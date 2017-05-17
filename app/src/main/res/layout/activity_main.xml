@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.gmsworld.devicelocator.Views.LDCard
+            <net.gmsworld.devicelocator.Views.LDCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -98,9 +98,9 @@
                     </RadioGroup>
                 </LinearLayout>
 
-            </com.gmsworld.devicelocator.Views.LDCard>
+            </net.gmsworld.devicelocator.Views.LDCard>
 
-            <com.gmsworld.devicelocator.Views.LDCard
+            <net.gmsworld.devicelocator.Views.LDCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -192,9 +192,9 @@
                         android:maxLines="1"/>
                 </LinearLayout>
 
-            </com.gmsworld.devicelocator.Views.LDCard>
+            </net.gmsworld.devicelocator.Views.LDCard>
 
-            <com.gmsworld.devicelocator.Views.LDCard
+            <net.gmsworld.devicelocator.Views.LDCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
@@ -208,7 +208,7 @@
 
                     <fragment
                         android:id="@+id/destination_autocomplete"
-                        android:name="com.gmsworld.devicelocator.Fragments.LDPlaceAutocompleteFragment"
+                        android:name="net.gmsworld.devicelocator.Fragments.LDPlaceAutocompleteFragment"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
@@ -307,9 +307,9 @@
 
                 </LinearLayout>
 
-            </com.gmsworld.devicelocator.Views.LDCard>
+            </net.gmsworld.devicelocator.Views.LDCard>
 
-            <com.gmsworld.devicelocator.Views.LDCard
+            <net.gmsworld.devicelocator.Views.LDCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
@@ -322,12 +322,12 @@
 
                     <fragment
                         android:id="@+id/settings_preferences"
-                        android:name="com.gmsworld.devicelocator.Fragments.SettingsCardFragment"
+                        android:name="net.gmsworld.devicelocator.Fragments.SettingsCardFragment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
                 </FrameLayout>
 
-            </com.gmsworld.devicelocator.Views.LDCard>
+            </net.gmsworld.devicelocator.Views.LDCard>
 
         </LinearLayout>
     </ScrollView>

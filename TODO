@@ -12,7 +12,7 @@
 
 6. When user registers email send message to admin for registration - rfe
 
-7. Retry failed message delivery (don't save recent location when delivery failed) - todo
+7. Retry failed message delivery (don't save recent location when delivery failed) - TODO
 
 8. Start/stop route tracker via sms - done
 
@@ -26,16 +26,16 @@
 
 13. Add battery level to notification - done
 
-14. All Network communication via gms-world (aws ses, telegram bot) - todo
+14. All Network communication via gms-world (aws ses, telegram bot) - TODO
 
-15. Create and use mail device-locator@gms-world.net - todo
+15. Create and use mail device-locator@gms-world.net - TODO
 
-16. Use gms-world token authentication (https://www.gms-world.net/token?scope=dl) - todo
+16. Use gms-world token authentication (https://www.gms-world.net/token?scope=dl) - TODO
 
 17. Use token in remote control command - wip
 
-18. Integrate acra.ch - todo
+18. Integrate acra.ch - TODO
 
 19. Add command description - wip
 
-20. Change package to net.gmsworld - todo
+20. Change package to net.gmsworld - done
