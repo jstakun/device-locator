@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.micutu.locatedriver"
+    package="com.gmsworld.devicelocator"
     android:versionCode="7"
     android:versionName="1.6">
 
@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name="com.gmsworld.devicelocator.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,8 +20,11 @@
             </intent-filter>
         </activity>
 
+        <service android:name="com.gmsworld.devicelocator.Services.SmsSenderService" android:exported="false"/>
+        <service android:name="com.gmsworld.devicelocator.Services.RouteTrackingService" android:exported="false"/>
+
         <receiver
-            android:name=".BroadcastReceivers.SmsReceiver"
+            android:name="com.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter android:priority="999">
@@ -29,7 +32,19 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".Services.SmsSenderService" android:exported="false"/>
+        <receiver
+            android:name="com.gmsworld.devicelocator.BroadcastReceivers.RouteTrackingServiceRestartReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartRouteTrackingServiceWhenStopped">
+            <intent-filter android:priority="999">
+                <action android:name="net.gmsworld.devicelocator.Services.RouteTrackingServiceRestartReceiver"/>
+            </intent-filter>
+            <!--intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter-->
+        </receiver>
+
         <meta-data tools:replace="android:value" android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
     </application>
 
@@ -41,5 +56,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.CALL_PHONE" />
 
 </manifest>

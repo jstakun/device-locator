@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="aws-android-sdk-ses-2.2.22">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-android-sdk-ses/2.2.22/50853bb98ae3cda4a5abac1ebf61b657b1317f7c/aws-android-sdk-ses-2.2.22.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.amazonaws/aws-android-sdk-ses/2.2.22/cbc3325fd685b39e1debf0e5243040fc41de4b54/aws-android-sdk-ses-2.2.22-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

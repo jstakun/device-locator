@@ -1,0 +1,41 @@
+1. Automatically send notification when location has changed by x meters - done
+
+2. Send notification to telegram - done
+
+2.1 Send notification to messanger, whatsapp - rfe
+
+3. Send notification via email - done
+
+4. Create forms with phone number, email and messanger id - done
+
+5. Add button to pick contact next to phoneNumber edittext - done
+
+6. When user registers email send message to admin for registration - rfe
+
+7. Retry failed message delivery (don't save recent location when delivery failed) - todo
+
+8. Start/stop route tracker via sms - done
+
+9. Save tracked route and send to server on sms request - done
+
+10. Send notification on first gps read if in radius - done
+
+11. Mute/unmute phone via sms - done
+
+12. Refactor ui - wip
+
+13. Add battery level to notification - done
+
+14. All Network communication via gms-world (aws ses, telegram bot) - todo
+
+15. Create and use mail device-locator@gms-world.net - todo
+
+16. Use gms-world token authentication (https://www.gms-world.net/token?scope=dl) - todo
+
+17. Use token in remote control command - wip
+
+18. Integrate acra.ch - todo
+
+19. Add command description - wip
+
+20. Change package to net.gmsworld - todo

@@ -24,17 +24,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.micutu.locatedriver.Views.LDCard
+            <com.gmsworld.devicelocator.Views.LDCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                ldcard:title="">
-
-                <fragment
-                    android:id="@+id/destination_autocomplete"
-                    android:name="com.micutu.locatedriver.Fragments.LDPlaceAutocompleteFragment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                ldcard:title="Device tracker">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -47,12 +43,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="@string/keyword" />
+                        android:text="Device motion radius limit in meters" />
 
                     <EditText
-                        android:id="@+id/keyword"
+                        android:id="@+id/radius"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:inputType="number"/>
                 </LinearLayout>
 
                 <RelativeLayout
@@ -60,16 +57,7 @@
                     android:layout_height="wrap_content">
 
                     <Button
-                        android:id="@+id/send_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:backgroundTint="@color/colorPrimary"
-                        android:text="@string/send_button"
-                        android:textColor="@android:color/white" />
-
-                    <Button
-                        android:id="@+id/running_button"
+                        android:id="@+id/motion_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
@@ -78,16 +66,254 @@
                         android:textColor="@android:color/white" />
                 </RelativeLayout>
 
-            </com.micutu.locatedriver.Views.LDCard>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="GPS Accuracy"
+                        android:paddingBottom="8dp"/>
 
-            <com.micutu.locatedriver.Views.LDCard
+                    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:id="@+id/gpsAccuracyGroup">
+                        android:checkedButton="@+id/radio_gps_low">
+                        <RadioButton android:id="@+id/radio_gps_low"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Balanced"
+                            android:onClick="onGpsRadioButtonClicked"/>
+                        <RadioButton android:id="@+id/radio_gps_high"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="High"
+                            android:onClick="onGpsRadioButtonClicked"/>
+                    </RadioGroup>
+                </LinearLayout>
+
+            </com.gmsworld.devicelocator.Views.LDCard>
+
+            <com.gmsworld.devicelocator.Views.LDCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
                 ldcard:title="@string/settings_card_title">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="Phone number" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <EditText
+                            android:id="@+id/phoneNumber"
+                            android:layout_alignParentLeft="true"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="phone"
+                            android:lines="1"
+                            android:maxLength="15"
+                            android:maxLines="1" />
+
+                        <Button
+                            android:id="@+id/contact_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:backgroundTint="@color/colorPrimary"
+                            android:text="Change"
+                            android:textColor="@android:color/white" />
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="Email" />
+
+                    <EditText
+                        android:id="@+id/email"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textEmailAddress"
+                        android:lines="1"
+                        android:maxLines="1"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="Telegram chat id" />
+
+                    <EditText
+                        android:id="@+id/telegramId"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:lines="1"
+                        android:maxLength="16"
+                        android:maxLines="1"/>
+                </LinearLayout>
+
+            </com.gmsworld.devicelocator.Views.LDCard>
+
+            <com.gmsworld.devicelocator.Views.LDCard
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                ldcard:title="Remote control via SMS">
+
+                <FrameLayout
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone">
+
+                    <fragment
+                        android:id="@+id/destination_autocomplete"
+                        android:name="com.gmsworld.devicelocator.Fragments.LDPlaceAutocompleteFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="15dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="@string/keyword" />
+
+                    <EditText
+                        android:id="@+id/keyword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:lines="1"
+                        android:maxLength="32"
+                        android:maxLines="1" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="8dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <Button
+                            android:id="@+id/send_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:backgroundTint="@color/colorPrimary"
+                            android:text="@string/send_button"
+                            android:textColor="@android:color/white" />
+
+                        <Button
+                            android:id="@+id/running_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:backgroundTint="@color/colorAccent"
+                            android:text=""
+                            android:textColor="@android:color/white" />
+                    </RelativeLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp"
+                        android:paddingTop="15dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="Security pin"/>
+
+                        <EditText
+                            android:id="@+id/token"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:lines="1"
+                            android:maxLength="8"
+                            android:maxLines="1"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp"
+                        android:paddingTop="15dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="left"
+                            android:text="@string/docsLink"
+                            android:autoLink="web"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.gmsworld.devicelocator.Views.LDCard>
+
+            <com.gmsworld.devicelocator.Views.LDCard
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                ldcard:title="Location SMS settings">
 
                 <FrameLayout
                     android:id="@+id/settings_preferences_framelayout"
@@ -96,29 +322,13 @@
 
                     <fragment
                         android:id="@+id/settings_preferences"
-                        android:name="com.micutu.locatedriver.Fragments.SettingsCardFragment"
+                        android:name="com.gmsworld.devicelocator.Fragments.SettingsCardFragment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent" />
                 </FrameLayout>
 
-            </com.micutu.locatedriver.Views.LDCard>
+            </com.gmsworld.devicelocator.Views.LDCard>
 
-            <com.micutu.locatedriver.Views.LDCard
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                ldcard:title="@string/about_card_title">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:autoLink="web"
-                    android:paddingTop="8dp"
-                    android:text="@string/about_text" />
-
-            </com.micutu.locatedriver.Views.LDCard>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
