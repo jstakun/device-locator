@@ -8,8 +8,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import net.gmsworld.locatedriver.R;
-
+import net.gmsworld.devicelocator.R;
 
 public class LDCard extends CardView {
     private TypedArray attributes = null;

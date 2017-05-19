@@ -8,7 +8,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
-import net.gmsworld.locatedriver.R;
+
+import net.gmsworld.devicelocator.R;
 
 
 public class LDPlaceAutocompleteFragment extends PlaceAutocompleteFragment {

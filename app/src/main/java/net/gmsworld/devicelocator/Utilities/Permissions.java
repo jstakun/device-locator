@@ -14,7 +14,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
 import net.gmsworld.devicelocator.MainActivity;
-import net.gmsworld.locatedriver.R;
+import net.gmsworld.devicelocator.R;
 
 import java.util.ArrayList;
 

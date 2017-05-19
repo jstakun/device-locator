@@ -10,7 +10,7 @@ import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 
-import net.gmsworld.locatedriver.R;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Messenger;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;

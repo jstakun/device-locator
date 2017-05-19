@@ -16,9 +16,9 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 import android.widget.Toast;
 
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
-import net.gmsworld.locatedriver.R;
 import net.gmsworld.devicelocator.Services.GmsLocationServicesManager;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Utilities.Network;

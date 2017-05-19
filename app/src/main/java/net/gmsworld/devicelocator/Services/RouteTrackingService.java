@@ -73,7 +73,8 @@ public class RouteTrackingService extends Service {
                         this.email = intent.getExtras().getString("email");
                         this.telegramId = intent.getExtras().getString("telegramId");
                         boolean resetRoute = intent.getBooleanExtra("resetRoute", true);
-                        startTracking(0, resetRoute);
+                        int gpsAccuracy = PreferenceManager.getDefaultSharedPreferences(this).getInt("gpsAccuracy", 0);
+                        startTracking(gpsAccuracy, resetRoute);
                         break;
                     case COMMAND_STOP:
                         stopTracking();

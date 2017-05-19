@@ -21,8 +21,8 @@ import com.amazonaws.services.simpleemail.model.Destination;
 import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
-import net.gmsworld.locatedriver.R;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Permissions.checkAndRequestPermissions(this); //check marshmallow permissions
-        setContentView(net.gmsworld.locatedriver.R.layout.activity_main);
+        setContentView(R.layout.activity_main);
         restoreSavedData();
         setupToolbar();
         initApp();
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void scrollTop() {
-        final ScrollView scrollView = (ScrollView) this.findViewById(net.gmsworld.locatedriver.R.id.scrollview);
+        final ScrollView scrollView = (ScrollView) this.findViewById(R.id.scrollview);
 
         scrollView.post(new Runnable() {
             public void run() {
@@ -117,19 +117,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        ((Button) this.findViewById(net.gmsworld.locatedriver.R.id.running_button)).setText((running) ? getResources().getString(net.gmsworld.locatedriver.R.string.stop) : getResources().getString(net.gmsworld.locatedriver.R.string.start));
-        ((TintableBackgroundView) (Button) this.findViewById(net.gmsworld.locatedriver.R.id.running_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((running) ? net.gmsworld.locatedriver.R.color.colorAccent : net.gmsworld.locatedriver.R.color.colorPrimary)));
-        ((TintableBackgroundView) (Button) this.findViewById(net.gmsworld.locatedriver.R.id.send_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(net.gmsworld.locatedriver.R.color.colorPrimary)));
+        ((Button) this.findViewById(R.id.running_button)).setText((running) ? getResources().getString(R.string.stop) : getResources().getString(R.string.start));
+        ((TintableBackgroundView) (Button) this.findViewById(R.id.running_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
+        ((TintableBackgroundView) (Button) this.findViewById(R.id.send_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
 
-        ((Button) this.findViewById(net.gmsworld.locatedriver.R.id.motion_button)).setText((motionDetectorRunning) ? getResources().getString(net.gmsworld.locatedriver.R.string.stop) : getResources().getString(net.gmsworld.locatedriver.R.string.start));
-        ((TintableBackgroundView) (Button) this.findViewById(net.gmsworld.locatedriver.R.id.motion_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? net.gmsworld.locatedriver.R.color.colorAccent : net.gmsworld.locatedriver.R.color.colorPrimary)));
+        ((Button) this.findViewById(R.id.motion_button)).setText((motionDetectorRunning) ? getResources().getString(R.string.stop) : getResources().getString(R.string.start));
+        ((TintableBackgroundView) (Button) this.findViewById(R.id.motion_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
     }
 
     private void toggleRunning() {
-        String currentKeyword = ((TextView) this.findViewById(net.gmsworld.locatedriver.R.id.keyword)).getText() + "";
+        String currentKeyword = ((TextView) this.findViewById(R.id.keyword)).getText() + "";
         if (this.running == false && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
             Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
-            Toast.makeText(getApplicationContext(), net.gmsworld.locatedriver.R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
     private void toggleMotionDetectorRunning() {
         int currentRadius = -1;
         try {
-            currentRadius = Integer.parseInt(((TextView) this.findViewById(net.gmsworld.locatedriver.R.id.radius)).getText() + "");
+            currentRadius = Integer.parseInt(((TextView) this.findViewById(R.id.radius)).getText() + "");
         } catch (Exception e) {
 
         }
@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (this.motionDetectorRunning == false && !Permissions.haveAllRequiredPermission(MainActivity.this)) {
             Permissions.requestAllRequiredPermission(MainActivity.this);
-            Toast.makeText(getApplicationContext(), net.gmsworld.locatedriver.R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initKeywordInput() {
-        final TextView keywordInput = (TextView) this.findViewById(net.gmsworld.locatedriver.R.id.keyword);
+        final TextView keywordInput = (TextView) this.findViewById(R.id.keyword);
         keywordInput.setText(this.keyword);
 
         keywordInput.addTextChangedListener(new TextWatcher() {
@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initTokenInput() {
-        final TextView tokenInput = (TextView) this.findViewById(net.gmsworld.locatedriver.R.id.token);
+        final TextView tokenInput = (TextView) this.findViewById(R.id.token);
         tokenInput.setText(token);
 
         tokenInput.addTextChangedListener(new TextWatcher() {
@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initRadiusInput() {
-        final TextView radiusInput = (TextView) this.findViewById(net.gmsworld.locatedriver.R.id.radius);
+        final TextView radiusInput = (TextView) this.findViewById(R.id.radius);
         radiusInput.setText(Integer.toString(this.radius));
 
         radiusInput.addTextChangedListener(new TextWatcher() {
@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initEmailInput() {
-        final TextView emailInput = (TextView) this.findViewById(net.gmsworld.locatedriver.R.id.email);
+        final TextView emailInput = (TextView) this.findViewById(R.id.email);
         emailInput.setText(email);
 
         emailInput.addTextChangedListener(new TextWatcher() {
@@ -322,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initTelegramInput() {
-        final TextView telegramInput = (TextView) this.findViewById(net.gmsworld.locatedriver.R.id.telegramId);
+        final TextView telegramInput = (TextView) this.findViewById(R.id.telegramId);
         telegramInput.setText(telegramId);
 
         telegramInput.addTextChangedListener(new TextWatcher() {
@@ -349,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initPhoneNumberInput() {
-        final TextView phoneNumberInput = (TextView) this.findViewById(net.gmsworld.locatedriver.R.id.phoneNumber);
+        final TextView phoneNumberInput = (TextView) this.findViewById(R.id.phoneNumber);
         phoneNumberInput.setText(this.phoneNumber);
 
         phoneNumberInput.addTextChangedListener(new TextWatcher() {
@@ -372,15 +372,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initGpsRadioGroup() {
-        final RadioGroup gpsAccuracyGroup = (RadioGroup) this.findViewById(net.gmsworld.locatedriver.R.id.gpsAccuracyGroup);
+        final RadioGroup gpsAccuracyGroup = (RadioGroup) this.findViewById(R.id.gpsAccuracyGroup);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         int gpsAccuracy = settings.getInt("gpsAccuracy", 0);
 
         if (gpsAccuracy == 1) {
-            gpsAccuracyGroup.check(net.gmsworld.locatedriver.R.id.radio_gps_high);
+            gpsAccuracyGroup.check(R.id.radio_gps_high);
         } else {
-            gpsAccuracyGroup.check(net.gmsworld.locatedriver.R.id.radio_gps_low);
+            gpsAccuracyGroup.check(R.id.radio_gps_low);
         }
 
     }
@@ -392,7 +392,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initSendLocationButton() {
-        Button sendLocationButton = (Button) this.findViewById(net.gmsworld.locatedriver.R.id.send_button);
+        Button sendLocationButton = (Button) this.findViewById(R.id.send_button);
 
         sendLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -404,13 +404,13 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     if (!Permissions.haveReadContactsPermission(MainActivity.this)) {
                         Permissions.requestContactsPermission(MainActivity.this);
-                        Toast.makeText(getApplicationContext(), net.gmsworld.locatedriver.R.string.read_contacts_permission, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), R.string.read_contacts_permission, Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     if (!Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
                         Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
-                        Toast.makeText(getApplicationContext(), net.gmsworld.locatedriver.R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -469,13 +469,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void launchService() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setPositiveButton(net.gmsworld.locatedriver.R.string.send, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.send, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 launchSmsService();
             }
         });
-        builder.setNegativeButton(net.gmsworld.locatedriver.R.string.cancel, null);
-        builder.setMessage(this.getResources().getString(net.gmsworld.locatedriver.R.string.are_you_sure) + " " + phoneNumber + "?");
+        builder.setNegativeButton(R.string.cancel, null);
+        builder.setMessage(this.getResources().getString(R.string.are_you_sure) + " " + phoneNumber + "?");
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -483,7 +483,7 @@ public class MainActivity extends AppCompatActivity {
     private void launchSmsService() {
         if (!Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
             Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
-            Toast.makeText(getApplicationContext(), net.gmsworld.locatedriver.R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -502,7 +502,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initRunningButton() {
-        Button runningButton = (Button) this.findViewById(net.gmsworld.locatedriver.R.id.running_button);
+        Button runningButton = (Button) this.findViewById(R.id.running_button);
 
         runningButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -514,7 +514,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initMotionDetectorButton() {
-        Button runningButton = (Button) this.findViewById(net.gmsworld.locatedriver.R.id.motion_button);
+        Button runningButton = (Button) this.findViewById(R.id.motion_button);
 
         runningButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -526,14 +526,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initContactButton() {
-        Button contactButton = (Button) this.findViewById(net.gmsworld.locatedriver.R.id.contact_button);
+        Button contactButton = (Button) this.findViewById(R.id.contact_button);
 
         contactButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (!Permissions.haveReadContactsPermission(MainActivity.this)) {
                     Permissions.requestContactsPermission(MainActivity.this);
-                    Toast.makeText(getApplicationContext(), net.gmsworld.locatedriver.R.string.read_contacts_permission, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), R.string.read_contacts_permission, Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Intent intent = new Intent(Intent.ACTION_PICK);
@@ -546,9 +546,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void initDestinationPlace() {
         final LDPlaceAutocompleteFragment destination = (LDPlaceAutocompleteFragment)
-                getFragmentManager().findFragmentById(net.gmsworld.locatedriver.R.id.destination_autocomplete);
+                getFragmentManager().findFragmentById(R.id.destination_autocomplete);
 
-        destination.setHint(getResources().getString(net.gmsworld.locatedriver.R.string.destination));
+        destination.setHint(getResources().getString(R.string.destination));
         destination.setText((this.place == null) ? "" : this.place.getName());
 
         destination.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -560,7 +560,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onError(Status status) {
                 MainActivity.this.setPlace(null);
-                Toast.makeText(getApplicationContext(), getResources().getString(net.gmsworld.locatedriver.R.string.destination_error), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.destination_error), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -574,9 +574,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void saveData() {
-        this.keyword = ((TextView) this.findViewById(net.gmsworld.locatedriver.R.id.keyword)).getText() + "";
+        this.keyword = ((TextView) this.findViewById(R.id.keyword)).getText() + "";
         try {
-            this.radius = Integer.parseInt(((TextView) this.findViewById(net.gmsworld.locatedriver.R.id.radius)).getText() + "");
+            this.radius = Integer.parseInt(((TextView) this.findViewById(R.id.radius)).getText() + "");
         } catch (Exception e) {
 
         }
@@ -598,7 +598,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void restoreSavedData() {
-        PreferenceManager.setDefaultValues(this, net.gmsworld.locatedriver.R.xml.settings_preferences, false);
+        PreferenceManager.setDefaultValues(this, R.xml.settings_preferences, false);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -628,7 +628,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void setupToolbar() {
-        final Toolbar toolbar = (Toolbar) findViewById(net.gmsworld.locatedriver.R.id.toolbar);
+        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
     }
 
@@ -640,14 +640,14 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = settings.edit();
         // Check which radio button was clicked
         switch(view.getId()) {
-            case net.gmsworld.locatedriver.R.id.radio_gps_high:
+            case R.id.radio_gps_high:
                 if (checked)
                     editor.putInt("gpsAccuracy", 1);
                     if (motionDetectorRunning) {
                         RouteTrackingServiceUtils.setHighGpsAccuracy(this);
                     }
                     break;
-            case net.gmsworld.locatedriver.R.id.radio_gps_low:
+            case R.id.radio_gps_low:
                 if (checked)
                     editor.putInt("gpsAccuracy", 0);
                     if (motionDetectorRunning) {

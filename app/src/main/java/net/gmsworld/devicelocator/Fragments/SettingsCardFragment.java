@@ -10,8 +10,7 @@ import android.widget.Adapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
-import net.gmsworld.locatedriver.R;
-
+import net.gmsworld.devicelocator.R;
 
 public class SettingsCardFragment extends PreferenceFragment {
 

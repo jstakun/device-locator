@@ -24,8 +24,8 @@ import net.gmsworld.devicelocator.Model.Feature;
 import net.gmsworld.devicelocator.Model.FeatureCollection;
 import net.gmsworld.devicelocator.Model.Geometry;
 import net.gmsworld.devicelocator.Model.Properties;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Network;
-import net.gmsworld.locatedriver.R;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -64,6 +64,8 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
     private LocationRequest mLocationRequest;
     private Location recentLocationSent, lastLocation;
 
+    private long routeTrackingStartTime = -1;
+
     private static final List<Location> route = new CopyOnWriteArrayList<Location>();
 
     public static final GmsLocationServicesManager instance = new GmsLocationServicesManager();
@@ -87,10 +89,12 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
         if (!isEnabled) {
             mLocationRequest = new LocationRequest();
             if (priority <= 0) {
+                Log.d(TAG, "Balanced gps accuracy selected");
                 mLocationRequest.setInterval(LOCATION_READ_INTERVAL_LOW);
                 mLocationRequest.setFastestInterval(LOCATION_READ_INTERVAL_LOW);
                 mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);//
             } else {
+                Log.d(TAG, "High gps accuracy selected");
                 mLocationRequest.setInterval(LOCATION_READ_INTERVAL_HIGH);
                 mLocationRequest.setFastestInterval(LOCATION_READ_INTERVAL_HIGH);
                 mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);//
@@ -203,7 +207,7 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
             setRecentLocationSent(lastLocation);
             Log.d(TAG, "Saving route point: " + lastLocation.getLatitude() + "," + lastLocation.getLongitude());
             sendLocationMessage(lastLocation, (int)distWithAccuracy);
-            route.add(lastLocation);
+            //route.add(lastLocation);
         }
     }
 
@@ -231,7 +235,8 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
 
     public void uploadRouteToServer(Context context, String title, long creationDate) {
         if (route.size() > 1) {
-            String content = routeToGeoJson(route, title, "Device id: " + Network.getDeviceId(context), creationDate);
+            String desc = "Device id: " + Network.getDeviceId(context) + ", time: " + (System.currentTimeMillis() - routeTrackingStartTime) + " ms";
+            String content = routeToGeoJson(route, title, desc, creationDate);
             String url = context.getResources().getString(R.string.routeProviderUrl);
             //Log.d(TAG, "Uploading route " + content);
             Network.post(url, "route=" + content, null, new Network.OnGetFinishListener() {
@@ -283,6 +288,9 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
         Location l = filterLocation(location);
         if (l != null) {
             route.add(l);
+            if (route.size() == 1) {
+                routeTrackingStartTime = System.currentTimeMillis();
+            }
         }
     }
 
