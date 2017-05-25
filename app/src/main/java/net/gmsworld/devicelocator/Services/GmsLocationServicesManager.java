@@ -6,11 +6,14 @@ package net.gmsworld.devicelocator.Services;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
@@ -20,6 +23,8 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.gson.Gson;
+
+import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Model.Feature;
 import net.gmsworld.devicelocator.Model.FeatureCollection;
 import net.gmsworld.devicelocator.Model.Geometry;
@@ -27,11 +32,14 @@ import net.gmsworld.devicelocator.Model.Properties;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Network;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -40,6 +48,10 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
         LocationListener {
 
     private static final String TAG = "GmsLocationServiceMngr";
+
+    private static final String ROUTE_SIZE = "routeSize";
+    private static final String ROUTE_START_TIME = "routeStartTime";
+    private static final String ROUTE_POINT = "routePoint";
 
     //public static final int GMS_CONNECTED = 300;
     public static final int UPDATE_LOCATION = 301;
@@ -64,9 +76,9 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
     private LocationRequest mLocationRequest;
     private Location recentLocationSent, lastLocation;
 
-    private long routeTrackingStartTime = -1;
-
-    private static final List<Location> route = new CopyOnWriteArrayList<Location>();
+    private SharedPreferences settings;
+    //private long routeTrackingStartTime = -1;
+    //private static final List<Location> route = new CopyOnWriteArrayList<Location>();
 
     public static final GmsLocationServicesManager instance = new GmsLocationServicesManager();
 
@@ -86,6 +98,7 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
         if (mGoogleApiClient != null && !mGoogleApiClient.isConnected() && !mGoogleApiClient.isConnecting()) {
             mGoogleApiClient.connect();
         }
+        settings = PreferenceManager.getDefaultSharedPreferences(context);
         if (!isEnabled) {
             mLocationRequest = new LocationRequest();
             if (priority <= 0) {
@@ -103,10 +116,23 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
         }
         this.radius = radius;
         if (resetRoute) {
-            Log.d(TAG, "Route array has been cleared");
-            this.route.clear();
+            Log.d(TAG, "Route has been cleared");
+            clearSavedRoute(PreferenceManager.getDefaultSharedPreferences(context));
         }
         mLocationHandlers.put(handlerName, locationHandler);
+    }
+
+    private static void clearSavedRoute(SharedPreferences settings) {
+        SharedPreferences.Editor editor = settings.edit();
+        int size = settings.getInt(ROUTE_SIZE, 0);
+        if (size > 0) {
+            editor.remove(ROUTE_START_TIME);
+            for (int i = 0; i < size; i++) {
+                editor.remove(ROUTE_POINT + i);
+            }
+            editor.remove(ROUTE_SIZE);
+            editor.commit();
+        }
     }
 
     public void disable(String handlerName) {
@@ -229,28 +255,45 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
         this.radius = radius;
     }
 
-    public int getRouteSize() {
-        return route != null ? route.size() : 0;
-    }
-
-    public void uploadRouteToServer(Context context, String title, long creationDate) {
-        if (route.size() > 1) {
-            String desc = "Device id: " + Network.getDeviceId(context) + ", time: " + (System.currentTimeMillis() - routeTrackingStartTime) + " ms";
-            String content = routeToGeoJson(route, title, desc, creationDate);
-            String url = context.getResources().getString(R.string.routeProviderUrl);
-            //Log.d(TAG, "Uploading route " + content);
-            Network.post(url, "route=" + content, null, new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String result) {
-                    Log.d(TAG, "Received following response code: " + result);
-                }
-            });
+    protected void uploadRouteToServer(final Context context, final String title, final String phoneNumber, long creationDate) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        final int size = settings.getInt(ROUTE_SIZE, 0);
+        final Intent newIntent = new Intent(context, SmsSenderService.class);
+        newIntent.putExtra("phoneNumber", phoneNumber);
+        newIntent.putExtra("command", SmsReceiver.ROUTE_COMMAND);
+        newIntent.putExtra("title", title);
+        if (size > 1) {
+            try {
+                long routeTrackingStartTime = settings.getLong(ROUTE_START_TIME, System.currentTimeMillis());
+                String desc = "Device id: " + Network.getDeviceId(context) + ", time: " + (System.currentTimeMillis() - routeTrackingStartTime) + " ms";
+                String content = routeToGeoJson(settings, size, title, desc, creationDate);
+                String url = context.getResources().getString(R.string.routeProviderUrl);
+                //Log.d(TAG, "Uploading route " + content);
+                Network.post(url, "route=" + content, null, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String result) {
+                        Log.d(TAG, "Received following response code: " + result);
+                        if (StringUtils.equals(result, "200")) {
+                            newIntent.putExtra("size", size);
+                        } else {
+                            newIntent.putExtra("size", -1);
+                        }
+                        context.startService(newIntent);
+                    }
+                });
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+                newIntent.putExtra("size", -1);
+                context.startService(newIntent);
+            }
         } else {
-            Log.d(TAG, "Route must have at least 2 points. Currently it has only " + route.size() + " point");
+            Log.d(TAG, "Route must have at least 2 points. Currently it has only " + size + " point");
+            newIntent.putExtra("size", 0);
+            context.startService(newIntent);
         }
     }
 
-    private static String routeToGeoJson(List<Location> routePoints, String filename, String description, long creationDate) {
+    private static String routeToGeoJson(SharedPreferences settings, int routeSize, String filename, String description, long creationDate) throws Exception {
         Gson gson = new Gson();
 
         FeatureCollection fc = new FeatureCollection();
@@ -270,12 +313,17 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
 
         Geometry g = new Geometry();
 
-        double[][] coordinates = new double[routePoints.size()][2];
-        int i = 0;
-        for (Location point : routePoints) {
-            //Log.d(TAG, "Adding new point to route geojson " + point.getLatitude() + "," + point.getLongitude());
-            coordinates[i] = new double[]{point.getLatitude(), point.getLongitude()};
-            i++;
+        double[][] coordinates = new double[routeSize][2];
+        Log.d(TAG, "Creating route geojson containing " + routeSize + " points");
+        for (int i=0;i<routeSize;i++) {
+            String coordsStr = settings.getString(ROUTE_POINT + i, "");
+            Log.d(TAG, "Parsing: " + coordsStr);
+            String[] coords = StringUtils.split(coordsStr, ",");
+            if (coords.length == 2) {
+                Log.d(TAG, "Adding point " + coords[0] + "," + coords[1]);
+                coordinates[i] = new double[]{Double.parseDouble(coords[0]), Double.parseDouble(coords[1])};
+            }
+
         }
 
         g.coordinates = coordinates;
@@ -287,10 +335,18 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
     private void addLocationToRoute(Location location) {
         Location l = filterLocation(location);
         if (l != null) {
-            route.add(l);
-            if (route.size() == 1) {
-                routeTrackingStartTime = System.currentTimeMillis();
+
+            SharedPreferences.Editor editor = settings.edit();
+            int size = settings.getInt(ROUTE_SIZE, 0);
+            if (size == 0) {
+                editor.putLong(ROUTE_START_TIME, System.currentTimeMillis());
             }
+            String key = ROUTE_POINT + "" + size;
+            String value = location.getLatitude()+","+location.getLongitude();
+            Log.d(TAG, "Saving route point " + key + ": " + value);
+            editor.putString(key, value);
+            editor.putInt(ROUTE_SIZE, (size+1));
+            editor.commit();
         }
     }
 

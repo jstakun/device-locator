@@ -498,7 +498,7 @@ public class MainActivity extends AppCompatActivity {
         saveData();
         updateUI();
         isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, true);
-        Toast.makeText(getApplicationContext(), "You'll receive notification to " + phoneNumber + " when device will move by " + radius + " meters", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "You'll receive notification when this device will move up " + radius + " meters", Toast.LENGTH_LONG).show();
     }
 
     private void initRunningButton() {

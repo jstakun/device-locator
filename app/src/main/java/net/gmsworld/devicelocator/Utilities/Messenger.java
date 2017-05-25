@@ -148,8 +148,10 @@ public class Messenger {
                 if (size > 1) {
                     String showRouteUrl = context.getResources().getString(R.string.showRouteUrl);
                     text = "Check your route at: " + showRouteUrl + "/" + title;
-                } else {
-                    text = "No route has been tracked yet";
+                } else if (size == 0) {
+                    text = "No route has been recorder yet";
+                } else if (size < 0) {
+                    text = "No route has been uploaded yet";
                 }
                 break;
             case SmsReceiver.GPS_HIGH_COMMAND:

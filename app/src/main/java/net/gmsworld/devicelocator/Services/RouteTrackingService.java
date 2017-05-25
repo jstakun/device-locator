@@ -81,7 +81,9 @@ public class RouteTrackingService extends Service {
                         break;
                     case COMMAND_ROUTE:
                         String title = intent.getStringExtra("title");
-                        shareRoute(title);
+                        //don't set phoneNumber here
+                        //this.phoneNumber = intent.getExtras().getString("phoneNumber");
+                        shareRoute(title, intent.getExtras().getString("phoneNumber"));
                         break;
                     case COMMAND_CONFIGURE:
                         this.phoneNumber = intent.getExtras().getString("phoneNumber");
@@ -170,9 +172,9 @@ public class RouteTrackingService extends Service {
         editor.commit();
     }
 
-    private void shareRoute(String title) {
+    private void shareRoute(String title, String phoneNumber) {
         Log.d(TAG, "RouteTrackingService shareRoute()");
-        GmsLocationServicesManager.getInstance().uploadRouteToServer(this, title, startTime);
+        GmsLocationServicesManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime);
     }
 
     private class IncomingHandler extends Handler {

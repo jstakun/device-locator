@@ -85,9 +85,9 @@ public class Network {
 
                     int responseCode = urlConnection.getResponseCode();
 
-                    onGetFinishListener.onGetFinish("{\"responseCode\": " + responseCode + "}");
+                    onGetFinishListener.onGetFinish(Integer.toString(responseCode));
                 } catch (Exception e) {
-                    onGetFinishListener.onGetFinish("{}");
+                    onGetFinishListener.onGetFinish("500");
                 }
             }
         };
