@@ -13,7 +13,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
@@ -36,12 +35,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -52,6 +48,7 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
     private static final String ROUTE_SIZE = "routeSize";
     private static final String ROUTE_START_TIME = "routeStartTime";
     private static final String ROUTE_POINT = "routePoint";
+
 
     //public static final int GMS_CONNECTED = 300;
     public static final int UPDATE_LOCATION = 301;
@@ -64,7 +61,7 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
     private static final int MAX_REASONABLE_ACCURACY = 50; //meters
 
     private static final Vector<Location> mWeakLocations = new Vector<Location>(3);
-    private static final Queue<Double> mAltitudes = new LinkedList<Double>();;
+    private static final Queue<Double> mAltitudes = new LinkedList<Double>();
     private boolean mSpeedSanityCheck = true;
 
     private boolean isEnabled = false;
@@ -77,10 +74,8 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
     private Location recentLocationSent, lastLocation;
 
     private SharedPreferences settings;
-    //private long routeTrackingStartTime = -1;
-    //private static final List<Location> route = new CopyOnWriteArrayList<Location>();
 
-    public static final GmsLocationServicesManager instance = new GmsLocationServicesManager();
+    private static final GmsLocationServicesManager instance = new GmsLocationServicesManager();
 
     private GmsLocationServicesManager() {
 
@@ -98,7 +93,7 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
         if (mGoogleApiClient != null && !mGoogleApiClient.isConnected() && !mGoogleApiClient.isConnecting()) {
             mGoogleApiClient.connect();
         }
-        settings = PreferenceManager.getDefaultSharedPreferences(context);
+        settings = context.getSharedPreferences(TAG, Context.MODE_PRIVATE);
         if (!isEnabled) {
             mLocationRequest = new LocationRequest();
             if (priority <= 0) {
@@ -117,7 +112,7 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
         this.radius = radius;
         if (resetRoute) {
             Log.d(TAG, "Route has been cleared");
-            clearSavedRoute(PreferenceManager.getDefaultSharedPreferences(context));
+            clearSavedRoute(settings);
         }
         mLocationHandlers.put(handlerName, locationHandler);
     }
@@ -149,13 +144,14 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
             Log.d(TAG, "GmsLocationServicesManager has " + mLocationHandlers.size() + " handlers");
         }
 
-        this.recentLocationSent = null;
-        this.lastLocation = null;
-
         //send last known location
         if (lastLocation != null) {
             sendLocationMessage(lastLocation, (int) lastLocation.getAccuracy());
         }
+
+        this.recentLocationSent = null;
+        this.lastLocation = null;
+
     }
 
     private synchronized void buildGoogleApiClient(Context context) {
@@ -256,7 +252,7 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
     }
 
     protected void uploadRouteToServer(final Context context, final String title, final String phoneNumber, long creationDate) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences settings = context.getSharedPreferences(TAG, Context.MODE_PRIVATE);
         final int size = settings.getInt(ROUTE_SIZE, 0);
         final Intent newIntent = new Intent(context, SmsSenderService.class);
         newIntent.putExtra("phoneNumber", phoneNumber);

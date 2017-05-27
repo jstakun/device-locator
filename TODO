@@ -26,11 +26,11 @@
 
 13. Add battery level to notification - done
 
-14. All Network communication via gms-world (aws ses, telegram bot) - TODO
+14. All Network communication via gms-world (aws ses, telegram bot) - wip
 
 15. Create and use mail device-locator@gms-world.net - TODO
 
-16. Use gms-world token authentication (https://www.gms-world.net/token?scope=dl) - TODO
+16. Use gms-world token authentication - wip
 
 17. Use token in remote control command - wip
 

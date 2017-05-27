@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 
 public class Network {
 
@@ -51,6 +52,38 @@ public class Network {
         thread.start();
     }
 
+    protected static void get(final String urlString, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(urlString);
+                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+                    for (Map.Entry<String, String> header : headers.entrySet()) {
+                        urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                    }
+
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+
+                    BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder total = new StringBuilder();
+                    String line;
+                    while ((line = r.readLine()) != null) {
+                        total.append(line).append('\n');
+                    }
+
+                    onGetFinishListener.onGetFinish(total.toString());
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    onGetFinishListener.onGetFinish("{}");
+                }
+            }
+        };
+
+        thread.start();
+    }
+
     public static void post(final String urlString, final String content, final String contentType, final OnGetFinishListener onGetFinishListener) {
         Thread thread = new Thread() {
             @Override
@@ -59,6 +92,54 @@ public class Network {
                     URL url = new URL(urlString);
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("POST");
+
+                    if (content != null) {
+                        urlConnection.setRequestProperty("Content-Length", Integer.toString(content.length()));
+
+                        if (contentType != null) {
+                            urlConnection.setRequestProperty("Content-Type", contentType);
+                        } else {
+                            urlConnection.setRequestProperty("Content-Type", FORM_ENCODING);
+                        }
+
+                        urlConnection.setDoInput(true);
+                        urlConnection.setDoOutput(true);
+
+                        //Log.d(TAG, "Sending post: " + content);
+
+                        //Send request
+                        DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
+                        wr.writeBytes(content);
+                        wr.flush();
+                        wr.close();
+                    } else {
+                        urlConnection.connect();
+                    }
+
+                    int responseCode = urlConnection.getResponseCode();
+
+                    onGetFinishListener.onGetFinish(Integer.toString(responseCode));
+                } catch (Exception e) {
+                    onGetFinishListener.onGetFinish("500");
+                }
+            }
+        };
+
+        thread.start();
+    }
+
+    public static void post(final String urlString, final String content, final String contentType, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    URL url = new URL(urlString);
+                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setRequestMethod("POST");
+
+                    for (Map.Entry<String, String> header : headers.entrySet()) {
+                        urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                    }
 
                     if (content != null) {
                         urlConnection.setRequestProperty("Content-Length", Integer.toString(content.length()));
@@ -131,6 +212,6 @@ public class Network {
     }
 
     public interface OnGetFinishListener {
-        public void onGetFinish(String result);
+        void onGetFinish(String result);
     }
 }

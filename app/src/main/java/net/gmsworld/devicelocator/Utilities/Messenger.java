@@ -20,12 +20,22 @@ import com.amazonaws.services.simpleemail.model.Content;
 import com.amazonaws.services.simpleemail.model.Destination;
 import com.amazonaws.services.simpleemail.model.Message;
 import com.amazonaws.services.simpleemail.model.SendEmailRequest;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by jstakun on 5/6/17.
@@ -34,6 +44,15 @@ import java.util.ArrayList;
 public class Messenger {
 
     private static final String TAG = Messenger.class.getSimpleName();
+    private static final String GMS_TOKEN_KEY = "gmsToken";
+
+    private Network.OnGetFinishListener telegramNotifier = new Network.OnGetFinishListener() {
+        @Override
+        public void onGetFinish(String result) {
+            Log.d(TAG, "Received following response code: " + result);
+        }
+    };
+
 
     public static void sendSMS(final Context context, final String phoneNumber, final String message) {
         //Log.d(TAG, "Send SMS: " + phoneNumber + ", " + message);
@@ -46,7 +65,33 @@ public class Messenger {
         smsManager.sendMultipartTextMessage(phoneNumber, null, parts, samsungFix, samsungFix);
     }
 
+
     public static void sendEmail(final Context context, final String email, final String message, final String title) {
+        if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message) || StringUtils.isNotEmpty(title))) {
+            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String tokenStr = settings.getString(GMS_TOKEN_KEY, "");
+            if (StringUtils.isNotEmpty(tokenStr)) {
+                sendEmail(context, email, message, title, tokenStr);
+            } else {
+                String queryString = "scope=dl&user=" + Network.getDeviceId(context);
+                Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String result) {
+                        Log.d(TAG, "Received following response code: " + result);
+                        JsonObject token = new JsonParser().parse(result).getAsJsonObject();
+                        SharedPreferences.Editor editor = settings.edit();
+                        String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
+                        Log.d(TAG, "Received following token: " + token);
+                        editor.putString(GMS_TOKEN_KEY, tokenStr);
+                        editor.commit();
+                        sendEmail(context, email, message, title, tokenStr);
+                    }
+                });
+            }
+        }
+    }
+
+    /*public static void sendEmail(final Context context, final String email, final String message, final String title) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -71,9 +116,9 @@ public class Messenger {
             }
         };
         Network.execute(r);
-    }
+    }*/
 
-    public static void sendTelegram(final Context context, final String telegramId, final String message) {
+    /*public static void sendTelegram(final Context context, final String telegramId, final String message) {
         if (telegramId != null && telegramId.length() > 0) {
             Network.post(context.getResources().getString(R.string.telegramBot), "text=" + message + "&chat_id=" + telegramId, null, new Network.OnGetFinishListener() {
                 @Override
@@ -81,6 +126,72 @@ public class Messenger {
                     Log.d(TAG, "Received following response code: " + result);
                 }
             });
+        }
+    }*/
+
+    public static void sendTelegram(final Context context, final String telegramId, final String message) {
+        if (StringUtils.isNumeric(telegramId)) {
+            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String tokenStr = settings.getString(GMS_TOKEN_KEY, "");
+            if (StringUtils.isNotEmpty(tokenStr)) {
+                sendTelegram(context, telegramId, message, tokenStr);
+            } else {
+                String queryString = "scope=dl&user=" + Network.getDeviceId(context);
+                Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String result) {
+                        Log.d(TAG, "Received following response code: " + result);
+                        JsonObject token = new JsonParser().parse(result).getAsJsonObject();
+                        SharedPreferences.Editor editor = settings.edit();
+                        String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
+                        Log.d(TAG, "Received following token: " + token);
+                        editor.putString(GMS_TOKEN_KEY, tokenStr);
+                        editor.commit();
+                        sendTelegram(context, telegramId, message, tokenStr);
+                    }
+                });
+            }
+        }
+    }
+
+    private static void sendTelegram(Context context, String telegramId, String message, String tokenStr) {
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("X-GMS-Token", tokenStr);
+        headers.put("X-GMS-AppId", "2");
+        headers.put("X-GMS-Scope", "dl");
+
+        try {
+            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&user=" + Network.getDeviceId(context);
+
+            Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String result) {
+                    Log.d(TAG, "Received following response code: " + result);
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, e.getMessage(), e);
+        }
+
+    }
+
+    private static void sendEmail(final Context context, final String email, final String message, final String title, String tokenStr) {
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("X-GMS-Token", tokenStr);
+        headers.put("X-GMS-AppId", "2");
+        headers.put("X-GMS-Scope", "dl");
+
+        try {
+            String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title;
+
+            Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String result) {
+                    Log.d(TAG, "Received following response code: " + result);
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, e.getMessage(), e);
         }
     }
 
