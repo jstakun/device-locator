@@ -37,4 +37,5 @@ dependencies {
     compile 'com.amazonaws:aws-android-sdk-ses:2.2.+'
     compile 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.2.+'
     compile 'org.apache.commons:commons-lang3:3.5'
+    compile 'ch.acra:acra:4.9.2'
 }

@@ -218,7 +218,7 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
             if (distWithAccuracy > radius && radius > 0 && lastLocation.getAccuracy() < radius) {
                 update = true;
             }
-        } else if (recentLocationSent == null) {
+        } else { //if (recentLocationSent == null) {
             Log.d(TAG, "checkRadius compared " + lastLocation.getAccuracy() + " with " + radius);
             distWithAccuracy = lastLocation.getAccuracy();
             if (distWithAccuracy < radius) {
@@ -226,7 +226,7 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
             }
         }
         if (update) {
-            setRecentLocationSent(lastLocation);
+            this.recentLocationSent = location;
             Log.d(TAG, "Saving route point: " + lastLocation.getLatitude() + "," + lastLocation.getLongitude());
             sendLocationMessage(lastLocation, (int)distWithAccuracy);
             //route.add(lastLocation);
@@ -241,10 +241,6 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
             msg.obj = location;
             entry.getValue().sendMessage(msg);
         }
-    }
-
-    public void setRecentLocationSent(Location location) {
-        this.recentLocationSent = location;
     }
 
     public void setRadius(int radius) {
@@ -313,10 +309,10 @@ public class GmsLocationServicesManager implements GoogleApiClient.ConnectionCal
         Log.d(TAG, "Creating route geojson containing " + routeSize + " points");
         for (int i=0;i<routeSize;i++) {
             String coordsStr = settings.getString(ROUTE_POINT + i, "");
-            Log.d(TAG, "Parsing: " + coordsStr);
+            //Log.d(TAG, "Parsing: " + coordsStr);
             String[] coords = StringUtils.split(coordsStr, ",");
             if (coords.length == 2) {
-                Log.d(TAG, "Adding point " + coords[0] + "," + coords[1]);
+                //Log.d(TAG, "Adding point " + coords[0] + "," + coords[1]);
                 coordinates[i] = new double[]{Double.parseDouble(coords[0]), Double.parseDouble(coords[1])};
             }
 

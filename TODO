@@ -26,16 +26,16 @@
 
 13. Add battery level to notification - done
 
-14. All Network communication via gms-world (aws ses, telegram bot) - wip
+14. All Network communication via gms-world (aws ses, telegram bot) - done
 
 15. Create and use mail device-locator@gms-world.net - TODO
 
-16. Use gms-world token authentication - wip
+16. Use gms-world token authentication - done
 
-17. Use token in remote control command - wip
+17. Use token in remote control command - done
 
-18. Integrate acra.ch - TODO
+18. Integrate acra.ch - done
 
-19. Add command description - wip
+19. Add command description to web page - TODO
 
 20. Change package to net.gmsworld - done

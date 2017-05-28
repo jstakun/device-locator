@@ -204,8 +204,8 @@ public class RouteTrackingService extends Service {
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber);
                             }
                             String message = "New location: " + location.getLatitude() + "," + location.getLongitude() +
-                                             " in distance of " + distance + " meters with accuracy " + location.getAccuracy() +
-                                             "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) + "%" +
+                                             " in distance of " + distance + " meters with accuracy " + location.getAccuracy() + " m." +
+                                             "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) + " p." +
                                              "\nhttps://maps.google.com/maps?q=" + location.getLatitude() + "," + location.getLongitude();
 
                             //Log.d(TAG, message);
@@ -219,7 +219,7 @@ public class RouteTrackingService extends Service {
                             }
 
                             if (telegramId != null && telegramId.length() > 0) {
-                                message = message.replace("\n", ", ").replace("%", " proc.");
+                                message = message.replace("\n", ", ");
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message);
                             }
                             //TODO call if failed to send all notifications

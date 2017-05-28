@@ -55,4 +55,5 @@
     <string name="notification_title">Locate driver not working</string>
     <string name="notification_content">SMS and Location permissions needed.</string>
     <string name="docsLink">Check available SMS commands at http://www.gms-world.net/m/dl.jsp</string>
+    <string name="Crash.error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
 </resources>
