@@ -17,6 +17,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.Utilities.GmsLocationManager;
 import net.gmsworld.devicelocator.Utilities.Network;
 
 public class RouteTrackingService extends Service {
@@ -89,7 +90,7 @@ public class RouteTrackingService extends Service {
                         this.phoneNumber = intent.getExtras().getString("phoneNumber");
                         this.email = intent.getExtras().getString("email");
                         this.telegramId = intent.getExtras().getString("telegramId");
-                        GmsLocationServicesManager.getInstance().setRadius(radius);
+                        GmsLocationManager.getInstance().setRadius(radius);
                         break;
                     case COMMAND_GPS_HIGH:
                         stopTracking();
@@ -147,7 +148,7 @@ public class RouteTrackingService extends Service {
         //    GpsDeviceFactory.initGpsDevice(this, incomingHandler);
         //    GpsDeviceFactory.startDevice();
         //} else {
-            GmsLocationServicesManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
+            GmsLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
         //}
     }
 
@@ -164,7 +165,7 @@ public class RouteTrackingService extends Service {
         //if (!IntentsHelper.getInstance().isGoogleApiAvailable(this)) {
         //    GpsDeviceFactory.stopDevice();
         //} else {
-            GmsLocationServicesManager.getInstance().disable(IncomingHandler.class.getName());
+            GmsLocationManager.getInstance().disable(IncomingHandler.class.getName());
         //}
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
@@ -174,7 +175,7 @@ public class RouteTrackingService extends Service {
 
     private void shareRoute(String title, String phoneNumber) {
         Log.d(TAG, "RouteTrackingService shareRoute()");
-        GmsLocationServicesManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime);
+        GmsLocationManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime);
     }
 
     private class IncomingHandler extends Handler {
@@ -185,7 +186,7 @@ public class RouteTrackingService extends Service {
                     mClient = msg.replyTo;
                     Log.d(TAG, "RouteTrackingService new client registered");
                     break;
-                case GmsLocationServicesManager.UPDATE_LOCATION:
+                case GmsLocationManager.UPDATE_LOCATION:
                     Log.d(TAG, "RouteTrackingService received new location");
                     if (mClient != null) {
                         try {
@@ -223,7 +224,7 @@ public class RouteTrackingService extends Service {
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message);
                             }
                             //TODO call if failed to send all notifications
-                            //GmsLocationServicesManager.getInstance().setRecentLocationSent(null);
+                            //GmsLocationManager.getInstance().setRecentLocationSent(null);
                         }
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage(), e);

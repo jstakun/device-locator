@@ -19,7 +19,6 @@ import android.widget.Toast;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
-import net.gmsworld.devicelocator.Services.GmsLocationServicesManager;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.Permissions;
@@ -165,7 +164,7 @@ public class SmsReceiver extends BroadcastReceiver {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String title = settings.getString("routeTitle", "");
 
-            if (title == null || title.length() == 0) {
+            if (StringUtils.isEmpty(title)) {
                 title = "devicelocatorroute_" + Network.getDeviceId(context) + "_" + System.currentTimeMillis();
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("routeTitle", title);
@@ -180,7 +179,7 @@ public class SmsReceiver extends BroadcastReceiver {
             //newIntent.putExtra("phoneNumber", sender);
             //newIntent.putExtra("command", ROUTE_COMMAND);
             //newIntent.putExtra("title", title);
-            //newIntent.putExtra("size", GmsLocationServicesManager.getInstance().getRouteSize());
+            //newIntent.putExtra("size", GmsLocationManager.getInstance().getRouteSize());
             //context.startService(newIntent);
         }
     }
