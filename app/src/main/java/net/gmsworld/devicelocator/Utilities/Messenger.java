@@ -12,15 +12,6 @@ import android.preference.PreferenceManager;
 import android.telephony.SmsManager;
 import android.util.Log;
 
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClient;
-import com.amazonaws.services.simpleemail.model.Body;
-import com.amazonaws.services.simpleemail.model.Content;
-import com.amazonaws.services.simpleemail.model.Destination;
-import com.amazonaws.services.simpleemail.model.Message;
-import com.amazonaws.services.simpleemail.model.SendEmailRequest;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -30,8 +21,6 @@ import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,8 +37,8 @@ public class Messenger {
 
     private Network.OnGetFinishListener telegramNotifier = new Network.OnGetFinishListener() {
         @Override
-        public void onGetFinish(String result) {
-            Log.d(TAG, "Received following response code: " + result);
+        public void onGetFinish(String results, int responseCode, String url) {
+            Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
         }
     };
 
@@ -66,95 +55,65 @@ public class Messenger {
     }
 
 
-    public static void sendEmail(final Context context, final String email, final String message, final String title) {
+    public static void sendEmail(final Context context, final String email, final String message, final String title, final int retryCount) {
         if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message) || StringUtils.isNotEmpty(title))) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String tokenStr = settings.getString(GMS_TOKEN_KEY, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
-                sendEmail(context, email, message, title, tokenStr);
+                sendEmail(context, email, message, title, tokenStr, 1);
             } else {
                 String queryString = "scope=dl&user=" + Network.getDeviceId(context);
                 Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
                     @Override
-                    public void onGetFinish(String result) {
-                        Log.d(TAG, "Received following response code: " + result);
-                        JsonObject token = new JsonParser().parse(result).getAsJsonObject();
-                        SharedPreferences.Editor editor = settings.edit();
-                        String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
-                        Log.d(TAG, "Received following token: " + token);
-                        editor.putString(GMS_TOKEN_KEY, tokenStr);
-                        editor.commit();
-                        sendEmail(context, email, message, title, tokenStr);
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                        if (responseCode == 200) {
+                            JsonObject token = new JsonParser().parse(results).getAsJsonObject();
+                            SharedPreferences.Editor editor = settings.edit();
+                            String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
+                            Log.d(TAG, "Received following token: " + token);
+                            editor.putString(GMS_TOKEN_KEY, tokenStr);
+                            editor.commit();
+                            sendEmail(context, email, message, title, tokenStr, 1);
+                        } else if (responseCode == 500 && retryCount > 0) {
+                            sendEmail(context, email, message, title, retryCount-1);
+                        }
                     }
                 });
             }
         }
     }
 
-    /*public static void sendEmail(final Context context, final String email, final String message, final String title) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Log.i(TAG, "Send email start to " + email);
-
-                    CognitoCachingCredentialsProvider credentialsProvider = new CognitoCachingCredentialsProvider(
-                            context,
-                            context.getResources().getString(R.string.identityPool), // Identity Pool ID
-                            Regions.US_WEST_2 // Region
-                    );
-                    AmazonSimpleEmailServiceClient sesClient = new AmazonSimpleEmailServiceClient(credentialsProvider);
-
-                    sesClient.sendEmail(new SendEmailRequest().
-                            withDestination(new Destination().withToAddresses(email)).
-                            withMessage(new Message().withBody(new Body().withText(new Content().withData(message))).withSubject(new Content().withData(title))).
-                            withSource(context.getResources().getString(R.string.defaultMail)));
-                    Log.i(TAG, "Send email done.");
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage(), e);
-                }
-            }
-        };
-        Network.execute(r);
-    }*/
-
-    /*public static void sendTelegram(final Context context, final String telegramId, final String message) {
-        if (telegramId != null && telegramId.length() > 0) {
-            Network.post(context.getResources().getString(R.string.telegramBot), "text=" + message + "&chat_id=" + telegramId, null, new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String result) {
-                    Log.d(TAG, "Received following response code: " + result);
-                }
-            });
-        }
-    }*/
-
-    public static void sendTelegram(final Context context, final String telegramId, final String message) {
+    public static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount) {
         if (StringUtils.isNumeric(telegramId)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String tokenStr = settings.getString(GMS_TOKEN_KEY, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
-                sendTelegram(context, telegramId, message, tokenStr);
+                sendTelegram(context, telegramId, message, tokenStr, 1);
             } else {
                 String queryString = "scope=dl&user=" + Network.getDeviceId(context);
                 Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
                     @Override
-                    public void onGetFinish(String result) {
-                        Log.d(TAG, "Received following response code: " + result);
-                        JsonObject token = new JsonParser().parse(result).getAsJsonObject();
-                        SharedPreferences.Editor editor = settings.edit();
-                        String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
-                        Log.d(TAG, "Received following token: " + token);
-                        editor.putString(GMS_TOKEN_KEY, tokenStr);
-                        editor.commit();
-                        sendTelegram(context, telegramId, message, tokenStr);
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                        if (responseCode == 200) {
+                            JsonObject token = new JsonParser().parse(results).getAsJsonObject();
+                            SharedPreferences.Editor editor = settings.edit();
+                            String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
+                            Log.d(TAG, "Received following token: " + token);
+                            editor.putString(GMS_TOKEN_KEY, tokenStr);
+                            editor.commit();
+                            sendTelegram(context, telegramId, message, tokenStr, 1);
+                        } else if (responseCode == 500 && retryCount > 0) {
+                            sendTelegram(context, telegramId, message, retryCount-1);
+                        }
                     }
                 });
             }
         }
     }
 
-    private static void sendTelegram(Context context, String telegramId, String message, String tokenStr) {
+    private static void sendTelegram(final Context context, final String telegramId, final String message, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("X-GMS-Token", tokenStr);
         headers.put("X-GMS-AppId", "2");
@@ -165,8 +124,11 @@ public class Messenger {
 
             Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
-                public void onGetFinish(String result) {
-                    Log.d(TAG, "Received following response code: " + result);
+                public void onGetFinish(String results, int responseCode, String url) {
+                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                    if (responseCode == 500 && retryCount > 0) {
+                        sendTelegram(context, telegramId, message, tokenStr, retryCount-1);
+                    }
                 }
             });
         } catch (Exception e) {
@@ -175,7 +137,7 @@ public class Messenger {
 
     }
 
-    private static void sendEmail(final Context context, final String email, final String message, final String title, String tokenStr) {
+    private static void sendEmail(final Context context, final String email, final String message, final String title, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("X-GMS-Token", tokenStr);
         headers.put("X-GMS-AppId", "2");
@@ -186,8 +148,11 @@ public class Messenger {
 
             Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
-                public void onGetFinish(String result) {
-                    Log.d(TAG, "Received following response code: " + result);
+                public void onGetFinish(String results, int responseCode, String url) {
+                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                    if (responseCode == 500 && retryCount > 0) {
+                        sendEmail(context, email, message, title, tokenStr, retryCount-1);
+                    }
                 }
             });
         } catch (Exception e) {
@@ -233,24 +198,27 @@ public class Messenger {
         String text = null;
         switch (command) {
             case SmsReceiver.START_COMMAND:
-                text = "Route tracking service has been started";
+                text = "Device location tracking service has been started";
                 break;
             case SmsReceiver.STOP_COMMAND:
-                text = "Route tracking service has been stopped";
+                text = "Device Location tracking service has been stopped";
+                break;
+            case SmsReceiver.RESET_COMMAND:
+                text = "Device location tracking service has been reset and started";
                 break;
             case SmsReceiver.MUTE_COMMAND:
-                text = "Your phone has been muted";
+                text = "Device has been muted";
                 break;
             case SmsReceiver.NORMAL_COMMAND:
-                text = "Your phone has been set to normal audio mode";
+                text = "Device has been set to normal audio settings";
                 break;
             case SmsReceiver.RADIUS_COMMAND:
                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 int radius = settings.getInt("radius", -1);
                 if (radius > 0) {
-                    text = "Route tracking service radius has been changed to " + radius;
+                    text = "Device location tracking service radius has been changed to " + radius;
                 } else {
-                    text = "Route tracking service radius is not set correctly. Please try again.";
+                    text = "Device location tracking service radius is incorrect. Please try again.";
                 }
                 break;
             case SmsReceiver.ROUTE_COMMAND:
@@ -260,16 +228,16 @@ public class Messenger {
                     String showRouteUrl = context.getResources().getString(R.string.showRouteUrl);
                     text = "Check your route at: " + showRouteUrl + "/" + title;
                 } else if (size == 0) {
-                    text = "No route has been recorder yet";
+                    text = "No route points has been recorder yet. Try again later.";
                 } else if (size < 0) {
-                    text = "No route has been uploaded yet";
+                    text = "No route points has been uploaded yet. Try again later.";
                 }
                 break;
             case SmsReceiver.GPS_HIGH_COMMAND:
-                text = "GPS has been changed to high accuracy";
+                text = "GPS settings as been changed to high accuracy";
                 break;
             case SmsReceiver.GPS_BALANCED_COMMAND:
-                text = "GPS has been changed to balanced accuracy";
+                text = "GPS settings has been changed to balanced accuracy";
                 break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
@@ -279,61 +247,6 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         }
     }
-
-    /*public static void sendNetworkMessage(final Context context, final Location location, final LDPlace place, final String phoneNumber, final OnNetworkMessageSentListener onNetworkMessageSentListener) {
-        //Log.d(TAG, "sendNetworkMessage() " + location.getAccuracy());
-        final Resources r = context.getResources();
-
-        if (!Network.isNetworkAvailable(context)) {
-            sendSMS(context, phoneNumber, r.getString(R.string.no_network));
-            onNetworkMessageSentListener.onNetworkMessageSent();
-            return;
-        }
-
-
-        //Log.d(TAG, "STARTED NETWORK REQUEST");
-        Network.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + location.getLatitude() + "," + location.getLongitude(), new Network.OnGetFinishListener() {
-            @Override
-            public void onGetFinish(String result) {
-                //Log.d(TAG, "RESULT ARRIVED");
-                try {
-                    final String address = new JSONObject(result).getJSONArray("results").getJSONObject(0).getString("formatted_address");
-                    final String firstText = r.getString(R.string.address) + " " + address + ". ";
-
-                    if (place == null) {
-                        sendSMS(context, phoneNumber, firstText + r.getString(R.string.no_destination));
-                        onNetworkMessageSentListener.onNetworkMessageSent();
-                        return;
-                    }
-
-                    Network.get("https://maps.googleapis.com/maps/api/directions/json?origin=" + location.getLatitude() + "," + location.getLongitude() + "&destination=" + place.getLatitude() + "," + place.getLongitude(), new Network.OnGetFinishListener() {
-                        @Override
-                        public void onGetFinish(String result) {
-                            try {
-                                JSONObject j = new JSONObject(result).getJSONArray("routes").getJSONObject(0).getJSONArray("legs").getJSONObject(0);
-                                String distance = j.getJSONObject("distance").getString("text");
-                                String duration = j.getJSONObject("duration").getString("text");
-
-                                sendSMS(context, phoneNumber, firstText + r.getString(R.string.remaining_distance_to) + " " + place.getName() + ": " + distance + ". " + r.getString(R.string.aprox_duration) + " " + duration + ".");
-                                onNetworkMessageSentListener.onNetworkMessageSent();
-                                return;
-                            } catch (Exception e) {
-                                //Log.d(TAG, "EXCEPTION E: " + e.getMessage());
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    //Log.d(TAG, "JSON EXCEPTION");
-                }
-            }
-        });
-    }
-
-    public interface OnNetworkMessageSentListener {
-        public void onNetworkMessageSent();
-    }*/
 
     public static void sendAcknowledgeMessage(Context context, String phoneNumber) {
         Resources r = context.getResources();

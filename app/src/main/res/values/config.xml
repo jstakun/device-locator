@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="routeProviderUrl">http://www.gms-world.net/routeProvider</string>
+    <string name="showRouteUrl">http://www.gms-world.net/showRoute</string>
+</resources>

@@ -24,6 +24,7 @@ import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.Permissions;
 
 import java.util.ArrayList;
+import java.util.StringTokenizer;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,6 +34,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
     public final static String START_COMMAND = "startdl"; //start route tracking
     public final static String STOP_COMMAND = "stopdl"; //stop route tracking
+    public final static String RESET_COMMAND = "resetdl"; //start route tracking and delete old route points if exists
     public final static String ROUTE_COMMAND = "routedl"; //share currently recorded route
     public final static String MUTE_COMMAND = "mutedl"; //mute phone
     public final static String NORMAL_COMMAND = "normaldl"; //unmute phone
@@ -44,19 +46,20 @@ public class SmsReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        findKeyword(context, intent);
-        findStartRouteTrackerServiceStartCommand(context, intent);
-        findStopRouteTrackerServiceStartCommand(context, intent);
-        findMuteCommand(context, intent);
-        findNormalCommand(context, intent);
-        findChangeRadiusRouteTrackerServiceCommand(context, intent);
-        findStartPhoneCallCommand(context, intent);
-        findShareRouteCommand(context, intent);
-        findGpsHighAccuracyCommand(context, intent);
-        findGpsLowAccuracyCommand(context, intent);
+        if (findKeyword(context, intent)) return;
+        if (findStartRouteTrackerServiceStartCommand(context, intent)) return;
+        if (findStartRouteTrackerServiceStartCommand(context, intent)) return;
+        if (findResetRouteTrackerServiceStartCommand(context, intent)) return;
+        if (findMuteCommand(context, intent)) return;
+        if (findNormalCommand(context, intent)) return;
+        if (findChangeRadiusRouteTrackerServiceCommand(context, intent)) return;
+        if (findStartPhoneCallCommand(context, intent)) return;
+        if (findShareRouteCommand(context, intent)) return;
+        if (findGpsHighAccuracyCommand(context, intent)) return;
+        if (findGpsLowAccuracyCommand(context, intent)) return;
     }
 
-    private void findStartRouteTrackerServiceStartCommand(Context context, Intent intent) {
+    private boolean findStartRouteTrackerServiceStartCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, START_COMMAND);
 
         if (sender != null) {
@@ -76,10 +79,39 @@ public class SmsReceiver extends BroadcastReceiver {
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", START_COMMAND);
             context.startService(newIntent);
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void findStopRouteTrackerServiceStartCommand(Context context, Intent intent) {
+    private boolean findResetRouteTrackerServiceStartCommand(Context context, Intent intent) {
+        String sender = getSenderAddress(context, intent, RESET_COMMAND);
+
+        if (sender != null) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
+            String phoneNumber = settings.getString("phoneNumber", "");
+            String email = settings.getString("email", "");
+            String telegramId = settings.getString("telegramId", "");
+
+            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true);
+
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean("motionDetectorRunning", true);
+            editor.commit();
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", RESET_COMMAND);
+            context.startService(newIntent);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean findStopRouteTrackerServiceStartCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, STOP_COMMAND);
 
         if (sender != null) {
@@ -94,10 +126,13 @@ public class SmsReceiver extends BroadcastReceiver {
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", STOP_COMMAND);
             context.startService(newIntent);
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void findChangeRadiusRouteTrackerServiceCommand(Context context, Intent intent) {
+    private boolean findChangeRadiusRouteTrackerServiceCommand(Context context, Intent intent) {
         ArrayList<SmsMessage> list = null;
         try {
             String keyword = RADIUS_COMMAND;
@@ -105,7 +140,7 @@ public class SmsReceiver extends BroadcastReceiver {
             keyword += token;
             list = getMessagesWithKeyword(keyword, intent.getExtras());
         } catch (Exception e) {
-            return;
+            return false;
         }
 
         if (list.size() > 0) {
@@ -135,15 +170,18 @@ public class SmsReceiver extends BroadcastReceiver {
                 newIntent.putExtra("command", RADIUS_COMMAND);
                 context.startService(newIntent);
             }
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void findStartPhoneCallCommand(Context context, Intent intent) {
+    private boolean findStartPhoneCallCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, CALL_COMMAND);
 
         if (sender != null) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                return;
+                return true;
             }
             Uri call = Uri.parse("tel:" + sender);
             Intent surf = new Intent(Intent.ACTION_CALL, call);
@@ -151,10 +189,13 @@ public class SmsReceiver extends BroadcastReceiver {
             //surf.setPackage("com.google.android.dialer");
             surf.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(surf);
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void findShareRouteCommand(Context context, Intent intent) {
+    private boolean findShareRouteCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, ROUTE_COMMAND);
 
         if (sender != null) {
@@ -181,10 +222,14 @@ public class SmsReceiver extends BroadcastReceiver {
             //newIntent.putExtra("title", title);
             //newIntent.putExtra("size", GmsLocationManager.getInstance().getRouteSize());
             //context.startService(newIntent);
+
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void findMuteCommand(Context context, Intent intent) {
+    private boolean findMuteCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, MUTE_COMMAND);
 
         if (sender != null) {
@@ -195,10 +240,13 @@ public class SmsReceiver extends BroadcastReceiver {
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", MUTE_COMMAND);
             context.startService(newIntent);
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void findNormalCommand(Context context, Intent intent) {
+    private boolean findNormalCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, NORMAL_COMMAND);
 
         if (sender != null) {
@@ -209,10 +257,13 @@ public class SmsReceiver extends BroadcastReceiver {
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", NORMAL_COMMAND);
             context.startService(newIntent);
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void findKeyword(Context context, Intent intent) {
+    private boolean findKeyword(Context context, Intent intent) {
         String keyword = PreferenceManager.getDefaultSharedPreferences(context).getString("keyword", "");
 
         if (keyword.length() == 0) {
@@ -226,7 +277,7 @@ public class SmsReceiver extends BroadcastReceiver {
         try {
             list = getMessagesWithKeyword(keyword, intent.getExtras());
         } catch (Exception e) {
-            return;
+            return false;
         }
 
         if (list.size() > 0) {
@@ -237,16 +288,19 @@ public class SmsReceiver extends BroadcastReceiver {
                     Toast.makeText(context, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
                 }
 
-                return;
+                return true;
             }
 
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", list.get(0).getOriginatingAddress());
             context.startService(newIntent);
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void findGpsHighAccuracyCommand(Context context, Intent intent) {
+    private boolean findGpsHighAccuracyCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, GPS_HIGH_COMMAND);
 
         if (sender != null) {
@@ -259,10 +313,13 @@ public class SmsReceiver extends BroadcastReceiver {
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", GPS_HIGH_COMMAND);
             context.startService(newIntent);
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private void findGpsLowAccuracyCommand(Context context, Intent intent) {
+    private boolean findGpsLowAccuracyCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, GPS_BALANCED_COMMAND);
 
         if (sender != null) {
@@ -275,6 +332,9 @@ public class SmsReceiver extends BroadcastReceiver {
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", GPS_BALANCED_COMMAND);
             context.startService(newIntent);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -293,8 +353,11 @@ public class SmsReceiver extends BroadcastReceiver {
 
                 if (StringUtils.equalsIgnoreCase(sms.getMessageBody(), keyword)) {
                     list.add(sms);
-                } else if (keyword.equals(RADIUS_COMMAND) && StringUtils.startsWithIgnoreCase(sms.getMessageBody(), keyword)) {
-                    list.add(sms);
+                } else if (keyword.startsWith(RADIUS_COMMAND)) {
+                    StringTokenizer tokens = new StringTokenizer(sms.getMessageBody());
+                    if (tokens.hasMoreTokens() && StringUtils.equalsIgnoreCase(tokens.nextToken(), keyword)) {
+                        list.add(sms);
+                    }
                 }
             }
         }

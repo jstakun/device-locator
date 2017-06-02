@@ -45,7 +45,7 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
 
     private static final String TAG = "GmsLocationManager";
 
-    private static final String ROUTE_FILE = "routeFile.txt";
+    public static final String ROUTE_FILE = "routeFile.txt";
 
     //public static final int GMS_CONNECTED = 300;
     public static final int UPDATE_LOCATION = 301;
@@ -117,7 +117,7 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
     public void disable(String handlerName) {
         mLocationHandlers.remove(handlerName);
         if (mLocationHandlers.isEmpty() && mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            Log.d(TAG, "GmsLocationManager removed location updates");
+            Log.d(TAG, "Removed location updates");
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             if (mGoogleApiClient != null) {
                 mGoogleApiClient.disconnect();
@@ -125,7 +125,7 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
             }
             isEnabled = false;
         } else {
-            Log.d(TAG, "GmsLocationManager has " + mLocationHandlers.size() + " handlers");
+            Log.d(TAG, mLocationHandlers.size() + " handlers registered");
         }
 
         //send last known location
@@ -231,13 +231,15 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
         this.radius = radius;
     }
 
-    public void uploadRouteToServer(final Context context, final String title, final String phoneNumber, long creationDate) {
+    public int uploadRouteToServer(final Context context, final String title, final String phoneNumber, final long creationDate, final boolean smsNotify) {
         List<String> route = Files.readFileByLinesFromContextDir(ROUTE_FILE, context);
         final int size = route.size();
         final Intent newIntent = new Intent(context, SmsSenderService.class);
-        newIntent.putExtra("phoneNumber", phoneNumber);
-        newIntent.putExtra("command", SmsReceiver.ROUTE_COMMAND);
-        newIntent.putExtra("title", title);
+        if (smsNotify) {
+            newIntent.putExtra("phoneNumber", phoneNumber);
+            newIntent.putExtra("command", SmsReceiver.ROUTE_COMMAND);
+            newIntent.putExtra("title", title);
+        }
         if (size > 1) {
             try {
                 String desc = "Device id: " + Network.getDeviceId(context);
@@ -246,26 +248,33 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
                 //Log.d(TAG, "Uploading route " + content);
                 Network.post(url, "route=" + content, null, new Network.OnGetFinishListener() {
                     @Override
-                    public void onGetFinish(String result) {
-                        Log.d(TAG, "Received following response code: " + result);
-                        if (StringUtils.equals(result, "200")) {
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                        if (responseCode == 200) {
                             newIntent.putExtra("size", size);
                         } else {
                             newIntent.putExtra("size", -1);
                         }
-                        context.startService(newIntent);
+                        if (smsNotify) {
+                            context.startService(newIntent);
+                        }
                     }
                 });
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
-                newIntent.putExtra("size", -1);
-                context.startService(newIntent);
+                if (smsNotify) {
+                    newIntent.putExtra("size", -1);
+                    context.startService(newIntent);
+                }
             }
         } else {
-            Log.d(TAG, "Route must have at least 2 points. Currently it has only " + size + " point");
-            newIntent.putExtra("size", 0);
-            context.startService(newIntent);
+            Log.d(TAG, "Route must have at least 2 points. Currently it has " + size);
+            if (smsNotify) {
+                newIntent.putExtra("size", 0);
+                context.startService(newIntent);
+            }
         }
+        return size;
     }
 
     private static String routeToGeoJson(List<String> routePoints, String filename, String description, long creationDate) throws Exception {
@@ -323,12 +332,15 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
     private void addLocationToRoute(Location location) {
         Location l = filterLocation(location);
         if (l != null) {
+            Log.d(TAG, "Route point will be added to data store");
             if (callerContext != null) {
                 String line = location.getLatitude() + "," + location.getLongitude() + "," + System.currentTimeMillis();
                 Files.appendLineToFileFromContextDir(ROUTE_FILE, callerContext, line);
             } else {
                 Log.e(TAG, "Caller context is null. I'm unable to persist route point!");
             }
+        } else {
+            Log.d(TAG, "Weak location won't be added to route");
         }
     }
 

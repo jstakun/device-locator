@@ -4,6 +4,9 @@ package net.gmsworld.devicelocator.Services;
  * Created by jstakun on 04.05.17.
  */
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -17,8 +20,11 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.GmsLocationManager;
 import net.gmsworld.devicelocator.Utilities.Network;
+import net.gmsworld.devicelocator.Utilities.NotificationUtils;
 
 public class RouteTrackingService extends Service {
 
@@ -35,6 +41,8 @@ public class RouteTrackingService extends Service {
     public static final int COMMAND_SHOW_ROUTE = 50;
     public static final int DEFAULT_RADIUS = 100;
 
+    private static final int NOTIFICATION_ID = 0;
+
     private static final String TAG = RouteTrackingService.class.getSimpleName();
     private int radius = DEFAULT_RADIUS;
 
@@ -46,20 +54,20 @@ public class RouteTrackingService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.d(TAG, "RouteTrackingService onBind()");
+        Log.d(TAG, "onBind()");
         return mMessenger.getBinder();
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.d(TAG, "RouteTrackingService onUnbind()");
+        Log.d(TAG, "onUnbind()");
         return true;
     }
 
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "RouteTrackingService onStartCommand()");
+        //Log.d(TAG, "RouteTrackingService onStartCommand()");
         super.onStartCommand(intent, flags, startId);
 
         if (intent != null) {
@@ -68,12 +76,13 @@ public class RouteTrackingService extends Service {
             }
             if (intent.hasExtra(COMMAND)) {
                 int command = intent.getIntExtra(COMMAND, -1);
+                Log.d(TAG, "onStartCommand(): " + command);
                 switch (command) {
                     case COMMAND_START:
                         this.phoneNumber = intent.getExtras().getString("phoneNumber");
                         this.email = intent.getExtras().getString("email");
                         this.telegramId = intent.getExtras().getString("telegramId");
-                        boolean resetRoute = intent.getBooleanExtra("resetRoute", true);
+                        boolean resetRoute = intent.getBooleanExtra("resetRoute", false);
                         int gpsAccuracy = PreferenceManager.getDefaultSharedPreferences(this).getInt("gpsAccuracy", 0);
                         startTracking(gpsAccuracy, resetRoute);
                         break;
@@ -101,12 +110,14 @@ public class RouteTrackingService extends Service {
                         startTracking(0, false);
                         break;
                     default:
-                        Log.e(TAG, "RouteTrackingService started with wrong command: " + command);
+                        Log.e(TAG, "Started with wrong command: " + command);
                         break;
                 }
+            } else {
+                Log.d(TAG, "onStartCommand()");
             }
         } else {
-            Log.e(TAG, "RouteTrackingService started without intent. This is wrong! --------------------------------------");
+            Log.e(TAG, "Started without intent. This is wrong! --------------------------------------");
         }
 
         return START_REDELIVER_INTENT;   //START_STICKY;
@@ -115,21 +126,21 @@ public class RouteTrackingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "RouteTrackingService onCreate()");
+        Log.d(TAG, "onCreate()");
         //startTracking();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "RouteTrackingService onDestroy()");
+        Log.i(TAG, "onDestroy()");
         stopTracking();
         Intent broadcastIntent = new Intent("net.gmsworld.devicelocator.Services.RouteTrackingServiceRestartReceiver");
         sendBroadcast(broadcastIntent);
     }
 
     private synchronized void startTracking(int priority, boolean resetRoute) {
-        Log.d(TAG, "RouteTrackingService startTracking()");
+        Log.d(TAG, "startTracking()");
 
         if (this.mWakeLock != null)
         {
@@ -143,6 +154,8 @@ public class RouteTrackingService extends Service {
 
         startTime = System.currentTimeMillis();
 
+        NotificationUtils.notify(this, NOTIFICATION_ID);
+
         //TODO add support for non google api compliant devices
         //if (!IntentsHelper.getInstance().isGoogleApiAvailable(this)) {
         //    GpsDeviceFactory.initGpsDevice(this, incomingHandler);
@@ -153,7 +166,9 @@ public class RouteTrackingService extends Service {
     }
 
     private synchronized void stopTracking() {
-        Log.d(TAG, "RouteTrackingService stopTracking()");
+        Log.d(TAG, "stopTracking()");
+
+        NotificationUtils.cancel(this, NOTIFICATION_ID);
 
         if (this.mWakeLock != null)
         {
@@ -174,8 +189,8 @@ public class RouteTrackingService extends Service {
     }
 
     private void shareRoute(String title, String phoneNumber) {
-        Log.d(TAG, "RouteTrackingService shareRoute()");
-        GmsLocationManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime);
+        Log.d(TAG, "shareRoute()");
+        GmsLocationManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime, true);
     }
 
     private class IncomingHandler extends Handler {
@@ -184,10 +199,10 @@ public class RouteTrackingService extends Service {
             switch (msg.what) {
                 case COMMAND_REGISTER_CLIENT:
                     mClient = msg.replyTo;
-                    Log.d(TAG, "RouteTrackingService new client registered");
+                    Log.d(TAG, "new client registered");
                     break;
                 case GmsLocationManager.UPDATE_LOCATION:
-                    Log.d(TAG, "RouteTrackingService received new location");
+                    Log.d(TAG, "received new location");
                     if (mClient != null) {
                         try {
                             Message message = Message.obtain(null, COMMAND_SHOW_ROUTE);
@@ -216,12 +231,12 @@ public class RouteTrackingService extends Service {
                                 if (deviceId != null) {
                                     title += " installed on device " + deviceId;
                                 }
-                                net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, email, message, title);
+                                net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, email, message, title, 1);
                             }
 
                             if (telegramId != null && telegramId.length() > 0) {
                                 message = message.replace("\n", ", ");
-                                net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message);
+                                net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message, 1);
                             }
                             //TODO call if failed to send all notifications
                             //GmsLocationManager.getInstance().setRecentLocationSent(null);

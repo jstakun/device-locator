@@ -37,7 +37,6 @@ public class Files {
 
 
     public static List<String> readFileByLinesFromContextDir(String filename, Context context) {
-        //LoggerUtils.debug("Loading resource bundle from file " + filename);
         InputStream is = null;
         InputStreamReader isr = null;
         List<String> lines = new ArrayList<String>();
@@ -51,6 +50,41 @@ public class Files {
                 String line;
                 while ((line = readLine(isr)) != null) {
                     lines.add(line);
+                }
+            }
+        } catch (Exception e) {
+            Log.d(TAG, e.getMessage(), e);
+        } finally {
+            if (isr != null) {
+                try {
+                    isr.close();
+                } catch (Exception e) {
+                    Log.d(TAG, e.getMessage(), e);
+                }
+            }
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (Exception e) {
+                    Log.d(TAG, e.getMessage(), e);
+                }
+            }
+        }
+        return lines;
+    }
+
+    public static int countLinesFromContextDir(String filename, Context context) {
+        InputStream is = null;
+        InputStreamReader isr = null;
+        int lines= 0;
+
+        try {
+            File fc = new File(context.getFilesDir(), filename);
+            if (fc.exists()) {
+                is = new FileInputStream(fc);
+                isr = new InputStreamReader(is, "UTF8");
+                while (readLine(isr) != null) {
+                    lines++;
                 }
             }
         } catch (Exception e) {

@@ -1,5 +1,7 @@
 package net.gmsworld.devicelocator;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -42,10 +44,14 @@ import net.gmsworld.devicelocator.Fragments.LDPlaceAutocompleteFragment;
 import net.gmsworld.devicelocator.Model.LDPlace;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
+import net.gmsworld.devicelocator.Utilities.Files;
+import net.gmsworld.devicelocator.Utilities.GmsLocationManager;
+import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.Permissions;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -53,8 +59,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private static final int SEND_LOCATION_INTENT = 1;
-    private static final int MOTION_DETECTOR_INTENT = 2;
+    //private static final int MOTION_DETECTOR_INTENT = 2;
     private static final int SELECT_CONTACT_INTENT = 3;
+
+    private static final int MAX_RADIUS = 10000; //meters
 
     private Boolean running = null;
     private String keyword = null;
@@ -92,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //Log.d(TAG, "MainActivity onDestroy()");
+        Log.d(TAG, "MainActivity onDestroy()");
         RouteTrackingServiceUtils.unbindRouteTrackingService(this, mConnection, isTrackingServiceBound);
     }
 
@@ -150,9 +158,9 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
 
         }
-        if ((currentRadius <= 0 || currentRadius > 1000) && this.motionDetectorRunning == false) {
+        if ((currentRadius <= 0 || currentRadius > MAX_RADIUS) && this.motionDetectorRunning == false) {
             //can't start application with no radius
-            Toast.makeText(getApplicationContext(), "Please specify radius between 1 and 1000 meters", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Please specify radius between 1 and " + MAX_RADIUS + " meters", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -195,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
         initDestinationPlace();
         initRunningButton();
         initSendLocationButton();
+        initShareRouteButton();
         initKeywordInput();
         initRadiusInput();
         initMotionDetectorButton();
@@ -391,6 +400,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void initShareRouteButton() {
+        Button shareRouteButton = (Button) this.findViewById(R.id.route_button);
+
+        shareRouteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Files.countLinesFromContextDir(GmsLocationManager.ROUTE_FILE, MainActivity.this) > 0) {
+                    String title = "devicelocatorroute_" + Network.getDeviceId(MainActivity.this) + "_" + System.currentTimeMillis();
+                    int routeSize = GmsLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", -1, false);
+                    if (routeSize > 0) {
+                        String showRouteUrl = MainActivity.this.getResources().getString(R.string.showRouteUrl) + "/" + title;
+                        //ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        //ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
+                        //clipboard.setPrimaryClip(urlClip);
+                        //Toast.makeText(getApplicationContext(), "Route has been uploaded to server and link has been copied to clipboard", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Route has been uploaded to server. In a moment you should see it in web browser window.", Toast.LENGTH_LONG).show();
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
+                        startActivity(browserIntent);
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "No route is saved yet. Please make sure device location tracking is started and try again after some time.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
     private void initSendLocationButton() {
         Button sendLocationButton = (Button) this.findViewById(R.id.send_button);
 
@@ -432,9 +469,9 @@ public class MainActivity extends AppCompatActivity {
             if (phoneNumber != null) {
                 if (requestCode == SEND_LOCATION_INTENT) {
                     launchService();
-                } else if (requestCode == MOTION_DETECTOR_INTENT) {
-                    launchMotionDetectorService();
-                }
+                } //else if (requestCode == MOTION_DETECTOR_INTENT) {
+                    //launchMotionDetectorService();
+                //}
             } else {
                 Toast.makeText(getApplicationContext(), "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
             }
@@ -519,6 +556,7 @@ public class MainActivity extends AppCompatActivity {
         runningButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d(TAG, "Motion button has been clicked");
                 MainActivity.this.toggleMotionDetectorRunning();
                 MainActivity.this.clearFocus();
             }

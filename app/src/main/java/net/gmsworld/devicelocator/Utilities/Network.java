@@ -9,6 +9,7 @@ import android.util.Log;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -21,6 +22,8 @@ public class Network {
 
     private static final String FORM_ENCODING = "application/x-www-form-urlencoded;charset=UTF-8";
 
+    private static final int SOCKET_TIMEOUT = 60 * 1000; //1 minute
+
     protected static boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
@@ -30,9 +33,12 @@ public class Network {
         Thread thread = new Thread() {
             @Override
             public void run() {
+                HttpURLConnection urlConnection = null;
                 try {
                     URL url = new URL(urlString);
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
+                    urlConnection.setReadTimeout(SOCKET_TIMEOUT);
                     InputStream in = new BufferedInputStream(urlConnection.getInputStream());
 
                     BufferedReader r = new BufferedReader(new InputStreamReader(in));
@@ -42,9 +48,17 @@ public class Network {
                         total.append(line).append('\n');
                     }
 
-                    onGetFinishListener.onGetFinish(total.toString());
+                    onGetFinishListener.onGetFinish(total.toString(), urlConnection.getResponseCode(), urlString);
                 } catch (Exception e) {
-                    onGetFinishListener.onGetFinish("{}");
+                    Log.e(TAG, e.getMessage(), e);
+                    int responseCode = 1;
+                    if (urlConnection != null) {
+                        try {
+                            responseCode = urlConnection.getResponseCode();
+                        } catch (IOException e1) {
+                        }
+                    }
+                    onGetFinishListener.onGetFinish("{}", responseCode, urlString);
                 }
             }
         };
@@ -56,9 +70,12 @@ public class Network {
         Thread thread = new Thread() {
             @Override
             public void run() {
+                HttpURLConnection urlConnection = null;
                 try {
                     URL url = new URL(urlString);
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
+                    urlConnection.setReadTimeout(SOCKET_TIMEOUT);
 
                     for (Map.Entry<String, String> header : headers.entrySet()) {
                         urlConnection.setRequestProperty(header.getKey(), header.getValue());
@@ -73,10 +90,17 @@ public class Network {
                         total.append(line).append('\n');
                     }
 
-                    onGetFinishListener.onGetFinish(total.toString());
+                    onGetFinishListener.onGetFinish(total.toString(), urlConnection.getResponseCode(), urlString);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
-                    onGetFinishListener.onGetFinish("{}");
+                    int responseCode = 1;
+                    if (urlConnection != null) {
+                        try {
+                            responseCode = urlConnection.getResponseCode();
+                        } catch (IOException e1) {
+                        }
+                    }
+                    onGetFinishListener.onGetFinish("{}", responseCode, urlString);
                 }
             }
         };
@@ -92,6 +116,8 @@ public class Network {
                     URL url = new URL(urlString);
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("POST");
+                    urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
+                    urlConnection.setReadTimeout(SOCKET_TIMEOUT);
 
                     if (content != null) {
                         urlConnection.setRequestProperty("Content-Length", Integer.toString(content.length()));
@@ -116,11 +142,10 @@ public class Network {
                         urlConnection.connect();
                     }
 
-                    int responseCode = urlConnection.getResponseCode();
-
-                    onGetFinishListener.onGetFinish(Integer.toString(responseCode));
+                    onGetFinishListener.onGetFinish(null, urlConnection.getResponseCode(), urlString);
                 } catch (Exception e) {
-                    onGetFinishListener.onGetFinish("500");
+                    Log.d(TAG, e.getMessage(), e);
+                    onGetFinishListener.onGetFinish(null, -1, urlString);
                 }
             }
         };
@@ -136,6 +161,8 @@ public class Network {
                     URL url = new URL(urlString);
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setRequestMethod("POST");
+                    urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
+                    urlConnection.setReadTimeout(SOCKET_TIMEOUT);
 
                     for (Map.Entry<String, String> header : headers.entrySet()) {
                         urlConnection.setRequestProperty(header.getKey(), header.getValue());
@@ -166,9 +193,9 @@ public class Network {
 
                     int responseCode = urlConnection.getResponseCode();
 
-                    onGetFinishListener.onGetFinish(Integer.toString(responseCode));
+                    onGetFinishListener.onGetFinish(null, urlConnection.getResponseCode(), urlString);
                 } catch (Exception e) {
-                    onGetFinishListener.onGetFinish("500");
+                    onGetFinishListener.onGetFinish(null, -1, urlString);
                 }
             }
         };
@@ -212,6 +239,6 @@ public class Network {
     }
 
     public interface OnGetFinishListener {
-        void onGetFinish(String result);
+        void onGetFinish(String result, int responseCode, String url);
     }
 }
