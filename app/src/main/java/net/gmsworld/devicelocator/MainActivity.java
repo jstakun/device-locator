@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void toggleRunning() {
         String currentKeyword = ((TextView) this.findViewById(R.id.keyword)).getText() + "";
-        if (this.running == false && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
+        if (!this.running && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
             Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
             Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             return;
@@ -156,15 +156,15 @@ public class MainActivity extends AppCompatActivity {
         try {
             currentRadius = Integer.parseInt(((TextView) this.findViewById(R.id.radius)).getText() + "");
         } catch (Exception e) {
-
+            Log.e(TAG, e.getMessage(), e);
         }
-        if ((currentRadius <= 0 || currentRadius > MAX_RADIUS) && this.motionDetectorRunning == false) {
+        if ((currentRadius <= 0 || currentRadius > MAX_RADIUS) && !motionDetectorRunning) {
             //can't start application with no radius
             Toast.makeText(getApplicationContext(), "Please specify radius between 1 and " + MAX_RADIUS + " meters", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (this.motionDetectorRunning == false && !Permissions.haveAllRequiredPermission(MainActivity.this)) {
+        if (!this.motionDetectorRunning && !Permissions.haveAllRequiredPermission(MainActivity.this)) {
             Permissions.requestAllRequiredPermission(MainActivity.this);
             Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             return;
@@ -252,13 +252,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String input = charSequence.toString();
-                if (input != null) {
-                    try {
-                        token = input;
-                        saveData();
-                    } catch (Exception e) {
-                        Log.e(TAG, e.getMessage(), e);
-                    }
+                try {
+                    token = input;
+                    saveData();
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
                 }
             }
 
@@ -282,17 +280,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String input = charSequence.toString();
-                if (input != null && input.length() > 0) {
-                    try {
-                        radius = Integer.parseInt(input);
-                        saveData();
-                        //update route tracking service if running
-                        if (motionDetectorRunning) {
-                            RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, e.getMessage(), e);
+                try {
+                    radius = Integer.parseInt(input);
+                    saveData();
+                    //update route tracking service if running
+                    if (motionDetectorRunning) {
+                        RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
                     }
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
                 }
             }
 
@@ -406,10 +402,10 @@ public class MainActivity extends AppCompatActivity {
         shareRouteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Files.countLinesFromContextDir(GmsLocationManager.ROUTE_FILE, MainActivity.this) > 0) {
+                if (Files.countLinesFromContextDir(GmsLocationManager.ROUTE_FILE, MainActivity.this) > 1) {
                     String title = "devicelocatorroute_" + Network.getDeviceId(MainActivity.this) + "_" + System.currentTimeMillis();
                     int routeSize = GmsLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", -1, false);
-                    if (routeSize > 0) {
+                    if (routeSize > 1) {
                         String showRouteUrl = MainActivity.this.getResources().getString(R.string.showRouteUrl) + "/" + title;
                         //ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                         //ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
@@ -616,7 +612,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             this.radius = Integer.parseInt(((TextView) this.findViewById(R.id.radius)).getText() + "");
         } catch (Exception e) {
-
+            Log.e(TAG, e.getMessage(), e);
         }
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
@@ -720,7 +716,7 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
-    private class LoadingHandler extends Handler {
+    private static class LoadingHandler extends Handler {
 
         @Override
         public void handleMessage(Message msg) {
