@@ -41,7 +41,7 @@ public class RouteTrackingService extends Service {
     public static final int COMMAND_SHOW_ROUTE = 50;
     public static final int DEFAULT_RADIUS = 100;
 
-    private static final int NOTIFICATION_ID = 0;
+    private static final int NOTIFICATION_ID = 1;
 
     private static final String TAG = RouteTrackingService.class.getSimpleName();
     private int radius = DEFAULT_RADIUS;
@@ -154,7 +154,8 @@ public class RouteTrackingService extends Service {
 
         startTime = System.currentTimeMillis();
 
-        NotificationUtils.notify(this, NOTIFICATION_ID);
+        //NotificationUtils.notify(this, NOTIFICATION_ID);
+        startForeground(NOTIFICATION_ID, NotificationUtils.buildNotification(this, NOTIFICATION_ID));
 
         //TODO add support for non google api compliant devices
         //if (!IntentsHelper.getInstance().isGoogleApiAvailable(this)) {
@@ -168,8 +169,9 @@ public class RouteTrackingService extends Service {
     private synchronized void stopTracking() {
         Log.d(TAG, "stopTracking()");
 
-        NotificationUtils.cancel(this, NOTIFICATION_ID);
-
+        //NotificationUtils.cancel(this, NOTIFICATION_ID);
+        stopForeground(true);
+        
         if (this.mWakeLock != null)
         {
             this.mWakeLock.release();
