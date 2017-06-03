@@ -4,9 +4,6 @@ package net.gmsworld.devicelocator.Services;
  * Created by jstakun on 04.05.17.
  */
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -20,8 +17,6 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import net.gmsworld.devicelocator.MainActivity;
-import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.GmsLocationManager;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
@@ -240,8 +235,6 @@ public class RouteTrackingService extends Service {
                                 message = message.replace("\n", ", ");
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message, 1);
                             }
-                            //TODO call if failed to send all notifications
-                            //GmsLocationManager.getInstance().setRecentLocationSent(null);
                         }
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage(), e);

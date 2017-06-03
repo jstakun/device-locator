@@ -10,9 +10,9 @@
 
 5. Add button to pick contact next to phoneNumber edittext - done
 
-6. When user registers email send message to admin for registration - rfe
+6. User email address registration - TODO
 
-7. Retry failed message delivery (don't save recent location when delivery failed) - TODO
+7. Retry failed message delivery - done
 
 8. Start/stop route tracker via sms - done
 
@@ -28,7 +28,7 @@
 
 14. All Network communication via gms-world (aws ses, telegram bot) - done
 
-15. Create and use mail device-locator@gms-world.net - TODO
+15. Create and use mail device-locator@gms-world.net - done
 
 16. Use gms-world token authentication - done
 
@@ -36,6 +36,6 @@
 
 18. Integrate acra.ch - done
 
-19. Add command description to web page - wip
+19. Add command description to web page - done
 
 20. Change package to net.gmsworld - done

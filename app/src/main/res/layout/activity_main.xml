@@ -45,7 +45,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="Device motion radius limit in meters" />
+                        android:text="@string/motion_radius" />
 
                     <EditText
                         android:id="@+id/radius"
@@ -64,7 +64,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentLeft="true"
                         android:backgroundTint="@color/colorPrimary"
-                        android:text="Share route"
+                        android:text="@string/share_route"
                         android:textColor="@android:color/white" />
 
                     <Button
@@ -81,13 +81,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingBottom="8dp">
+                    android:paddingBottom="8dp"
+                    android:paddingTop="15dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="GPS Accuracy"
+                        android:text="@string/gps_accuracy"
                         android:paddingBottom="8dp"/>
 
                     <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
@@ -99,12 +100,12 @@
                         <RadioButton android:id="@+id/radio_gps_low"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Balanced"
+                            android:text="@string/gps_balanced"
                             android:onClick="onGpsRadioButtonClicked"/>
                         <RadioButton android:id="@+id/radio_gps_high"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="High"
+                            android:text="@string/gps_high"
                             android:onClick="onGpsRadioButtonClicked"/>
                     </RadioGroup>
                 </LinearLayout>
@@ -130,7 +131,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="Phone number" />
+                        android:text="@string/phone_number" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -152,7 +153,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
                             android:backgroundTint="@color/colorPrimary"
-                            android:text="Change"
+                            android:text="@string/find"
                             android:textColor="@android:color/white" />
                     </RelativeLayout>
 
@@ -169,7 +170,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="Email" />
+                        android:text="@string/email_address" />
 
                     <EditText
                         android:id="@+id/email"
@@ -191,7 +192,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="center"
-                        android:text="Telegram chat id" />
+                        android:text="@string/telegram_chat_id" />
 
                     <EditText
                         android:id="@+id/telegramId"
@@ -202,6 +203,21 @@
                         android:maxLength="16"
                         android:maxLines="1"/>
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="15dp">
+
+                    <TextView
+                        android:text="@string/telegramLink"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="left"/>
+                </LinearLayout>
+
 
             </net.gmsworld.devicelocator.Views.LDCard>
 
@@ -289,7 +305,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
-                            android:text="Security pin"/>
+                            android:text="@string/security_pin"/>
 
                         <EditText
                             android:id="@+id/token"
