@@ -299,6 +299,7 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
         double[][] coordinates = new double[routeSize][2];
         Log.d(TAG, "Creating route geojson containing " + routeSize + " points");
         long routeTime = -1L;
+        float routeDistance = 0L;
         for (int i=0;i<routeSize;i++) {
             String coordsStr = routePoints.get(i);
             //Log.d(TAG, "Parsing: " + coordsStr);
@@ -314,10 +315,22 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
                 routeTime = Long.parseLong(coords[2]) - routeTime;
             }
 
+            if (i > 0) {
+                float dist[] = new float[1];
+                Location.distanceBetween(coordinates[i][0], coordinates[i][1], coordinates[i-1][0], coordinates[i-1][1], dist);
+                if (dist[0] > 0) {
+                    routeDistance += dist[0];
+                }
+            }
+
         }
 
         if (routeTime > 0) {
             description += ", time: " + routeTime + " ms.";
+        }
+
+        if (routeDistance > 0) {
+            description += ", distance: " + routeDistance + " meters";
         }
 
         p.description = description;
