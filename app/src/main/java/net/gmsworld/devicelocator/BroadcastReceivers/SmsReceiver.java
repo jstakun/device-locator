@@ -216,13 +216,6 @@ public class SmsReceiver extends BroadcastReceiver {
             routeTracingService.putExtra("phoneNumber", sender);
             context.startService(routeTracingService);
 
-            //Intent newIntent = new Intent(context, SmsSenderService.class);
-            //newIntent.putExtra("phoneNumber", sender);
-            //newIntent.putExtra("command", ROUTE_COMMAND);
-            //newIntent.putExtra("title", title);
-            //newIntent.putExtra("size", GmsLocationManager.getInstance().getRouteSize());
-            //context.startService(newIntent);
-
             return true;
         } else {
             return false;

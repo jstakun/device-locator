@@ -171,7 +171,7 @@ public class RouteTrackingService extends Service {
 
         //NotificationUtils.cancel(this, NOTIFICATION_ID);
         stopForeground(true);
-        
+
         if (this.mWakeLock != null)
         {
             this.mWakeLock.release();
