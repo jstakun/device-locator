@@ -10,4 +10,6 @@ public class Properties {
     public String username = "devicelocator";
     public long uploadDate;
     public long creationDate;
+    public float distance;
+    public long time;
 }

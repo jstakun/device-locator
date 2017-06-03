@@ -327,10 +327,12 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
 
         if (routeTime > 0) {
             description += ", time: " + routeTime + " ms.";
+            p.time = routeTime;
         }
 
         if (routeDistance > 0) {
             description += ", distance: " + routeDistance + " meters";
+            p.distance = routeDistance;
         }
 
         p.description = description;
