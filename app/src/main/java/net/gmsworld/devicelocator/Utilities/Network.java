@@ -29,7 +29,7 @@ public class Network {
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
     }
 
-    protected static void get(final String urlString, final OnGetFinishListener onGetFinishListener) {
+    public static void get(final String urlString, final OnGetFinishListener onGetFinishListener) {
         Thread thread = new Thread() {
             @Override
             public void run() {

@@ -16,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
+import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
@@ -33,7 +34,6 @@ import java.util.Map;
 public class Messenger {
 
     private static final String TAG = Messenger.class.getSimpleName();
-    private static final String GMS_TOKEN_KEY = "gmsToken";
 
     private Network.OnGetFinishListener telegramNotifier = new Network.OnGetFinishListener() {
         @Override
@@ -58,7 +58,7 @@ public class Messenger {
     public static void sendEmail(final Context context, final String email, final String message, final String title, final int retryCount) {
         if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message) || StringUtils.isNotEmpty(title))) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(GMS_TOKEN_KEY, "");
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendEmail(context, email, message, title, tokenStr, 1);
             } else {
@@ -70,9 +70,9 @@ public class Messenger {
                         if (responseCode == 200) {
                             JsonObject token = new JsonParser().parse(results).getAsJsonObject();
                             SharedPreferences.Editor editor = settings.edit();
-                            String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
+                            String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
                             Log.d(TAG, "Received following token: " + token);
-                            editor.putString(GMS_TOKEN_KEY, tokenStr);
+                            editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
                             editor.commit();
                             sendEmail(context, email, message, title, tokenStr, 1);
                         } else if (responseCode == 500 && retryCount > 0) {
@@ -87,7 +87,7 @@ public class Messenger {
     public static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount) {
         if (StringUtils.isNumeric(telegramId)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(GMS_TOKEN_KEY, "");
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendTelegram(context, telegramId, message, tokenStr, 1);
             } else {
@@ -99,9 +99,9 @@ public class Messenger {
                         if (responseCode == 200) {
                             JsonObject token = new JsonParser().parse(results).getAsJsonObject();
                             SharedPreferences.Editor editor = settings.edit();
-                            String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
+                            String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
                             Log.d(TAG, "Received following token: " + token);
-                            editor.putString(GMS_TOKEN_KEY, tokenStr);
+                            editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
                             editor.commit();
                             sendTelegram(context, telegramId, message, tokenStr, 1);
                         } else if (responseCode == 500 && retryCount > 0) {

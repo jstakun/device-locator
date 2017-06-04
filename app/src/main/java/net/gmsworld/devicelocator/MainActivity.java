@@ -53,7 +53,6 @@ import net.gmsworld.devicelocator.Utilities.Permissions;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -63,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int SEND_LOCATION_INTENT = 1;
     //private static final int MOTION_DETECTOR_INTENT = 2;
     private static final int SELECT_CONTACT_INTENT = 3;
+
+    private static final int SHARE_ROUTE_MESSAGE = 1;
 
     private static final int MAX_RADIUS = 10000; //meters
 
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         updateUI();
         toggleBroadcastReceiver(); //set broadcast receiver for sms
         scrollTop();
-        loadingHandler = new LoadingHandler();
+        loadingHandler = new UIHandler();
         mMessenger = new Messenger(loadingHandler);
         if (motionDetectorRunning) {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, false);
@@ -415,17 +416,8 @@ public class MainActivity extends AppCompatActivity {
                     int routeSize = GmsLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", -1, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
-                            if (responseCode == 200) {
-                                String showRouteUrl = MainActivity.this.getResources().getString(R.string.showRouteUrl) + "/" + title;
-                                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                                ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
-                                clipboard.setPrimaryClip(urlClip);
-                                Toast.makeText(getApplicationContext(), "Route has been uploaded to server. In a moment you should see it in web browser window. Route map url has been as well saved to clipboard.", Toast.LENGTH_LONG).show();
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
-                                startActivity(browserIntent);
-                            } else {
-                                Toast.makeText(getApplicationContext(), "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
-                            }
+                            Message message = loadingHandler.obtainMessage(SHARE_ROUTE_MESSAGE, responseCode, 0, title);
+                            message.sendToTarget();
                         }
                     });
                     if (routeSize <= 1) {
@@ -730,13 +722,25 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
-    private static class LoadingHandler extends Handler {
+    private class UIHandler extends Handler {
 
         @Override
         public void handleMessage(Message msg) {
-            //MainActivity.this.launchSmsService();
-            //Toast.makeText(context.get(), "Your device has moved more that accepted radius!", Toast.LENGTH_SHORT).show();
-            Log.d(TAG, "Device has moved more that accepted radius!");
+            if (msg.what == SHARE_ROUTE_MESSAGE) {
+                int responseCode = msg.arg1;
+                String title = (String)msg.obj;
+                if (responseCode == 200) {
+                    String showRouteUrl = MainActivity.this.getResources().getString(R.string.showRouteUrl) + "/" + title;
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
+                    clipboard.setPrimaryClip(urlClip);
+                    Toast.makeText(getApplicationContext(), "Route has been uploaded to server. In a moment you should see it in web browser window. Route map url has been as well saved to clipboard.", Toast.LENGTH_LONG).show();
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
+                    startActivity(browserIntent);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 }

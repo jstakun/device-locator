@@ -8,7 +8,7 @@ android {
         applicationId "net.gmsworld.devicelocator"
         minSdkVersion 16
         targetSdkVersion 24
-        versionCode 7
+        versionCode 10
         versionName "0.1"
     }
     buildTypes {
@@ -34,5 +34,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:10.2.4'
     compile 'com.google.code.gson:gson:2.7'
     compile 'org.apache.commons:commons-lang3:3.5'
-    compile 'ch.acra:acra:4.9.2'
+    compile 'ch.acra:acra:4.9.1'
 }

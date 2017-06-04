@@ -2,4 +2,5 @@
 <resources>
     <string name="routeProviderUrl">http://www.gms-world.net/routeProvider</string>
     <string name="showRouteUrl">http://www.gms-world.net/showRoute</string>
+    <string name="crashReportUrl">https://www.gms-world.net/s/crashReport</string>
 </resources>
