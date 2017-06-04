@@ -215,9 +215,12 @@ public class MainActivity extends AppCompatActivity {
         initContactButton();
         initTokenInput();
         initGpsRadioGroup();
-        TextView mLink = (TextView) findViewById(R.id.docsLink);
-        mLink.setMovementMethod(LinkMovementMethod.getInstance());
-        mLink.setText(Html.fromHtml(getResources().getString(R.string.docsLink)));
+        TextView commandLink = (TextView) findViewById(R.id.docsLink);
+        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
+        commandLink.setText(Html.fromHtml(getResources().getString(R.string.docsLink)));
+        TextView telegramLink = (TextView) findViewById(R.id.telegramLink);
+        telegramLink.setMovementMethod(LinkMovementMethod.getInstance());
+        telegramLink.setText(Html.fromHtml(getResources().getString(R.string.telegramLink)));
     }
 
     private void initKeywordInput() {

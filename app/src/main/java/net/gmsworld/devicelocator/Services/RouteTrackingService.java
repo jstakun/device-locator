@@ -233,7 +233,7 @@ public class RouteTrackingService extends Service {
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber);
                             }
                             String message = "New location: " + location.getLatitude() + "," + location.getLongitude() +
-                                             " in distance of " + distance + " meters with accuracy " + location.getAccuracy() + " m." +
+                                             " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m." +
                                              "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) + " p." +
                                              "\nhttps://maps.google.com/maps?q=" + location.getLatitude() + "," + location.getLongitude();
 

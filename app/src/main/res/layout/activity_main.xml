@@ -212,7 +212,7 @@
                     android:paddingTop="15dp">
 
                     <TextView
-                        android:text="@string/telegramLink"
+                        android:id="@+id/telegramLink"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:gravity="left"/>
