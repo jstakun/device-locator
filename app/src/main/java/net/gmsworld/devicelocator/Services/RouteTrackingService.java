@@ -17,6 +17,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Utilities.GmsLocationManager;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
@@ -185,9 +186,24 @@ public class RouteTrackingService extends Service {
         editor.commit();
     }
 
-    private void shareRoute(String title, String phoneNumber) {
+    private void shareRoute(final String title, final String phoneNumber) {
         Log.d(TAG, "shareRoute()");
-        GmsLocationManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime, true);
+        GmsLocationManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime, true, new Network.OnGetFinishListener() {
+            @Override
+            public void onGetFinish(String results, int responseCode, String url) {
+                Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                final Intent newIntent = new Intent(RouteTrackingService.this, SmsSenderService.class);
+                newIntent.putExtra("phoneNumber", phoneNumber);
+                newIntent.putExtra("command", SmsReceiver.ROUTE_COMMAND);
+                newIntent.putExtra("title", title);
+                if (responseCode == 200) {
+                    newIntent.putExtra("size", 2); //we know only size > 1
+                } else {
+                    newIntent.putExtra("size", -1);
+                }
+                RouteTrackingService.this.startService(newIntent);
+            }
+        });
     }
 
     private class IncomingHandler extends Handler {

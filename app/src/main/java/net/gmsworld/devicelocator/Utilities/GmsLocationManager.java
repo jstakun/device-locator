@@ -231,7 +231,7 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
         this.radius = radius;
     }
 
-    public int uploadRouteToServer(final Context context, final String title, final String phoneNumber, final long creationDate, final boolean smsNotify) {
+    public int uploadRouteToServer(final Context context, final String title, final String phoneNumber, final long creationDate, final boolean smsNotify, Network.OnGetFinishListener onFinishListener) {
         List<String> route = Files.readFileByLinesFromContextDir(ROUTE_FILE, context);
         final int size = route.size();
         final Intent newIntent = new Intent(context, SmsSenderService.class);
@@ -246,20 +246,7 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
                 String content = routeToGeoJson(route, title, desc, creationDate);
                 String url = context.getResources().getString(R.string.routeProviderUrl);
                 //Log.d(TAG, "Uploading route " + content);
-                Network.post(url, "route=" + content, null, new Network.OnGetFinishListener() {
-                    @Override
-                    public void onGetFinish(String results, int responseCode, String url) {
-                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                        if (responseCode == 200) {
-                            newIntent.putExtra("size", size);
-                        } else {
-                            newIntent.putExtra("size", -1);
-                        }
-                        if (smsNotify) {
-                            context.startService(newIntent);
-                        }
-                    }
-                });
+                Network.post(url, "route=" + content, null, onFinishListener);
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
                 if (smsNotify) {

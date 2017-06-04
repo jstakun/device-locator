@@ -115,7 +115,7 @@ public class Messenger {
 
     private static void sendTelegram(final Context context, final String telegramId, final String message, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put("X-GMS-Token", tokenStr);
+        headers.put("Authorization", "Bearer " + tokenStr);
         headers.put("X-GMS-AppId", "2");
         headers.put("X-GMS-Scope", "dl");
 
@@ -139,7 +139,7 @@ public class Messenger {
 
     private static void sendEmail(final Context context, final String email, final String message, final String title, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<String, String>();
-        headers.put("X-GMS-Token", tokenStr);
+        headers.put("Authorization", "Bearer " + tokenStr);
         headers.put("X-GMS-AppId", "2");
         headers.put("X-GMS-Scope", "dl");
 

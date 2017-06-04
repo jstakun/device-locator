@@ -408,19 +408,25 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (Files.countLinesFromContextDir(GmsLocationManager.ROUTE_FILE, MainActivity.this) > 1) {
-                    String title = "devicelocatorroute_" + Network.getDeviceId(MainActivity.this) + "_" + System.currentTimeMillis();
-                    int routeSize = GmsLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", -1, false);
-                    if (routeSize > 1) {
-                        String showRouteUrl = MainActivity.this.getResources().getString(R.string.showRouteUrl) + "/" + title;
-                        //ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                        //ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
-                        //clipboard.setPrimaryClip(urlClip);
-                        //Toast.makeText(getApplicationContext(), "Route has been uploaded to server and link has been copied to clipboard", Toast.LENGTH_LONG).show();
-                        Toast.makeText(getApplicationContext(), "Route has been uploaded to server. In a moment you should see it in web browser window.", Toast.LENGTH_LONG).show();
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
-                        startActivity(browserIntent);
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
+                    final String title = "devicelocatorroute_" + Network.getDeviceId(MainActivity.this) + "_" + System.currentTimeMillis();
+                    int routeSize = GmsLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", -1, false, new Network.OnGetFinishListener() {
+                        @Override
+                        public void onGetFinish(String result, int responseCode, String url) {
+                            if (responseCode == 200) {
+                                String showRouteUrl = MainActivity.this.getResources().getString(R.string.showRouteUrl) + "/" + title;
+                                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
+                                clipboard.setPrimaryClip(urlClip);
+                                Toast.makeText(getApplicationContext(), "Route has been uploaded to server. In a moment you should see it in web browser window. Route map url has been as well saved to clipboard.", Toast.LENGTH_LONG).show();
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
+                                startActivity(browserIntent);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+                    if (routeSize <= 1) {
+                        Toast.makeText(getApplicationContext(), "No route is saved yet. Please make sure device location tracking is started and try again after some time.", Toast.LENGTH_LONG).show();
                     }
                 } else {
                     Toast.makeText(getApplicationContext(), "No route is saved yet. Please make sure device location tracking is started and try again after some time.", Toast.LENGTH_LONG).show();
