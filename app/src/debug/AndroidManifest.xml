@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="net.gmsworld.devicelocator"
-    android:versionCode="7"
+    android:versionCode="10"
     android:versionName="0.1">
-
-    <application>
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBT36tmLjf0azRAwa-thOfoQ6LWQzWm3xc" />
-    </application>
 </manifest>

@@ -53,6 +53,7 @@ import net.gmsworld.devicelocator.Utilities.Permissions;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -416,6 +417,7 @@ public class MainActivity extends AppCompatActivity {
                     int routeSize = GmsLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", -1, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
+                            Log.d(TAG, "Received following response code: "+ responseCode + " from url " + url);
                             Message message = loadingHandler.obtainMessage(SHARE_ROUTE_MESSAGE, responseCode, 0, title);
                             message.sendToTarget();
                         }
@@ -734,9 +736,19 @@ public class MainActivity extends AppCompatActivity {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
                     clipboard.setPrimaryClip(urlClip);
-                    Toast.makeText(getApplicationContext(), "Route has been uploaded to server. In a moment you should see it in web browser window. Route map url has been as well saved to clipboard.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Route has been uploaded to server. Route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
                     startActivity(browserIntent);
+                    String message = "Check out your route at " + showRouteUrl;
+                    if (StringUtils.isNotEmpty(MainActivity.this.phoneNumber)) {
+                        net.gmsworld.devicelocator.Utilities.Messenger.sendSMS(MainActivity.this, MainActivity.this.phoneNumber, message);
+                    }
+                    if (StringUtils.isNotEmpty(MainActivity.this.email)) {
+                        net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(MainActivity.this, MainActivity.this.email, message, "Message from Device Locator", 1);
+                    }
+                    if (StringUtils.isNotEmpty(MainActivity.this.telegramId)) {
+                        net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(MainActivity.this, MainActivity.this.telegramId, message, 1);
+                    }
                 } else {
                     Toast.makeText(getApplicationContext(), "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
                 }
