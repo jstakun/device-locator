@@ -28,6 +28,7 @@ import android.text.Html;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -313,7 +314,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView emailInput = (TextView) this.findViewById(R.id.email);
         emailInput.setText(email);
 
-        emailInput.addTextChangedListener(new TextWatcher() {
+        /*emailInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -321,17 +322,32 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                email = emailInput.getText().toString();
-                saveData();
-                //update route tracking service if running
-                if (motionDetectorRunning) {
-                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
-                }
+
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
+            }
+        });*/
 
+        emailInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus) {
+                    String newEmailAddress = emailInput.getText().toString();
+                    if ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress)) {
+                        Log.d(TAG, "Setting new email address: " + newEmailAddress);
+                        email = newEmailAddress;
+                        saveData();
+                        //update route tracking service if running
+                        if (motionDetectorRunning) {
+                            RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                        }
+                    } else if (StringUtils.isNotEmpty(newEmailAddress)) {
+                        Toast.makeText(getApplicationContext(), "Make sure to specify valid email address!", Toast.LENGTH_SHORT).show();
+                        emailInput.setText("");
+                    }
+                }
             }
         });
     }
@@ -340,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView telegramInput = (TextView) this.findViewById(R.id.telegramId);
         telegramInput.setText(telegramId);
 
-        telegramInput.addTextChangedListener(new TextWatcher() {
+        /*telegramInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -348,17 +364,32 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                telegramId = telegramInput.getText().toString();
-                saveData();
-                //update route tracking service if running
-                if (motionDetectorRunning) {
-                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
-                }
+
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
+            }
+        });*/
 
+        telegramInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    String newTelegramId = telegramInput.getText().toString();
+                    if (StringUtils.isNumeric(newTelegramId)) {
+                        Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
+                        telegramId = newTelegramId;
+                        saveData();
+                        //update route tracking service if running
+                        if (motionDetectorRunning) {
+                            RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                        }
+                    } else if (StringUtils.isNotEmpty(newTelegramId)) {
+                        Toast.makeText(getApplicationContext(), "Make sure to specify valid Telegram chat id!", Toast.LENGTH_SHORT).show();
+                        telegramInput.setText("");
+                    }
+                }
             }
         });
     }
@@ -367,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView phoneNumberInput = (TextView) this.findViewById(R.id.phoneNumber);
         phoneNumberInput.setText(this.phoneNumber);
 
-        phoneNumberInput.addTextChangedListener(new TextWatcher() {
+        /*phoneNumberInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -375,13 +406,31 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                phoneNumber = phoneNumberInput.getText().toString();
-                saveData();
+
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
+            }
+        });*/
 
+        phoneNumberInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    String newPhoneNumber = phoneNumberInput.getText().toString();
+                    //if (StringUtils.isNotEmpty(newPhoneNumber)) {
+                        Log.d(TAG, "Setting new phone number: " + newPhoneNumber);
+                        phoneNumber = newPhoneNumber;
+                        saveData();
+                        if (motionDetectorRunning) {
+                            RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                        }
+                    //} else {
+                    //    Toast.makeText(getApplicationContext(), "Make sure to specify valid phone number!", Toast.LENGTH_SHORT).show();
+                    //    phoneNumberInput.setText("");
+                    //}
+                }
             }
         });
     }

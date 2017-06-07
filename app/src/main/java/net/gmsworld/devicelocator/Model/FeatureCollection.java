@@ -8,4 +8,5 @@ public class FeatureCollection {
     public String type =  "FeatureCollection";
     public String _id;
     public Feature[] features;
+    public long creationDate;
 }

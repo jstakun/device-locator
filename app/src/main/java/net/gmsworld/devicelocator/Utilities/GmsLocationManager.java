@@ -269,6 +269,7 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
 
         FeatureCollection fc = new FeatureCollection();
         fc._id = filename;
+        fc.creationDate = System.currentTimeMillis();
 
         Feature[] f = {new Feature()};
         fc.features = f;

@@ -2,7 +2,7 @@
 
 2. Send notification to telegram - done
 
-2.1 Send notification to messanger, whatsapp - rfe
+2.1 Send notification to messanger, whatsapp, slack - rfe
 
 3. Send notification via email - done
 
@@ -10,7 +10,7 @@
 
 5. Add button to pick contact next to phoneNumber edittext - done
 
-6. User email address and telegram chat id white list - TODO
+6. Notification emails and telegram chat id white lists - TODO
 
 7. Retry failed message delivery - done
 
