@@ -10,7 +10,7 @@
 
 5. Add button to pick contact next to phoneNumber edittext - done
 
-6. Notification emails and telegram chat id white lists - TODO
+6. Notification emails and telegram chat id white lists - wip
 
 7. Retry failed message delivery - done
 
@@ -26,7 +26,7 @@
 
 13. Add battery level to notification - done
 
-14. All Network communication via gms-world (aws ses, telegram bot) - done
+14. All Network communication via gms-world - done
 
 15. Create and use mail device-locator@gms-world.net - done
 
