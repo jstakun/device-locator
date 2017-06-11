@@ -850,7 +850,7 @@ public class MainActivity extends AppCompatActivity {
         headers.put("X-GMS-Scope", "dl");
 
         try {
-            String queryString = "type=register_m&email=" + email;
+            String queryString = "type=register_m&email=" + email + "&user=" + Network.getDeviceId(context);
 
             Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
