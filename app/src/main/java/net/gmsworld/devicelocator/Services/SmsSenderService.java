@@ -27,7 +27,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private Context context = null;
     private String phoneNumber = null;
 
-    //private LDPlace place = null;
     private boolean keywordReceivedSms = false;
     private boolean gpsSms = false;
     private boolean googleMapsSms = false;
@@ -173,10 +172,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         googleMapsSms = settings.getBoolean("settings_google_sms", false);
         //networkSms = settings.getBoolean("settings_network_sms", false);
         speedType = Integer.parseInt(settings.getString("settings_kmh_or_mph", "0"));
-
-        //String json = settings.getString("place", "");
-        //Gson gson = new Gson();
-        //this.place = gson.fromJson(json, LDPlace.class);
     }
 
     @Override

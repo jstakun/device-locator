@@ -38,16 +38,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlaceSelectionListener;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
-import net.gmsworld.devicelocator.Fragments.LDPlaceAutocompleteFragment;
-import net.gmsworld.devicelocator.Model.LDPlace;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.Files;
@@ -77,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Boolean running = null;
     private String keyword = null;
-    private LDPlace place = null;
 
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
     private boolean motionDetectorRunning = false;
@@ -211,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initApp() {
-        initDestinationPlace();
         initRunningButton();
         initSendLocationButton();
         initShareRouteButton();
@@ -647,35 +639,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void initDestinationPlace() {
-        final LDPlaceAutocompleteFragment destination = (LDPlaceAutocompleteFragment)
-                getFragmentManager().findFragmentById(R.id.destination_autocomplete);
-
-        destination.setHint(getResources().getString(R.string.destination));
-        destination.setText((this.place == null) ? "" : this.place.getName());
-
-        destination.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                MainActivity.this.setPlace(place);
-            }
-
-            @Override
-            public void onError(Status status) {
-                MainActivity.this.setPlace(null);
-                Toast.makeText(getApplicationContext(), getResources().getString(R.string.destination_error), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        destination.setOnPlaceClearListener(new LDPlaceAutocompleteFragment.PlaceClearListener() {
-            @Override
-            public void cleared() {
-                MainActivity.this.setPlace(null);
-            }
-        });
-    }
-
-
     private void saveData() {
         this.keyword = ((TextView) this.findViewById(R.id.keyword)).getText() + "";
         try {
@@ -694,9 +657,6 @@ public class MainActivity extends AppCompatActivity {
         editor.putString("email", email);
         editor.putString("telegramId", telegramId);
 
-        Gson gson = new Gson();
-        editor.putString("place", gson.toJson(place, LDPlace.class));
-
         editor.commit();
     }
 
@@ -714,20 +674,6 @@ public class MainActivity extends AppCompatActivity {
         this.phoneNumber = settings.getString("phoneNumber", "");
         this.email = settings.getString("email", "");
         this.telegramId = settings.getString("telegramId", "");
-
-        String json = settings.getString("place", "");
-        Gson gson = new Gson();
-        this.place = gson.fromJson(json, LDPlace.class);
-    }
-
-    private void setPlace(Place place) {
-        if (place == null) {
-            this.place = null;
-        } else {
-            this.place = new LDPlace(place.getName() + "", place.getId(), place.getLatLng().latitude, place.getLatLng().longitude);
-        }
-
-        this.saveData();
     }
 
     protected void setupToolbar() {
