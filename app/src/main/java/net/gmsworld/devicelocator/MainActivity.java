@@ -350,7 +350,7 @@ public class MainActivity extends AppCompatActivity {
                             RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
                         }
 
-                        Toast.makeText(getApplicationContext(), "Soon you'll receive verification instruction to your email", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
                         sendEmailRegistrationRequest(MainActivity.this, email, 1);
                     } else {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid email address!", Toast.LENGTH_SHORT).show();
@@ -396,7 +396,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
-                        Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your chat", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your chat", Toast.LENGTH_LONG).show();
                     } else if (StringUtils.isNotEmpty(newTelegramId)) {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid Telegram chat id!", Toast.LENGTH_SHORT).show();
                         telegramInput.setText("");
