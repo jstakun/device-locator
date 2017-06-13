@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,12 +30,15 @@ import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int MAX_RADIUS = 10000; //meters
 
     private Boolean running = null;
-    private String keyword = null;
 
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
     private boolean motionDetectorRunning = false;
@@ -86,14 +89,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate()");
         Permissions.checkAndRequestPermissions(this); //check marshmallow permissions
         setContentView(R.layout.activity_main);
         restoreSavedData();
-        setupToolbar();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
+        if (isTrackerShown) {
+            setupToolbar(R.id.trackerToolbar);
+            findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
+            findViewById(R.id.smsSettings).setVisibility(View.GONE);
+        } else {
+            setupToolbar(R.id.smsToolbar);
+            findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
+            findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+        }
         initApp();
         updateUI();
         toggleBroadcastReceiver(); //set broadcast receiver for sms
-        scrollTop();
+        //scrollTop();
         loadingHandler = new UIHandler();
         mMessenger = new Messenger(loadingHandler);
         if (motionDetectorRunning) {
@@ -104,19 +118,82 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "MainActivity onDestroy()");
+        Log.d(TAG, "onDestroy()");
         RouteTrackingServiceUtils.unbindRouteTrackingService(this, mConnection, isTrackingServiceBound);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putBoolean("isTrackerShown", findViewById(R.id.trackerSettings).isShown());
+        editor.commit();
     }
 
-    private void scrollTop() {
-        final ScrollView scrollView = (ScrollView) this.findViewById(R.id.scrollview);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            phoneNumber = getNumber(data);
+            initPhoneNumberInput();
+            if (phoneNumber != null) {
+                if (requestCode == SEND_LOCATION_INTENT) {
+                    launchService();
+                }
+            } else {
+                Toast.makeText(getApplicationContext(), "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.sms:
+                findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
+                findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+                return true;
+            case R.id.tracker:
+                findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
+                findViewById(R.id.smsSettings).setVisibility(View.GONE);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu (Menu menu) {
+        if (findViewById(R.id.smsSettings).isShown()) {
+            menu.findItem(R.id.sms).setVisible(false);
+            setupToolbar(R.id.trackerToolbar);
+        }
+        if (findViewById(R.id.trackerSettings).isShown()) {
+            menu.findItem(R.id.tracker).setVisible(false);
+            setupToolbar(R.id.smsToolbar);
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onNewIntent (Intent intent) {
+        //show tracker view
+        Log.d(TAG, "onNewIntent()");
+        findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
+        findViewById(R.id.smsSettings).setVisibility(View.GONE);
+    }
+
+    /*private void scrollTop() {
+        final ScrollView scrollView = (ScrollView) this.findViewById(R.id.scrollview);
         scrollView.post(new Runnable() {
             public void run() {
                 scrollView.scrollTo(0, 0);
             }
         });
-    }
+    }*/
 
     private void clearFocus() {
         View current = getCurrentFocus();
@@ -138,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toggleRunning() {
-        String currentKeyword = ((TextView) this.findViewById(R.id.keyword)).getText() + "";
+        //String currentKeyword = ((TextView) this.findViewById(R.id.keyword)).getText() + "";
         if (!this.running && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
             Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
             Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
@@ -207,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
         initRunningButton();
         initSendLocationButton();
         initShareRouteButton();
-        initKeywordInput();
+        //initKeywordInput();
         initRadiusInput();
         initMotionDetectorButton();
         initPhoneNumberInput();
@@ -224,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
         telegramLink.setText(Html.fromHtml(getResources().getString(R.string.telegramLink)));
     }
 
-    private void initKeywordInput() {
+    /*private void initKeywordInput() {
         final TextView keywordInput = (TextView) this.findViewById(R.id.keyword);
         keywordInput.setText(this.keyword);
 
@@ -246,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-    }
+    }*/
 
     private void initTokenInput() {
         final TextView tokenInput = (TextView) this.findViewById(R.id.token);
@@ -453,11 +530,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void stop() {
-        if (this.running) {
-            this.toggleRunning();
-        }
-    }
+    //private void stop() {
+    //    if (this.running) {
+    //        this.toggleRunning();
+    //    }
+    //}
 
     private void initShareRouteButton() {
         Button shareRouteButton = (Button) this.findViewById(R.id.route_button);
@@ -515,24 +592,6 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.clearFocus();
             }
         });
-    }
-
-    /* read the contact from the contact picker */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
-            phoneNumber = getNumber(data);
-            initPhoneNumberInput();
-            if (phoneNumber != null) {
-                if (requestCode == SEND_LOCATION_INTENT) {
-                    launchService();
-                } //else if (requestCode == MOTION_DETECTOR_INTENT) {
-                    //launchMotionDetectorService();
-                //}
-            } else {
-                Toast.makeText(getApplicationContext(), "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
-            }
-        }
     }
 
     private String getNumber(Intent data) {
@@ -621,7 +680,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initContactButton() {
-        Button contactButton = (Button) this.findViewById(R.id.contact_button);
+        ImageButton contactButton = (ImageButton) this.findViewById(R.id.contact_button);
 
         contactButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -640,7 +699,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveData() {
-        this.keyword = ((TextView) this.findViewById(R.id.keyword)).getText() + "";
+        //this.keyword = ((TextView) this.findViewById(R.id.keyword)).getText() + "";
         try {
             this.radius = Integer.parseInt(((TextView) this.findViewById(R.id.radius)).getText() + "");
         } catch (Exception e) {
@@ -649,7 +708,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("running", this.running);
-        editor.putString("keyword", this.keyword);
+        //editor.putString("keyword", this.keyword);
         editor.putString("token", token);
         editor.putBoolean("motionDetectorRunning" , this.motionDetectorRunning);
         editor.putInt("radius" , this.radius);
@@ -666,7 +725,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         this.running = settings.getBoolean("running", false);
-        this.keyword = settings.getString("keyword", "");
+        //this.keyword = settings.getString("keyword", "");
         this.token = settings.getString("token", RandomStringUtils.random(4, false, true));
 
         this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
@@ -676,8 +735,8 @@ public class MainActivity extends AppCompatActivity {
         this.telegramId = settings.getString("telegramId", "");
     }
 
-    protected void setupToolbar() {
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    protected void setupToolbar(int toolbarId) {
+        final Toolbar toolbar = (Toolbar) findViewById(toolbarId);
         setSupportActionBar(toolbar);
     }
 

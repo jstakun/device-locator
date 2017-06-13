@@ -15,7 +15,8 @@
         android:name="DeviceLocatorApp">
         <activity
             android:name="net.gmsworld.devicelocator.MainActivity"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
