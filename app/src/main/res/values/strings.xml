@@ -57,7 +57,7 @@
     <string name="docsLink">Check all available SMS commands &lt;a href="http://www.gms-world.net/dl">here&lt;a></string>
     <string name="Crash.error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
     <string name="security_pin">Security PIN</string>
-    <string name="motion_radius">Radius limit of the device motion in meters</string>
+    <string name="motion_radius">Notify me when the device moves outside the area in meters</string>
     <string name="gps_accuracy">GPS Accuracy</string>
     <string name="gps_balanced">Balanced</string>
     <string name="gps_high">High</string>
