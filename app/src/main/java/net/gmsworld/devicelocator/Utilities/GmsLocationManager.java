@@ -268,15 +268,14 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
         Gson gson = new Gson();
 
         FeatureCollection fc = new FeatureCollection();
-        fc._id = filename;
-        fc.creationDate = System.currentTimeMillis();
+        fc.name = filename;
 
         Feature[] f = {new Feature()};
         fc.features = f;
 
         Properties p = new Properties();
         p.name = filename;
-        p.username = "devicelocator";
+        p.username = "device-locator";
         p.creationDate = creationDate;
 
         f[0].properties = p;

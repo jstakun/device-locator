@@ -543,8 +543,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (Files.countLinesFromContextDir(GmsLocationManager.ROUTE_FILE, MainActivity.this) > 1) {
-                    final String title = "devicelocatorroute_" + Network.getDeviceId(MainActivity.this) + "_" + System.currentTimeMillis();
-                    int routeSize = GmsLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", -1, false, new Network.OnGetFinishListener() {
+                    long now = System.currentTimeMillis();
+                    final String title = "devicelocatorroute_" + Network.getDeviceId(MainActivity.this) + "_" + now;
+                    int routeSize = GmsLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", now, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: "+ responseCode + " from url " + url);
