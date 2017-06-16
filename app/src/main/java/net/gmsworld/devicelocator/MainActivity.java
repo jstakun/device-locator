@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
         toggleBroadcastReceiver();
 
         if (running) {
-            Toast.makeText(getApplicationContext(), "From now you can send remote control commands to this device", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "From now on you can send remote control sms commands to this device", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -257,13 +257,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void toogleLocationDetector() {
         if (this.motionDetectorRunning) {
-            //if (StringUtils.isEmpty(phoneNumber) && StringUtils.isEmpty(email) && StringUtils.isEmpty(telegramId)) {
             launchMotionDetectorService();
-            //} else {
-            //Intent intent = new Intent(Intent.ACTION_PICK);
-            //intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-            //startActivityForResult(intent, MOTION_DETECTOR_INTENT);
-            //}
         } else {
             saveData();
             RouteTrackingServiceUtils.stopRouteTrackingService(this, mConnection, isTrackingServiceBound);
@@ -284,7 +278,6 @@ public class MainActivity extends AppCompatActivity {
         initRunningButton();
         initSendLocationButton();
         initShareRouteButton();
-        //initKeywordInput();
         initRadiusInput();
         initMotionDetectorButton();
         initPhoneNumberInput();
@@ -299,31 +292,8 @@ public class MainActivity extends AppCompatActivity {
         TextView telegramLink = (TextView) findViewById(R.id.telegramLink);
         telegramLink.setMovementMethod(LinkMovementMethod.getInstance());
         telegramLink.setText(Html.fromHtml(getResources().getString(R.string.telegramLink)));
+        initRemoteControl();
     }
-
-    /*private void initKeywordInput() {
-        final TextView keywordInput = (TextView) this.findViewById(R.id.keyword);
-        keywordInput.setText(this.keyword);
-
-        keywordInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (keywordInput.getText().length() == 0) {
-                    MainActivity.this.stop();
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-    }*/
 
     private void initTokenInput() {
         final TextView tokenInput = (TextView) this.findViewById(R.id.token);
@@ -632,6 +602,27 @@ public class MainActivity extends AppCompatActivity {
         builder.setMessage(this.getResources().getString(R.string.are_you_sure) + " " + phoneNumber + "?");
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    private void initRemoteControl() {
+        if (!running) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            final SharedPreferences.Editor editor = settings.edit();
+            if (!settings.contains("smsDialog")) {
+                editor.putBoolean("smsDialog", true);
+                editor.commit();
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        toggleRunning();
+                    }
+                });
+                builder.setNegativeButton(R.string.no, null);
+                builder.setMessage("Do you want to enable now remote control commands via SMS in your device?");
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        }
     }
 
     private void launchSmsService() {
