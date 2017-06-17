@@ -198,25 +198,25 @@ public class Messenger {
         String text = null;
         switch (command) {
             case SmsReceiver.START_COMMAND:
-                text = "Device location tracking service has been started";
+                text = "Device location tracking service has been started.";
                 break;
             case SmsReceiver.STOP_COMMAND:
-                text = "Device location tracking service has been stopped";
+                text = "Device location tracking service has been stopped.";
                 break;
             case SmsReceiver.RESET_COMMAND:
-                text = "Device location tracking service has been reset";
+                text = "Device location tracking service has been reset.";
                 break;
             case SmsReceiver.MUTE_COMMAND:
-                text = "Device has been muted";
+                text = "Device has been muted.";
                 break;
             case SmsReceiver.NORMAL_COMMAND:
-                text = "Device has been set to normal audio settings";
+                text = "Device has been set to normal audio settings.";
                 break;
             case SmsReceiver.RADIUS_COMMAND:
                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 int radius = settings.getInt("radius", -1);
                 if (radius > 0) {
-                    text = "Device location tracking service radius has been changed to " + radius;
+                    text = "Device location tracking service radius has been changed to " + radius + " meters.";
                 } else {
                     text = "Device location tracking service radius is incorrect. Please try again.";
                 }
@@ -234,10 +234,10 @@ public class Messenger {
                 }
                 break;
             case SmsReceiver.GPS_HIGH_COMMAND:
-                text = "GPS settings as been changed to high accuracy";
+                text = "GPS settings as been changed to high accuracy.";
                 break;
             case SmsReceiver.GPS_BALANCED_COMMAND:
-                text = "GPS settings has been changed to balanced accuracy";
+                text = "GPS settings has been changed to balanced accuracy.";
                 break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
