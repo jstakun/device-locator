@@ -138,6 +138,10 @@ public class GmsLocationManager implements GoogleApiClient.ConnectionCallbacks,
 
     }
 
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
     private synchronized void buildGoogleApiClient(Context context) {
         if (mGoogleApiClient == null && context != null) {
             mGoogleApiClient = new GoogleApiClient.Builder(context)

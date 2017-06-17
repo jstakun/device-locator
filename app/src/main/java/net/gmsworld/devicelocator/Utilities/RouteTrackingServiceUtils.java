@@ -48,16 +48,12 @@ public class RouteTrackingServiceUtils {
         context.startService(routeTracingService);
     }
 
-    public static void setHighGpsAccuracy(Context context) {
-        Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-        routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_GPS_HIGH);
-        context.startService(routeTracingService);
-    }
-
-    public static void setBalancedGpsAccuracy(Context context) {
-        Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-        routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_GPS_BALANCED);
-        context.startService(routeTracingService);
+    public static void setGpsAccuracy(Context context, int command) {
+        if (GmsLocationManager.getInstance().isEnabled()) {
+            Intent routeTracingService = new Intent(context, RouteTrackingService.class);
+            routeTracingService.putExtra(RouteTrackingService.COMMAND, command);
+            context.startService(routeTracingService);
+        }
     }
 
     public static void unbindRouteTrackingService(Context context, ServiceConnection mConnection, boolean isBound) {

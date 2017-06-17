@@ -762,14 +762,14 @@ public class MainActivity extends AppCompatActivity {
                 if (checked)
                     editor.putInt("gpsAccuracy", 1);
                     if (motionDetectorRunning) {
-                        RouteTrackingServiceUtils.setHighGpsAccuracy(this);
+                        RouteTrackingServiceUtils.setGpsAccuracy(this, RouteTrackingService.COMMAND_GPS_HIGH);
                     }
                     break;
             case R.id.radio_gps_low:
                 if (checked)
                     editor.putInt("gpsAccuracy", 0);
                     if (motionDetectorRunning) {
-                        RouteTrackingServiceUtils.setBalancedGpsAccuracy(this);
+                        RouteTrackingServiceUtils.setGpsAccuracy(this, RouteTrackingService.COMMAND_GPS_BALANCED);
                     }
                     break;
         }

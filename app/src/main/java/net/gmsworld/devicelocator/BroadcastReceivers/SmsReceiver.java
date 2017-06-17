@@ -301,7 +301,7 @@ public class SmsReceiver extends BroadcastReceiver {
             SharedPreferences.Editor editor = settings.edit();
             editor.putInt("gpsAccuracy", 1);
             editor.commit();
-            RouteTrackingServiceUtils.setHighGpsAccuracy(context);
+            RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", GPS_HIGH_COMMAND);
@@ -320,7 +320,7 @@ public class SmsReceiver extends BroadcastReceiver {
             SharedPreferences.Editor editor = settings.edit();
             editor.putInt("gpsAccuracy", 0);
             editor.commit();
-            RouteTrackingServiceUtils.setBalancedGpsAccuracy(context);
+            RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_BALANCED);
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", GPS_BALANCED_COMMAND);
