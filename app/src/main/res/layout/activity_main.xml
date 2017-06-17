@@ -32,43 +32,6 @@
                 android:layout_margin="8dp"
                 ldcard:title="Remote control via SMS">
 
-                <!--FrameLayout
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone">
-
-                    <fragment
-                        android:id="@+id/destination_autocomplete"
-                        android:name="net.gmsworld.devicelocator.Fragments.LDPlaceAutocompleteFragment"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-                </FrameLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingBottom="8dp"
-                    android:paddingTop="15dp"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:text="@string/keyword" />
-
-                    <EditText
-                        android:id="@+id/keyword"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:lines="1"
-                        android:maxLength="32"
-                        android:maxLines="1" />
-                </LinearLayout-->
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -148,17 +111,38 @@
                 android:layout_margin="8dp"
                 ldcard:title="Location SMS settings">
 
-                <FrameLayout
-                    android:id="@+id/settings_preferences_framelayout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+               <CheckBox
+                    android:id="@+id/settings_detected_sms"
+                    android:text="@string/detected_message_summary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:onClick="onLocationSMSCheckboxClicked"
+                    android:paddingLeft="8dp"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="8dp"/>
 
-                    <fragment
-                        android:id="@+id/settings_preferences"
-                        android:name="net.gmsworld.devicelocator.Fragments.SettingsCardFragment"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
-                </FrameLayout>
+                <CheckBox
+                    android:id="@+id/settings_gps_sms"
+                    android:text="@string/gps_message_summary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:onClick="onLocationSMSCheckboxClicked"
+                    android:paddingLeft="8dp"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="8dp"/>
+
+                <CheckBox
+                    android:id="@+id/settings_google_sms"
+                    android:text="@string/google_message_summary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:onClick="onLocationSMSCheckboxClicked"
+                    android:paddingLeft="8dp"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="8dp"/>
 
             </net.gmsworld.devicelocator.Views.LDCard>
 

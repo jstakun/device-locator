@@ -31,6 +31,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private boolean gpsSms = false;
     private boolean googleMapsSms = false;
     //private boolean networkSms = false;
+
     private int speedType = 0;
     private String command = null;
 
@@ -167,9 +168,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private void readSettings() {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
-        keywordReceivedSms = settings.getBoolean("settings_detected_sms", false);
-        gpsSms = settings.getBoolean("settings_gps_sms", false);
-        googleMapsSms = settings.getBoolean("settings_google_sms", false);
+        keywordReceivedSms = settings.getBoolean("settings_detected_sms", true);
+        gpsSms = settings.getBoolean("settings_gps_sms", true);
+        googleMapsSms = settings.getBoolean("settings_google_sms", true);
         //networkSms = settings.getBoolean("settings_network_sms", false);
         speedType = Integer.parseInt(settings.getString("settings_kmh_or_mph", "0"));
     }

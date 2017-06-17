@@ -36,6 +36,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -194,6 +195,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }*/
+
+    public void onLocationSMSCheckboxClicked(View view) {
+        boolean checked = ((CheckBox) view).isChecked();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = settings.edit();
+
+        switch (view.getId()) {
+            case R.id.settings_detected_sms:
+                 editor.putBoolean("settings_detected_sms", checked);
+                 break;
+            case R.id.settings_gps_sms:
+                 editor.putBoolean("settings_gps_sms", checked);
+                 break;
+            case R.id.settings_google_sms:
+                 editor.putBoolean("settings_google_sms", checked);
+                 break;
+            default:
+                break;
+        }
+
+        editor.commit();
+    }
 
     private void clearFocus() {
         View current = getCurrentFocus();
@@ -712,8 +735,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void restoreSavedData() {
-        PreferenceManager.setDefaultValues(this, R.xml.settings_preferences, false);
-
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         this.running = settings.getBoolean("running", false);
