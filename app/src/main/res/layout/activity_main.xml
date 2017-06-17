@@ -84,7 +84,8 @@
                             android:inputType="number"
                             android:lines="1"
                             android:maxLength="8"
-                            android:maxLines="1"/>
+                            android:maxLines="1"
+                            android:textColor="@color/gray"/>
                     </LinearLayout>
 
                     <LinearLayout
@@ -114,6 +115,7 @@
                <CheckBox
                     android:id="@+id/settings_detected_sms"
                     android:text="@string/detected_message_summary"
+                    android:textColor="@color/gray"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
@@ -125,6 +127,7 @@
                 <CheckBox
                     android:id="@+id/settings_gps_sms"
                     android:text="@string/gps_message_summary"
+                    android:textColor="@color/gray"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
@@ -136,6 +139,7 @@
                 <CheckBox
                     android:id="@+id/settings_google_sms"
                     android:text="@string/google_message_summary"
+                    android:textColor="@color/gray"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
@@ -220,16 +224,17 @@
                         android:paddingTop="15dp">
 
                             <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:gravity="left"
-                            android:text="@string/motion_radius" />
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:gravity="left"
+                                android:text="@string/motion_radius" />
 
                             <EditText
-                            android:id="@+id/radius"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number"/>
+                                android:id="@+id/radius"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:textColor="@color/gray"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -247,21 +252,23 @@
                             android:paddingBottom="8dp"/>
 
                             <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
-                            android:layout_width="fill_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:id="@+id/gpsAccuracyGroup"
-                            android:checkedButton="@+id/radio_gps_low">
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:id="@+id/gpsAccuracyGroup"
+                                android:checkedButton="@+id/radio_gps_low">
                                 <RadioButton android:id="@+id/radio_gps_low"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/gps_balanced"
-                                android:onClick="onGpsRadioButtonClicked"/>
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/gps_balanced"
+                                    android:textColor="@color/gray"
+                                    android:onClick="onGpsRadioButtonClicked"/>
                                 <RadioButton android:id="@+id/radio_gps_high"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/gps_high"
-                                android:onClick="onGpsRadioButtonClicked"/>
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/gps_high"
+                                    android:textColor="@color/gray"
+                                    android:onClick="onGpsRadioButtonClicked"/>
                             </RadioGroup>
 
                         </LinearLayout>
@@ -311,7 +318,8 @@
                                 android:inputType="phone"
                                 android:lines="1"
                                 android:maxLength="20"
-                                android:maxLines="1" />
+                                android:maxLines="1"
+                                android:textColor="@color/gray"/>
 
                         </LinearLayout>
 
@@ -336,7 +344,8 @@
                             android:layout_height="wrap_content"
                             android:inputType="textEmailAddress"
                             android:lines="1"
-                            android:maxLines="1"/>
+                            android:maxLines="1"
+                            android:textColor="@color/gray"/>
                     </LinearLayout>
 
                     <LinearLayout
@@ -359,7 +368,8 @@
                             android:inputType="number"
                             android:lines="1"
                             android:maxLength="16"
-                            android:maxLines="1"/>
+                            android:maxLines="1"
+                            android:textColor="@color/gray"/>
                     </LinearLayout>
 
                     <LinearLayout
