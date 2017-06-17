@@ -48,7 +48,7 @@ public class SmsReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (findKeyword(context, intent)) return;
         if (findStartRouteTrackerServiceStartCommand(context, intent)) return;
-        if (findStartRouteTrackerServiceStartCommand(context, intent)) return;
+        if (findStopRouteTrackerServiceStartCommand(context, intent)) return;
         if (findResetRouteTrackerServiceStartCommand(context, intent)) return;
         if (findMuteCommand(context, intent)) return;
         if (findNormalCommand(context, intent)) return;

@@ -201,7 +201,7 @@ public class Messenger {
                 text = "Device location tracking service has been started";
                 break;
             case SmsReceiver.STOP_COMMAND:
-                text = "Device Location tracking service has been stopped";
+                text = "Device location tracking service has been stopped";
                 break;
             case SmsReceiver.RESET_COMMAND:
                 text = "Device location tracking service has been reset";

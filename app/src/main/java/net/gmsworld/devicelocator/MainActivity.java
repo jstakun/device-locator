@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
@@ -714,7 +713,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveData() {
-        //this.keyword = ((TextView) this.findViewById(R.id.keyword)).getText() + "";
         try {
             this.radius = Integer.parseInt(((TextView) this.findViewById(R.id.radius)).getText() + "");
         } catch (Exception e) {
@@ -723,7 +721,6 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("running", this.running);
-        //editor.putString("keyword", this.keyword);
         editor.putString("token", token);
         editor.putBoolean("motionDetectorRunning" , this.motionDetectorRunning);
         editor.putInt("radius" , this.radius);
