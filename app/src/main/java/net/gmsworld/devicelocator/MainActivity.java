@@ -728,13 +728,13 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     MainActivity.this.getPackageManager().getPackageInfo(appName, PackageManager.GET_ACTIVITIES);
                     intent.setPackage(appName);
-                } catch (PackageManager.NameNotFoundException e)
-                {
+                    //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
+                    MainActivity.this.startActivity(intent);
+                    Toast.makeText(getApplicationContext(), "In order to get your Chat ID please find and select Device Locator bot now.", Toast.LENGTH_LONG).show();
+                } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, appName + " not found on this device");
+                    Toast.makeText(getApplicationContext(), "This function requires installed Telegram Messenger on your device.", Toast.LENGTH_LONG).show();
                 }
-                //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
-                MainActivity.this.startActivity(intent);
-                Toast.makeText(getApplicationContext(), "In order to get your Chat ID please find and select Device Locator bot now.", Toast.LENGTH_LONG).show();
             }
         });
     }
