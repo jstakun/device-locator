@@ -306,14 +306,15 @@ public class MainActivity extends AppCompatActivity {
         initEmailInput();
         initTelegramInput();
         initContactButton();
+        initTelegramButton();
         initTokenInput();
         initGpsRadioGroup();
         TextView commandLink = (TextView) findViewById(R.id.docsLink);
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
         commandLink.setText(Html.fromHtml(getResources().getString(R.string.docsLink)));
-        TextView telegramLink = (TextView) findViewById(R.id.telegramLink);
-        telegramLink.setMovementMethod(LinkMovementMethod.getInstance());
-        telegramLink.setText(Html.fromHtml(getResources().getString(R.string.telegramLink)));
+        //TextView telegramLink = (TextView) findViewById(R.id.telegramLink);
+        //telegramLink.setMovementMethod(LinkMovementMethod.getInstance());
+        //telegramLink.setText(Html.fromHtml(getResources().getString(R.string.telegramLink)));
         initRemoteControl();
     }
 
@@ -708,6 +709,32 @@ public class MainActivity extends AppCompatActivity {
                 intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
                 startActivityForResult(intent, SELECT_CONTACT_INTENT);
                 MainActivity.this.clearFocus();
+            }
+        });
+    }
+
+    private void initTelegramButton() {
+        ImageButton telegramButton = (ImageButton) this.findViewById(R.id.telegram_button);
+        final String appName = "org.telegram.messenger";
+
+        telegramButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setData(Uri.parse("http://telegram.me/device_locator_bot"));
+                //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("tg://resolve?domain=device_locator_bot"));
+                intent.setType("text/plain");
+                intent.putExtra(android.content.Intent.EXTRA_TEXT, "/getmyid");
+                try {
+                    MainActivity.this.getPackageManager().getPackageInfo(appName, PackageManager.GET_ACTIVITIES);
+                    intent.setPackage(appName);
+                } catch (PackageManager.NameNotFoundException e)
+                {
+                    Log.w(TAG, appName + " not found on this device");
+                }
+                //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
+                MainActivity.this.startActivity(intent);
+                Toast.makeText(getApplicationContext(), "In order to get your Chat ID please find and select Device Locator bot now.", Toast.LENGTH_LONG).show();
             }
         });
     }

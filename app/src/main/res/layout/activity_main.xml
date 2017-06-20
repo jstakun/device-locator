@@ -361,18 +361,34 @@
                             android:gravity="center"
                             android:text="@string/telegram_chat_id" />
 
-                        <EditText
-                            android:id="@+id/telegramId"
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:lines="1"
-                            android:maxLength="16"
-                            android:maxLines="1"
-                            android:textColor="@color/gray"/>
+                            android:orientation="horizontal">
+
+                            <ImageButton
+                                android:id="@+id/telegram_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="8dp"
+                                android:backgroundTint="@color/colorPrimary"
+                                android:textColor="@android:color/white"
+                                android:src="@drawable/ic_contact_mail_white"/>
+
+                            <EditText
+                                android:id="@+id/telegramId"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:lines="1"
+                                android:maxLength="16"
+                                android:maxLines="1"
+                                android:textColor="@color/gray"/>
+                        </LinearLayout>
+
                     </LinearLayout>
 
-                    <LinearLayout
+                    <!--LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -384,7 +400,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="left"/>
-                    </LinearLayout>
+                    </LinearLayout-->
 
 
                 </net.gmsworld.devicelocator.Views.LDCard>
