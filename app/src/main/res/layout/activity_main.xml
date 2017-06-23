@@ -256,19 +256,22 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:id="@+id/gpsAccuracyGroup"
-                                android:checkedButton="@+id/radio_gps_low">
+                                android:checkedButton="@+id/radio_gps_high">
+
                                 <RadioButton android:id="@+id/radio_gps_low"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/gps_balanced"
                                     android:textColor="@color/gray"
                                     android:onClick="onGpsRadioButtonClicked"/>
+
                                 <RadioButton android:id="@+id/radio_gps_high"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/gps_high"
                                     android:textColor="@color/gray"
                                     android:onClick="onGpsRadioButtonClicked"/>
+
                             </RadioGroup>
 
                         </LinearLayout>

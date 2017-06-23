@@ -77,10 +77,8 @@ public class MainActivity extends AppCompatActivity {
 
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
     private boolean motionDetectorRunning = false;
-    private String phoneNumber = null;
-    private String email = null;
-    private String telegramId = null;
-    private String token = null;
+    private String phoneNumber = null, email = null, telegramId = null, token = null;
+    private String newEmailAddress, newTelegramId, newPhoneNumber;
 
     private Handler loadingHandler;
     private Messenger mMessenger;
@@ -123,6 +121,25 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("isTrackerShown", findViewById(R.id.trackerSettings).isShown());
+
+        if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
+            editor.putString("email", newEmailAddress);
+            if (StringUtils.isNotEmpty(newEmailAddress)) {
+                sendEmailRegistrationRequest(MainActivity.this, newEmailAddress, 1);
+            }
+        }
+
+        if (!StringUtils.equals(phoneNumber, newPhoneNumber) && ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || StringUtils.isEmpty(newPhoneNumber))) {
+            editor.putString("phoneNumber", newPhoneNumber);
+        }
+
+        if (!StringUtils.equals(email, newTelegramId) && StringUtils.isNumeric(newTelegramId)) {
+            editor.putString("telegramId", newTelegramId);
+            if (StringUtils.isNotEmpty(newTelegramId)) {
+                sendTelegramRegistrationRequest(MainActivity.this, newTelegramId, 1);
+            }
+        }
+
         editor.commit();
     }
 
@@ -382,7 +399,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView emailInput = (TextView) this.findViewById(R.id.email);
         emailInput.setText(email);
 
-        /*emailInput.addTextChangedListener(new TextWatcher() {
+        emailInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -390,20 +407,20 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                newEmailAddress = charSequence.toString();
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
             }
-        });*/
+        });
 
         emailInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
                 if(!hasFocus) {
-                    String newEmailAddress = emailInput.getText().toString();
-                    if ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress)) {
+                    newEmailAddress = emailInput.getText().toString();
+                    if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
                         Log.d(TAG, "Setting new email address: " + newEmailAddress);
                         email = newEmailAddress;
                         saveData();
@@ -427,7 +444,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView telegramInput = (TextView) this.findViewById(R.id.telegramId);
         telegramInput.setText(telegramId);
 
-        /*telegramInput.addTextChangedListener(new TextWatcher() {
+        telegramInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -435,20 +452,21 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                newTelegramId = charSequence.toString();
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
+
             }
-        });*/
+        });
 
         telegramInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    String newTelegramId = telegramInput.getText().toString();
-                    if (StringUtils.isNumeric(newTelegramId)) {
+                    newTelegramId = telegramInput.getText().toString();
+                    if (!StringUtils.equals(telegramId, newTelegramId) && StringUtils.isNumeric(newTelegramId)) {
                         Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
                         telegramId = newTelegramId;
                         saveData();
@@ -472,7 +490,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView phoneNumberInput = (TextView) this.findViewById(R.id.phoneNumber);
         phoneNumberInput.setText(this.phoneNumber);
 
-        /*phoneNumberInput.addTextChangedListener(new TextWatcher() {
+        phoneNumberInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -480,20 +498,20 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                newPhoneNumber = charSequence.toString();
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
             }
-        });*/
+        });
 
         phoneNumberInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    String newPhoneNumber = phoneNumberInput.getText().toString();
-                    if ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || StringUtils.isEmpty(newPhoneNumber)) {
+                    newPhoneNumber = phoneNumberInput.getText().toString();
+                    if (!StringUtils.equals(phoneNumber, newPhoneNumber) && ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || StringUtils.isEmpty(newPhoneNumber))) {
                         Log.d(TAG, "Setting new phone number: " + newPhoneNumber);
                         phoneNumber = newPhoneNumber;
                         saveData();
@@ -513,7 +531,7 @@ public class MainActivity extends AppCompatActivity {
         final RadioGroup gpsAccuracyGroup = (RadioGroup) this.findViewById(R.id.gpsAccuracyGroup);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        int gpsAccuracy = settings.getInt("gpsAccuracy", 0);
+        int gpsAccuracy = settings.getInt("gpsAccuracy", 1);
 
         if (gpsAccuracy == 1) {
             gpsAccuracyGroup.check(R.id.radio_gps_high);
@@ -910,7 +928,7 @@ public class MainActivity extends AppCompatActivity {
 
     //----------------------------- route tracking service -----------------------------------
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    private ServiceConnection mConnection = null; /*new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder service) {
@@ -928,8 +946,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
         }
-
-    };
+    };*/
 
     private class UIHandler extends Handler {
 

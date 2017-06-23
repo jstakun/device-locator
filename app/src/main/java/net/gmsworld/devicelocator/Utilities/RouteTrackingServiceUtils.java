@@ -25,7 +25,7 @@ public class RouteTrackingServiceUtils {
         routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_START);
         context.startService(routeTracingService);
         if (mConnection != null) {
-            return false; //this.bindService(routeTracingService, mConnection, Context.BIND_AUTO_CREATE);
+            return context.bindService(routeTracingService, mConnection, Context.BIND_AUTO_CREATE);
         } else {
             return false;
         }
