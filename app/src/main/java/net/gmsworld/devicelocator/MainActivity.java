@@ -431,9 +431,11 @@ public class MainActivity extends AppCompatActivity {
                             RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
                         }
 
-                        Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
-                        sendEmailRegistrationRequest(MainActivity.this, email, 1);
-                    } else {
+                        if (StringUtils.isNotEmpty(email)) {
+                            Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
+                            sendEmailRegistrationRequest(MainActivity.this, email, 1);
+                        }
+                    } else if (!StringUtils.equals(email, newEmailAddress)) {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid email address!", Toast.LENGTH_SHORT).show();
                         emailInput.setText("");
                     }
@@ -472,7 +474,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     newTelegramId = telegramInput.getText().toString();
-                    if (!StringUtils.equals(telegramId, newTelegramId) && StringUtils.isNumeric(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) {
+                    if (!StringUtils.equals(telegramId, newTelegramId) && ((StringUtils.isNumeric(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || StringUtils.isEmpty(newTelegramId))) {
                         Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
                         telegramId = newTelegramId;
                         saveData();
@@ -481,9 +483,11 @@ public class MainActivity extends AppCompatActivity {
                             RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
                         }
 
-                        sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
-                        Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your chat", Toast.LENGTH_LONG).show();
-                    } else if (StringUtils.isNotEmpty(newTelegramId)) {
+                        if (StringUtils.isNotEmpty(telegramId)) {
+                            sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
+                            Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your chat", Toast.LENGTH_LONG).show();
+                        }
+                    } else if (!StringUtils.equals(telegramId, newTelegramId)) {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid Telegram chat id!", Toast.LENGTH_SHORT).show();
                         telegramInput.setText("");
                     }
@@ -542,7 +546,7 @@ public class MainActivity extends AppCompatActivity {
                         if (motionDetectorRunning) {
                             RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
                         }
-                    } else {
+                    } else if (!StringUtils.equals(phoneNumber, newPhoneNumber)) {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid phone number!", Toast.LENGTH_SHORT).show();
                         phoneNumberInput.setText("");
                     }
