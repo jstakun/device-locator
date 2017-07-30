@@ -191,9 +191,7 @@ public class Network {
                         urlConnection.connect();
                     }
 
-                    int responseCode = urlConnection.getResponseCode();
-
-                    onGetFinishListener.onGetFinish(null, responseCode, urlString);
+                    onGetFinishListener.onGetFinish(null, urlConnection.getResponseCode(), urlString);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
                     onGetFinishListener.onGetFinish(null, -1, urlString);

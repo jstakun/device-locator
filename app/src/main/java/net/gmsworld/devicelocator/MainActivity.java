@@ -395,6 +395,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //TODO email input setup
+
     private void initEmailInput() {
         final TextView emailInput = (TextView) this.findViewById(R.id.email);
         emailInput.setText(email);
@@ -435,10 +437,14 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid email address!", Toast.LENGTH_SHORT).show();
                         emailInput.setText("");
                     }
+                } else {
+                    //TODO paste email from clipboard
                 }
             }
         });
     }
+
+    //TODO telegram input setup
 
     private void initTelegramInput() {
         final TextView telegramInput = (TextView) this.findViewById(R.id.telegramId);
@@ -466,7 +472,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     newTelegramId = telegramInput.getText().toString();
-                    if (!StringUtils.equals(telegramId, newTelegramId) && StringUtils.isNumeric(newTelegramId)) {
+                    if (!StringUtils.equals(telegramId, newTelegramId) && StringUtils.isNumeric(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) {
                         Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
                         telegramId = newTelegramId;
                         saveData();
@@ -481,10 +487,28 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid Telegram chat id!", Toast.LENGTH_SHORT).show();
                         telegramInput.setText("");
                     }
+                } else {
+                    //TODO paste telegramid from clipboard
+                    String currentText = telegramInput.getText().toString();
+                    if (currentText.isEmpty()) {
+                        try {
+                            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+                            String pasteData = item.getText().toString();
+                            if (!StringUtils.equals(pasteData, telegramId) && StringUtils.isNumeric(pasteData) && StringUtils.isNotEmpty(pasteData)) {
+                                telegramInput.setText(pasteData);
+                                Toast.makeText(getApplicationContext(), "Pasted Chat ID from clipboard!", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Failed to paste text from clipboard", e);
+                        }
+                    }
                 }
             }
         });
     }
+
+    //TODO phone number input setup
 
     private void initPhoneNumberInput() {
         final TextView phoneNumberInput = (TextView) this.findViewById(R.id.phoneNumber);
@@ -526,6 +550,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    //------------------------------------------------------------------------------------------------
 
     private void initGpsRadioGroup() {
         final RadioGroup gpsAccuracyGroup = (RadioGroup) this.findViewById(R.id.gpsAccuracyGroup);
@@ -748,7 +774,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.setPackage(appName);
                     //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
                     MainActivity.this.startActivity(intent);
-                    Toast.makeText(getApplicationContext(), "In order to get your Chat ID please find and select Device Locator bot now.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "In order to get your Chat ID please select Device Locator bot now.", Toast.LENGTH_LONG).show();
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, appName + " not found on this device");
                     Toast.makeText(getApplicationContext(), "This function requires installed Telegram Messenger on your device.", Toast.LENGTH_LONG).show();
@@ -960,7 +986,7 @@ public class MainActivity extends AppCompatActivity {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
                     clipboard.setPrimaryClip(urlClip);
-                    Toast.makeText(getApplicationContext(), "Route has been uploaded to server. Route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
                     startActivity(browserIntent);
                     String message = "Check out your route at " + showRouteUrl;
