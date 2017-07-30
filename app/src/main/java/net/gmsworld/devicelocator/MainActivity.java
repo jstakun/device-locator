@@ -13,7 +13,6 @@ import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.preference.PreferenceManager;
@@ -78,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
     private boolean motionDetectorRunning = false;
     private String phoneNumber = null, email = null, telegramId = null, token = null;
-    private String newEmailAddress, newTelegramId, newPhoneNumber;
+    private String newEmailAddress = null, newTelegramId = null, newPhoneNumber = null;
 
     private Handler loadingHandler;
     private Messenger mMessenger;
@@ -122,18 +121,21 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("isTrackerShown", findViewById(R.id.trackerSettings).isShown());
 
-        if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
+        if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || (StringUtils.isEmpty(newEmailAddress) && newEmailAddress != null))) {
+            Log.d(TAG, "New email has been set: " + newEmailAddress);
             editor.putString("email", newEmailAddress);
             if (StringUtils.isNotEmpty(newEmailAddress)) {
                 sendEmailRegistrationRequest(MainActivity.this, newEmailAddress, 1);
             }
         }
 
-        if (!StringUtils.equals(phoneNumber, newPhoneNumber) && ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || StringUtils.isEmpty(newPhoneNumber))) {
+        if (!StringUtils.equals(phoneNumber, newPhoneNumber) && ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || (StringUtils.isEmpty(newPhoneNumber) && newPhoneNumber != null))) {
+            Log.d(TAG, "New phone number has been set: " + newPhoneNumber);
             editor.putString("phoneNumber", newPhoneNumber);
         }
 
-        if (!StringUtils.equals(email, newTelegramId) && StringUtils.isNumeric(newTelegramId)) {
+        if (!StringUtils.equals(telegramId, newTelegramId) && ((StringUtils.isNumeric(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || (StringUtils.isEmpty(newTelegramId) && newTelegramId != null))) {
+            Log.d(TAG, "New telegram id has been set: " + newTelegramId);
             editor.putString("telegramId", newTelegramId);
             if (StringUtils.isNotEmpty(newTelegramId)) {
                 sendTelegramRegistrationRequest(MainActivity.this, newTelegramId, 1);
@@ -441,6 +443,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     //TODO paste email from clipboard
+                    String currentText = emailInput.getText().toString();
+                    if (currentText.isEmpty()) {
+                        try {
+                            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                            ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
+                            String pasteData = item.getText().toString();
+                            if (!StringUtils.equals(pasteData, email) && Patterns.EMAIL_ADDRESS.matcher(pasteData).matches()) {
+                                emailInput.setText(pasteData);
+                                Toast.makeText(getApplicationContext(), "Pasted email address from clipboard!", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Failed to paste text from clipboard", e);
+                        }
+                    }
                 }
             }
         });
