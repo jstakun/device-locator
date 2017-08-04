@@ -447,11 +447,17 @@ public class MainActivity extends AppCompatActivity {
                     if (currentText.isEmpty()) {
                         try {
                             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                            ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
-                            String pasteData = item.getText().toString();
-                            if (!StringUtils.equals(pasteData, email) && Patterns.EMAIL_ADDRESS.matcher(pasteData).matches()) {
-                                emailInput.setText(pasteData);
-                                Toast.makeText(getApplicationContext(), "Pasted email address from clipboard!", Toast.LENGTH_SHORT).show();
+                            if (clipboard.hasPrimaryClip()) {
+                                int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
+                                for (int i = 0; i < clipboardItemCount; i++) {
+                                    ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
+                                    String pasteData = item.getText().toString();
+                                    if (!StringUtils.equals(pasteData, email) && Patterns.EMAIL_ADDRESS.matcher(pasteData).matches()) {
+                                        emailInput.setText(pasteData);
+                                        Toast.makeText(getApplicationContext(), "Pasted email address from clipboard!", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    }
+                                }
                             }
                         } catch (Exception e) {
                             Log.e(TAG, "Failed to paste text from clipboard", e);
@@ -508,16 +514,23 @@ public class MainActivity extends AppCompatActivity {
                         telegramInput.setText("");
                     }
                 } else {
-                    //TODO paste telegramid from clipboard
+                    //paste telegramid from clipboard
                     String currentText = telegramInput.getText().toString();
                     if (currentText.isEmpty()) {
                         try {
                             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                            ClipData.Item item = clipboard.getPrimaryClip().getItemAt(0);
-                            String pasteData = item.getText().toString();
-                            if (!StringUtils.equals(pasteData, telegramId) && StringUtils.isNumeric(pasteData) && StringUtils.isNotEmpty(pasteData)) {
-                                telegramInput.setText(pasteData);
-                                Toast.makeText(getApplicationContext(), "Pasted Chat ID from clipboard!", Toast.LENGTH_SHORT).show();
+                            if (clipboard.hasPrimaryClip()) {
+                                int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
+                                for (int i=0;i<clipboardItemCount; i++) {
+                                    ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
+                                    String pasteData = item.getText().toString();
+                                    Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
+                                    if (StringUtils.isNumeric(pasteData) && StringUtils.isNotEmpty(pasteData)) {
+                                        telegramInput.setText(pasteData);
+                                        Toast.makeText(getApplicationContext(), "Pasted Chat ID from clipboard!", Toast.LENGTH_SHORT).show();
+                                        break;
+                                    }
+                                }
                             }
                         } catch (Exception e) {
                             Log.e(TAG, "Failed to paste text from clipboard", e);
