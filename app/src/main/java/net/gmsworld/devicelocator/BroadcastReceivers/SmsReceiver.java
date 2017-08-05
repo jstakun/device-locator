@@ -57,6 +57,7 @@ public class SmsReceiver extends BroadcastReceiver {
         if (findShareRouteCommand(context, intent)) return;
         if (findGpsHighAccuracyCommand(context, intent)) return;
         if (findGpsLowAccuracyCommand(context, intent)) return;
+        //TODO add method to add notification email phone number and messenger chat id
     }
 
     private boolean findStartRouteTrackerServiceStartCommand(Context context, Intent intent) {
@@ -77,6 +78,9 @@ public class SmsReceiver extends BroadcastReceiver {
 
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("notificationNumber", phoneNumber);
+            newIntent.putExtra("email", email);
+            newIntent.putExtra("telegramId", telegramId);
             newIntent.putExtra("command", START_COMMAND);
             context.startService(newIntent);
             return true;

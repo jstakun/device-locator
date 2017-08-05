@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -194,11 +195,26 @@ public class Messenger {
         sendSMS(context, phoneNumber, text);
     }
 
-    public static void sendCommandMessage(Context context, Intent intent, String command, String phoneNumber) {
+    public static void sendCommandMessage(Context context, Intent intent, String command, String phoneNumber, String email, String telegramId, String notificationNumber) {
         String text = null;
         switch (command) {
             case SmsReceiver.START_COMMAND:
                 text = "Device location tracking service has been started.";
+                List<String> notifications = new ArrayList<String>();
+                if (StringUtils.isNotEmpty(notificationNumber)) {
+                    notifications.add(notificationNumber);
+                }
+                if (StringUtils.isNotEmpty(email)) {
+                    notifications.add(email);
+                }
+                if (StringUtils.isNotEmpty(telegramId)) {
+                    notifications.add("Telegram chat id: " + telegramId);
+                }
+                if (notifications.isEmpty()) {
+                    text += " No notifications will be sent!";
+                } else {
+                    text += " Notificatons will be sent to " + StringUtils.joinWith(", ", notifications);
+                }
                 break;
             case SmsReceiver.STOP_COMMAND:
                 text = "Device location tracking service has been stopped.";
@@ -252,7 +268,7 @@ public class Messenger {
         Resources r = context.getResources();
         String text = r.getString(R.string.acknowledgeMessage);
         text += " " + r.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context));
-        text += ", " + r.getString(R.string.gps) + " " + SmsSenderService.locationToString(context, SmsSenderService.getLocationMode(context));
+        text += ", " + r.getString(R.string.gps) + " " + SmsSenderService.locationToString(context);
         text += ", Battery level: " + Messenger.getBatteryLevel(context) + "%";
         sendSMS(context, phoneNumber, text);
     }

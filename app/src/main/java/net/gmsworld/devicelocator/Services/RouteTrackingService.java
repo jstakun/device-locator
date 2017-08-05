@@ -17,8 +17,12 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Utilities.GmsLocationManager;
+import net.gmsworld.devicelocator.Utilities.GpsDeviceFactory;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
 
@@ -153,13 +157,12 @@ public class RouteTrackingService extends Service {
         //NotificationUtils.notify(this, NOTIFICATION_ID);
         startForeground(NOTIFICATION_ID, NotificationUtils.buildNotification(this, NOTIFICATION_ID));
 
-        //TODO add support for non google api compliant devices
-        //if (!IntentsHelper.getInstance().isGoogleApiAvailable(this)) {
-        //    GpsDeviceFactory.initGpsDevice(this, incomingHandler);
-        //    GpsDeviceFactory.startDevice();
-        //} else {
+        if (!isGoogleApiAvailable(this)) {
+            GpsDeviceFactory.initGpsDevice(this, incomingHandler);
+            GpsDeviceFactory.startDevice(this, radius, priority, resetRoute);
+        } else {
             GmsLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
-        //}
+        }
     }
 
     private synchronized void stopTracking() {
@@ -174,12 +177,12 @@ public class RouteTrackingService extends Service {
             this.mWakeLock = null;
         }
 
-        //TODO add support for non google api compliant devices
-        //if (!IntentsHelper.getInstance().isGoogleApiAvailable(this)) {
-        //    GpsDeviceFactory.stopDevice();
-        //} else {
+        if (!isGoogleApiAvailable(this)) {
+            GpsDeviceFactory.stopDevice();
+        } else {
             GmsLocationManager.getInstance().disable(IncomingHandler.class.getName());
-        //}
+        }
+
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.remove("routeTitle");
@@ -204,6 +207,14 @@ public class RouteTrackingService extends Service {
                 RouteTrackingService.this.startService(newIntent);
             }
         });
+    }
+
+    private boolean isGoogleApiAvailable(Context context) {
+        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private class IncomingHandler extends Handler {

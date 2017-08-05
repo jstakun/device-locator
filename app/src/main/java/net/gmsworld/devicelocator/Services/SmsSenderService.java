@@ -52,6 +52,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             return;
         }
 
+        String email = intent.getExtras().getString("email");
+        String telegramId = intent.getExtras().getString("telegramId");
+        String notificationNumber = intent.getExtras().getString("notificationNumber");
+
         this.context = this;
         this.r = context.getResources();
 
@@ -60,7 +64,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         if (command == null || command.length() == 0) {
             initSending();
         } else {
-            Messenger.sendCommandMessage(this, intent, command, phoneNumber);
+            Messenger.sendCommandMessage(this, intent, command, phoneNumber, email, telegramId, notificationNumber);
         }
     }
 
@@ -187,7 +191,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         super.onDestroy();
     }
 
-    public static int getLocationMode(Context context) {
+    private static int getLocationMode(Context context) {
         try {
             return Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
         } catch (Settings.SettingNotFoundException e) {
@@ -195,7 +199,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         }
     }
 
-    public static String locationToString(Context context, int mode) {
+    public static String locationToString(Context context) {
+        int mode = getLocationMode(context);
         switch (mode) {
             case Settings.Secure.LOCATION_MODE_OFF:
                 return context.getResources().getString(R.string.location_mode_off);
