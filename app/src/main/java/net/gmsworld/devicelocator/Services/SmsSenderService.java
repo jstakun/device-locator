@@ -9,9 +9,12 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.util.Log;
 
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Messenger;
+
+import org.apache.commons.lang3.StringUtils;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
@@ -211,7 +214,12 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
                 return context.getResources().getString(R.string.location_high_accuracy);
             default:
-                return "Error";
+                //API version <= 17
+                String status =  Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+                if (StringUtils.isEmpty(status)) {
+                    status = "Unknown";
+                }
+                return status;
         }
     }
 }

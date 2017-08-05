@@ -197,6 +197,7 @@ public class Messenger {
 
     public static void sendCommandMessage(Context context, Intent intent, String command, String phoneNumber, String email, String telegramId, String notificationNumber) {
         String text = null;
+        //TODO send notification email, phone number or telegram messenger chat id has been saved
         switch (command) {
             case SmsReceiver.START_COMMAND:
                 text = "Device location tracking service has been started.";

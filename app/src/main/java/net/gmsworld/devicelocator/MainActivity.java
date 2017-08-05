@@ -397,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //TODO email input setup
+    //email input setup ------------------------------------------------------------------
 
     private void initEmailInput() {
         final TextView emailInput = (TextView) this.findViewById(R.id.email);
@@ -442,7 +442,7 @@ public class MainActivity extends AppCompatActivity {
                         emailInput.setText("");
                     }
                 } else {
-                    //TODO paste email from clipboard
+                    //paste email from clipboard
                     String currentText = emailInput.getText().toString();
                     if (currentText.isEmpty()) {
                         try {
@@ -468,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //TODO telegram input setup
+    //telegram input setup -----------------------------------------------------------------
 
     private void initTelegramInput() {
         final TextView telegramInput = (TextView) this.findViewById(R.id.telegramId);
@@ -541,7 +541,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //TODO phone number input setup
+    // phone number input setup ---------------------------------------------------------------
 
     private void initPhoneNumberInput() {
         final TextView phoneNumberInput = (TextView) this.findViewById(R.id.phoneNumber);
