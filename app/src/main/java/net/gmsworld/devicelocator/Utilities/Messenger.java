@@ -197,11 +197,10 @@ public class Messenger {
 
     public static void sendCommandMessage(Context context, Intent intent, String command, String phoneNumber, String email, String telegramId, String notificationNumber) {
         String text = null;
-        //TODO send notification email, phone number or telegram messenger chat id has been saved
+        List<String> notifications = new ArrayList<String>();
         switch (command) {
             case SmsReceiver.START_COMMAND:
                 text = "Device location tracking service has been started.";
-                List<String> notifications = new ArrayList<String>();
                 if (StringUtils.isNotEmpty(notificationNumber)) {
                     notifications.add(notificationNumber);
                 }
@@ -214,7 +213,7 @@ public class Messenger {
                 if (notifications.isEmpty()) {
                     text += " No notifications will be sent!";
                 } else {
-                    text += " Notificatons will be sent to " + StringUtils.joinWith(", ", notifications);
+                    text += " Notifications will be sent to " + StringUtils.joinWith(", ", notifications);
                 }
                 break;
             case SmsReceiver.STOP_COMMAND:
@@ -255,6 +254,23 @@ public class Messenger {
                 break;
             case SmsReceiver.GPS_BALANCED_COMMAND:
                 text = "GPS settings has been changed to balanced accuracy.";
+                break;
+            case SmsReceiver.NOTIFY_COMMAND:
+                text = "";
+                if (StringUtils.isNotEmpty(notificationNumber)) {
+                    notifications.add(notificationNumber);
+                }
+                if (StringUtils.isNotEmpty(email)) {
+                    notifications.add(email);
+                }
+                if (StringUtils.isNotEmpty(telegramId)) {
+                    notifications.add("Telegram chat id: " + telegramId);
+                }
+                if (notifications.isEmpty()) {
+                    text += "No notifications will be sent! Please specify valid email, phone number or Telegram chat id.";
+                } else {
+                    text += "Notifications will be sent to " + StringUtils.joinWith(", ", notifications);
+                }
                 break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);

@@ -14,6 +14,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.telephony.SmsMessage;
 import android.util.Log;
+import android.util.Patterns;
 import android.widget.Toast;
 
 import net.gmsworld.devicelocator.R;
@@ -43,6 +44,7 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String CALL_COMMAND = "calldl"; //call to sender
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //set high gps accuracy
     public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //set balanced gps accuracy
+    public final static String NOTIFY_COMMAND = "notifydl"; //set notification email, phone or telegram chat id
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -57,7 +59,7 @@ public class SmsReceiver extends BroadcastReceiver {
         if (findShareRouteCommand(context, intent)) return;
         if (findGpsHighAccuracyCommand(context, intent)) return;
         if (findGpsLowAccuracyCommand(context, intent)) return;
-        //TODO add method to add email, phone number or telegram messenger chat id notification
+        if (findNotifyCommand(context, intent)) return;
     }
 
     private boolean findStartRouteTrackerServiceStartCommand(Context context, Intent intent) {
@@ -329,6 +331,84 @@ public class SmsReceiver extends BroadcastReceiver {
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", GPS_BALANCED_COMMAND);
             context.startService(newIntent);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean findNotifyCommand(Context context, Intent intent) {
+        ArrayList<SmsMessage> list = null;
+        try {
+            String keyword = NOTIFY_COMMAND;
+            String token = PreferenceManager.getDefaultSharedPreferences(context).getString("token", "");
+            keyword += token;
+            list = getMessagesWithKeyword(keyword, intent.getExtras());
+        } catch (Exception e) {
+            return false;
+        }
+
+        if (list.size() > 0) {
+            String[] tokens = list.get(0).getMessageBody().split(" ");
+            String email = null;
+            String phoneNumber = null;
+            String telegramId = null;
+            
+            for (int i=0;i<tokens.length;i++) {
+                String token = tokens[i]; //validate
+                if (token.startsWith("m:")) {
+                    String newEmailAddress = token.substring(2);
+                    if ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress)) {
+                        email = newEmailAddress;
+                    }
+                } else if (token.startsWith("p:")) {
+                    String newPhoneNumber = token.substring(2);
+                    if ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || StringUtils.isEmpty(newPhoneNumber)) {
+                        phoneNumber = newPhoneNumber;
+                    }
+                } else if (token.startsWith("t:")) {
+                    String newTelegramId = token.substring(2);
+                    if ((StringUtils.isNumeric(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || StringUtils.isEmpty(newTelegramId)) {
+                        telegramId = newTelegramId;
+                    }
+                }
+            }
+            
+            if (telegramId != null || phoneNumber != null || email != null) {
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+
+                SharedPreferences.Editor editor = settings.edit();
+                if (email != null) {
+                    editor.putString("email", email);
+                } else {
+                    email = settings.getString("email", "");
+                }
+                if (phoneNumber != null) {
+                    editor.putString("phoneNumber", phoneNumber);
+                } else {
+                    phoneNumber = settings.getString("phoneNumber", "");
+                }
+                if (telegramId != null) {
+                    editor.putString("telegramId", telegramId);
+                } else {
+                    telegramId = settings.getString("telegramId", "");
+                }
+                editor.commit();
+
+
+                int radius = settings.getInt("radius", 100);
+
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+
+                
+                Intent newIntent = new Intent(context, SmsSenderService.class);
+                newIntent.putExtra("phoneNumber", list.get(0).getOriginatingAddress());
+                newIntent.putExtra("notificationNumber", phoneNumber);
+                newIntent.putExtra("email", email);
+                newIntent.putExtra("telegramId", telegramId);
+                newIntent.putExtra("command", NOTIFY_COMMAND);
+                context.startService(newIntent);
+            }
             return true;
         } else {
             return false;
