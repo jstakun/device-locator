@@ -313,4 +313,108 @@ public class Messenger {
 
         return (int)(batteryPct * 100);
     }
+
+    public static void sendEmailRegistrationRequest(final Context context, final String email, final int retryCount) {
+        if (StringUtils.isNotEmpty(email)) {
+            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+            if (StringUtils.isNotEmpty(tokenStr)) {
+                sendEmailRegistrationRequest(context, email, tokenStr, 1);
+            } else {
+                String queryString = "scope=dl&user=" + Network.getDeviceId(context);
+                Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                        if (responseCode == 200) {
+                            JsonObject token = new JsonParser().parse(results).getAsJsonObject();
+                            SharedPreferences.Editor editor = settings.edit();
+                            String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
+                            Log.d(TAG, "Received following token: " + token);
+                            editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
+                            editor.commit();
+                            sendEmailRegistrationRequest(context, email, tokenStr, 1);
+                        } else if (responseCode == 500 && retryCount > 0) {
+                            sendEmailRegistrationRequest(context, email, retryCount-1);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    public static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final int retryCount) {
+        if (StringUtils.isNumeric(telegramId)) {
+            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+            if (StringUtils.isNotEmpty(tokenStr)) {
+                sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
+            } else {
+                String queryString = "scope=dl&user=" + Network.getDeviceId(context);
+                Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                        if (responseCode == 200) {
+                            JsonObject token = new JsonParser().parse(results).getAsJsonObject();
+                            SharedPreferences.Editor editor = settings.edit();
+                            String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
+                            Log.d(TAG, "Received following token: " + token);
+                            editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
+                            editor.commit();
+                            sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
+                        } else if (responseCode == 500 && retryCount > 0) {
+                            sendTelegramRegistrationRequest(context, telegramId, retryCount-1);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    private static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final String tokenStr, final int retryCount) {
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("Authorization", "Bearer " + tokenStr);
+        headers.put("X-GMS-AppId", "2");
+        headers.put("X-GMS-Scope", "dl");
+
+        try {
+            String queryString = "type=register_t&chatId=" + telegramId + "&user=" + Network.getDeviceId(context);
+
+            Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                    if (responseCode == 500 && retryCount > 0) {
+                        sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount-1);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, e.getMessage(), e);
+        }
+    }
+
+    private static void sendEmailRegistrationRequest(final Context context, final String email, final String tokenStr, final int retryCount) {
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("Authorization", "Bearer " + tokenStr);
+        headers.put("X-GMS-AppId", "2");
+        headers.put("X-GMS-Scope", "dl");
+
+        try {
+            String queryString = "type=register_m&email=" + email + "&user=" + Network.getDeviceId(context);
+
+            Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                    if (responseCode == 500 && retryCount > 0) {
+                        sendEmailRegistrationRequest(context, email, tokenStr, retryCount-1);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, e.getMessage(), e);
+        }
+    }
 }

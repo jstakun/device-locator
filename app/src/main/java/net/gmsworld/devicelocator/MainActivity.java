@@ -41,9 +41,6 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
@@ -55,10 +52,6 @@ import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class MainActivity extends AppCompatActivity {
 
@@ -125,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "New email has been set: " + newEmailAddress);
             editor.putString("email", newEmailAddress);
             if (StringUtils.isNotEmpty(newEmailAddress)) {
-                sendEmailRegistrationRequest(MainActivity.this, newEmailAddress, 1);
+                net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, newEmailAddress, 1);
             }
         }
 
@@ -138,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "New telegram id has been set: " + newTelegramId);
             editor.putString("telegramId", newTelegramId);
             if (StringUtils.isNotEmpty(newTelegramId)) {
-                sendTelegramRegistrationRequest(MainActivity.this, newTelegramId, 1);
+                net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, newTelegramId, 1);
             }
         }
 
@@ -439,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
 
                         if (StringUtils.isNotEmpty(email)) {
                             Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
-                            sendEmailRegistrationRequest(MainActivity.this, email, 1);
+                            net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
                         }
                     } else if (!StringUtils.equals(email, newEmailAddress)) {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid email address!", Toast.LENGTH_SHORT).show();
@@ -510,7 +503,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         if (StringUtils.isNotEmpty(telegramId)) {
-                            sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
+                            net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
                             Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your chat", Toast.LENGTH_LONG).show();
                         }
                     } else if (!StringUtils.equals(telegramId, newTelegramId)) {
@@ -883,110 +876,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         editor.commit();
-    }
-
-    public static void sendEmailRegistrationRequest(final Context context, final String email, final int retryCount) {
-        if (StringUtils.isNotEmpty(email)) {
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
-            if (StringUtils.isNotEmpty(tokenStr)) {
-                sendEmailRegistrationRequest(context, email, tokenStr, 1);
-            } else {
-                String queryString = "scope=dl&user=" + Network.getDeviceId(context);
-                Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
-                    @Override
-                    public void onGetFinish(String results, int responseCode, String url) {
-                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                        if (responseCode == 200) {
-                            JsonObject token = new JsonParser().parse(results).getAsJsonObject();
-                            SharedPreferences.Editor editor = settings.edit();
-                            String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
-                            Log.d(TAG, "Received following token: " + token);
-                            editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
-                            editor.commit();
-                            sendEmailRegistrationRequest(context, email, tokenStr, 1);
-                        } else if (responseCode == 500 && retryCount > 0) {
-                            sendEmailRegistrationRequest(context, email, retryCount-1);
-                        }
-                    }
-                });
-            }
-        }
-    }
-
-    private static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final int retryCount) {
-        if (StringUtils.isNumeric(telegramId)) {
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
-            if (StringUtils.isNotEmpty(tokenStr)) {
-                sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
-            } else {
-                String queryString = "scope=dl&user=" + Network.getDeviceId(context);
-                Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
-                    @Override
-                    public void onGetFinish(String results, int responseCode, String url) {
-                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                        if (responseCode == 200) {
-                            JsonObject token = new JsonParser().parse(results).getAsJsonObject();
-                            SharedPreferences.Editor editor = settings.edit();
-                            String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
-                            Log.d(TAG, "Received following token: " + token);
-                            editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
-                            editor.commit();
-                            sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
-                        } else if (responseCode == 500 && retryCount > 0) {
-                            sendTelegramRegistrationRequest(context, telegramId, retryCount-1);
-                        }
-                    }
-                });
-            }
-        }
-    }
-
-    private static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final String tokenStr, final int retryCount) {
-        Map<String, String> headers = new HashMap<String, String>();
-        headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppId", "2");
-        headers.put("X-GMS-Scope", "dl");
-
-        try {
-            String queryString = "type=register_t&chatId=" + telegramId + "&user=" + Network.getDeviceId(context);
-
-            Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String results, int responseCode, String url) {
-                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                    if (responseCode == 500 && retryCount > 0) {
-                        sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount-1);
-                    }
-                }
-            });
-        } catch (Exception e) {
-            Log.d(TAG, e.getMessage(), e);
-        }
-    }
-
-    private static void sendEmailRegistrationRequest(final Context context, final String email, final String tokenStr, final int retryCount) {
-        Map<String, String> headers = new HashMap<String, String>();
-        headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppId", "2");
-        headers.put("X-GMS-Scope", "dl");
-
-        try {
-            String queryString = "type=register_m&email=" + email + "&user=" + Network.getDeviceId(context);
-
-            Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String results, int responseCode, String url) {
-                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                    if (responseCode == 500 && retryCount > 0) {
-                        sendEmailRegistrationRequest(context, email, tokenStr, retryCount-1);
-                    }
-                }
-            });
-        } catch (Exception e) {
-            Log.d(TAG, e.getMessage(), e);
-        }
     }
 
     //----------------------------- route tracking service -----------------------------------

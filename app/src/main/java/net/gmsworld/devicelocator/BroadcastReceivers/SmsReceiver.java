@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
+import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Utilities.Network;
@@ -353,13 +354,17 @@ public class SmsReceiver extends BroadcastReceiver {
             String email = null;
             String phoneNumber = null;
             String telegramId = null;
-            
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+
             for (int i=0;i<tokens.length;i++) {
                 String token = tokens[i]; //validate
                 if (token.startsWith("m:")) {
                     String newEmailAddress = token.substring(2);
                     if ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress)) {
                         email = newEmailAddress;
+                        if (!StringUtils.equals(settings.getString("email", ""), email)) {
+                            Messenger.sendEmailRegistrationRequest(context, email, 1);
+                        }
                     }
                 } else if (token.startsWith("p:")) {
                     String newPhoneNumber = token.substring(2);
@@ -370,13 +375,14 @@ public class SmsReceiver extends BroadcastReceiver {
                     String newTelegramId = token.substring(2);
                     if ((StringUtils.isNumeric(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || StringUtils.isEmpty(newTelegramId)) {
                         telegramId = newTelegramId;
+                        if (!StringUtils.equals(settings.getString("telegramId", ""), telegramId)) {
+                            Messenger.sendTelegramRegistrationRequest(context, telegramId, 1);
+                        }
                     }
                 }
             }
             
             if (telegramId != null || phoneNumber != null || email != null) {
-                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
                     editor.putString("email", email);
@@ -395,11 +401,9 @@ public class SmsReceiver extends BroadcastReceiver {
                 }
                 editor.commit();
 
-
                 int radius = settings.getInt("radius", 100);
 
                 RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
-
                 
                 Intent newIntent = new Intent(context, SmsSenderService.class);
                 newIntent.putExtra("phoneNumber", list.get(0).getOriginatingAddress());
@@ -431,6 +435,11 @@ public class SmsReceiver extends BroadcastReceiver {
                 if (StringUtils.equalsIgnoreCase(sms.getMessageBody(), keyword)) {
                     list.add(sms);
                 } else if (keyword.startsWith(RADIUS_COMMAND)) {
+                    StringTokenizer tokens = new StringTokenizer(sms.getMessageBody());
+                    if (tokens.hasMoreTokens() && StringUtils.equalsIgnoreCase(tokens.nextToken(), keyword)) {
+                        list.add(sms);
+                    }
+                } else if (keyword.startsWith(NOTIFY_COMMAND)) {
                     StringTokenizer tokens = new StringTokenizer(sms.getMessageBody());
                     if (tokens.hasMoreTokens() && StringUtils.equalsIgnoreCase(tokens.nextToken(), keyword)) {
                         list.add(sms);
