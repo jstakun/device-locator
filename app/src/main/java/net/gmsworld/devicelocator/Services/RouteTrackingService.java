@@ -178,7 +178,7 @@ public class RouteTrackingService extends Service {
         }
 
         if (!isGoogleApiAvailable(this)) {
-            GpsDeviceFactory.stopDevice();
+            GpsDeviceFactory.stopDevice(IncomingHandler.class.getName());
         } else {
             GmsLocationManager.getInstance().disable(IncomingHandler.class.getName());
         }

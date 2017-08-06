@@ -30,28 +30,15 @@ public class GpsDeviceFactory {
         return device;
     }
 
-    public static void stopDevice() {
+    public static void stopDevice(String handler) {
         if (device != null) {
-            device.stopListening();
+            device.stopListening(handler);
         }
     }
 
     public static void startDevice(Context context, int radius, int priority, boolean resetRoute) {
         if (device != null) {
             device.startListening(context, radius, priority, resetRoute);
-        }
-    }
-
-    public static void startDevice(Handler handler, Context context, int radius, int priority, boolean resetRoute) {
-        if (device != null) {
-            device.startListening(context, radius, priority, resetRoute);
-            device.setPositionHandler(handler);
-        }
-    }
-
-    public static void setPositionHandler(Handler handler) {
-        if (device != null) {
-            device.setPositionHandler(handler);
         }
     }
 

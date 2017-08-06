@@ -29,7 +29,6 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
     private static final String TAG = AndroidDevice.class.getSimpleName();
 
     private LocationManager locationManager;
-    private Handler positionHandler = null;
     private boolean isListening = false;
 
     private Listener gpsStatusListener = new GpsStatus.Listener() {
@@ -45,14 +44,14 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
                                 satellites++;
                             }
                         }
-                        Log.d(TAG, "AndroidDevice Number of available satellites: " + satellites);
+                        Log.d(TAG, "Number of available satellites: " + satellites);
                     }
                     break;
                 case GpsStatus.GPS_EVENT_STOPPED:
-                    Log.d(TAG, "AndroidDevice GPS device stopped!");
+                    Log.d(TAG, "GPS device stopped!");
                     break;
                 case GpsStatus.GPS_EVENT_STARTED:
-                    Log.d(TAG, "AndroidDevice GPS device started!");
+                    Log.d(TAG, "GPS device started!");
                     break;
                 default:
                     break;
@@ -62,7 +61,7 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
 
     public AndroidDevice(Context context) {
 
-        Log.d(TAG, "AndroidDevice() created...");
+        Log.d(TAG, "GPS Provider created...");
 
         if (locationManager == null && context != null) {
             locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -82,29 +81,29 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
     }
 
     public void setPositionHandler(Handler handler) {
-        this.positionHandler = handler;
+        mLocationHandlers.put(handler.getClass().getName(), handler);
     }
 
     public void startListening(Context context, int radius, int priority, boolean resetRoute) {
-        Log.d(TAG, "AndroidDevice.startListening(): " + isListening);
+        Log.d(TAG, "startListening(): " + isListening);
+        setMyLocation(getLastKnownLocation(context, 10)); //set last know location in last 10 minutes
         if (!isListening) {
             Criteria crit = new Criteria();
-            if (priority <= 0) {
-                crit.setAccuracy(Criteria.ACCURACY_COARSE);
-            } else {
-                crit.setAccuracy(Criteria.ACCURACY_FINE);
-            }
+            crit.setAccuracy(Criteria.ACCURACY_FINE);
             String provider = locationManager.getBestProvider(crit, false);
             try {
                 locationManager.removeUpdates(this);
-                locationManager.requestLocationUpdates(provider, MILLIS, METERS, this);
+                if (priority <= 0) {
+                    locationManager.requestLocationUpdates(provider, MILLIS * 2, METERS * 2, this);
+                } else {
+                    locationManager.requestLocationUpdates(provider, MILLIS, METERS, this);
+                }
                 isListening = true;
             } catch (Exception e) {
-                stopListening();
+                stopListening(null);
             }
 
             locationManager.addGpsStatusListener(gpsStatusListener);
-
 
             callerContext = context;
 
@@ -124,7 +123,7 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
         //}
 
         //if (currentLocation != null) {
-        Log.d(TAG, "AndroidDevice received new location");
+        Log.d(TAG, "Received new location");
         if (location != null) {
             checkRadius(location);
             addLocationToRoute(location);
@@ -132,8 +131,11 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
         //}
     }
 
-    public void stopListening() {
-        Log.d(TAG, "AndroidDevice.stopListening(): " + isListening);
+    public void stopListening(String handler) {
+        Log.d(TAG, "stopListening(): " + isListening);
+        if (handler != null) {
+            mLocationHandlers.remove(handler);
+        }
         if (isListening) {
             locationManager.removeUpdates(this);
             locationManager.removeGpsStatusListener(gpsStatusListener);
@@ -143,19 +145,15 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
 
 
     public void onProviderDisabled(String provider) {
-        Log.d(TAG, "AndroidDevice Provider Disabled: " + provider);
+        Log.d(TAG, "GPS Provider Disabled: " + provider);
     }
 
     public void onProviderEnabled(String provider) {
-        Log.d(TAG, "AndroidDevice Provider Enabled: " + provider);
+        Log.d(TAG, "GPS Provider Enabled: " + provider);
     }
 
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        Log.d(TAG, "AndroidDevice Provider Status Changed: " + provider + ", Status=[" + status + "], extras=" + extras);
-    }
-
-    protected Handler getPositionHandler() {
-        return positionHandler;
+        Log.d(TAG, "GPS Provider Status Changed: " + provider + ", Status=[" + status + "], extras=" + extras);
     }
 
     private Location getLastKnownLocation() {
@@ -166,7 +164,7 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
                 lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             }
         } catch (Exception e) {
-            Log.e(TAG, "AndroidDevice.getLastKnownLocation() exception:", e);
+            Log.e(TAG, "getLastKnownLocation() exception:", e);
         }
 
         if (lastKnownLocation == null) {
@@ -175,7 +173,7 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
                     lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 }
             } catch (Exception e) {
-                Log.e(TAG, "AndroidDevice.getLastKnownLocation() exception:", e);
+                Log.e(TAG, "getLastKnownLocation() exception:", e);
             }
         }
 
@@ -183,8 +181,10 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
     }
 
     private void setMyLocation(Location lastKnownLocation) {
-        Log.e(TAG, "AndroidDevice Setting last known location.");
-        onLocationChanged(lastKnownLocation);
+        if (lastKnownLocation != null) {
+            Log.d(TAG, "Setting last known location.");
+            onLocationChanged(lastKnownLocation);
+        }
     }
 
     public static int getBearingIndex(Location location) {
@@ -253,20 +253,20 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
             try {
                 location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             } catch (Exception e) {
-                Log.e(TAG, "AndroidDevice.getLastKnownLocation() exception:", e);
+                Log.e(TAG, "getLastKnownLocation() exception:", e);
             }
             if (location == null) {
                 try {
                     location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 } catch (Exception e) {
-                    Log.e(TAG, "AndroidDevice.getLastKnownLocation() exception:", e);
+                    Log.e(TAG, "getLastKnownLocation() exception:", e);
                 }
             }
             if (location == null) {
-                Log.d(TAG, "AndroidDevice.getLastKnownLocation() no location from location manager available");
+                Log.d(TAG, "getLastKnownLocation() no location from location manager available");
             }
         } else {
-            Log.d(TAG, "AndroidDevice.getLastKnownLocation() no location manager available");
+            Log.d(TAG, "getLastKnownLocation() no location manager available");
         }
 
         if (location != null && (System.currentTimeMillis() - location.getTime()) < (validityMinutes * 60 * 1000)) {

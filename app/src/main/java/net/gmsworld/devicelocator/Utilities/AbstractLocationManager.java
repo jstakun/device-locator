@@ -48,7 +48,7 @@ public abstract class AbstractLocationManager {
 
     protected int radius = -1;
 
-    private static Map<String, Handler> mLocationHandlers = new HashMap<String, Handler>();
+    static Map<String, Handler> mLocationHandlers = new HashMap<String, Handler>();
     private Location recentLocationSent, lastLocation;
 
     protected Context callerContext;

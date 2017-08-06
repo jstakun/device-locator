@@ -51,7 +51,6 @@ public class GmsLocationManager extends AbstractLocationManager implements Googl
     private boolean isEnabled = false;
 
     private GoogleApiClient mGoogleApiClient;
-    private static Map<String, Handler> mLocationHandlers = new HashMap<String, Handler>();
     private LocationRequest mLocationRequest;
     private Location recentLocationSent, lastLocation;
 
