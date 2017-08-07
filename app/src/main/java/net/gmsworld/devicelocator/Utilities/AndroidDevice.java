@@ -20,6 +20,8 @@ import android.util.Log;
  *
  * @author jstakun
  */
+
+@Deprecated
 public class AndroidDevice extends AbstractLocationManager implements LocationListener {
 
     private static final int MILLIS = 5000;
@@ -29,7 +31,6 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
     private static final String TAG = AndroidDevice.class.getSimpleName();
 
     private LocationManager locationManager;
-    private boolean isListening = false;
 
     private Listener gpsStatusListener = new GpsStatus.Listener() {
         public synchronized void onGpsStatusChanged(int event) {
@@ -81,9 +82,9 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
     }
 
     public void startListening(String handlerName, Handler handler, Context context, int radius, int priority, boolean resetRoute) {
-        Log.d(TAG, "startListening(): " + isListening);
+        Log.d(TAG, "startListening(): " + isEnabled);
         setMyLocation(getLastKnownLocation(context, 10)); //set last know location in last 10 minutes
-        if (!isListening) {
+        if (!isEnabled) {
             Criteria crit = new Criteria();
             crit.setAccuracy(Criteria.ACCURACY_FINE);
             String provider = locationManager.getBestProvider(crit, false);
@@ -94,7 +95,7 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
                 } else {
                     locationManager.requestLocationUpdates(provider, MILLIS, METERS, this);
                 }
-                isListening = true;
+                isEnabled = true;
             } catch (Exception e) {
                 stopListening(null);
             }
@@ -111,13 +112,13 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
     }
 
     public void stopListening(String handler) {
-        Log.d(TAG, "stopListening(): " + isListening);
+        Log.d(TAG, "stopListening(): " + isEnabled);
         finish(handler);
-        if (isListening) {
+        if (isEnabled) {
             locationManager.removeUpdates(this);
             locationManager.removeGpsStatusListener(gpsStatusListener);
         }
-        isListening = false;
+        isEnabled = false;
     }
 
 

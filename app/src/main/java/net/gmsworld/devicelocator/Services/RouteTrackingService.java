@@ -21,11 +21,14 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
+import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.Utilities.GmsLocationManager;
 import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.Utilities.GpsDeviceFactory;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
+
+import java.text.DecimalFormat;
 
 public class RouteTrackingService extends Service {
 
@@ -100,7 +103,8 @@ public class RouteTrackingService extends Service {
                         this.phoneNumber = intent.getExtras().getString("phoneNumber");
                         this.email = intent.getExtras().getString("email");
                         this.telegramId = intent.getExtras().getString("telegramId");
-                        GmsLocationManager.getInstance().setRadius(radius);
+                        //use smart location lib
+                        GmsSmartLocationManager.getInstance().setRadius(radius);
                         break;
                     case COMMAND_GPS_HIGH:
                         stopTracking();
@@ -197,7 +201,7 @@ public class RouteTrackingService extends Service {
 
     private void shareRoute(final String title, final String phoneNumber) {
         Log.d(TAG, "shareRoute()");
-        GmsLocationManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime, true, new Network.OnGetFinishListener() {
+        GmsSmartLocationManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime, true, new Network.OnGetFinishListener() {
             @Override
             public void onGetFinish(String results, int responseCode, String url) {
                 Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -231,7 +235,7 @@ public class RouteTrackingService extends Service {
                     mClient = msg.replyTo;
                     Log.d(TAG, "new client registered");
                     break;
-                case GmsLocationManager.UPDATE_LOCATION:
+                case AbstractLocationManager.UPDATE_LOCATION:
                     Log.d(TAG, "received new location");
                     if (mClient != null) {
                         try {
@@ -249,10 +253,11 @@ public class RouteTrackingService extends Service {
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, 0, phoneNumber);
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber);
                             }
-                            String message = "New location: " + location.getLatitude() + "," + location.getLongitude() +
+                            DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
+                            String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + "," + latAndLongFormat.format(location.getLongitude()) +
                                              " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m." +
                                              "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) + " p." +
-                                             "\nhttps://maps.google.com/maps?q=" + location.getLatitude() + "," + location.getLongitude();
+                                             "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()) + "," + latAndLongFormat.format(location.getLongitude());
 
                             //Log.d(TAG, message);
                             if (email != null && email.length() > 0) {

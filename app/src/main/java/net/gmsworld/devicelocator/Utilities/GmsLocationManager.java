@@ -6,12 +6,10 @@ package net.gmsworld.devicelocator.Utilities;
 
 import android.Manifest;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
@@ -20,25 +18,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.gson.Gson;
 
-import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
-import net.gmsworld.devicelocator.Model.Feature;
-import net.gmsworld.devicelocator.Model.FeatureCollection;
-import net.gmsworld.devicelocator.Model.Geometry;
-import net.gmsworld.devicelocator.Model.Properties;
-import net.gmsworld.devicelocator.R;
-import net.gmsworld.devicelocator.Services.SmsSenderService;
-
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Vector;
-
+@Deprecated
 public class GmsLocationManager extends AbstractLocationManager implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
@@ -47,8 +28,6 @@ public class GmsLocationManager extends AbstractLocationManager implements Googl
 
     private static final int LOCATION_READ_INTERVAL_LOW = 10000; //ms
     private static final int LOCATION_READ_INTERVAL_HIGH = 5000; //ms
-
-    private boolean isEnabled = false;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -104,10 +83,6 @@ public class GmsLocationManager extends AbstractLocationManager implements Googl
         } else {
             Log.d(TAG, mLocationHandlers.size() + " handlers registered");
         }
-    }
-
-    public boolean isEnabled() {
-        return isEnabled;
     }
 
     private synchronized void buildGoogleApiClient(Context context) {

@@ -36,12 +36,16 @@ public class GmsSmartLocationManager extends AbstractLocationManager implements 
                 .config(config)
                 .start(this);
 
+        isEnabled = true;
+
         init(handlerName, locationHandler, context, radius, priority, resetRoute);
     }
 
     public void disable(String handlerName, Context context) {
 
         SmartLocation.with(context).location().stop();
+
+        isEnabled = false;
 
         finish(handlerName);
     }

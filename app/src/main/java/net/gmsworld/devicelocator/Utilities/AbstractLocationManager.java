@@ -54,6 +54,8 @@ public abstract class AbstractLocationManager {
 
     protected Context callerContext;
 
+    boolean isEnabled = false;
+
     void checkRadius(Location location) {
         lastLocation = location;
         boolean update = false;
@@ -92,6 +94,10 @@ public abstract class AbstractLocationManager {
 
     public void setRadius(int radius) {
         this.radius = radius;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
     }
 
     void onLocationReceived(Location location) {

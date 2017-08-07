@@ -12,6 +12,8 @@ import android.util.Log;
  *
  * @author jstakun
  */
+
+@Deprecated
 public class GpsDeviceFactory {
     private static final String TAG = GpsDeviceFactory.class.getSimpleName();
     private static AndroidDevice device = null;

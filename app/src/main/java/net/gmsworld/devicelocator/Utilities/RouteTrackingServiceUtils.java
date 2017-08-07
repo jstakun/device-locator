@@ -49,7 +49,7 @@ public class RouteTrackingServiceUtils {
     }
 
     public static void setGpsAccuracy(Context context, int command) {
-        if (GmsLocationManager.getInstance().isEnabled()) {
+        if (GmsSmartLocationManager.getInstance().isEnabled()) {
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, command);
             context.startService(routeTracingService);

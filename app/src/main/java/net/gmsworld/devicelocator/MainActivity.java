@@ -44,8 +44,9 @@ import android.widget.Toast;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
+import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.Utilities.Files;
-import net.gmsworld.devicelocator.Utilities.GmsLocationManager;
+import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.Permissions;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
@@ -609,10 +610,10 @@ public class MainActivity extends AppCompatActivity {
         shareRouteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Files.countLinesFromContextDir(GmsLocationManager.ROUTE_FILE, MainActivity.this) > 1) {
+                if (Files.countLinesFromContextDir(AbstractLocationManager.ROUTE_FILE, MainActivity.this) > 1) {
                     long now = System.currentTimeMillis();
                     final String title = "devicelocatorroute_" + Network.getDeviceId(MainActivity.this) + "_" + now;
-                    int routeSize = GmsLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", now, false, new Network.OnGetFinishListener() {
+                    int routeSize = GmsSmartLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", now, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: "+ responseCode + " from url " + url);

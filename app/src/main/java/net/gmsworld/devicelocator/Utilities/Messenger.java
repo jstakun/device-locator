@@ -36,6 +36,8 @@ public class Messenger {
 
     private static final String TAG = Messenger.class.getSimpleName();
 
+    private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
+
     private Network.OnGetFinishListener telegramNotifier = new Network.OnGetFinishListener() {
         @Override
         public void onGetFinish(String results, int responseCode, String url) {
@@ -165,8 +167,6 @@ public class Messenger {
         //Log.d(TAG, "sendLocationMessage()" + location.getAccuracy());
         Resources r = context.getResources();
 
-        DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
-
         String text = r.getString(fused ? R.string.approximate : R.string.accurate) + " location:\n";
 
         text += r.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
@@ -191,7 +191,7 @@ public class Messenger {
 
     public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber) {
         //Log.d(TAG, "sendGoogleMapsMessage() " + location.getAccuracy());
-        String text = "https://maps.google.com/maps?q=" + location.getLatitude() + "," + location.getLongitude();
+        String text = "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()) + "," + latAndLongFormat.format(location.getLongitude());
         sendSMS(context, phoneNumber, text);
     }
 
