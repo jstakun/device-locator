@@ -52,7 +52,6 @@ public class GmsLocationManager extends AbstractLocationManager implements Googl
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private Location recentLocationSent, lastLocation;
 
     private static final GmsLocationManager instance = new GmsLocationManager();
 
@@ -87,17 +86,13 @@ public class GmsLocationManager extends AbstractLocationManager implements Googl
             }
             isEnabled = true;
         }
-        this.radius = radius;
-        if (resetRoute) {
-            Log.d(TAG, "Route has been cleared");
-            Files.deleteFileFromContextDir(ROUTE_FILE, context);
-        }
-        callerContext = context;
-        mLocationHandlers.put(handlerName, locationHandler);
+
+        init(handlerName, locationHandler, context, radius, priority, resetRoute);
     }
 
     public void disable(String handlerName) {
-        mLocationHandlers.remove(handlerName);
+        finish(handlerName);
+
         if (mLocationHandlers.isEmpty() && mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             Log.d(TAG, "Removed location updates");
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -109,15 +104,6 @@ public class GmsLocationManager extends AbstractLocationManager implements Googl
         } else {
             Log.d(TAG, mLocationHandlers.size() + " handlers registered");
         }
-
-        //send last known location
-        if (lastLocation != null) {
-            sendLocationMessage(lastLocation, (int) lastLocation.getAccuracy());
-        }
-
-        this.recentLocationSent = null;
-        this.lastLocation = null;
-
     }
 
     public boolean isEnabled() {
@@ -136,12 +122,7 @@ public class GmsLocationManager extends AbstractLocationManager implements Googl
 
     @Override
     public void onLocationChanged(Location location) {
-        //if (AndroidDevice.isBetterLocation(location, ConfigurationManager.getInstance().getLocation())) {
-        Log.d(TAG, "Received new location");
-        if (location != null) {
-            checkRadius(location);
-            addLocationToRoute(location);
-        }
+        onLocationReceived(location);
     }
 
     @Override

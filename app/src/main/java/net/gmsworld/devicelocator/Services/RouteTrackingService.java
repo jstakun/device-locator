@@ -22,6 +22,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Utilities.GmsLocationManager;
+import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.Utilities.GpsDeviceFactory;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
@@ -157,12 +158,14 @@ public class RouteTrackingService extends Service {
         //NotificationUtils.notify(this, NOTIFICATION_ID);
         startForeground(NOTIFICATION_ID, NotificationUtils.buildNotification(this, NOTIFICATION_ID));
 
-        if (!isGoogleApiAvailable(this)) {
-            GpsDeviceFactory.initGpsDevice(this, incomingHandler);
-            GpsDeviceFactory.startDevice(this, radius, priority, resetRoute);
-        } else {
-            GmsLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
-        }
+        //use smart location lib
+        GmsSmartLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
+
+        //if (!isGoogleApiAvailable(this)) {
+        //    GpsDeviceFactory.startDevice(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
+        //} else {
+        //    GmsLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
+        //}
     }
 
     private synchronized void stopTracking() {
@@ -177,11 +180,14 @@ public class RouteTrackingService extends Service {
             this.mWakeLock = null;
         }
 
-        if (!isGoogleApiAvailable(this)) {
-            GpsDeviceFactory.stopDevice(IncomingHandler.class.getName());
-        } else {
-            GmsLocationManager.getInstance().disable(IncomingHandler.class.getName());
-        }
+        //use smart location lib
+        GmsSmartLocationManager.getInstance().disable(IncomingHandler.class.getName(), this);
+
+        //if (!isGoogleApiAvailable(this)) {
+        //    GpsDeviceFactory.stopDevice(IncomingHandler.class.getName());
+        //} else {
+        //    GmsLocationManager.getInstance().disable(IncomingHandler.class.getName());
+        //}
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();

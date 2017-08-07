@@ -80,11 +80,7 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
         callerContext = context;
     }
 
-    public void setPositionHandler(Handler handler) {
-        mLocationHandlers.put(handler.getClass().getName(), handler);
-    }
-
-    public void startListening(Context context, int radius, int priority, boolean resetRoute) {
+    public void startListening(String handlerName, Handler handler, Context context, int radius, int priority, boolean resetRoute) {
         Log.d(TAG, "startListening(): " + isListening);
         setMyLocation(getLastKnownLocation(context, 10)); //set last know location in last 10 minutes
         if (!isListening) {
@@ -105,37 +101,18 @@ public class AndroidDevice extends AbstractLocationManager implements LocationLi
 
             locationManager.addGpsStatusListener(gpsStatusListener);
 
-            callerContext = context;
 
-            this.radius = radius;
-            if (resetRoute) {
-                Log.d(TAG, "Route has been cleared");
-                Files.deleteFileFromContextDir(ROUTE_FILE, callerContext);
-            }
+            init(handlerName, handler, context, radius, priority, resetRoute);
         }
     }
 
     public void onLocationChanged(Location location) {
-
-        //Location currentLocation = null;
-        //if (isBetterLocation(location, previousLocation)) {
-        //    currentLocation = location;
-        //}
-
-        //if (currentLocation != null) {
-        Log.d(TAG, "Received new location");
-        if (location != null) {
-            checkRadius(location);
-            addLocationToRoute(location);
-        }
-        //}
+        onLocationReceived(location);
     }
 
     public void stopListening(String handler) {
         Log.d(TAG, "stopListening(): " + isListening);
-        if (handler != null) {
-            mLocationHandlers.remove(handler);
-        }
+        finish(handler);
         if (isListening) {
             locationManager.removeUpdates(this);
             locationManager.removeGpsStatusListener(gpsStatusListener);

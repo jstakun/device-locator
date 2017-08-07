@@ -49,7 +49,8 @@ public abstract class AbstractLocationManager {
     protected int radius = -1;
 
     static Map<String, Handler> mLocationHandlers = new HashMap<String, Handler>();
-    private Location recentLocationSent, lastLocation;
+    Location recentLocationSent;
+    Location lastLocation;
 
     protected Context callerContext;
 
@@ -91,6 +92,35 @@ public abstract class AbstractLocationManager {
 
     public void setRadius(int radius) {
         this.radius = radius;
+    }
+
+    void onLocationReceived(Location location) {
+        Log.d(TAG, "Received new location");
+        if (location != null) {
+            checkRadius(location);
+            addLocationToRoute(location);
+        }
+    }
+
+    void init(String handlerName, Handler handler, Context context, int radius, int priority, boolean resetRoute) {
+        callerContext = context;
+        this.radius = radius;
+        if (resetRoute) {
+            Log.d(TAG, "Route has been cleared");
+            Files.deleteFileFromContextDir(ROUTE_FILE, callerContext);
+        }
+        mLocationHandlers.put(handlerName, handler);
+    }
+
+    void finish(String handlerName) {
+        mLocationHandlers.remove(handlerName);
+        //send last known location
+        if (lastLocation != null) {
+            sendLocationMessage(lastLocation, (int) lastLocation.getAccuracy());
+        }
+
+        this.recentLocationSent = null;
+        this.lastLocation = null;
     }
 
     public int uploadRouteToServer(final Context context, final String title, final String phoneNumber, final long creationDate, final boolean smsNotify, Network.OnGetFinishListener onFinishListener) {
