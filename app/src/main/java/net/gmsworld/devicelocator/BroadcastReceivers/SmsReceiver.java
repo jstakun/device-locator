@@ -265,6 +265,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
     private boolean findKeyword(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, SHARE_COMMAND);
+
         if (sender != null) {
             if (!Permissions.haveSendSMSAndLocationPermission(context)) {
                 try {
