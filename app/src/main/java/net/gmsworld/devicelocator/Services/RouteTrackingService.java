@@ -250,11 +250,11 @@ public class RouteTrackingService extends Service {
                         int distance = msg.arg1;
                         if (location != null) {
                             if (phoneNumber != null && phoneNumber.length() > 0) {
-                                net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, 0, phoneNumber);
-                                net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber);
+                                net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, 0, phoneNumber, null);
+                                net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber, null);
                             }
                             DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
-                            String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + "," + latAndLongFormat.format(location.getLongitude()) +
+                            String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
                                              " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m." +
                                              "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) + " p." +
                                              "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()) + "," + latAndLongFormat.format(location.getLongitude());

@@ -163,7 +163,7 @@ public class Messenger {
         }
     }
 
-    public static void sendLocationMessage(Context context, Location location, boolean fused, int speedType, String phoneNumber) {
+    public static void sendLocationMessage(Context context, Location location, boolean fused, int speedType, String phoneNumber, String telegramId) {
         //Log.d(TAG, "sendLocationMessage()" + location.getAccuracy());
         Resources r = context.getResources();
 
@@ -186,13 +186,23 @@ public class Messenger {
             text += "\n" + r.getString(R.string.altitude) + " " + ((int) location.getAltitude()) + "m";
         }
 
-        sendSMS(context, phoneNumber, text);
+        if (StringUtils.isNotEmpty(phoneNumber)) {
+            sendSMS(context, phoneNumber, text);
+        }
+        if (StringUtils.isNotEmpty(telegramId)) {
+            sendTelegram(context, telegramId, text, 1);
+        }
     }
 
-    public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber) {
+    public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId) {
         //Log.d(TAG, "sendGoogleMapsMessage() " + location.getAccuracy());
         String text = "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()) + "," + latAndLongFormat.format(location.getLongitude());
-        sendSMS(context, phoneNumber, text);
+        if (StringUtils.isNotEmpty(phoneNumber)) {
+            sendSMS(context, phoneNumber, text);
+        }
+        if (StringUtils.isNotEmpty(telegramId)) {
+            sendTelegram(context, telegramId, text, 1);
+        }
     }
 
     public static void sendCommandMessage(Context context, Intent intent, String command, String phoneNumber, String email, String telegramId, String notificationNumber) {
@@ -281,13 +291,18 @@ public class Messenger {
         }
     }
 
-    public static void sendAcknowledgeMessage(Context context, String phoneNumber) {
+    public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId) {
         Resources r = context.getResources();
         String text = r.getString(R.string.acknowledgeMessage);
         text += " " + r.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context));
         text += ", " + r.getString(R.string.gps) + " " + SmsSenderService.locationToString(context);
         text += ", Battery level: " + Messenger.getBatteryLevel(context) + "%";
-        sendSMS(context, phoneNumber, text);
+        if (StringUtils.isNotEmpty(phoneNumber)) {
+            sendSMS(context, phoneNumber, text);
+        }
+        if (StringUtils.isNotEmpty(telegramId)) {
+            sendTelegram(context, telegramId, text, 1);
+        }
     }
 
     private static String booleanToString(Context context, Boolean enabled) {

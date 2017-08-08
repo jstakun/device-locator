@@ -9,7 +9,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.util.Log;
 
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Messenger;
@@ -29,11 +28,11 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private Resources r = null;
     private Context context = null;
     private String phoneNumber = null;
+    private String telegramId = null;
 
     private boolean keywordReceivedSms = false;
     private boolean gpsSms = false;
     private boolean googleMapsSms = false;
-    //private boolean networkSms = false;
 
     private int speedType = 0;
     private String command = null;
@@ -50,21 +49,23 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         //Log.d(TAG, "onHandleIntent");
         this.phoneNumber = intent.getExtras().getString("phoneNumber");
 
-        if (this.phoneNumber.length() == 0) {
+        this.telegramId = intent.getExtras().getString("telegramId");
+
+        if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId)) {
             //Log.d(TAG, "Phonenumber empty, return.");
             return;
         }
 
-        String email = intent.getExtras().getString("email");
-        String telegramId = intent.getExtras().getString("telegramId");
-        String notificationNumber = intent.getExtras().getString("notificationNumber");
-
         this.context = this;
         this.r = context.getResources();
 
+        String email = intent.getExtras().getString("email");
+
+        String notificationNumber = intent.getExtras().getString("notificationNumber");
+
         this.command = intent.getExtras().getString("command");
 
-        if (command == null || command.length() == 0) {
+        if (StringUtils.isEmpty(this.command)) {
             initSending();
         } else {
             Messenger.sendCommandMessage(this, intent, command, phoneNumber, email, telegramId, notificationNumber);
@@ -77,7 +78,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         readSettings();
 
         if (keywordReceivedSms) {
-            Messenger.sendAcknowledgeMessage(this, phoneNumber);
+            Messenger.sendAcknowledgeMessage(this, phoneNumber, telegramId);
         }
 
         //set bestLocation to null and start time
@@ -155,21 +156,12 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         }
 
         if (gpsSms) {
-            Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), speedType, phoneNumber);
+            Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), speedType, phoneNumber, telegramId);
         }
 
         if (googleMapsSms) {
-            Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber);
+            Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId);
         }
-
-        /*if (networkSms) {
-            Messenger.sendNetworkMessage(this, bestLocation, place, phoneNumber, new Messenger.OnNetworkMessageSentListener() {
-                @Override
-                public void onNetworkMessageSent() {
-                    //Log.d(TAG, "Network Message Sent");
-                }
-            });
-        }*/
     }
 
     private void readSettings() {
