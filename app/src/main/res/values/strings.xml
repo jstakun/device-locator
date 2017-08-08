@@ -21,7 +21,7 @@
     <string name="google_message_summary">Third message: Google maps link with your device current location.</string>
     <string name="network_message_title">Forth message</string>
     <string name="network_message_summary">Informations about current address and remaining distance to destination.</string>
-    <string name="acknowledgeMessage">Wait max 1 minute for response. Retry if no response in approx 1 minute.</string>
+    <string name="acknowledgeMessage">Wait max 1 minute for response. Retry if no response after 1 minute.</string>
     <string name="network">Internet:</string>
     <string name="gps">GPS:</string>
     <string name="enabled">enabled</string>

@@ -188,8 +188,7 @@ public class Messenger {
 
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
-        }
-        if (StringUtils.isNotEmpty(telegramId)) {
+        } else if (StringUtils.isNotEmpty(telegramId)) {
             sendTelegram(context, telegramId, text, 1);
         }
     }
@@ -199,8 +198,7 @@ public class Messenger {
         String text = "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()) + "," + latAndLongFormat.format(location.getLongitude());
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
-        }
-        if (StringUtils.isNotEmpty(telegramId)) {
+        } else if (StringUtils.isNotEmpty(telegramId)) {
             sendTelegram(context, telegramId, text, 1);
         }
     }
@@ -286,8 +284,13 @@ public class Messenger {
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;
         }
-        if (text != null && text.length() > 0) {
-            sendSMS(context, phoneNumber, text);
+        if (StringUtils.isNotEmpty(text)) {
+            if (StringUtils.isNotEmpty(phoneNumber)) {
+                sendSMS(context, phoneNumber, text);
+            } else if (StringUtils.isNotEmpty(telegramId)) {
+                sendTelegram(context, telegramId, text, 1);
+            }
+
         }
     }
 
@@ -299,8 +302,7 @@ public class Messenger {
         text += ", Battery level: " + Messenger.getBatteryLevel(context) + "%";
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
-        }
-        if (StringUtils.isNotEmpty(telegramId)) {
+        } else if (StringUtils.isNotEmpty(telegramId)) {
             sendTelegram(context, telegramId, text, 1);
         }
     }

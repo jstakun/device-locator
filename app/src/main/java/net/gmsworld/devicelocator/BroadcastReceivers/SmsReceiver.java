@@ -41,7 +41,6 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String MUTE_COMMAND = "mutedl"; //mute phone
     public final static String NORMAL_COMMAND = "normaldl"; //unmute phone
     public final static String SHARE_COMMAND = "locatedl"; //share current location via sms
-    public final static String SHARE_TELEGRAM_COMMAND = "locatetdl"; //share current location via Telegram
     public final static String RADIUS_COMMAND = "radiusdl"; //change tracking radius, usage radiusdl x where is number of meters > 0
     public final static String CALL_COMMAND = "calldl"; //call to sender
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //set high gps accuracy
@@ -51,7 +50,6 @@ public class SmsReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (findKeyword(context, intent)) return;
-        if (findTelegramKeyword(context, intent)) return;
         if (findStartRouteTrackerServiceStartCommand(context, intent)) return;
         if (findStopRouteTrackerServiceStartCommand(context, intent)) return;
         if (findResetRouteTrackerServiceStartCommand(context, intent)) return;
@@ -266,59 +264,34 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     private boolean findKeyword(Context context, Intent intent) {
-        /*String keyword = PreferenceManager.getDefaultSharedPreferences(context).getString("keyword", "");
-
-        if (keyword.length() == 0) {
-            keyword = SHARE_COMMAND;
-        }
-
-        String token = PreferenceManager.getDefaultSharedPreferences(context).getString("token", "");
-        keyword += token;
-
-        ArrayList<SmsMessage> list = null;
-        try {
-            list = getMessagesWithKeyword(keyword, intent.getExtras());
-        } catch (Exception e) {
-            return false;
-        }*/
         String sender = getSenderAddress(context, intent, SHARE_COMMAND);
         if (sender != null) {
-        //if (list.size() > 0) {
             if (!Permissions.haveSendSMSAndLocationPermission(context)) {
                 try {
                     Permissions.setPermissionNotification(context);
                 } catch (Exception e) {
                     Toast.makeText(context, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
                 }
-
                 return true;
             }
-
             Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender); //list.get(0).getOriginatingAddress());
+            newIntent.putExtra("phoneNumber", sender);
             context.startService(newIntent);
             return true;
         } else {
-            return false;
-        }
-    }
-
-    private boolean findTelegramKeyword(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, SHARE_TELEGRAM_COMMAND);
-        if (sender != null) {
-            Intent newIntent = new Intent(context, SmsSenderService.class);
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String telegramId = settings.getString("telegramId", "");
             if (StringUtils.isNotEmpty(telegramId)) {
-                newIntent.putExtra("telegramId", telegramId);
-                context.startService(newIntent);
-            } else {
-                Log.e(TAG, "Telegram chat id not set! Unable to share location via Telegram");
+                sender = getSenderAddress(context, intent, SHARE_COMMAND + "t");
+                if (sender != null) {
+                    Intent newIntent = new Intent(context, SmsSenderService.class);
+                    newIntent.putExtra("telegramId", telegramId);
+                    context.startService(newIntent);
+                    return true;
+                }
             }
-            return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     private boolean findGpsHighAccuracyCommand(Context context, Intent intent) {
