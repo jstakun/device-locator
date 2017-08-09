@@ -67,6 +67,6 @@ public class LDPlaceAutocompleteFragment extends PlaceAutocompleteFragment {
         /**
          * Run when the clear button is pressed.
          */
-        public void cleared();
+        void cleared();
     }
 }

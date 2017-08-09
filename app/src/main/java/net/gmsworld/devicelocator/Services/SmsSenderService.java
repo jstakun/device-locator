@@ -104,7 +104,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         //Log.d(TAG, "Start time: " + startTime + ", Current time: " + currentTime);
         //Log.d(TAG, "Difference: " + (currentTime - startTime));
 
-        if (currentTime - startTime < this.LOCATION_REQUEST_MAX_WAIT_TIME) {
+        if (currentTime - startTime < LOCATION_REQUEST_MAX_WAIT_TIME) {
             //Log.d(TAG, "NOT EXPIRED YET. CHECK");
 
             if (bestLocation == null) {
@@ -134,7 +134,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             }
 
 
-            if (this.isLocationFused(bestLocation)) {
+            if (isLocationFused(bestLocation)) {
                 //Log.d(TAG, "Location still fused.");
                 return;
             }

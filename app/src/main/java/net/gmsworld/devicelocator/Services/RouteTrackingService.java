@@ -22,9 +22,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
-import net.gmsworld.devicelocator.Utilities.GmsLocationManager;
 import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
-import net.gmsworld.devicelocator.Utilities.GpsDeviceFactory;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
 
@@ -224,11 +222,7 @@ public class RouteTrackingService extends Service {
     }
 
     private boolean isGoogleApiAvailable(Context context) {
-        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
-            return true;
-        } else {
-            return false;
-        }
+        return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS;
     }
 
     private class IncomingHandler extends Handler {
