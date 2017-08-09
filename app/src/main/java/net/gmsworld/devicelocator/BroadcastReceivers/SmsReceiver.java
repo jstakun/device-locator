@@ -207,7 +207,6 @@ public class SmsReceiver extends BroadcastReceiver {
 
         if (sender != null) {
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
 
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String title = settings.getString("routeTitle", "");
@@ -219,14 +218,37 @@ public class SmsReceiver extends BroadcastReceiver {
                 editor.commit();
             }
 
+            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
             routeTracingService.putExtra("title", title);
             routeTracingService.putExtra("phoneNumber", sender);
             context.startService(routeTracingService);
 
             return true;
         } else {
-            return false;
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String telegramId = settings.getString("telegramId", "");
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sender = getSenderAddress(context, intent, ROUTE_COMMAND + "t");
+                if (sender != null) {
+                    String title = settings.getString("routeTitle", "");
+
+                    if (StringUtils.isEmpty(title)) {
+                        title = "devicelocatorroute_" + Network.getDeviceId(context) + "_" + System.currentTimeMillis();
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString("routeTitle", title);
+                        editor.commit();
+                    }
+
+                    Intent routeTracingService = new Intent(context, RouteTrackingService.class);
+                    routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
+                    routeTracingService.putExtra("title", title);
+                    routeTracingService.putExtra("telegramId", telegramId);
+                    context.startService(routeTracingService);
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     private boolean findMuteCommand(Context context, Intent intent) {

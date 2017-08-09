@@ -28,6 +28,8 @@ import net.gmsworld.devicelocator.Utilities.GpsDeviceFactory;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.DecimalFormat;
 
 public class RouteTrackingService extends Service {
@@ -95,9 +97,7 @@ public class RouteTrackingService extends Service {
                         break;
                     case COMMAND_ROUTE:
                         String title = intent.getStringExtra("title");
-                        //don't set phoneNumber here
-                        //this.phoneNumber = intent.getExtras().getString("phoneNumber");
-                        shareRoute(title, intent.getExtras().getString("phoneNumber"));
+                        shareRoute(title, intent.getExtras().getString("phoneNumber"), intent.getExtras().getString("telegramId"));
                         break;
                     case COMMAND_CONFIGURE:
                         this.phoneNumber = intent.getExtras().getString("phoneNumber");
@@ -199,14 +199,18 @@ public class RouteTrackingService extends Service {
         editor.commit();
     }
 
-    private void shareRoute(final String title, final String phoneNumber) {
+    private void shareRoute(final String title, final String phoneNumber, final String telegramId) {
         Log.d(TAG, "shareRoute()");
         GmsSmartLocationManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime, true, new Network.OnGetFinishListener() {
             @Override
             public void onGetFinish(String results, int responseCode, String url) {
                 Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                 final Intent newIntent = new Intent(RouteTrackingService.this, SmsSenderService.class);
-                newIntent.putExtra("phoneNumber", phoneNumber);
+                if (StringUtils.isNotEmpty(phoneNumber)) {
+                    newIntent.putExtra("phoneNumber", phoneNumber);
+                } else if (StringUtils.isNotEmpty(telegramId)) {
+                    newIntent.putExtra("telegramId", telegramId);
+                }
                 newIntent.putExtra("command", SmsReceiver.ROUTE_COMMAND);
                 newIntent.putExtra("title", title);
                 if (responseCode == 200) {
