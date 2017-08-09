@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     private Boolean running = null;
 
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
-    private boolean motionDetectorRunning = false;
+    private boolean motionDetectorRunning = false, routeSharingInProgress = false;
     private String phoneNumber = null, email = null, telegramId = null, token = null;
     private String newEmailAddress = null, newTelegramId = null, newPhoneNumber = null;
 
@@ -242,15 +242,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateUI() {
         ((Button) this.findViewById(R.id.running_button)).setText((running) ? getResources().getString(R.string.stop) : getResources().getString(R.string.start));
-        ((TintableBackgroundView) this.findViewById(R.id.running_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
-        ((TintableBackgroundView) this.findViewById(R.id.send_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ((TintableBackgroundView) (Button)this.findViewById(R.id.running_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
+        ((TintableBackgroundView) (Button)this.findViewById(R.id.send_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
 
         ((Button) this.findViewById(R.id.motion_button)).setText((motionDetectorRunning) ? getResources().getString(R.string.stop) : getResources().getString(R.string.start));
-        ((TintableBackgroundView) this.findViewById(R.id.motion_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
+        ((TintableBackgroundView) (Button)this.findViewById(R.id.motion_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
 
-        ((TintableBackgroundView) this.findViewById(R.id.route_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-        ((TintableBackgroundView) this.findViewById(R.id.contact_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-        ((TintableBackgroundView) this.findViewById(R.id.telegram_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ((TintableBackgroundView) (Button)this.findViewById(R.id.route_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ((TintableBackgroundView) (ImageButton)this.findViewById(R.id.contact_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ((TintableBackgroundView) (ImageButton)this.findViewById(R.id.telegram_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
     }
 
     private void toggleRunning() {
@@ -610,18 +610,25 @@ public class MainActivity extends AppCompatActivity {
         shareRouteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (routeSharingInProgress) {
+                    Toast.makeText(getApplicationContext(), "Please wait. Route sharing in progress...", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 if (Files.countLinesFromContextDir(AbstractLocationManager.ROUTE_FILE, MainActivity.this) > 1) {
+                    routeSharingInProgress = true;
                     long now = System.currentTimeMillis();
                     final String title = "devicelocatorroute_" + Network.getDeviceId(MainActivity.this) + "_" + now;
                     int routeSize = GmsSmartLocationManager.getInstance().uploadRouteToServer(MainActivity.this, title, "", now, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
+                            routeSharingInProgress = false;
                             Log.d(TAG, "Received following response code: "+ responseCode + " from url " + url);
                             Message message = loadingHandler.obtainMessage(SHARE_ROUTE_MESSAGE, responseCode, 0, title);
                             message.sendToTarget();
                         }
                     });
                     if (routeSize <= 1) {
+                        routeSharingInProgress = false;
                         Toast.makeText(getApplicationContext(), "No route is saved yet. Please make sure device location tracking is started and try again after some time.", Toast.LENGTH_LONG).show();
                     }
                 } else {
