@@ -172,7 +172,7 @@ public class Messenger {
         text += r.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
         text += r.getString(R.string.latitude) + " " + latAndLongFormat.format(location.getLatitude()) + "\n";
         text += r.getString(R.string.longitude) + " " + latAndLongFormat.format(location.getLongitude()) + "\n";
-        text += "Battery level: " + getBatteryLevel(context) + "%";
+        text += "Battery level: " + getBatteryLevel(context);
 
         if (location.hasSpeed()) {
             if (speedType == 0) {
@@ -189,6 +189,7 @@ public class Messenger {
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         } else if (StringUtils.isNotEmpty(telegramId)) {
+            //text = text.replace("\n", ", ");
             sendTelegram(context, telegramId, text, 1);
         }
     }
@@ -299,7 +300,7 @@ public class Messenger {
         String text = r.getString(R.string.acknowledgeMessage);
         text += " " + r.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context));
         text += ", " + r.getString(R.string.gps) + " " + SmsSenderService.locationToString(context);
-        text += ", Battery level: " + Messenger.getBatteryLevel(context) + "%";
+        text += ", Battery level: " + Messenger.getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         } else if (StringUtils.isNotEmpty(telegramId)) {

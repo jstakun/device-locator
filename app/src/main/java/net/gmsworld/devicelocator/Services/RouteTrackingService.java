@@ -162,12 +162,6 @@ public class RouteTrackingService extends Service {
 
         //use smart location lib
         GmsSmartLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
-
-        //if (!isGoogleApiAvailable(this)) {
-        //    GpsDeviceFactory.startDevice(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
-        //} else {
-        //    GmsLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
-        //}
     }
 
     private synchronized void stopTracking() {
@@ -184,12 +178,6 @@ public class RouteTrackingService extends Service {
 
         //use smart location lib
         GmsSmartLocationManager.getInstance().disable(IncomingHandler.class.getName(), this);
-
-        //if (!isGoogleApiAvailable(this)) {
-        //    GpsDeviceFactory.stopDevice(IncomingHandler.class.getName());
-        //} else {
-        //    GmsLocationManager.getInstance().disable(IncomingHandler.class.getName());
-        //}
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
@@ -254,7 +242,7 @@ public class RouteTrackingService extends Service {
                             DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
                             String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
                                              " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m." +
-                                             "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) + " p." +
+                                             "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
                                              "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()) + "," + latAndLongFormat.format(location.getLongitude());
 
                             //Log.d(TAG, message);
