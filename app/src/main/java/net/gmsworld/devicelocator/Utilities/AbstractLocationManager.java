@@ -82,7 +82,7 @@ public abstract class AbstractLocationManager {
         }
     }
 
-    protected void sendLocationMessage(Location location, int distance) {
+    private void sendLocationMessage(Location location, int distance) {
         for (Map.Entry<String, Handler> entry : mLocationHandlers.entrySet()) {
             Message msg = Message.obtain();
             msg.what = UPDATE_LOCATION;

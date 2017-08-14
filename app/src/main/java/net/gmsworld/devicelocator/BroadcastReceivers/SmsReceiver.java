@@ -18,17 +18,17 @@ import android.util.Patterns;
 import android.widget.Toast;
 
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.Messenger;
-import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
-import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.Permissions;
+import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class SmsReceiver extends BroadcastReceiver {
 
@@ -46,6 +46,9 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //set high gps accuracy
     public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //set balanced gps accuracy
     public final static String NOTIFY_COMMAND = "notifydl"; //set notification email, phone or telegram chat id
+    //TODO
+    public final static String AUDIO_ON_COMMAND = "audiodl"; //enable useAudio
+    public final static String AUDIO_OFF_COMMAND = "noaudiodl"; //disable useAudio
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -88,8 +91,31 @@ public class SmsReceiver extends BroadcastReceiver {
             context.startService(newIntent);
             return true;
         } else {
-            return false;
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String telegramId = settings.getString("telegramId", "");
+
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sender = getSenderAddress(context, intent, START_COMMAND + "t");
+                if (sender != null) {
+                    int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
+                    String phoneNumber = settings.getString("phoneNumber", "");
+                    String email = settings.getString("email", "");
+
+                    RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false);
+
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putBoolean("motionDetectorRunning", true);
+                    editor.commit();
+
+                    Intent newIntent = new Intent(context, SmsSenderService.class);
+                    newIntent.putExtra("telegramId", telegramId);
+                    newIntent.putExtra("command", START_COMMAND);
+                    context.startService(newIntent);
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     private boolean findResetRouteTrackerServiceStartCommand(Context context, Intent intent) {
@@ -135,8 +161,25 @@ public class SmsReceiver extends BroadcastReceiver {
             context.startService(newIntent);
             return true;
         } else {
-            return false;
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String telegramId = settings.getString("telegramId", "");
+
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sender = getSenderAddress(context, intent, STOP_COMMAND + "t");
+                if (sender != null) {
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putBoolean("motionDetectorRunning", false);
+                    editor.commit();
+
+                    Intent newIntent = new Intent(context, SmsSenderService.class);
+                    newIntent.putExtra("telegramId", telegramId);
+                    newIntent.putExtra("command", STOP_COMMAND);
+                    context.startService(newIntent);
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     private boolean findChangeRadiusRouteTrackerServiceCommand(Context context, Intent intent) {

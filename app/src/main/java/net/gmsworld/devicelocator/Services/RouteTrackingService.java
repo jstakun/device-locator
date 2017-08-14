@@ -20,6 +20,7 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
+import net.gmsworld.devicelocator.Audio.morse.MorseSoundGenerator;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
@@ -214,6 +215,9 @@ public class RouteTrackingService extends Service {
     }
 
     private class IncomingHandler extends Handler {
+
+        MorseSoundGenerator morseSoundGenerator = null;
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -259,6 +263,21 @@ public class RouteTrackingService extends Service {
                                 message = message.replace("\n", ", ");
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message, 1);
                             }
+
+                            //TODO audio testing
+                            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this);
+                            boolean useAudio = settings.getBoolean("useAudio", false);
+                            if (useAudio) {
+                                if (morseSoundGenerator == null) {
+                                    morseSoundGenerator = new MorseSoundGenerator(44100, 800.0, 50);
+                                }
+                                synchronized (morseSoundGenerator) {
+                                    final String signal = ((int) (location.getLatitude() * 1e6)) + "," + ((int) (location.getLongitude() * 1e6));
+                                    Log.d(TAG, "Sending audio signal: " + signal);
+                                    morseSoundGenerator.morseOnce(signal);
+                                }
+                            }
+                            //------------------
                         }
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage(), e);
