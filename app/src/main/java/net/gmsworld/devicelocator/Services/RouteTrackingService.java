@@ -216,7 +216,7 @@ public class RouteTrackingService extends Service {
 
     private class IncomingHandler extends Handler {
 
-        MorseSoundGenerator morseSoundGenerator = null;
+        final MorseSoundGenerator morseSoundGenerator = new MorseSoundGenerator(44100, 800.0, 50);;
 
         @Override
         public void handleMessage(Message msg) {
@@ -268,9 +268,6 @@ public class RouteTrackingService extends Service {
                             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this);
                             boolean useAudio = settings.getBoolean("useAudio", false);
                             if (useAudio) {
-                                if (morseSoundGenerator == null) {
-                                    morseSoundGenerator = new MorseSoundGenerator(44100, 800.0, 50);
-                                }
                                 synchronized (morseSoundGenerator) {
                                     final String signal = ((int) (location.getLatitude() * 1e6)) + "," + ((int) (location.getLongitude() * 1e6));
                                     Log.d(TAG, "Sending audio signal: " + signal);
