@@ -249,7 +249,7 @@ public class RouteTrackingService extends Service {
                                              "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
                                              "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
-                            //Log.d(TAG, message);
+
                             if (email != null && email.length() > 0) {
                                 String title = "Message from Device Locator";
                                 String deviceId = Network.getDeviceId(RouteTrackingService.this);
