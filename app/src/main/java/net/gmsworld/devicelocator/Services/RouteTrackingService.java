@@ -264,8 +264,7 @@ public class RouteTrackingService extends Service {
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message, 1);
                             }
 
-                            //TODO audio testing
-                            //from https://github.com/uschwar/morsecode/tree/master/MorseService/src/at/schwar/android/morse/service
+                            //audio transmitter
                             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this);
                             boolean useAudio = settings.getBoolean("useAudio", false);
                             if (useAudio) {

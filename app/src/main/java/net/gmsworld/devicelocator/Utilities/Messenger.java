@@ -280,6 +280,12 @@ public class Messenger {
                     text += "Notifications will be sent to " + StringUtils.joinWith(", ", notifications);
                 }
                 break;
+            case SmsReceiver.AUDIO_COMMAND:
+                text = "Audio transmitter has been started.";
+                break;
+            case SmsReceiver.NOAUDIO_COMMAND:
+                text = "Audio transmitter has been stopped.";
+                break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;

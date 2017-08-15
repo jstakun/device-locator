@@ -46,9 +46,9 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //set high gps accuracy
     public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //set balanced gps accuracy
     public final static String NOTIFY_COMMAND = "notifydl"; //set notification email, phone or telegram chat id
-    //TODO audio settings
-    public final static String AUDIO_ON_COMMAND = "audiodl"; //enable useAudio
-    public final static String AUDIO_OFF_COMMAND = "noaudiodl"; //disable useAudio
+
+    public final static String AUDIO_COMMAND = "audiodl"; //enable audio transmitter
+    public final static String NOAUDIO_COMMAND = "noaudiodl"; //disable audio transmitter
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -64,6 +64,8 @@ public class SmsReceiver extends BroadcastReceiver {
         if (findGpsHighAccuracyCommand(context, intent)) return;
         if (findGpsLowAccuracyCommand(context, intent)) return;
         if (findNotifyCommand(context, intent)) return;
+        if (findAudioCommand(context, intent)) return;
+        if (findNoAudioCommand(context, intent)) return;
     }
 
     private boolean findStartRouteTrackerServiceStartCommand(Context context, Intent intent) {
@@ -306,6 +308,44 @@ public class SmsReceiver extends BroadcastReceiver {
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", MUTE_COMMAND);
+            context.startService(newIntent);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean findAudioCommand(Context context, Intent intent) {
+        String sender = getSenderAddress(context, intent, AUDIO_COMMAND);
+
+        if (sender != null) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean("useAudio", true);
+            editor.commit();
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", AUDIO_COMMAND);
+            context.startService(newIntent);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean findNoAudioCommand(Context context, Intent intent) {
+        String sender = getSenderAddress(context, intent, NOAUDIO_COMMAND);
+
+        if (sender != null) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putBoolean("useAudio", false);
+            editor.commit();
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", NOAUDIO_COMMAND);
             context.startService(newIntent);
             return true;
         } else {
