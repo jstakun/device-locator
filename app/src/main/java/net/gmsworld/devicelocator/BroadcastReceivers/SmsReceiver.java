@@ -46,7 +46,7 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //set high gps accuracy
     public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //set balanced gps accuracy
     public final static String NOTIFY_COMMAND = "notifydl"; //set notification email, phone or telegram chat id
-    //TODO
+    //TODO audio settings
     public final static String AUDIO_ON_COMMAND = "audiodl"; //enable useAudio
     public final static String AUDIO_OFF_COMMAND = "noaudiodl"; //disable useAudio
 
@@ -167,6 +167,8 @@ public class SmsReceiver extends BroadcastReceiver {
             if (StringUtils.isNotEmpty(telegramId)) {
                 sender = getSenderAddress(context, intent, STOP_COMMAND + "t");
                 if (sender != null) {
+                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false);
+
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putBoolean("motionDetectorRunning", false);
                     editor.commit();

@@ -247,7 +247,7 @@ public class RouteTrackingService extends Service {
                             String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
                                              " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m." +
                                              "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
-                                             "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()) + "," + latAndLongFormat.format(location.getLongitude());
+                                             "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
                             //Log.d(TAG, message);
                             if (email != null && email.length() > 0) {
@@ -265,6 +265,7 @@ public class RouteTrackingService extends Service {
                             }
 
                             //TODO audio testing
+                            //from https://github.com/uschwar/morsecode/tree/master/MorseService/src/at/schwar/android/morse/service
                             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this);
                             boolean useAudio = settings.getBoolean("useAudio", false);
                             if (useAudio) {

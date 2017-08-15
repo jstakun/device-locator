@@ -195,7 +195,7 @@ public class Messenger {
     }
 
     public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId) {
-        String text = "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()) + "," + latAndLongFormat.format(location.getLongitude());
+        String text = "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         } else if (StringUtils.isNotEmpty(telegramId)) {
