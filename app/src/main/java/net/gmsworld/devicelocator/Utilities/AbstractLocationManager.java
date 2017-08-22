@@ -3,9 +3,11 @@ package net.gmsworld.devicelocator.Utilities;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -19,6 +21,7 @@ import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +35,7 @@ import java.util.Vector;
 
 public abstract class AbstractLocationManager {
 
-    private static final String TAG =  AbstractLocationManager.class.getSimpleName();
+    private static final String TAG = AbstractLocationManager.class.getSimpleName();
 
     public static final String ROUTE_FILE = "routeFile.txt";
 
@@ -77,7 +80,7 @@ public abstract class AbstractLocationManager {
         if (update) {
             this.recentLocationSent = location;
             //Log.d(TAG, "Saving route point: " + lastLocation.getLatitude() + "," + lastLocation.getLongitude());
-            sendLocationMessage(lastLocation, (int)distWithAccuracy);
+            sendLocationMessage(lastLocation, (int) distWithAccuracy);
             //route.add(lastLocation);
         }
     }
@@ -127,106 +130,6 @@ public abstract class AbstractLocationManager {
 
         this.recentLocationSent = null;
         this.lastLocation = null;
-    }
-
-    public int uploadRouteToServer(final Context context, final String title, final String phoneNumber, final long creationDate, final boolean smsNotify, Network.OnGetFinishListener onFinishListener) {
-        List<String> route = Files.readFileByLinesFromContextDir(ROUTE_FILE, context);
-        final int size = route.size();
-        final Intent newIntent = new Intent(context, SmsSenderService.class);
-        if (smsNotify) {
-            newIntent.putExtra("phoneNumber", phoneNumber);
-            newIntent.putExtra("command", SmsReceiver.ROUTE_COMMAND);
-            newIntent.putExtra("title", title);
-        }
-        if (size > 1) {
-            try {
-                String desc = "Device id: " + Network.getDeviceId(context);
-                String content = routeToGeoJson(route, title, desc, creationDate);
-                String url = context.getResources().getString(R.string.routeProviderUrl);
-                //Log.d(TAG, "Uploading route " + content);
-                Network.post(url, "route=" + content, null, onFinishListener);
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage(), e);
-                if (smsNotify) {
-                    newIntent.putExtra("size", -1);
-                    context.startService(newIntent);
-                }
-            }
-        } else {
-            Log.d(TAG, "Route must have at least 2 points. Currently it has " + size);
-            if (smsNotify) {
-                newIntent.putExtra("size", 0);
-                context.startService(newIntent);
-            }
-        }
-        return size;
-    }
-
-    private static String routeToGeoJson(List<String> routePoints, String filename, String description, long creationDate) throws Exception {
-        Gson gson = new Gson();
-
-        FeatureCollection fc = new FeatureCollection();
-        fc.name = filename;
-
-        Feature[] f = {new Feature()};
-        fc.features = f;
-
-        Properties p = new Properties();
-        p.name = filename;
-        p.username = "device-locator";
-        p.creationDate = creationDate;
-
-        f[0].properties = p;
-
-        Geometry g = new Geometry();
-
-        int routeSize = routePoints.size();
-        double[][] coordinates = new double[routeSize][2];
-        Log.d(TAG, "Creating route geojson containing " + routeSize + " points");
-        long routeTime = -1L;
-        float routeDistance = 0L;
-        for (int i=0;i<routeSize;i++) {
-            String coordsStr = routePoints.get(i);
-            //Log.d(TAG, "Parsing: " + coordsStr);
-            String[] coords = StringUtils.split(coordsStr, ",");
-            if (coords.length >= 2) {
-                //Log.d(TAG, "Adding point " + coords[0] + "," + coords[1]);
-                coordinates[i] = new double[]{Double.parseDouble(coords[0]), Double.parseDouble(coords[1])};
-            }
-
-            if (i == 0 && coords.length >= 3) {
-                routeTime = Long.parseLong(coords[2]);
-            } else if (i == (routeSize-1) && coords.length >= 3) {
-                routeTime = Long.parseLong(coords[2]) - routeTime;
-            }
-
-            if (i > 0) {
-                float dist[] = new float[1];
-                Location.distanceBetween(coordinates[i][0], coordinates[i][1], coordinates[i-1][0], coordinates[i-1][1], dist);
-                if (dist[0] > 0) {
-                    routeDistance += dist[0];
-                }
-            }
-
-        }
-
-        if (routeTime > 0) {
-            description += ", time: " + routeTime + " ms.";
-            p.time = routeTime;
-        }
-
-        if (routeDistance > 0) {
-            description += ", distance: " + routeDistance + " meters";
-            p.distance = routeDistance;
-        }
-
-        p.description = description;
-        p.uploadDate = System.currentTimeMillis();
-
-        g.coordinates = coordinates;
-        f[0].geometry = g;
-
-        return gson.toJson(fc);
     }
 
     void addLocationToRoute(Location location) {
@@ -337,5 +240,158 @@ public abstract class AbstractLocationManager {
         sane = Math.abs(altitude - avg) < MAX_REASONABLE_ALTITUDECHANGE;
 
         return sane;
+    }
+
+    public void executeRouteUploadTask(Context activity, String title, String phoneNumber, long creationTimestamp, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
+        new RouteUploadTask(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener).execute();
+    }
+
+    static class RouteUploadTask extends AsyncTask<Void, Integer, Integer> {
+        private final WeakReference<Context> callerActivity;
+        private String title, phoneNumber;
+        private long creationTimestamp;
+        private Network.OnGetFinishListener onGetFinishListener;
+        private boolean smsNotify;
+
+        RouteUploadTask(Context activity, String title, String phoneNumber, long creationTimestamp, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
+            this.callerActivity = new WeakReference<>(activity);
+            this.title = title;
+            this.phoneNumber = phoneNumber;
+            this.creationTimestamp = creationTimestamp;
+            this.smsNotify = smsNotify;
+            this.onGetFinishListener = onGetFinishListener;
+        }
+
+        @Override
+        public void onPreExecute () {
+            if (!smsNotify) {
+                Context activity = callerActivity.get();
+                if (activity == null) {
+                    return;
+                }
+                Toast.makeText(activity, "Route sharing task has been started...", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        @Override
+        public Integer doInBackground(Void... params) {
+            Context activity = callerActivity.get();
+            if (activity == null) {
+                return -1;
+            }
+            return uploadRouteToServer(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener);
+        }
+
+        @Override
+        public void onPostExecute(Integer routeSize) {
+            Context activity = callerActivity.get();
+            if (activity == null) {
+                return;
+            }
+            if (routeSize <= 1 && !smsNotify) {
+                Toast.makeText(activity, "No route is saved yet. Please make sure device location tracking is started and try again after some time.", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        private Integer uploadRouteToServer(final Context context, final String title, final String phoneNumber, final long creationDate, final boolean smsNotify, Network.OnGetFinishListener onFinishListener) {
+            List<String> route = Files.readFileByLinesFromContextDir(ROUTE_FILE, context);
+            final int size = route.size();
+            Log.d(TAG, "Route has " + size + " points");
+            final Intent newIntent = new Intent(context, SmsSenderService.class);
+            if (smsNotify) {
+                newIntent.putExtra("phoneNumber", phoneNumber);
+                newIntent.putExtra("command", SmsReceiver.ROUTE_COMMAND);
+                newIntent.putExtra("title", title);
+            }
+            if (size > 1) {
+                try {
+                    String desc = "Device id: " + Network.getDeviceId(context);
+                    String content = routeToGeoJson(route, title, desc, creationDate);
+                    String url = context.getResources().getString(R.string.routeProviderUrl);
+                    //Log.d(TAG, "Uploading route " + content);
+                    Network.post(url, "route=" + content, null, onFinishListener);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    if (smsNotify) {
+                        newIntent.putExtra("size", -1);
+                        context.startService(newIntent);
+                    }
+                }
+            } else {
+                Log.d(TAG, "Route must have at least 2 points. Currently it has " + size);
+                if (smsNotify) {
+                    newIntent.putExtra("size", 0);
+                    context.startService(newIntent);
+                }
+            }
+            return size;
+        }
+
+        private String routeToGeoJson(List<String> routePoints, String filename, String description, long creationDate) throws Exception {
+            Gson gson = new Gson();
+
+            FeatureCollection fc = new FeatureCollection();
+            fc.name = filename;
+
+            Feature[] f = {new Feature()};
+            fc.features = f;
+
+            Properties p = new Properties();
+            p.name = filename;
+            p.username = "device-locator";
+            p.creationDate = creationDate;
+
+            f[0].properties = p;
+
+            Geometry g = new Geometry();
+
+            int routeSize = routePoints.size();
+            double[][] coordinates = new double[routeSize][2];
+            Log.d(TAG, "Creating route geojson containing " + routeSize + " points");
+            long routeTime = -1L;
+            float routeDistance = 0L;
+            for (int i = 0; i < routeSize; i++) {
+                String coordsStr = routePoints.get(i);
+                //Log.d(TAG, "Parsing: " + coordsStr);
+                String[] coords = StringUtils.split(coordsStr, ",");
+                if (coords.length >= 2) {
+                    //Log.d(TAG, "Adding point " + coords[0] + "," + coords[1]);
+                    coordinates[i] = new double[]{Double.parseDouble(coords[0]), Double.parseDouble(coords[1])};
+                }
+
+                if (i == 0 && coords.length >= 3) {
+                    routeTime = Long.parseLong(coords[2]);
+                } else if (i == (routeSize - 1) && coords.length >= 3) {
+                    routeTime = Long.parseLong(coords[2]) - routeTime;
+                }
+
+                if (i > 0) {
+                    float dist[] = new float[1];
+                    Location.distanceBetween(coordinates[i][0], coordinates[i][1], coordinates[i - 1][0], coordinates[i - 1][1], dist);
+                    if (dist[0] > 0) {
+                        routeDistance += dist[0];
+                    }
+                }
+
+            }
+
+            if (routeTime > 0) {
+                description += ", time: " + routeTime + " ms.";
+                p.time = routeTime;
+            }
+
+            if (routeDistance > 0) {
+                description += ", distance: " + routeDistance + " meters";
+                p.distance = routeDistance;
+            }
+
+            p.description = description;
+            p.uploadDate = System.currentTimeMillis();
+
+            g.coordinates = coordinates;
+            f[0].geometry = g;
+
+            return gson.toJson(fc);
+        }
     }
 }

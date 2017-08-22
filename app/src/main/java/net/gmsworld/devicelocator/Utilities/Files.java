@@ -3,6 +3,7 @@ package net.gmsworld.devicelocator.Utilities;
 import android.content.Context;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,30 +39,38 @@ public class Files {
 
     public static List<String> readFileByLinesFromContextDir(String filename, Context context) {
         InputStream is = null;
-        InputStreamReader isr = null;
+        //InputStreamReader isr = null;
         List<String> lines = new ArrayList<String>();
 
         try {
             File fc = new File(context.getFilesDir(), filename);
             if (fc.exists()) {
                 is = new FileInputStream(fc);
-                isr = new InputStreamReader(is, "UTF8");
+                //isr = new InputStreamReader(is, "UTF8");
 
+                //String line;
+                //while ((line = readLine(isr)) != null) {
+                //    lines.add(line);
+                //}
+                long start = System.nanoTime();
+                BufferedReader in = new BufferedReader(new InputStreamReader(is));
                 String line;
-                while ((line = readLine(isr)) != null) {
+                while ((line = in.readLine()) != null) {
                     lines.add(line);
                 }
+                long time = System.nanoTime() - start;
+                Log.d(TAG, "Route file processed in " + time + " ns.");
             }
         } catch (Exception e) {
             Log.d(TAG, e.getMessage(), e);
         } finally {
-            if (isr != null) {
-                try {
-                    isr.close();
-                } catch (Exception e) {
-                    Log.d(TAG, e.getMessage(), e);
-                }
-            }
+            //if (isr != null) {
+            //    try {
+            //        isr.close();
+            //    } catch (Exception e) {
+            //        Log.d(TAG, e.getMessage(), e);
+            //    }
+            //}
             if (is != null) {
                 try {
                     is.close();
@@ -73,30 +82,55 @@ public class Files {
         return lines;
     }
 
+    public static boolean isRouteTracked(String filename, Context context, int numOfPoints) {
+        InputStream is = null;
+        int i=0;
+
+        try {
+            File fc = new File(context.getFilesDir(), filename);
+            if (fc.exists()) {
+                is = new FileInputStream(fc);
+                BufferedReader in = new BufferedReader(new InputStreamReader(is));
+                while (i < numOfPoints) {
+                    String line = in.readLine();
+                    if (line == null) {
+                        break;
+                    } else {
+                        i += 1;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.d(TAG, e.getMessage(), e);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (Exception e) {
+                    Log.d(TAG, e.getMessage(), e);
+                }
+            }
+        }
+        return (i == numOfPoints);
+    }
+
     public static int countLinesFromContextDir(String filename, Context context) {
         InputStream is = null;
-        InputStreamReader isr = null;
         int lines= 0;
 
         try {
             File fc = new File(context.getFilesDir(), filename);
             if (fc.exists()) {
                 is = new FileInputStream(fc);
-                isr = new InputStreamReader(is, "UTF8");
-                while (readLine(isr) != null) {
+                BufferedReader in = new BufferedReader(new InputStreamReader(is));
+                String line;
+                while ((line = in.readLine()) != null) {
                     lines++;
                 }
             }
         } catch (Exception e) {
             Log.d(TAG, e.getMessage(), e);
         } finally {
-            if (isr != null) {
-                try {
-                    isr.close();
-                } catch (Exception e) {
-                    Log.d(TAG, e.getMessage(), e);
-                }
-            }
             if (is != null) {
                 try {
                     is.close();

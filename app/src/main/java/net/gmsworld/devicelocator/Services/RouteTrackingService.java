@@ -17,9 +17,6 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-
 import net.gmsworld.devicelocator.Audio.morse.MorseSoundGenerator;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
@@ -188,7 +185,7 @@ public class RouteTrackingService extends Service {
 
     private void shareRoute(final String title, final String phoneNumber, final String telegramId) {
         Log.d(TAG, "shareRoute()");
-        GmsSmartLocationManager.getInstance().uploadRouteToServer(this, title, phoneNumber, startTime, true, new Network.OnGetFinishListener() {
+        GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, title, phoneNumber, startTime, true, new Network.OnGetFinishListener() {
             @Override
             public void onGetFinish(String results, int responseCode, String url) {
                 Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -208,10 +205,6 @@ public class RouteTrackingService extends Service {
                 RouteTrackingService.this.startService(newIntent);
             }
         });
-    }
-
-    private boolean isGoogleApiAvailable(Context context) {
-        return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS;
     }
 
     private class IncomingHandler extends Handler {
