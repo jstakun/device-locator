@@ -142,8 +142,31 @@ public class SmsReceiver extends BroadcastReceiver {
             context.startService(newIntent);
             return true;
         } else {
-            return false;
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String telegramId = settings.getString("telegramId", "");
+
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sender = getSenderAddress(context, intent, RESET_COMMAND + "t");
+                if (sender != null) {
+                    int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
+                    String phoneNumber = settings.getString("phoneNumber", "");
+                    String email = settings.getString("email", "");
+
+                    RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true);
+
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putBoolean("motionDetectorRunning", true);
+                    editor.commit();
+
+                    Intent newIntent = new Intent(context, SmsSenderService.class);
+                    newIntent.putExtra("telegramId", telegramId);
+                    newIntent.putExtra("command", RESET_COMMAND);
+                    context.startService(newIntent);
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     private boolean findStopRouteTrackerServiceStartCommand(Context context, Intent intent) {
