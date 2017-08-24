@@ -9,7 +9,9 @@ import android.content.res.Resources;
 import android.location.Location;
 import android.os.BatteryManager;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
@@ -65,7 +67,7 @@ public class Messenger {
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendEmail(context, email, message, title, tokenStr, 1);
             } else {
-                String queryString = "scope=dl&user=" + Network.getDeviceId(context);
+                String queryString = "scope=dl&user=" + getDeviceId(context);
                 Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
@@ -94,7 +96,7 @@ public class Messenger {
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendTelegram(context, telegramId, message, tokenStr, 1);
             } else {
-                String queryString = "scope=dl&user=" + Network.getDeviceId(context);
+                String queryString = "scope=dl&user=" + getDeviceId(context);
                 Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
@@ -123,7 +125,7 @@ public class Messenger {
         headers.put("X-GMS-Scope", "dl");
 
         try {
-            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&user=" + Network.getDeviceId(context);
+            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&user=" + getDeviceId(context);
 
             Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
@@ -286,6 +288,9 @@ public class Messenger {
             case SmsReceiver.NOAUDIO_COMMAND:
                 text = "Audio transmitter has been stopped.";
                 break;
+            case "LoginFailed":
+                text = "Failed login attempt to your device " + getDeviceId(context) + "!";
+                break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;
@@ -344,7 +349,7 @@ public class Messenger {
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendEmailRegistrationRequest(context, email, tokenStr, 1);
             } else {
-                String queryString = "scope=dl&user=" + Network.getDeviceId(context);
+                String queryString = "scope=dl&user=" + getDeviceId(context);
                 Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
@@ -373,7 +378,7 @@ public class Messenger {
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
             } else {
-                String queryString = "scope=dl&user=" + Network.getDeviceId(context);
+                String queryString = "scope=dl&user=" + getDeviceId(context);
                 Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
@@ -402,7 +407,7 @@ public class Messenger {
         headers.put("X-GMS-Scope", "dl");
 
         try {
-            String queryString = "type=register_t&chatId=" + telegramId + "&user=" + Network.getDeviceId(context);
+            String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context);
 
             Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
@@ -425,7 +430,7 @@ public class Messenger {
         headers.put("X-GMS-Scope", "dl");
 
         try {
-            String queryString = "type=register_m&email=" + email + "&user=" + Network.getDeviceId(context);
+            String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context);
 
             Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
@@ -439,5 +444,35 @@ public class Messenger {
         } catch (Exception e) {
             Log.d(TAG, e.getMessage(), e);
         }
+    }
+
+    public static String getDeviceId(Context context) {
+        String androidDeviceId = null;
+
+        if (context != null) {
+            //android.Manifest.permission.READ_PHONE_STATE required
+            // get telephony imei
+            try {
+                final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                androidDeviceId = tm.getDeviceId(); //imei
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+
+            // get internal android device id
+            if (androidDeviceId == null || androidDeviceId.length() == 0) {
+                try {
+                    androidDeviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
+            }
+        }
+
+        if (androidDeviceId == null) {
+            androidDeviceId = "unknown";
+        }
+
+        return androidDeviceId;
     }
 }

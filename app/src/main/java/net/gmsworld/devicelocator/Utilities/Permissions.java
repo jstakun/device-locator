@@ -28,6 +28,7 @@ public class Permissions {
         permissions.add(3, Manifest.permission.READ_PHONE_STATE);
         permissions.add(4, Manifest.permission.MODIFY_AUDIO_SETTINGS);
         permissions.add(5, Manifest.permission.CALL_PHONE);
+        permissions.add(5, Manifest.permission.BIND_DEVICE_ADMIN);
 
         ArrayList<String> neededPermissions = new ArrayList<>();
         for (int i = 0; i < permissions.size(); i++) {
@@ -54,14 +55,16 @@ public class Permissions {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, 2);
     }
 
-    public static void requestContactsPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.READ_PHONE_STATE}, 2);
+    public static void requestLocationPermission(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
     }
 
-    public static void requestAllRequiredPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS, Manifest.permission.SEND_SMS,
-                Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.MODIFY_AUDIO_SETTINGS, Manifest.permission.CALL_PHONE}, 2);
+    public static void requestContactsPermission(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, 1);//, Manifest.permission.READ_PHONE_STATE}, 2);
+    }
+
+    public static void requestCallPhonePermission(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, 1);
     }
 
     public static boolean haveSendSMSAndLocationPermission(Context context) {
@@ -69,18 +72,17 @@ public class Permissions {
                 ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
-    public static boolean haveAllRequiredPermission(Context context) {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.MODIFY_AUDIO_SETTINGS) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
+    public static boolean haveLocationPermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     public static boolean haveReadContactsPermission(Context context) {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED; // &&
+                //ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static boolean haveCallPhonePermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED; // &&
     }
 
     public static void setPermissionNotification(Context context) {

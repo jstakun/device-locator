@@ -8,11 +8,11 @@ import android.util.Log;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
 
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;
-import org.acra.annotation.ReportsCrashes;
 import org.acra.config.ACRAConfiguration;
 import org.acra.config.ConfigurationBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +47,7 @@ public class DeviceLocatorApp extends Application {
             headers.put("X-GMS-Scope", "dl");
             initAcra(headers);
         } else {
-            String queryString = "scope=dl&user=" + Network.getDeviceId(this);
+            String queryString = "scope=dl&user=" + Messenger.getDeviceId(this);
             Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {

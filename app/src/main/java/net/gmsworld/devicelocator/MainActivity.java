@@ -1,5 +1,6 @@
 package net.gmsworld.devicelocator;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
@@ -15,7 +16,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Messenger;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.support.v4.view.TintableBackgroundView;
@@ -41,12 +41,14 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.Utilities.Files;
 import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
+import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.Permissions;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
@@ -62,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
     //private static final int MOTION_DETECTOR_INTENT = 2;
     private static final int SELECT_CONTACT_INTENT = 3;
 
+    private static final int ENABLE_ADMIN_INTENT = 12;
+
     private static final int SHARE_ROUTE_MESSAGE = 1;
 
     private static final int MAX_RADIUS = 10000; //meters
@@ -74,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     private String newEmailAddress = null, newTelegramId = null, newPhoneNumber = null;
 
     private Handler loadingHandler;
-    private Messenger mMessenger;
+    //private Messenger mMessenger;
     private boolean isTrackingServiceBound = false;
 
     @Override
@@ -82,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate()");
         Permissions.checkAndRequestPermissions(this); //check marshmallow permissions
+
         setContentView(R.layout.activity_main);
         restoreSavedData();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -100,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         toggleBroadcastReceiver(); //set broadcast receiver for sms
         //scrollTop();
         loadingHandler = new UIHandler();
-        mMessenger = new Messenger(loadingHandler);
+        //mMessenger = new Messenger(loadingHandler);
         if (motionDetectorRunning) {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, false);
         }
@@ -142,14 +147,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            phoneNumber = getNumber(data);
-            initPhoneNumberInput();
-            if (phoneNumber != null) {
-                if (requestCode == SEND_LOCATION_INTENT) {
-                    launchService();
-                }
+            if (requestCode == ENABLE_ADMIN_INTENT) {
+                Toast.makeText(MainActivity.this, "You'll receive notification when wrong password or pin will be entered to unlock this device.", Toast.LENGTH_LONG).show();
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putBoolean("loginTracker", true);
+                editor.commit();
             } else {
-                Toast.makeText(getApplicationContext(), "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
+                phoneNumber = getNumber(data);
+                initPhoneNumberInput();
+                if (phoneNumber != null) {
+                    if (requestCode == SEND_LOCATION_INTENT) {
+                        launchService();
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
@@ -171,6 +184,9 @@ public class MainActivity extends AppCompatActivity {
             case R.id.tracker:
                 findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
+                return true;
+            case R.id.loginTracker:
+                onLoginTrackerItemSelected();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -230,6 +246,37 @@ public class MainActivity extends AppCompatActivity {
         editor.commit();
     }
 
+    private void onLoginTrackerItemSelected() {
+        final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean loginTracker = settings.getBoolean("loginTracker", false);
+        final ComponentName deviceAdmin = new ComponentName(this, DeviceAdminEventReceiver.class);
+
+        if (loginTracker) {
+            //disable tracking
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+                    devicePolicyManager.removeActiveAdmin(deviceAdmin);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putBoolean("loginTracker", false);
+                    editor.commit();
+                    Toast.makeText(MainActivity.this, "Failed login tracking service has been disabled.", Toast.LENGTH_LONG).show();
+                }
+            });
+            builder.setNegativeButton(R.string.no, null);
+            builder.setMessage("Are you sure you want to disable failed login notification service?");
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } else {
+            //enable tracking
+            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, deviceAdmin);
+            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Please grant this permission to enable failed login notification service.");
+            startActivityForResult(intent, ENABLE_ADMIN_INTENT);
+        }
+    }
+
     private void clearFocus() {
         View current = getCurrentFocus();
         if (current != null) {
@@ -261,6 +308,10 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        if (!this.running && !Permissions.haveCallPhonePermission(MainActivity.this)) {
+            Permissions.requestCallPhonePermission(MainActivity.this);
+        }
+
         this.running = !this.running;
         saveData();
         updateUI();
@@ -284,10 +335,18 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        if (!this.motionDetectorRunning && !Permissions.haveAllRequiredPermission(MainActivity.this)) {
-            Permissions.requestAllRequiredPermission(MainActivity.this);
-            Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
-            return;
+        if (StringUtils.isNotEmpty(phoneNumber)) {
+            if (!this.motionDetectorRunning && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
+                Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
+                Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+                return;
+            }
+        } else {
+            if (!this.motionDetectorRunning && !Permissions.haveLocationPermission(MainActivity.this)) {
+                Permissions.requestLocationPermission(MainActivity.this);
+                Toast.makeText(getApplicationContext(), "Location permission is needed", Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         this.motionDetectorRunning = !this.motionDetectorRunning;
@@ -606,7 +665,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (Files.isRouteTracked(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
                     final long now = System.currentTimeMillis();
-                    final String title = "devicelocatorroute_" + Network.getDeviceId(MainActivity.this) + "_" + now;
+                    final String title = "devicelocatorroute_" + Messenger.getDeviceId(MainActivity.this) + "_" + now;
                     GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, title, null, now, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
@@ -753,7 +812,6 @@ public class MainActivity extends AppCompatActivity {
         runningButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(TAG, "Motion button has been clicked");
                 MainActivity.this.toggleMotionDetectorRunning();
                 MainActivity.this.clearFocus();
             }

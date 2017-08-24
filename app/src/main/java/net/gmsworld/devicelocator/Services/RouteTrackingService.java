@@ -245,7 +245,7 @@ public class RouteTrackingService extends Service {
 
                             if (email != null && email.length() > 0) {
                                 String title = "Message from Device Locator";
-                                String deviceId = Network.getDeviceId(RouteTrackingService.this);
+                                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(RouteTrackingService.this);
                                 if (deviceId != null) {
                                     title += " installed on device " + deviceId;
                                 }

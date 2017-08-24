@@ -10,4 +10,9 @@
         android:title="SMS remote control"
         android:icon="@drawable/ic_textsms_white"
         app:showAsAction="ifRoom|withText"/>
+    <item
+        android:id="@+id/loginTracker"
+        android:title="Login tracker"
+        android:icon="@drawable/ic_perm_identity_white"
+        app:showAsAction="ifRoom|withText"/>
 </menu>

@@ -2,8 +2,6 @@ package net.gmsworld.devicelocator.Utilities;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -205,36 +203,6 @@ public class Network {
     public static void execute(Runnable r) {
         Thread thread = new Thread(r);
         thread.start();
-    }
-
-    public static String getDeviceId(Context context) {
-        String androidDeviceId = null;
-
-        if (context != null) {
-            //android.Manifest.permission.READ_PHONE_STATE required
-            // get telephony imei
-            try {
-                final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-                androidDeviceId = tm.getDeviceId(); //imei
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage(), e);
-            }
-
-            // get internal android device id
-            if (androidDeviceId == null || androidDeviceId.length() == 0) {
-                try {
-                    androidDeviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage(), e);
-                }
-            }
-        }
-
-        if (androidDeviceId == null) {
-            androidDeviceId = "unknown";
-        }
-
-        return androidDeviceId;
     }
 
     public interface OnGetFinishListener {

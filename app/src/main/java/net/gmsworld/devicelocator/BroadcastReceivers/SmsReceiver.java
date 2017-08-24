@@ -21,7 +21,6 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.Messenger;
-import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.Permissions;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
@@ -282,7 +281,7 @@ public class SmsReceiver extends BroadcastReceiver {
             String title = settings.getString("routeTitle", "");
 
             if (StringUtils.isEmpty(title)) {
-                title = "devicelocatorroute_" + Network.getDeviceId(context) + "_" + System.currentTimeMillis();
+                title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("routeTitle", title);
                 editor.commit();
@@ -303,7 +302,7 @@ public class SmsReceiver extends BroadcastReceiver {
                     String title = settings.getString("routeTitle", "");
 
                     if (StringUtils.isEmpty(title)) {
-                        title = "devicelocatorroute_" + Network.getDeviceId(context) + "_" + System.currentTimeMillis();
+                        title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString("routeTitle", title);
                         editor.commit();

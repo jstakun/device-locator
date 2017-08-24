@@ -305,7 +305,7 @@ public abstract class AbstractLocationManager {
             }
             if (size > 1) {
                 try {
-                    String desc = "Device id: " + Network.getDeviceId(context);
+                    String desc = "Device id: " + Messenger.getDeviceId(context);
                     String content = routeToGeoJson(route, title, desc, creationDate);
                     String url = context.getResources().getString(R.string.routeProviderUrl);
                     //Log.d(TAG, "Uploading route " + content);
