@@ -143,6 +143,11 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 //Log.d(TAG, "Accuracy more than 100, check again.");
                 return;
             }
+
+            if ((System.currentTimeMillis() - bestLocation.getTime()) > 10 * 60 * 1000) {
+                //Log.d(TAG, "Location is older than 10 minutes");
+                return;
+            }
         }
 
 
