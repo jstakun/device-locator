@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 
+import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Messenger;
 
@@ -21,12 +22,11 @@ import io.nlopez.smartlocation.location.config.LocationParams;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
 public class SmsSenderService extends IntentService implements OnLocationUpdatedListener {
-    private final static String TAG = SmsSenderService.class.getSimpleName();
+    //private final static String TAG = SmsSenderService.class.getSimpleName();
 
     private final static int LOCATION_REQUEST_MAX_WAIT_TIME = 60;
 
     private Resources r = null;
-    private Context context = null;
     private String phoneNumber = null;
     private String telegramId = null;
 
@@ -35,7 +35,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private boolean googleMapsSms = false;
 
     private int speedType = 0;
-    private String command = null;
 
     private Location bestLocation = null;
     private long startTime = 0;
@@ -56,28 +55,29 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             return;
         }
 
-        this.context = this;
-        this.r = context.getResources();
+        this.r = getResources();
 
         String email = intent.getExtras().getString("email");
 
         String notificationNumber = intent.getExtras().getString("notificationNumber");
 
-        this.command = intent.getExtras().getString("command");
+        String command = intent.getExtras().getString("command");
 
-        if (StringUtils.isEmpty(this.command)) {
-            initSending();
+        if (StringUtils.isEmpty(command)) {
+            initSending(intent.getExtras().getString("source"));
         } else {
             Messenger.sendCommandMessage(this, intent, command, phoneNumber, email, telegramId, notificationNumber);
         }
     }
 
 
-    private void initSending() {
+    private void initSending(String source) {
         //Log.d(TAG, "initSending()");
         readSettings();
 
-        if (keywordReceivedSms) {
+        if (StringUtils.equals(source, DeviceAdminEventReceiver.SOURCE)) {
+            Messenger.sendLoginFailedMessage(this, phoneNumber, telegramId);
+        } else if (keywordReceivedSms) {
             Messenger.sendAcknowledgeMessage(this, phoneNumber, telegramId);
         }
 
@@ -85,7 +85,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         startTime = System.currentTimeMillis() / 1000;
         bestLocation = null;
 
-        SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context))
+        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
                 .config(LocationParams.NAVIGATION)
                 .start(this);
 
@@ -150,10 +150,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             }
         }
 
-
         //stop the location
         //Log.d(TAG, "STOP LOCATION BECAUSE TIME ELAPSED OR ACCURACY IS GOOD");
-        SmartLocation.with(context).location().stop();
+        SmartLocation.with(this).location().stop();
 
         if (bestLocation == null) {
             Messenger.sendSMS(this, phoneNumber, r.getString(R.string.error_getting_location));
@@ -170,7 +169,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     }
 
     private void readSettings() {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         keywordReceivedSms = settings.getBoolean("settings_detected_sms", true);
         gpsSms = settings.getBoolean("settings_gps_sms", true);

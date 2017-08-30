@@ -17,6 +17,8 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
 
     private static final String TAG = DeviceAdminEventReceiver.class.getSimpleName();
 
+    public static final String SOURCE = "LoginFailed";
+
     @Override
     public void onEnabled(Context context, Intent intent) {
         super.onEnabled(context, intent);
@@ -42,10 +44,10 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
         newIntent.putExtra("notificationNumber", phoneNumber);
         newIntent.putExtra("email", email);
         newIntent.putExtra("telegramId", telegramId);
-        newIntent.putExtra("command", "LoginFailed");
+        newIntent.putExtra("source", SOURCE);
         context.startService(newIntent);
 
-        //TODO take photo with front camera and send it
+        //TODO take photo with front camera and send it to nofitication targets
     }
 
     @Override

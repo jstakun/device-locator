@@ -288,9 +288,6 @@ public class Messenger {
             case SmsReceiver.NOAUDIO_COMMAND:
                 text = "Audio transmitter has been stopped.";
                 break;
-            case "LoginFailed":
-                text = "Failed login attempt to your device " + getDeviceId(context) + "!";
-                break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;
@@ -311,6 +308,17 @@ public class Messenger {
         text += " " + r.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context));
         text += ", " + r.getString(R.string.gps) + " " + SmsSenderService.locationToString(context);
         text += ", Battery level: " + Messenger.getBatteryLevel(context);
+        if (StringUtils.isNotEmpty(phoneNumber)) {
+            sendSMS(context, phoneNumber, text);
+        } else if (StringUtils.isNotEmpty(telegramId)) {
+            sendTelegram(context, telegramId, text, 1);
+        }
+    }
+
+    public static void sendLoginFailedMessage(Context context, String phoneNumber, String telegramId) {
+        String text = "Failed login attempt to your device " + getDeviceId(context) + "."
+                + " You should receive device location message soon."
+                + " Battery level: " + Messenger.getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         } else if (StringUtils.isNotEmpty(telegramId)) {
