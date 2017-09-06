@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.v4.view.TintableBackgroundView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -40,6 +41,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.androidhiddencamera.HiddenCameraUtils;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
@@ -65,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int SELECT_CONTACT_INTENT = 3;
 
     private static final int ENABLE_ADMIN_INTENT = 12;
+
+    private static final int ACTION_MANAGE_OVERLAY_INTENT = 13;
 
     private static final int SHARE_ROUTE_MESSAGE = 1;
 
@@ -149,10 +154,7 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             if (requestCode == ENABLE_ADMIN_INTENT) {
                 Toast.makeText(MainActivity.this, "You'll receive notification when wrong password or pin will be entered to unlock this device.", Toast.LENGTH_LONG).show();
-                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("loginTracker", true);
-                editor.commit();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("loginTracker", true).commit();
             } else {
                 phoneNumber = getNumber(data);
                 initPhoneNumberInput();
@@ -164,6 +166,10 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
                 }
             }
+        }
+        if (requestCode == ACTION_MANAGE_OVERLAY_INTENT && HiddenCameraUtils.canOverDrawOtherApps(this)) {
+            Toast.makeText(MainActivity.this, "Device locator will take picture when wrong password or pin will be entered to unlock this device.", Toast.LENGTH_LONG).show();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).commit();
         }
     }
 
@@ -187,6 +193,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.loginTracker:
                 onLoginTrackerItemSelected();
+                return true;
+            case R.id.camera:
+                onCameraItemSelected();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -258,9 +267,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int id) {
                     DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
                     devicePolicyManager.removeActiveAdmin(deviceAdmin);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putBoolean("loginTracker", false);
-                    editor.commit();
+                    settings.edit().putBoolean("loginTracker", false).commit();
                     Toast.makeText(MainActivity.this, "Failed login tracking service has been disabled.", Toast.LENGTH_LONG).show();
                 }
             });
@@ -274,6 +281,25 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, deviceAdmin);
             intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Please grant this permission to enable failed login notification service.");
             startActivityForResult(intent, ENABLE_ADMIN_INTENT);
+        }
+    }
+
+    private void onCameraItemSelected() {
+        boolean hiddenCamera = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("hiddenCamera", false);
+
+        if (!hiddenCamera) {
+            Log.d(TAG, "Camera is off");
+            if (!Permissions.haveCameraPermission(this)) {
+                Permissions.requestCameraPermission(this);
+            }
+
+            if (!HiddenCameraUtils.canOverDrawOtherApps(this)) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, ACTION_MANAGE_OVERLAY_INTENT);
+            }
+        } else {
+            Log.d(TAG, "Camera is on");
+            Toast.makeText(MainActivity.this, "Device locator will take picture when wrong password or pin will be entered to unlock this device.", Toast.LENGTH_LONG).show();
         }
     }
 

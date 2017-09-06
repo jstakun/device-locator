@@ -15,4 +15,9 @@
         android:title="Login tracker"
         android:icon="@drawable/ic_perm_identity_white"
         app:showAsAction="ifRoom|withText"/>
+    <item
+        android:id="@+id/camera"
+        android:title="Camera control"
+        android:icon="@drawable/ic_camera"
+        app:showAsAction="ifRoom|withText"/>
 </menu>

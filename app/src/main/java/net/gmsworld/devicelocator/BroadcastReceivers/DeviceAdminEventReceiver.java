@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 /**
@@ -47,7 +48,8 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
         newIntent.putExtra("source", SOURCE);
         context.startService(newIntent);
 
-        //TODO take photo with front camera and send it to nofitication targets
+        Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+        context.startService(cameraIntent);
     }
 
     @Override
