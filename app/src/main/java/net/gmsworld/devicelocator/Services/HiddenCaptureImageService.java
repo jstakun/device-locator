@@ -20,6 +20,7 @@ import com.androidhiddencamera.HiddenCameraUtils;
 import com.androidhiddencamera.config.CameraFacing;
 import com.androidhiddencamera.config.CameraImageFormat;
 import com.androidhiddencamera.config.CameraResolution;
+import com.androidhiddencamera.config.CameraRotation;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.Utilities.Network;
@@ -50,6 +51,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                             .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
                             .setCameraResolution(CameraResolution.HIGH_RESOLUTION) //.MEDIUM_RESOLUTION)
                             .setImageFormat(CameraImageFormat.FORMAT_JPEG)
+                            .setImageRotation(CameraRotation.ROTATION_270)
                             .build();
 
                     startCamera(cameraConfig);
@@ -57,7 +59,11 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                     new android.os.Handler().post(new Runnable() {
                         @Override
                         public void run() {
-                            takePicture();
+                            try {
+                                takePicture();
+                            } catch (Exception e) {
+                                Log.e(TAG, "Failed to take a picture!", e);
+                            }
                         }
                     });
                 } catch (Exception e) {

@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (requestCode == ACTION_MANAGE_OVERLAY_INTENT && HiddenCameraUtils.canOverDrawOtherApps(this)) {
-            Toast.makeText(MainActivity.this, "Device locator will take photo when wrong password or pin will be entered to unlock this device.", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "Device Locator will take photo when wrong password or pin will be entered to unlock this device.", Toast.LENGTH_LONG).show();
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).commit();
         }
     }
@@ -309,11 +309,11 @@ public class MainActivity extends AppCompatActivity {
             builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("hiddenCamera", false).commit();
-                    Toast.makeText(MainActivity.this, "Photo will not be taken on failed login.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "From now on photo will not be taken on failed login.", Toast.LENGTH_LONG).show();
                 }
             });
             builder.setNegativeButton(R.string.no, null);
-            builder.setMessage("Are you sure you want Device Locator not to take photo on failed login?");
+            builder.setMessage("Are you sure you want Device Locator to stop taking photo on failed login?");
             AlertDialog dialog = builder.create();
             dialog.show();
         }
