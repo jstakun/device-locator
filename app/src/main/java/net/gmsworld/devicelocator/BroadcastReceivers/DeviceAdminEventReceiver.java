@@ -48,8 +48,12 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
         newIntent.putExtra("source", SOURCE);
         context.startService(newIntent);
 
-        Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
-        context.startService(cameraIntent);
+        if (settings.getBoolean("hiddenCamera", false)) {
+            Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+            context.startService(cameraIntent);
+        } else {
+            Log.d(TAG, "Camera is disable. No photo will be taken");
+        }
     }
 
     @Override

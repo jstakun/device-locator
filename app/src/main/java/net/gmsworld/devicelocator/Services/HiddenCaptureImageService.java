@@ -44,21 +44,25 @@ public class HiddenCaptureImageService extends HiddenCameraService {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
-                CameraConfig cameraConfig = new CameraConfig()
-                        .getBuilder(this)
-                        .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
-                        .setCameraResolution(CameraResolution.MEDIUM_RESOLUTION)
-                        .setImageFormat(CameraImageFormat.FORMAT_JPEG)
-                        .build();
+                try {
+                    CameraConfig cameraConfig = new CameraConfig()
+                            .getBuilder(this)
+                            .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
+                            .setCameraResolution(CameraResolution.HIGH_RESOLUTION) //.MEDIUM_RESOLUTION)
+                            .setImageFormat(CameraImageFormat.FORMAT_JPEG)
+                            .build();
 
-                startCamera(cameraConfig);
+                    startCamera(cameraConfig);
 
-                new android.os.Handler().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        takePicture();
-                    }
-                });
+                    new android.os.Handler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            takePicture();
+                        }
+                    });
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to start camera!", e);
+                }
             } else {
 
                 Log.e(TAG, "Draw over other apps permission is missing. Can't take a picture");
