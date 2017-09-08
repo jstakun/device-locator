@@ -46,6 +46,7 @@ import com.androidhiddencamera.HiddenCameraUtils;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
+import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
@@ -164,13 +165,16 @@ public class MainActivity extends AppCompatActivity {
                         launchService();
                     }
                 } else {
-                    Toast.makeText(getApplicationContext(), "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
                 }
             }
         }
         if (requestCode == ACTION_MANAGE_OVERLAY_INTENT && HiddenCameraUtils.canOverDrawOtherApps(this)) {
-            Toast.makeText(MainActivity.this, "Device Locator will take photo when wrong password or pin will be entered to unlock this device.", Toast.LENGTH_LONG).show();
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).commit();
+            //Toast.makeText(MainActivity.this, "Device Locator will take photo when wrong password or pin will be entered to unlock this device.", Toast.LENGTH_LONG).show();
+            //PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).commit();
+            Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
+            cameraIntent.putExtra("test", true);
+            startService(cameraIntent);
         }
     }
 
@@ -300,8 +304,9 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, ACTION_MANAGE_OVERLAY_INTENT);
             } else if (Permissions.haveCameraPermission(this)) {
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).commit();
-                Toast.makeText(this, "From now on photo will be taken on failed login", Toast.LENGTH_LONG).show();
+                Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
+                cameraIntent.putExtra("test", true);
+                startService(cameraIntent);
             }
         } else {
             Log.d(TAG, "Camera is on");

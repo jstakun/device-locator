@@ -45,9 +45,9 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //set high gps accuracy
     public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //set balanced gps accuracy
     public final static String NOTIFY_COMMAND = "notifydl"; //set notification email, phone or telegram chat id
-
     public final static String AUDIO_COMMAND = "audiodl"; //enable audio transmitter
     public final static String NOAUDIO_COMMAND = "noaudiodl"; //disable audio transmitter
+    //TODO add take photo command
 
     @Override
     public void onReceive(Context context, Intent intent) {
