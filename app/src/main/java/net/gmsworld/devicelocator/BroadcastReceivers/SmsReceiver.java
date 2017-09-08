@@ -18,6 +18,7 @@ import android.util.Patterns;
 import android.widget.Toast;
 
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.Messenger;
@@ -48,6 +49,7 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String AUDIO_COMMAND = "audiodl"; //enable audio transmitter
     public final static String NOAUDIO_COMMAND = "noaudiodl"; //disable audio transmitter
     //TODO add take photo command
+    public final static String TAKE_PHOTO_COMMAND = "photodl"; //take photo and send link
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -65,6 +67,7 @@ public class SmsReceiver extends BroadcastReceiver {
         if (findNotifyCommand(context, intent)) return;
         if (findAudioCommand(context, intent)) return;
         if (findNoAudioCommand(context, intent)) return;
+        if (findTakePhotoCommand(context, intent)) return;
     }
 
     private boolean findStartRouteTrackerServiceStartCommand(Context context, Intent intent) {
@@ -537,6 +540,22 @@ public class SmsReceiver extends BroadcastReceiver {
                 newIntent.putExtra("command", NOTIFY_COMMAND);
                 context.startService(newIntent);
             }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean findTakePhotoCommand(Context context, Intent intent) {
+        String sender = getSenderAddress(context, intent, TAKE_PHOTO_COMMAND);
+
+        if (sender != null) {
+            Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+            context.startService(cameraIntent);
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", TAKE_PHOTO_COMMAND);
+            context.startService(newIntent);
             return true;
         } else {
             return false;

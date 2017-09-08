@@ -288,8 +288,12 @@ public class Messenger {
             case SmsReceiver.NOAUDIO_COMMAND:
                 text = "Audio transmitter has been stopped.";
                 break;
-            case "ImageUrl":
-                text = "Failed login photo: " + param1;
+            case SmsReceiver.TAKE_PHOTO_COMMAND:
+                if (StringUtils.isEmpty(param1)) {
+                    text = "Photo will be taken. You should receive link soon.";
+                } else {
+                    text = "Front camera photo: " + param1;
+                }
                 break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
