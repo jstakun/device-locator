@@ -2,8 +2,12 @@ package net.gmsworld.devicelocator.Services;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -17,7 +21,15 @@ import com.androidhiddencamera.config.CameraFacing;
 import com.androidhiddencamera.config.CameraImageFormat;
 import com.androidhiddencamera.config.CameraResolution;
 
+import net.gmsworld.devicelocator.DeviceLocatorApp;
+import net.gmsworld.devicelocator.Utilities.Network;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by jstakun on 9/6/17.
@@ -59,13 +71,53 @@ public class HiddenCaptureImageService extends HiddenCameraService {
 
     @Override
     public void onImageCapture(@NonNull File imageFile) {
-        //BitmapFactory.Options options = new BitmapFactory.Options();
-        //options.inPreferredConfig = Bitmap.Config.RGB_565;
-        //Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888; //.RGB_565;
+        Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
 
         Log.d(TAG, "Image will be sent to server");
 
-        //TODO send image to server and send notification with link
+        //send image to server and send notification with link
+
+        Map<String, String> headers = new HashMap<String, String>();
+
+        final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+        String uploadUrl = "https://www.gms-world.net/";
+        if (StringUtils.isNotEmpty(tokenStr)) {
+            headers.put("Authorization", "Bearer " + tokenStr);
+            uploadUrl += "s";
+        }
+
+        headers.put("X-GMS-AppId", "2");
+        headers.put("X-GMS-Scope", "dl");
+
+        Network.uploadScreenshot(uploadUrl + "/imageUpload", out.toByteArray(), "screenshot_device_locator.jpg", headers, new Network.OnGetFinishListener() {
+            @Override
+            public void onGetFinish(String imageUrl, int responseCode, String url) {
+                if (StringUtils.isNotEmpty(imageUrl)) {
+                    //send notification with image url
+                    String email = settings.getString("email", "");
+                    String phoneNumber = settings.getString("phoneNumber", "");
+                    String telegramId = settings.getString("telegramId", "");
+
+                    Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
+                    newIntent.putExtra("notificationNumber", phoneNumber);
+                    newIntent.putExtra("email", email);
+                    newIntent.putExtra("telegramId", telegramId);
+                    newIntent.putExtra("command", "ImageUrl");
+                    newIntent.putExtra("param1", imageUrl);
+                    HiddenCaptureImageService.this.startService(newIntent);
+                } else {
+                    Log.e(TAG, "Received empty image url!");
+                }
+            }
+        });
+
+
 
         stopSelf();
     }

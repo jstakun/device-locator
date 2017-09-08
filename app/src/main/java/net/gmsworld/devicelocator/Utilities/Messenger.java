@@ -38,7 +38,7 @@ public class Messenger {
 
     private static final String TAG = Messenger.class.getSimpleName();
 
-    private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
+    protected static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
 
     private Network.OnGetFinishListener telegramNotifier = new Network.OnGetFinishListener() {
         @Override
@@ -205,7 +205,7 @@ public class Messenger {
         }
     }
 
-    public static void sendCommandMessage(Context context, Intent intent, String command, String phoneNumber, String email, String telegramId, String notificationNumber) {
+    public static void sendCommandMessage(Context context, Intent intent, String command, String phoneNumber, String email, String telegramId, String notificationNumber, String param1) {
         String text = null;
         List<String> notifications = new ArrayList<String>();
         switch (command) {
@@ -287,6 +287,9 @@ public class Messenger {
                 break;
             case SmsReceiver.NOAUDIO_COMMAND:
                 text = "Audio transmitter has been stopped.";
+                break;
+            case "ImageUrl":
+                text = "Failed login photo: " + param1;
                 break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);

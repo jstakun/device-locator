@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.util.Log;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -13,6 +15,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 public class Network {
 
@@ -200,8 +203,90 @@ public class Network {
         thread.start();
     }
 
-    public static void execute(Runnable r) {
-        Thread thread = new Thread(r);
+    public static void uploadScreenshot(final String fileUrl, final byte[] file, final String filename, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+
+                InputStream is = null;
+                String response = null;
+
+                final String attachmentName = "screenshot";
+                final String crlf = "\r\n";
+                final String twoHyphens = "--";
+                final String boundary = "*****";
+
+                try {
+                    HttpURLConnection conn = (HttpURLConnection) new URL(fileUrl).openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setConnectTimeout(SOCKET_TIMEOUT);
+                    conn.setReadTimeout(SOCKET_TIMEOUT);
+
+                    //conn.setRequestProperty("User-Agent", ConfigurationManager.getAppUtils().getUserAgent());
+
+                    //conn.setRequestProperty(Commons.APP_HEADER, ConfigurationManager.getInstance().getString(ConfigurationManager.APP_ID));
+                    //conn.setRequestProperty(Commons.APP_VERSION_HEADER, Integer.toString(ConfigurationManager.getAppUtils().getVersionCode()));
+                    //conn.setRequestProperty(Commons.USE_COUNT_HEADER, ConfigurationManager.getInstance().getString(ConfigurationManager.USE_COUNT));
+
+                    for (Map.Entry<String, String> header : headers.entrySet()) {
+                        conn.setRequestProperty(header.getKey(), header.getValue());
+                    }
+
+                    conn.setRequestProperty("X-GMS-Silent", "true");
+                    conn.setRequestProperty("X-GMS-BucketName", "device-locator");
+                    conn.setRequestProperty("Accept-Encoding", "gzip");
+
+                    //write file
+                    conn.setDoOutput(true);
+                    conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                    DataOutputStream request = new DataOutputStream(conn.getOutputStream());
+
+                    request.writeBytes(twoHyphens + boundary + crlf);
+                    request.writeBytes("Content-Disposition: form-data; name=\"" + attachmentName + "\";filename=\"" + filename + "\"" + crlf);
+                    request.writeBytes(crlf);
+
+                    IOUtils.write(file, request);
+
+                    request.writeBytes(crlf);
+                    request.writeBytes(twoHyphens + boundary + twoHyphens + crlf);
+
+                    request.flush();
+                    request.close();
+
+                    int responseCode = conn.getResponseCode();
+
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        if (conn.getContentType().indexOf("gzip") != -1) {
+                            is = new GZIPInputStream(conn.getInputStream());
+                        } else {
+                            is = conn.getInputStream();
+                        }
+                    } else {
+                        is = conn.getErrorStream();
+                        Log.e(TAG, fileUrl + " loading error: " + responseCode);
+                    }
+
+                    if (is != null) {
+                        //Read response
+                        response = IOUtils.toString(is, "UTF-8");
+                        Log.d(TAG, "Received following server response: " + response);
+                    }
+                    onGetFinishListener.onGetFinish(response, responseCode, fileUrl);
+                } catch (Throwable e) {
+                    Log.d(TAG, ".uploadScreenshot() exception: " + e.getMessage(), e);
+                } finally {
+                    try {
+                        if (is != null) {
+                            is.close();
+                        }
+                    } catch (IOException e) {
+                    }
+                }
+
+            }
+        };
+
         thread.start();
     }
 

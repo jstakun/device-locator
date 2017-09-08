@@ -63,10 +63,12 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
         String command = intent.getExtras().getString("command");
 
+        String param1 = intent.getExtras().getString("param1");
+
         if (StringUtils.isEmpty(command)) {
             initSending(intent.getExtras().getString("source"));
         } else {
-            Messenger.sendCommandMessage(this, intent, command, phoneNumber, email, telegramId, notificationNumber);
+            Messenger.sendCommandMessage(this, intent, command, phoneNumber, email, telegramId, notificationNumber, param1);
         }
     }
 
