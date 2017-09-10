@@ -4,7 +4,6 @@
     xmlns:ldcard="http://schemas.android.com/apk/res-auto">
 
   <LinearLayout
-            android:id="@+id/smsSettings"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -18,8 +17,9 @@
                 android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
       <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+          android:id="@+id/smsSettings"
+          android:layout_width="match_parent"
+          android:layout_height="match_parent">
 
           <LinearLayout
               android:layout_width="match_parent"
@@ -154,26 +154,11 @@
 
       </ScrollView>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/trackerSettings"
-        android:visibility="gone"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/trackerToolbar"
+      <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:elevation="4dp"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:id="@+id/trackerSettings"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -390,21 +375,6 @@
                         </LinearLayout>
 
                     </LinearLayout>
-
-                    <!--LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingBottom="8dp"
-                        android:paddingTop="15dp">
-
-                        <TextView
-                            android:id="@+id/telegramLink"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:gravity="left"/>
-                    </LinearLayout-->
-
 
                 </net.gmsworld.devicelocator.Views.LDCard>
 

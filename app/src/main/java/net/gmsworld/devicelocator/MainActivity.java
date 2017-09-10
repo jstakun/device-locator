@@ -105,14 +105,12 @@ public class MainActivity extends AppCompatActivity {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, false);
         }
 
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
+        boolean isTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isTrackerShown", false);
+        setupToolbar(R.id.smsToolbar);
         if (isTrackerShown) {
-            setupToolbar(R.id.trackerToolbar);
             findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.smsSettings).setVisibility(View.GONE);
         } else {
-            setupToolbar(R.id.smsToolbar);
             findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.trackerSettings).setVisibility(View.GONE);
         }
@@ -125,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
         RouteTrackingServiceUtils.unbindRouteTrackingService(this, mConnection, isTrackingServiceBound);
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean("isTrackerShown", findViewById(R.id.trackerSettings).isShown());
 
         if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || (StringUtils.isEmpty(newEmailAddress) && newEmailAddress != null))) {
             Log.d(TAG, "New email has been set: " + newEmailAddress);
@@ -157,9 +154,7 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == ENABLE_ADMIN_INTENT) {
                 Toast.makeText(MainActivity.this, "You'll receive notification when wrong password or pin will be entered.", Toast.LENGTH_LONG).show();
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("loginTracker", true).commit();
-                //invalidateOptionsMenu(); //TODO invalidate menu
                 getSupportActionBar().invalidateOptionsMenu();
-                //recreate();
                 //open dialog to enable photo on failed login
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
@@ -203,12 +198,18 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sms:
+                Log.d(TAG, "Show sms settings");
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", false).commit();
                 findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+                getSupportActionBar().invalidateOptionsMenu();
                 return true;
             case R.id.tracker:
+                Log.d(TAG, "Show tracker settings");
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).commit();
                 findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
+                getSupportActionBar().invalidateOptionsMenu();
                 return true;
             case R.id.loginTracker:
                 onLoginTrackerItemSelected();
@@ -229,11 +230,12 @@ public class MainActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu (Menu menu) {
         //Log.d(TAG, "onPrepareOptionsMenu()");
         menu.findItem(R.id.camera).setVisible(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("loginTracker", false));
+        boolean isTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isTrackerShown", false);
 
-        if (findViewById(R.id.smsSettings).isShown()) {
+        if (!isTrackerShown) {
             menu.findItem(R.id.sms).setVisible(false);
             menu.findItem(R.id.tracker).setVisible(true);
-        } else if (findViewById(R.id.trackerSettings).isShown()) {
+        } else  {
             menu.findItem(R.id.tracker).setVisible(false);
             menu.findItem(R.id.sms).setVisible(true);
         }
@@ -245,8 +247,10 @@ public class MainActivity extends AppCompatActivity {
     public void onNewIntent (Intent intent) {
         //show tracker view
         Log.d(TAG, "onNewIntent()");
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).commit();
         findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
         findViewById(R.id.smsSettings).setVisibility(View.GONE);
+        getSupportActionBar().invalidateOptionsMenu();
     }
 
     /*private void scrollTop() {
@@ -296,9 +300,7 @@ public class MainActivity extends AppCompatActivity {
                     editor.putBoolean("loginTracker", false);
                     editor.putBoolean("hiddenCamera", false);
                     editor.commit();
-                    //invalidateOptionsMenu(); //TODO invalidate menu
                     getSupportActionBar().invalidateOptionsMenu();
-                    //recreate();
                     Toast.makeText(MainActivity.this, "Failed login notification service has been disabled.", Toast.LENGTH_LONG).show();
                 }
             });
