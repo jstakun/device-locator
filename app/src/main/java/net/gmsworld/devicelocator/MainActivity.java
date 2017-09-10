@@ -95,6 +95,16 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         restoreSavedData();
+        initApp();
+        updateUI();
+        toggleBroadcastReceiver(); //set broadcast receiver for sms
+        //scrollTop();
+        loadingHandler = new UIHandler();
+        //mMessenger = new Messenger(loadingHandler);
+        if (motionDetectorRunning) {
+            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, false);
+        }
+
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
         if (isTrackerShown) {
@@ -105,15 +115,6 @@ public class MainActivity extends AppCompatActivity {
             setupToolbar(R.id.smsToolbar);
             findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.trackerSettings).setVisibility(View.GONE);
-        }
-        initApp();
-        updateUI();
-        toggleBroadcastReceiver(); //set broadcast receiver for sms
-        //scrollTop();
-        loadingHandler = new UIHandler();
-        //mMessenger = new Messenger(loadingHandler);
-        if (motionDetectorRunning) {
-            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, false);
         }
     }
 
@@ -154,8 +155,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             if (requestCode == ENABLE_ADMIN_INTENT) {
-                Toast.makeText(MainActivity.this, "You'll receive notification when wrong password or pin will be entered to unlock this device.", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "You'll receive notification when wrong password or pin will be entered.", Toast.LENGTH_LONG).show();
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("loginTracker", true).commit();
+                //invalidateOptionsMenu(); //TODO invalidate menu
+                getSupportActionBar().invalidateOptionsMenu();
+                //recreate();
                 //open dialog to enable photo on failed login
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
@@ -164,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 builder.setNegativeButton(R.string.no, null);
-                builder.setMessage("Do you want Device Locator to take photo when wrong password or pin will be entered to unlock this device?");
+                builder.setMessage("Do you want Device Locator to take photo when wrong password or pin will be entered?");
                 AlertDialog dialog = builder.create();
                 dialog.show();
             } else {
@@ -189,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        //Log.d(TAG, "onCreateOptionsMenu()");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         return true;
@@ -209,7 +214,11 @@ public class MainActivity extends AppCompatActivity {
                 onLoginTrackerItemSelected();
                 return true;
             case R.id.camera:
-                onCameraItemSelected();
+                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("loginTracker", false)) {
+                    onCameraItemSelected();
+                } else {
+                    Toast.makeText(this, "First please enable failed login notification service!", Toast.LENGTH_LONG).show();
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -218,16 +227,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu (Menu menu) {
+        //Log.d(TAG, "onPrepareOptionsMenu()");
+        menu.findItem(R.id.camera).setVisible(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("loginTracker", false));
+
         if (findViewById(R.id.smsSettings).isShown()) {
             menu.findItem(R.id.sms).setVisible(false);
-            setupToolbar(R.id.trackerToolbar);
-        }
-        if (findViewById(R.id.trackerSettings).isShown()) {
+            menu.findItem(R.id.tracker).setVisible(true);
+        } else if (findViewById(R.id.trackerSettings).isShown()) {
             menu.findItem(R.id.tracker).setVisible(false);
-            setupToolbar(R.id.smsToolbar);
+            menu.findItem(R.id.sms).setVisible(true);
         }
-
-        menu.findItem(R.id.camera).setVisible(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("loginTracker", false));
 
         return true;
     }
@@ -283,8 +292,14 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(DialogInterface dialog, int id) {
                     DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
                     devicePolicyManager.removeActiveAdmin(deviceAdmin);
-                    settings.edit().putBoolean("loginTracker", false).commit();
-                    Toast.makeText(MainActivity.this, "Failed login tracking service has been disabled.", Toast.LENGTH_LONG).show();
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putBoolean("loginTracker", false);
+                    editor.putBoolean("hiddenCamera", false);
+                    editor.commit();
+                    //invalidateOptionsMenu(); //TODO invalidate menu
+                    getSupportActionBar().invalidateOptionsMenu();
+                    //recreate();
+                    Toast.makeText(MainActivity.this, "Failed login notification service has been disabled.", Toast.LENGTH_LONG).show();
                 }
             });
             builder.setNegativeButton(R.string.no, null);
