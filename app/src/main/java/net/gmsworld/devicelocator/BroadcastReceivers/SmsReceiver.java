@@ -26,6 +26,7 @@ import net.gmsworld.devicelocator.Utilities.Permissions;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -501,7 +502,7 @@ public class SmsReceiver extends BroadcastReceiver {
                     }
                 } else if (token.startsWith("t:")) {
                     String newTelegramId = token.substring(2);
-                    if ((StringUtils.isNumeric(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || StringUtils.isEmpty(newTelegramId)) {
+                    if ((NumberUtils.isCreatable(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || StringUtils.isEmpty(newTelegramId)) {
                         telegramId = newTelegramId;
                         if (!StringUtils.equals(settings.getString("telegramId", ""), telegramId)) {
                             Messenger.sendTelegramRegistrationRequest(context, telegramId, 1);

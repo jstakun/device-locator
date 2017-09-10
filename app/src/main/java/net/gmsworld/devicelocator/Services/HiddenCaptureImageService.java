@@ -149,7 +149,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                 //Camera open failed. Probably because another application
                 //is using the camera
                 Log.e(TAG, "Cannot open camera.");
-                Toast.makeText(this, "Camera open failed. There might be someting wrong with your front camera. Please try again.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Camera opening failed. There might be someting wrong with your front camera. Please try again.", Toast.LENGTH_LONG).show();
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", false).commit();
                 break;
             case CameraError.ERROR_IMAGE_WRITE_FAILED:

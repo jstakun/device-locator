@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
@@ -24,6 +25,14 @@ public class Network {
     private static final String FORM_ENCODING = "application/x-www-form-urlencoded;charset=UTF-8";
 
     private static final int SOCKET_TIMEOUT = 60 * 1000; //1 minute
+
+    private static final Map<String, String> defaultHeaders = new HashMap<String, String>();
+
+    static {
+        defaultHeaders.put("X-GMS-AppId", "2");
+        defaultHeaders.put("X-GMS-Scope", "dl");
+        defaultHeaders.put("User-Agent", "Device Locator/0.2-10 (+http://www.gms-world.net)");
+    }
 
     protected static boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
@@ -40,45 +49,8 @@ public class Network {
                     urlConnection = (HttpURLConnection) url.openConnection();
                     urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
                     urlConnection.setReadTimeout(SOCKET_TIMEOUT);
-                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
 
-                    BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                    StringBuilder total = new StringBuilder();
-                    String line;
-                    while ((line = r.readLine()) != null) {
-                        total.append(line).append('\n');
-                    }
-
-                    onGetFinishListener.onGetFinish(total.toString(), urlConnection.getResponseCode(), urlString);
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage(), e);
-                    int responseCode = 1;
-                    if (urlConnection != null) {
-                        try {
-                            responseCode = urlConnection.getResponseCode();
-                        } catch (IOException e1) {
-                        }
-                    }
-                    onGetFinishListener.onGetFinish("{}", responseCode, urlString);
-                }
-            }
-        };
-
-        thread.start();
-    }
-
-    protected static void get(final String urlString, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                HttpURLConnection urlConnection = null;
-                try {
-                    URL url = new URL(urlString);
-                    urlConnection = (HttpURLConnection) url.openConnection();
-                    urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
-                    urlConnection.setReadTimeout(SOCKET_TIMEOUT);
-
-                    for (Map.Entry<String, String> header : headers.entrySet()) {
+                    for (Map.Entry<String, String> header : defaultHeaders.entrySet()) {
                         urlConnection.setRequestProperty(header.getKey(), header.getValue());
                     }
 
@@ -109,6 +81,52 @@ public class Network {
         thread.start();
     }
 
+    /*protected static void get(final String urlString, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                HttpURLConnection urlConnection = null;
+                try {
+                    URL url = new URL(urlString);
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
+                    urlConnection.setReadTimeout(SOCKET_TIMEOUT);
+
+                    for (Map.Entry<String, String> header : defaultHeaders.entrySet()) {
+                        urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                    }
+
+                    for (Map.Entry<String, String> header : headers.entrySet()) {
+                        urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                    }
+
+                    InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+
+                    BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder total = new StringBuilder();
+                    String line;
+                    while ((line = r.readLine()) != null) {
+                        total.append(line).append('\n');
+                    }
+
+                    onGetFinishListener.onGetFinish(total.toString(), urlConnection.getResponseCode(), urlString);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    int responseCode = 1;
+                    if (urlConnection != null) {
+                        try {
+                            responseCode = urlConnection.getResponseCode();
+                        } catch (IOException e1) {
+                        }
+                    }
+                    onGetFinishListener.onGetFinish("{}", responseCode, urlString);
+                }
+            }
+        };
+
+        thread.start();
+    }*/
+
     public static void post(final String urlString, final String content, final String contentType, final OnGetFinishListener onGetFinishListener) {
         Thread thread = new Thread() {
             @Override
@@ -119,6 +137,10 @@ public class Network {
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
                     urlConnection.setReadTimeout(SOCKET_TIMEOUT);
+
+                    for (Map.Entry<String, String> header : defaultHeaders.entrySet()) {
+                        urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                    }
 
                     if (content != null) {
                         urlConnection.setRequestProperty("Content-Length", Integer.toString(content.length()));
@@ -164,6 +186,10 @@ public class Network {
                     urlConnection.setRequestMethod("POST");
                     urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
                     urlConnection.setReadTimeout(SOCKET_TIMEOUT);
+
+                    for (Map.Entry<String, String> header : defaultHeaders.entrySet()) {
+                        urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                    }
 
                     for (Map.Entry<String, String> header : headers.entrySet()) {
                         urlConnection.setRequestProperty(header.getKey(), header.getValue());
@@ -223,11 +249,9 @@ public class Network {
                     conn.setConnectTimeout(SOCKET_TIMEOUT);
                     conn.setReadTimeout(SOCKET_TIMEOUT);
 
-                    //conn.setRequestProperty("User-Agent", ConfigurationManager.getAppUtils().getUserAgent());
-
-                    //conn.setRequestProperty(Commons.APP_HEADER, ConfigurationManager.getInstance().getString(ConfigurationManager.APP_ID));
-                    //conn.setRequestProperty(Commons.APP_VERSION_HEADER, Integer.toString(ConfigurationManager.getAppUtils().getVersionCode()));
-                    //conn.setRequestProperty(Commons.USE_COUNT_HEADER, ConfigurationManager.getInstance().getString(ConfigurationManager.USE_COUNT));
+                    for (Map.Entry<String, String> header : defaultHeaders.entrySet()) {
+                        conn.setRequestProperty(header.getKey(), header.getValue());
+                    }
 
                     for (Map.Entry<String, String> header : headers.entrySet()) {
                         conn.setRequestProperty(header.getKey(), header.getValue());

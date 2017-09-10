@@ -23,6 +23,7 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public class Messenger {
     }
 
     public static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount) {
-        if (StringUtils.isNumeric(telegramId)) {
+        if (NumberUtils.isCreatable(telegramId)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
@@ -121,8 +122,6 @@ public class Messenger {
     private static void sendTelegram(final Context context, final String telegramId, final String message, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppId", "2");
-        headers.put("X-GMS-Scope", "dl");
 
         try {
             String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&user=" + getDeviceId(context);
@@ -145,8 +144,6 @@ public class Messenger {
     private static void sendEmail(final Context context, final String email, final String message, final String title, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppId", "2");
-        headers.put("X-GMS-Scope", "dl");
 
         try {
             String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title;
@@ -387,7 +384,7 @@ public class Messenger {
     }
 
     public static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final int retryCount) {
-        if (StringUtils.isNumeric(telegramId)) {
+        if (NumberUtils.isCreatable(telegramId)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
@@ -418,8 +415,6 @@ public class Messenger {
     private static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppId", "2");
-        headers.put("X-GMS-Scope", "dl");
 
         try {
             String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context);
@@ -441,8 +436,6 @@ public class Messenger {
     private static void sendEmailRegistrationRequest(final Context context, final String email, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppId", "2");
-        headers.put("X-GMS-Scope", "dl");
 
         try {
             String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context);

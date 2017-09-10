@@ -59,6 +59,7 @@ import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -137,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
             editor.putString("phoneNumber", newPhoneNumber);
         }
 
-        if (!StringUtils.equals(telegramId, newTelegramId) && ((StringUtils.isNumeric(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || (StringUtils.isEmpty(newTelegramId) && newTelegramId != null))) {
+        if (!StringUtils.equals(telegramId, newTelegramId) && ((NumberUtils.isCreatable(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || (StringUtils.isEmpty(newTelegramId) && newTelegramId != null))) {
             Log.d(TAG, "New telegram id has been set: " + newTelegramId);
             editor.putString("telegramId", newTelegramId);
             if (StringUtils.isNotEmpty(newTelegramId)) {
@@ -627,7 +628,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     newTelegramId = telegramInput.getText().toString();
-                    if (!StringUtils.equals(telegramId, newTelegramId) && ((StringUtils.isNumeric(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || StringUtils.isEmpty(newTelegramId))) {
+                    if (!StringUtils.equals(telegramId, newTelegramId) && ((NumberUtils.isCreatable(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || StringUtils.isEmpty(newTelegramId))) {
                         Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
                         telegramId = newTelegramId;
                         saveData();
@@ -656,7 +657,7 @@ public class MainActivity extends AppCompatActivity {
                                     ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
                                     String pasteData = item.getText().toString();
                                     Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
-                                    if (StringUtils.isNumeric(pasteData) && StringUtils.isNotEmpty(pasteData)) {
+                                    if (NumberUtils.isCreatable(pasteData) && StringUtils.isNotEmpty(pasteData)) {
                                         telegramInput.setText(pasteData);
                                         Toast.makeText(getApplicationContext(), "Pasted Chat ID from clipboard!", Toast.LENGTH_SHORT).show();
                                         break;
