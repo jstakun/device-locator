@@ -20,7 +20,7 @@ import java.util.ArrayList;
 
 public class Permissions {
 
-    public static void checkAndRequestPermissions(Activity activity) {
+    public static void checkAndRequestPermissionsAtStartup(Activity activity) {
         ArrayList<String> permissions = new ArrayList();
         permissions.add(0, Manifest.permission.SEND_SMS);
         permissions.add(1, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -29,7 +29,7 @@ public class Permissions {
         permissions.add(4, Manifest.permission.MODIFY_AUDIO_SETTINGS);
         permissions.add(5, Manifest.permission.CALL_PHONE);
         permissions.add(5, Manifest.permission.BIND_DEVICE_ADMIN);
-        permissions.add(6, Manifest.permission.CAMERA);
+        //permissions.add(6, Manifest.permission.CAMERA); don't check camera permission at startup
 
         ArrayList<String> neededPermissions = new ArrayList<>();
         for (int i = 0; i < permissions.size(); i++) {

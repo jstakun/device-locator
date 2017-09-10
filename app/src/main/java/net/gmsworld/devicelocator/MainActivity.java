@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate()");
-        Permissions.checkAndRequestPermissions(this); //check marshmallow permissions
+        Permissions.checkAndRequestPermissionsAtStartup(this); //check marshmallow permissions
 
         setContentView(R.layout.activity_main);
         restoreSavedData();
