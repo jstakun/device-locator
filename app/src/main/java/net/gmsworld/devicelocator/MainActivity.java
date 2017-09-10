@@ -180,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         if (requestCode == ACTION_MANAGE_OVERLAY_INTENT && HiddenCameraUtils.canOverDrawOtherApps(this)) {
+            Toast.makeText(MainActivity.this, "Please wait. Device Locator is checking your camera...", Toast.LENGTH_LONG).show();
             Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
             cameraIntent.putExtra("test", true);
             startService(cameraIntent);
@@ -312,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, ACTION_MANAGE_OVERLAY_INTENT);
             } else if (Permissions.haveCameraPermission(this)) {
+                Toast.makeText(MainActivity.this, "Please wait. Device Locator is checking your camera...", Toast.LENGTH_LONG).show();
                 Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
                 cameraIntent.putExtra("test", true);
                 startService(cameraIntent);
