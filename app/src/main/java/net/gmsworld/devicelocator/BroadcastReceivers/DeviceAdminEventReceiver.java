@@ -42,7 +42,7 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
         String telegramId = settings.getString("telegramId", "");
 
         Intent newIntent = new Intent(context, SmsSenderService.class);
-        newIntent.putExtra("notificationNumber", phoneNumber);
+        newIntent.putExtra("phoneNumber", phoneNumber);
         newIntent.putExtra("email", email);
         newIntent.putExtra("telegramId", telegramId);
         newIntent.putExtra("source", SOURCE);

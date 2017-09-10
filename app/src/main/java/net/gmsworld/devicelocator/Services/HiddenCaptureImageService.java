@@ -119,13 +119,14 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                         String telegramId = settings.getString("telegramId", "");
 
                         Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
-                        newIntent.putExtra("notificationNumber", phoneNumber);
                         newIntent.putExtra("email", email);
                         newIntent.putExtra("telegramId", telegramId);
                         newIntent.putExtra("command", SmsReceiver.TAKE_PHOTO_COMMAND);
                         newIntent.putExtra("param1", imageUrl);
                         if (StringUtils.isNotEmpty(sender)) {
                             newIntent.putExtra("phoneNumber", sender);
+                        } else {
+                            newIntent.putExtra("phoneNumber", phoneNumber);
                         }
                         HiddenCaptureImageService.this.startService(newIntent);
                     } else {
