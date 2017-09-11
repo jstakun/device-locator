@@ -66,5 +66,8 @@
     <string name="email_address">Email address</string>
     <string name="telegram_chat_id">Telegram Messenger chat id</string>
     <string name="share_route">Share route</string>
-    <string name="telegramLink">In order to obtain your Telegram Messenger chat id contact with &lt;a href="http://telegram.me/get_id_bot">@get_id_bot&lt;a></string>
+    <string name="device_tracker">Device tracker</string>
+    <string name="sms_control">SMS control</string>
+    <string name="failed_login_tracker">Failed login tracker</string>
+    <string name="camera_control">Camera control</string>
 </resources>

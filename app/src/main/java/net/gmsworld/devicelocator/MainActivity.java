@@ -63,7 +63,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int SEND_LOCATION_INTENT = 1;
     //private static final int MOTION_DETECTOR_INTENT = 2;
@@ -153,7 +153,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             if (requestCode == ENABLE_ADMIN_INTENT) {
-                Toast.makeText(MainActivity.this, "You'll receive notification when wrong password or pin will be entered.", Toast.LENGTH_LONG).show();
+                //TODO check if any notifier is set
+                if (phoneNumber == null && telegramId == null && email == null) {
+                    Toast.makeText(MainActivity.this, "Please specify who should be notified in case of failed login!", Toast.LENGTH_LONG).show();
+                    findViewById(R.id.phoneNumber).requestFocus();
+                } else {
+                    Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
+                }
+                //
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("loginTracker", true).commit();
                 getSupportActionBar().invalidateOptionsMenu();
                 //open dialog to enable photo on failed login
@@ -302,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
                     editor.putBoolean("hiddenCamera", false);
                     editor.commit();
                     getSupportActionBar().invalidateOptionsMenu();
-                    Toast.makeText(MainActivity.this, "Failed login notification service has been disabled.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
                 }
             });
             builder.setNegativeButton(R.string.no, null);
@@ -342,7 +349,7 @@ public class MainActivity extends AppCompatActivity {
             builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("hiddenCamera", false).commit();
-                    Toast.makeText(MainActivity.this, "From now on Device Locator will stop taking photo on failed login.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
                 }
             });
             builder.setNegativeButton(R.string.no, null);
@@ -393,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
         toggleBroadcastReceiver();
 
         if (running) {
-            Toast.makeText(getApplicationContext(), "From now on you can send remote control sms commands to this device", Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "From now on you can send SMS commands to this device", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -750,7 +757,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    Toast.makeText(getApplicationContext(), "No route is saved yet. Please make sure device location tracking is started and try again after some time.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "No route is saved yet. Please make sure device location tracking is started and try again later.", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -841,7 +848,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 builder.setNegativeButton(R.string.no, null);
-                builder.setMessage("Do you want to enable now remote control commands via SMS in your device?");
+                builder.setMessage("Do you want to enable now SMS commands to your device?");
                 AlertDialog dialog = builder.create();
                 dialog.show();
             }

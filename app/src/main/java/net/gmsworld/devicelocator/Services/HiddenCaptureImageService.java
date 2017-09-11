@@ -135,7 +135,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                 }
             });
         } else {
-            Toast.makeText(this, "Device Locator will take photo when wrong password or pin will be entered to unlock this device.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Done", Toast.LENGTH_LONG).show();
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).commit();
         }
 

@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                ldcard:title="Remote control via SMS">
+                ldcard:title="SMS control">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -169,7 +169,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
-                    ldcard:title="Device tracker">
+                    ldcard:title="@string/device_tracker">
 
                     <LinearLayout
                         android:layout_width="match_parent"

@@ -2,22 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/tracker"
-        android:title="Motion tracker"
+        android:title="@string/device_tracker"
         android:icon="@drawable/ic_location_on_white"
         app:showAsAction="ifRoom|withText"/>
     <item
         android:id="@+id/sms"
-        android:title="SMS control"
+        android:title="@string/sms_control"
         android:icon="@drawable/ic_textsms_white"
         app:showAsAction="ifRoom|withText"/>
     <item
         android:id="@+id/loginTracker"
-        android:title="Failed login tracker"
+        android:title="@string/failed_login_tracker"
         android:icon="@drawable/ic_perm_identity_white"
         app:showAsAction="ifRoom|withText"/>
     <item
         android:id="@+id/camera"
-        android:title="Camera control"
+        android:title="@string/camera_control"
         android:icon="@drawable/ic_camera"
         app:showAsAction="ifRoom|withText"/>
 </menu>
