@@ -153,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
             if (requestCode == ENABLE_ADMIN_INTENT) {
-                //TODO check if any notifier is set
                 if (phoneNumber == null && telegramId == null && email == null) {
                     Toast.makeText(MainActivity.this, "Please specify who should be notified in case of failed login!", Toast.LENGTH_LONG).show();
                     findViewById(R.id.phoneNumber).requestFocus();

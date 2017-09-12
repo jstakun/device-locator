@@ -36,9 +36,9 @@ public class SmsReceiver extends BroadcastReceiver {
     private final static String TAG = SmsReceiver.class.getSimpleName();
 
     //public
-    public final static String START_COMMAND = "startdl"; //start route tracking
+    public final static String START_COMMAND = "resumedl"; //resume route tracking
+    public final static String RESET_COMMAND = "startdl"; //start route tracking and delete old route points if exists
     public final static String STOP_COMMAND = "stopdl"; //stop route tracking
-    public final static String RESET_COMMAND = "resetdl"; //start route tracking and delete old route points if exists
     public final static String ROUTE_COMMAND = "routedl"; //share currently recorded route
     public final static String MUTE_COMMAND = "mutedl"; //mute phone
     public final static String NORMAL_COMMAND = "normaldl"; //unmute phone
@@ -51,7 +51,7 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String AUDIO_COMMAND = "audiodl"; //enable audio transmitter
     public final static String NOAUDIO_COMMAND = "noaudiodl"; //disable audio transmitter
     //private
-    public final static String TAKE_PHOTO_COMMAND = "photodl"; //take photo and send link
+    public final static String TAKE_PHOTO_COMMAND = "photodl"; //if all permissions set take photo and send link
 
     @Override
     public void onReceive(Context context, Intent intent) {
