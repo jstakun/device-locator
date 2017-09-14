@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.util.Log;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.R;
@@ -22,9 +23,11 @@ import io.nlopez.smartlocation.location.config.LocationParams;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
 public class SmsSenderService extends IntentService implements OnLocationUpdatedListener {
-    //private final static String TAG = SmsSenderService.class.getSimpleName();
+    private final static String TAG = SmsSenderService.class.getSimpleName();
 
     private final static int LOCATION_REQUEST_MAX_WAIT_TIME = 60;
+
+    private static boolean isRunning = false;
 
     private Resources r = null;
     private String phoneNumber = null;
@@ -66,7 +69,11 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         String param1 = intent.getExtras().getString("param1");
 
         if (StringUtils.isEmpty(command)) {
-            initSending(intent.getExtras().getString("source"));
+            if (!isRunning) {
+                initSending(intent.getExtras().getString("source"));
+            } else {
+                Log.d(TAG, "GPS provider is already running!");
+            }
         } else {
             Messenger.sendCommandMessage(this, intent, command, phoneNumber, email, telegramId, notificationNumber, param1);
         }
@@ -87,10 +94,17 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         startTime = System.currentTimeMillis() / 1000;
         bestLocation = null;
 
-        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
-                .config(LocationParams.NAVIGATION)
-                .start(this);
 
+        if (SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
+
+            isRunning = true;
+
+            SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
+                    .config(LocationParams.NAVIGATION)
+                    .start(this);
+        } else {
+            Log.e(TAG, "No GPS providers are available!");
+        }
     }
 
     public static boolean isLocationFused(Location location) {
@@ -154,6 +168,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
         //stop the location
         //Log.d(TAG, "STOP LOCATION BECAUSE TIME ELAPSED OR ACCURACY IS GOOD");
+
         SmartLocation.with(this).location().stop();
 
         if (bestLocation == null) {
@@ -168,6 +183,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         if (googleMapsSms) {
             Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId);
         }
+
+        isRunning = false;
     }
 
     private void readSettings() {
