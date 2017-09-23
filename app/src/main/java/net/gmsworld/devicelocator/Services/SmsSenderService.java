@@ -166,13 +166,19 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             }
         }
 
-        //stop the location
-        //Log.d(TAG, "STOP LOCATION BECAUSE TIME ELAPSED OR ACCURACY IS GOOD");
+        //stop the location updates
 
         SmartLocation.with(this).location().stop();
 
         if (bestLocation == null) {
-            Messenger.sendSMS(this, phoneNumber, r.getString(R.string.error_getting_location));
+            final String message = r.getString(R.string.error_getting_location);
+            if (StringUtils.isNotEmpty(phoneNumber)) {
+                Messenger.sendSMS(this, phoneNumber, message);
+            } else if (StringUtils.isNotEmpty(telegramId)) {
+                Messenger.sendTelegram(this, telegramId, message, 1);
+            } else {
+                Log.e(TAG, message);
+            }
             return;
         }
 
