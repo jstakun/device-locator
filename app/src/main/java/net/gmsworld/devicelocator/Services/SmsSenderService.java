@@ -184,10 +184,14 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
         if (gpsSms) {
             Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), speedType, phoneNumber, telegramId);
+        } else {
+            Log.d(TAG, "Location message won't be send");
         }
 
         if (googleMapsSms) {
             Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId);
+        } else {
+            Log.d(TAG, "Google Maps link message won't be send");
         }
 
         isRunning = false;
@@ -199,7 +203,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         keywordReceivedSms = settings.getBoolean("settings_detected_sms", true);
         gpsSms = settings.getBoolean("settings_gps_sms", true);
         googleMapsSms = settings.getBoolean("settings_google_sms", true);
-        //networkSms = settings.getBoolean("settings_network_sms", false);
+
         speedType = Integer.parseInt(settings.getString("settings_kmh_or_mph", "0"));
     }
 

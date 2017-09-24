@@ -560,8 +560,21 @@ public class SmsReceiver extends BroadcastReceiver {
             context.startService(newIntent);
             return true;
         } else {
-            return false;
+            String telegramId = PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "");
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sender = getSenderAddress(context, intent, TAKE_PHOTO_COMMAND + "t");
+                if (sender != null) {
+                    Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+                    context.startService(cameraIntent);
+                    Intent newIntent = new Intent(context, SmsSenderService.class);
+                    newIntent.putExtra("telegramId", telegramId);
+                    newIntent.putExtra("command", TAKE_PHOTO_COMMAND);
+                    context.startService(newIntent);
+                    return true;
+                }
+            }
         }
+        return false;
     }
 
     private ArrayList<SmsMessage> getMessagesWithKeyword(String keyword, Bundle bundle) {
