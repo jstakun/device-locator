@@ -550,10 +550,13 @@ public class SmsReceiver extends BroadcastReceiver {
 
     private boolean findTakePhotoCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, TAKE_PHOTO_COMMAND);
+        boolean hiddenCamera = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false);
 
         if (sender != null) {
-            Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
-            context.startService(cameraIntent);
+            if (hiddenCamera) {
+                Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+                context.startService(cameraIntent);
+            }
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", TAKE_PHOTO_COMMAND);
@@ -564,8 +567,10 @@ public class SmsReceiver extends BroadcastReceiver {
             if (StringUtils.isNotEmpty(telegramId)) {
                 sender = getSenderAddress(context, intent, TAKE_PHOTO_COMMAND + "t");
                 if (sender != null) {
-                    Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
-                    context.startService(cameraIntent);
+                    if (hiddenCamera) {
+                        Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+                        context.startService(cameraIntent);
+                    }
                     Intent newIntent = new Intent(context, SmsSenderService.class);
                     newIntent.putExtra("telegramId", telegramId);
                     newIntent.putExtra("command", TAKE_PHOTO_COMMAND);

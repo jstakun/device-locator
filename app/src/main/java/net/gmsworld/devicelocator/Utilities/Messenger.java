@@ -286,8 +286,11 @@ public class Messenger {
                 text = "Audio transmitter has been stopped.";
                 break;
             case SmsReceiver.TAKE_PHOTO_COMMAND:
-                if (StringUtils.isEmpty(param1)) {
+                boolean hiddenCamera = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false);
+                if (StringUtils.isEmpty(param1) && hiddenCamera) {
                     text = "Photo will be taken. You should receive link soon.";
+                } else if (StringUtils.isEmpty(param1) && !hiddenCamera) {
+                    text = "Camera is disabled! No photo will be taken.";
                 } else {
                     text = "Front camera photo: " + param1;
                 }

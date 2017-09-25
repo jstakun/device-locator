@@ -135,7 +135,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                 }
             });
         } else {
-            Toast.makeText(this, "Done", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Camera enabled", Toast.LENGTH_LONG).show();
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).commit();
         }
 

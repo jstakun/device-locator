@@ -348,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
             builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("hiddenCamera", false).commit();
-                    Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Camera disabled", Toast.LENGTH_LONG).show();
                 }
             });
             builder.setNegativeButton(R.string.no, null);
