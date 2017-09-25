@@ -25,6 +25,7 @@ import com.androidhiddencamera.config.CameraRotation;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Network;
 
 import org.apache.commons.lang3.StringUtils;
@@ -85,55 +86,59 @@ public class HiddenCaptureImageService extends HiddenCameraService {
     @Override
     public void onImageCapture(@NonNull File imageFile) {
         if (!isTest) {
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inPreferredConfig = Bitmap.Config.ARGB_8888; //.RGB_565;
-            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+            if (Network.isNetworkAvailable(this)) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888; //.RGB_565;
+                Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
 
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
 
-            Log.d(TAG, "Image will be sent to server");
+                Log.d(TAG, "Image will be sent to server");
 
-            //send image to server and send notification with link
+                //send image to server and send notification with link
 
-            Map<String, String> headers = new HashMap<String, String>();
+                Map<String, String> headers = new HashMap<String, String>();
 
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
-            String uploadUrl = "https://www.gms-world.net/";
-            if (StringUtils.isNotEmpty(tokenStr)) {
-                headers.put("Authorization", "Bearer " + tokenStr);
-                uploadUrl += "s";
-            }
-
-            headers.put("X-GMS-AppId", "2");
-            headers.put("X-GMS-Scope", "dl");
-
-            Network.uploadScreenshot(uploadUrl + "/imageUpload", out.toByteArray(), "screenshot_device_locator.jpg", headers, new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String imageUrl, int responseCode, String url) {
-                    if (StringUtils.isNotEmpty(imageUrl)) {
-                        //send notification with image url
-                        String email = settings.getString("email", "");
-                        String phoneNumber = settings.getString("phoneNumber", "");
-                        String telegramId = settings.getString("telegramId", "");
-
-                        Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
-                        newIntent.putExtra("email", email);
-                        newIntent.putExtra("telegramId", telegramId);
-                        newIntent.putExtra("command", SmsReceiver.TAKE_PHOTO_COMMAND);
-                        newIntent.putExtra("param1", imageUrl);
-                        if (StringUtils.isNotEmpty(sender)) {
-                            newIntent.putExtra("phoneNumber", sender);
-                        } else {
-                            newIntent.putExtra("phoneNumber", phoneNumber);
-                        }
-                        HiddenCaptureImageService.this.startService(newIntent);
-                    } else {
-                        Log.e(TAG, "Received empty image url!");
-                    }
+                final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+                String uploadUrl = "https://www.gms-world.net/";
+                if (StringUtils.isNotEmpty(tokenStr)) {
+                    headers.put("Authorization", "Bearer " + tokenStr);
+                    uploadUrl += "s";
                 }
-            });
+
+                headers.put("X-GMS-AppId", "2");
+                headers.put("X-GMS-Scope", "dl");
+
+                Network.uploadScreenshot(uploadUrl + "/imageUpload", out.toByteArray(), "screenshot_device_locator.jpg", headers, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String imageUrl, int responseCode, String url) {
+                        if (StringUtils.isNotEmpty(imageUrl)) {
+                            //send notification with image url
+                            String email = settings.getString("email", "");
+                            String phoneNumber = settings.getString("phoneNumber", "");
+                            String telegramId = settings.getString("telegramId", "");
+
+                            Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
+                            newIntent.putExtra("email", email);
+                            newIntent.putExtra("telegramId", telegramId);
+                            newIntent.putExtra("command", SmsReceiver.TAKE_PHOTO_COMMAND);
+                            newIntent.putExtra("param1", imageUrl);
+                            if (StringUtils.isNotEmpty(sender)) {
+                                newIntent.putExtra("phoneNumber", sender);
+                            } else {
+                                newIntent.putExtra("phoneNumber", phoneNumber);
+                            }
+                            HiddenCaptureImageService.this.startService(newIntent);
+                        } else {
+                            Log.e(TAG, "Received empty image url!");
+                        }
+                    }
+                });
+            } else {
+                Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+            }
         } else {
             Toast.makeText(this, "Camera enabled", Toast.LENGTH_LONG).show();
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).commit();

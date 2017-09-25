@@ -13,6 +13,7 @@ import android.provider.Settings;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -50,7 +51,6 @@ public class Messenger {
 
 
     public static void sendSMS(final Context context, final String phoneNumber, final String message) {
-        //Log.d(TAG, "Send SMS: " + phoneNumber + ", " + message);
         //on samsung intents can't be null. the messages are not sent if intents are null
         ArrayList<PendingIntent> samsungFix = new ArrayList<>();
         samsungFix.add(PendingIntent.getBroadcast(context, 0, new Intent("SMS_RECEIVED"), 0));
@@ -63,58 +63,66 @@ public class Messenger {
 
     public static void sendEmail(final Context context, final String email, final String message, final String title, final int retryCount) {
         if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message) || StringUtils.isNotEmpty(title))) {
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
-            if (StringUtils.isNotEmpty(tokenStr)) {
-                sendEmail(context, email, message, title, tokenStr, 1);
-            } else {
-                String queryString = "scope=dl&user=" + getDeviceId(context);
-                Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
-                    @Override
-                    public void onGetFinish(String results, int responseCode, String url) {
-                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                        if (responseCode == 200) {
-                            JsonObject token = new JsonParser().parse(results).getAsJsonObject();
-                            SharedPreferences.Editor editor = settings.edit();
-                            String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
-                            Log.d(TAG, "Received following token: " + token);
-                            editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
-                            editor.commit();
-                            sendEmail(context, email, message, title, tokenStr, 1);
-                        } else if (responseCode == 500 && retryCount > 0) {
-                            sendEmail(context, email, message, title, retryCount-1);
+            if (Network.isNetworkAvailable(context)) {
+                final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+                if (StringUtils.isNotEmpty(tokenStr)) {
+                    sendEmail(context, email, message, title, tokenStr, 1);
+                } else {
+                    String queryString = "scope=dl&user=" + getDeviceId(context);
+                    Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+                        @Override
+                        public void onGetFinish(String results, int responseCode, String url) {
+                            Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                            if (responseCode == 200) {
+                                JsonObject token = new JsonParser().parse(results).getAsJsonObject();
+                                SharedPreferences.Editor editor = settings.edit();
+                                String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
+                                Log.d(TAG, "Received following token: " + token);
+                                editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
+                                editor.commit();
+                                sendEmail(context, email, message, title, tokenStr, 1);
+                            } else if (responseCode == 500 && retryCount > 0) {
+                                sendEmail(context, email, message, title, retryCount - 1);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+            } else {
+                Toast.makeText(context, R.string.no_network_error, Toast.LENGTH_LONG).show();
             }
         }
     }
 
     public static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount) {
         if (NumberUtils.isCreatable(telegramId)) {
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
-            if (StringUtils.isNotEmpty(tokenStr)) {
-                sendTelegram(context, telegramId, message, tokenStr, 1);
-            } else {
-                String queryString = "scope=dl&user=" + getDeviceId(context);
-                Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
-                    @Override
-                    public void onGetFinish(String results, int responseCode, String url) {
-                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                        if (responseCode == 200) {
-                            JsonObject token = new JsonParser().parse(results).getAsJsonObject();
-                            SharedPreferences.Editor editor = settings.edit();
-                            String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
-                            Log.d(TAG, "Received following token: " + token);
-                            editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
-                            editor.commit();
-                            sendTelegram(context, telegramId, message, tokenStr, 1);
-                        } else if (responseCode == 500 && retryCount > 0) {
-                            sendTelegram(context, telegramId, message, retryCount-1);
+            if (Network.isNetworkAvailable(context)) {
+                final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+                if (StringUtils.isNotEmpty(tokenStr)) {
+                    sendTelegram(context, telegramId, message, tokenStr, 1);
+                } else {
+                    String queryString = "scope=dl&user=" + getDeviceId(context);
+                    Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+                        @Override
+                        public void onGetFinish(String results, int responseCode, String url) {
+                            Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                            if (responseCode == 200) {
+                                JsonObject token = new JsonParser().parse(results).getAsJsonObject();
+                                SharedPreferences.Editor editor = settings.edit();
+                                String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
+                                Log.d(TAG, "Received following token: " + token);
+                                editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
+                                editor.commit();
+                                sendTelegram(context, telegramId, message, tokenStr, 1);
+                            } else if (responseCode == 500 && retryCount > 0) {
+                                sendTelegram(context, telegramId, message, retryCount - 1);
+                            }
                         }
-                    }
-                });
+                    });
+                }
+            } else {
+                Toast.makeText(context, R.string.no_network_error, Toast.LENGTH_LONG).show();
             }
         }
     }

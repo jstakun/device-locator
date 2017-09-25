@@ -46,7 +46,7 @@ public class DeviceLocatorApp extends Application {
             headers.put("X-GMS-AppId", "2");
             headers.put("X-GMS-Scope", "dl");
             initAcra(headers);
-        } else {
+        } else if (Network.isNetworkAvailable(this)) {
             String queryString = "scope=dl&user=" + Messenger.getDeviceId(this);
             Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
                 @Override

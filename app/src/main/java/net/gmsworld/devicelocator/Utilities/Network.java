@@ -34,7 +34,7 @@ public class Network {
         defaultHeaders.put("User-Agent", "Device Locator/0.2-10 (+http://www.gms-world.net)");
     }
 
-    protected static boolean isNetworkAvailable(final Context context) {
+    public static boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
     }
@@ -127,7 +127,7 @@ public class Network {
         thread.start();
     }*/
 
-    public static void post(final String urlString, final String content, final String contentType, final OnGetFinishListener onGetFinishListener) {
+    /*public static void post(final String urlString, final String content, final String contentType, final OnGetFinishListener onGetFinishListener) {
         Thread thread = new Thread() {
             @Override
             public void run() {
@@ -174,7 +174,7 @@ public class Network {
         };
 
         thread.start();
-    }
+    }*/
 
     public static void post(final String urlString, final String content, final String contentType, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
         Thread thread = new Thread() {
@@ -191,8 +191,10 @@ public class Network {
                         urlConnection.setRequestProperty(header.getKey(), header.getValue());
                     }
 
-                    for (Map.Entry<String, String> header : headers.entrySet()) {
-                        urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                    if (headers != null) {
+                        for (Map.Entry<String, String> header : headers.entrySet()) {
+                            urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                        }
                     }
 
                     if (content != null) {

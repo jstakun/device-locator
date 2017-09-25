@@ -70,4 +70,5 @@
     <string name="sms_control">SMS control</string>
     <string name="failed_login_tracker">Failed login tracker</string>
     <string name="camera_control">Camera control</string>
+    <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
 </resources>

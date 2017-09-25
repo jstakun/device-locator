@@ -243,7 +243,12 @@ public abstract class AbstractLocationManager {
     }
 
     public void executeRouteUploadTask(Context activity, String title, String phoneNumber, long creationTimestamp, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
-        new RouteUploadTask(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener).execute();
+        if (Network.isNetworkAvailable(activity)) {
+            new RouteUploadTask(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener).execute();;
+        } else {
+            Toast.makeText(activity, R.string.no_network_error, Toast.LENGTH_LONG).show();
+            return;
+        }
     }
 
     static class RouteUploadTask extends AsyncTask<Void, Integer, Integer> {
@@ -278,8 +283,9 @@ public abstract class AbstractLocationManager {
             Context activity = callerActivity.get();
             if (activity == null) {
                 return -1;
+            } else {
+                return uploadRouteToServer(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener);
             }
-            return uploadRouteToServer(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener);
         }
 
         @Override
@@ -309,7 +315,7 @@ public abstract class AbstractLocationManager {
                     String content = routeToGeoJson(route, title, desc, creationDate);
                     String url = context.getResources().getString(R.string.routeProviderUrl);
                     //Log.d(TAG, "Uploading route " + content);
-                    Network.post(url, "route=" + content, null, onFinishListener);
+                    Network.post(url, "route=" + content, null, null, onFinishListener);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
                     if (smsNotify) {

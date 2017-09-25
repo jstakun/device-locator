@@ -563,17 +563,22 @@ public class MainActivity extends AppCompatActivity {
                 if(!hasFocus) {
                     newEmailAddress = emailInput.getText().toString();
                     if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
-                        Log.d(TAG, "Setting new email address: " + newEmailAddress);
-                        email = newEmailAddress;
-                        saveData();
-                        //update route tracking service if running
-                        if (motionDetectorRunning) {
-                            RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
-                        }
+                        if (Network.isNetworkAvailable(MainActivity.this)) {
+                            Log.d(TAG, "Setting new email address: " + newEmailAddress);
+                            email = newEmailAddress;
+                            saveData();
+                            //update route tracking service if running
+                            if (motionDetectorRunning) {
+                                RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                            }
 
-                        if (StringUtils.isNotEmpty(email)) {
-                            Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
-                            net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
+                            if (StringUtils.isNotEmpty(email)) {
+                                Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
+                                net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
+                            }
+                        } else {
+                            Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                            emailInput.setText("");
                         }
                     } else if (!StringUtils.equals(email, newEmailAddress)) {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid email address!", Toast.LENGTH_SHORT).show();
@@ -635,17 +640,22 @@ public class MainActivity extends AppCompatActivity {
                 if (!hasFocus) {
                     newTelegramId = telegramInput.getText().toString();
                     if (!StringUtils.equals(telegramId, newTelegramId) && ((NumberUtils.isCreatable(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || StringUtils.isEmpty(newTelegramId))) {
-                        Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
-                        telegramId = newTelegramId;
-                        saveData();
-                        //update route tracking service if running
-                        if (motionDetectorRunning) {
-                            RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
-                        }
+                        if (Network.isNetworkAvailable(MainActivity.this)) {
+                            Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
+                            telegramId = newTelegramId;
+                            saveData();
+                            //update route tracking service if running
+                            if (motionDetectorRunning) {
+                                RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                            }
 
-                        if (StringUtils.isNotEmpty(telegramId)) {
-                            net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
-                            Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your chat", Toast.LENGTH_LONG).show();
+                            if (StringUtils.isNotEmpty(telegramId)) {
+                                net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
+                                Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your chat", Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                            Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                            telegramInput.setText("");
                         }
                     } else if (!StringUtils.equals(telegramId, newTelegramId)) {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid Telegram chat id!", Toast.LENGTH_SHORT).show();
