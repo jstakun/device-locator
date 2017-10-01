@@ -127,9 +127,13 @@ public class MainActivity extends AppCompatActivity {
 
         if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || (StringUtils.isEmpty(newEmailAddress) && newEmailAddress != null))) {
             Log.d(TAG, "New email has been set: " + newEmailAddress);
-            editor.putString("email", newEmailAddress);
-            if (StringUtils.isNotEmpty(newEmailAddress)) {
-                net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, newEmailAddress, 1);
+            if (Network.isNetworkAvailable(MainActivity.this)) {
+                editor.putString("email", newEmailAddress);
+                if (StringUtils.isNotEmpty(newEmailAddress)) {
+                    net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, newEmailAddress, 1);
+                }
+            } else {
+                Toast.makeText(MainActivity.this, "No network available! Please connect to networking service and set email again.", Toast.LENGTH_LONG).show();
             }
         }
 
@@ -140,9 +144,13 @@ public class MainActivity extends AppCompatActivity {
 
         if (!StringUtils.equals(telegramId, newTelegramId) && ((NumberUtils.isCreatable(newTelegramId) && StringUtils.isNotEmpty(newTelegramId)) || (StringUtils.isEmpty(newTelegramId) && newTelegramId != null))) {
             Log.d(TAG, "New telegram id has been set: " + newTelegramId);
-            editor.putString("telegramId", newTelegramId);
-            if (StringUtils.isNotEmpty(newTelegramId)) {
-                net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, newTelegramId, 1);
+            if (Network.isNetworkAvailable(MainActivity.this)) {
+                editor.putString("telegramId", newTelegramId);
+                if (StringUtils.isNotEmpty(newTelegramId)) {
+                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, newTelegramId, 1);
+                }
+            } else {
+                Toast.makeText(MainActivity.this, "No network available! Please connect to networking service and set Telegram chat or channel id again.", Toast.LENGTH_LONG).show();
             }
         }
 
