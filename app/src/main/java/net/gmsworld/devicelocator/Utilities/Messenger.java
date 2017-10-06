@@ -434,16 +434,20 @@ public class Messenger {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                    if (responseCode == 500 && retryCount > 0) {
+                    if (responseCode != 200 && retryCount > 0) {
                         sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount-1);
                     } else if (responseCode == 200  && StringUtils.startsWith(results, "{")) {
                         JsonObject reply = new JsonParser().parse(results).getAsJsonObject();
                         String status = reply.get("status").getAsString();
                         if (StringUtils.equals(status, "registered")) {
-                            Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications now.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equals(status, "unverified")) {
                             Toast.makeText(context, "You'll receive verification instruction to your chat or channel", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(context, "Oops! Something went wrong. Please add again Telegram chat id!", Toast.LENGTH_LONG).show();
                         }
+                    } else {
+                        Toast.makeText(context, "Oops! Something went wrong. Please add again Telegram chat id!", Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -462,16 +466,20 @@ public class Messenger {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url + " with content " + results);
-                    if (responseCode == 500 && retryCount > 0) {
+                    if (responseCode != 200 && retryCount > 0) {
                         sendEmailRegistrationRequest(context, email, tokenStr, retryCount-1);
                     } else if (responseCode == 200  && StringUtils.startsWith(results, "{")) {
                         JsonObject reply = new JsonParser().parse(results).getAsJsonObject();
                         String status = reply.get("status").getAsString();
                         if (StringUtils.equals(status, "registered")) {
-                            Toast.makeText(context, "Your email address is already verified. You should start receiving notifications now.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Your email address is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equals(status, "unverified")) {
                             Toast.makeText(context, "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(context, "Oops! Something went wrong. Please add again email address!", Toast.LENGTH_LONG).show();
                         }
+                    } else {
+                        Toast.makeText(context, "Oops! Something went wrong. Please add again email address!", Toast.LENGTH_LONG).show();
                     }
                 }
             });
