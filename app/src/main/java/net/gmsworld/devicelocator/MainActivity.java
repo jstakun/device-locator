@@ -581,7 +581,6 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             if (StringUtils.isNotEmpty(email)) {
-                                Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
                             }
                         } else {
@@ -659,7 +658,6 @@ public class MainActivity extends AppCompatActivity {
 
                             if (StringUtils.isNotEmpty(telegramId)) {
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
-                                Toast.makeText(getApplicationContext(), "You'll receive verification instruction to your chat or channel", Toast.LENGTH_LONG).show();
                             }
                         } else {
                             Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();

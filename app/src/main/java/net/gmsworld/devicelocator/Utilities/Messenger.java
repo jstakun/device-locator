@@ -216,7 +216,7 @@ public class Messenger {
         List<String> notifications = new ArrayList<String>();
         switch (command) {
             case SmsReceiver.START_COMMAND:
-                text = "Device location tracking service has been started.";
+                text = "Device location tracking service has been started. Battery level: " + getBatteryLevel(context);
                 if (StringUtils.isNotEmpty(notificationNumber)) {
                     notifications.add(notificationNumber);
                 }
@@ -233,10 +233,10 @@ public class Messenger {
                 }
                 break;
             case SmsReceiver.STOP_COMMAND:
-                text = "Device location tracking service has been stopped.";
+                text = "Device location tracking service has been stopped. Battery level: " + getBatteryLevel(context);
                 break;
             case SmsReceiver.RESET_COMMAND:
-                text = "Device location tracking service has been reset.";
+                text = "Device location tracking service has been reset. Battery level: " + getBatteryLevel(context);
                 break;
             case SmsReceiver.MUTE_COMMAND:
                 text = "Device has been muted.";
@@ -323,7 +323,7 @@ public class Messenger {
         String text = r.getString(R.string.acknowledgeMessage);
         text += " " + r.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context));
         text += ", " + r.getString(R.string.gps) + " " + SmsSenderService.locationToString(context);
-        text += ", Battery level: " + Messenger.getBatteryLevel(context);
+        text += ", Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         } else if (StringUtils.isNotEmpty(telegramId)) {
@@ -334,7 +334,7 @@ public class Messenger {
     public static void sendLoginFailedMessage(Context context, String phoneNumber, String telegramId) {
         String text = "Failed login attempt to your device " + getDeviceId(context) + "."
                 + " You should receive device location message soon."
-                + " Battery level: " + Messenger.getBatteryLevel(context);
+                + " Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         } else if (StringUtils.isNotEmpty(telegramId)) {
@@ -430,13 +430,20 @@ public class Messenger {
 
         try {
             String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context);
-
             Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 500 && retryCount > 0) {
                         sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount-1);
+                    } else if (responseCode == 200  && StringUtils.startsWith(results, "{")) {
+                        JsonObject reply = new JsonParser().parse(results).getAsJsonObject();
+                        String status = reply.get("status").getAsString();
+                        if (StringUtils.equals(status, "registered")) {
+                            Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications now.", Toast.LENGTH_LONG).show();
+                        } else if (StringUtils.equals(status, "unverified")) {
+                            Toast.makeText(context, "You'll receive verification instruction to your chat or channel", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
             });
@@ -451,13 +458,20 @@ public class Messenger {
 
         try {
             String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context);
-
             Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url + " with content " + results);
                     if (responseCode == 500 && retryCount > 0) {
                         sendEmailRegistrationRequest(context, email, tokenStr, retryCount-1);
+                    } else if (responseCode == 200  && StringUtils.startsWith(results, "{")) {
+                        JsonObject reply = new JsonParser().parse(results).getAsJsonObject();
+                        String status = reply.get("status").getAsString();
+                        if (StringUtils.equals(status, "registered")) {
+                            Toast.makeText(context, "Your email address is already verified. You should start receiving notifications now.", Toast.LENGTH_LONG).show();
+                        } else if (StringUtils.equals(status, "unverified")) {
+                            Toast.makeText(context, "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
             });
