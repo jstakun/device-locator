@@ -17,7 +17,7 @@
         <activity
             android:name="net.gmsworld.devicelocator.MainActivity"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="stateHidden">
+            android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

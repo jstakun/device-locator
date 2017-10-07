@@ -211,9 +211,16 @@ public class Messenger {
         }
     }
 
-    public static void sendCommandMessage(Context context, Intent intent, String command, String phoneNumber, String email, String telegramId, String notificationNumber, String param1) {
+    public static void sendCommandMessage(final Context context, final Intent intent) {
         String text = null;
+        String phoneNumber = intent.getExtras().getString("phoneNumber");
+        String telegramId = intent.getExtras().getString("telegramId");
+        String email = intent.getExtras().getString("email");
+        String notificationNumber = intent.getExtras().getString("notificationNumber");
+        String command = intent.getExtras().getString("command");
+
         List<String> notifications = new ArrayList<String>();
+
         switch (command) {
             case SmsReceiver.START_COMMAND:
                 text = "Device location tracking service has been started. Battery level: " + getBatteryLevel(context);
@@ -296,12 +303,13 @@ public class Messenger {
                 break;
             case SmsReceiver.TAKE_PHOTO_COMMAND:
                 boolean hiddenCamera = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false);
-                if (StringUtils.isEmpty(param1) && hiddenCamera) {
+                String imageUrl = intent.getExtras().getString("imageUrl");
+                if (StringUtils.isEmpty(imageUrl) && hiddenCamera) {
                     text = "Photo will be taken. You should receive link soon.";
-                } else if (StringUtils.isEmpty(param1) && !hiddenCamera) {
+                } else if (StringUtils.isEmpty(imageUrl) && !hiddenCamera) {
                     text = "Camera is disabled! No photo will be taken.";
                 } else {
-                    text = "Front camera photo: " + param1;
+                    text = "Front camera photo: " + imageUrl;
                 }
                 break;
             case SmsReceiver.PIN_COMMAND:

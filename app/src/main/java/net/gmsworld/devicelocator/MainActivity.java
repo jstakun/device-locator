@@ -26,17 +26,20 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
 import android.text.InputFilter;
-import android.text.InputType;
+import android.text.Layout;
+import android.text.Spannable;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
-import android.text.method.PasswordTransformationMethod;
+import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -127,12 +130,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //long pinVerificationMillis = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getLong("pinVerificationMillis", 0);
+        long pinVerificationMillis = PreferenceManager.getDefaultSharedPreferences(this).getLong("pinVerificationMillis", 0);
+        boolean settingsVerifyPin = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("settings_verify_pin", false);
         //Log.d(TAG, "Checking if Security PIN should be verified...");
-        //if (StringUtils.isNotEmpty(token) && System.currentTimeMillis() - pinVerificationMillis > 10 * 60 * 1000) {
-            //show pin dalog only if not shown in last 10 minutes
-        //    showPinDialog();
-        //}
+        if (StringUtils.isNotEmpty(token) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > 10 * 60 * 1000) {
+            //show pin dialog only if not shown in last 10 minutes
+            showPinDialog();
+        }
     }
 
     @Override
@@ -300,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean("settings_detected_sms", true));
         ((CheckBox) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean("settings_gps_sms", true));
         ((CheckBox) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean("settings_google_sms", true));
+        ((CheckBox) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
     }
 
     public void onLocationSMSCheckboxClicked(View view) {
@@ -317,6 +322,10 @@ public class MainActivity extends AppCompatActivity {
             case R.id.settings_google_sms:
                  editor.putBoolean("settings_google_sms", checked);
                  break;
+            case R.id.settings_verify_pin:
+                 editor.putBoolean("settings_verify_pin", checked);
+                 break;
+
             default:
                 break;
         }
@@ -503,9 +512,6 @@ public class MainActivity extends AppCompatActivity {
         TextView commandLink = (TextView) findViewById(R.id.docsLink);
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
         commandLink.setText(Html.fromHtml(getResources().getString(R.string.docsLink)));
-        //TextView telegramLink = (TextView) findViewById(R.id.telegramLink);
-        //telegramLink.setMovementMethod(LinkMovementMethod.getInstance());
-        //telegramLink.setText(Html.fromHtml(getResources().getString(R.string.telegramLink)));
         initRemoteControl();
     }
 
@@ -1055,16 +1061,12 @@ public class MainActivity extends AppCompatActivity {
     private void showPinDialog() {
         if (pinDialog == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Enter Security PIN");
 
-            final EditText tokenInput = new EditText(this);
+            LayoutInflater li = LayoutInflater.from(this);
+            View pinView = li.inflate(R.layout.verify_pin_dialog, null);
 
-            tokenInput.setInputType(InputType.TYPE_CLASS_NUMBER);
-            tokenInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
-            tokenInput.setLines(1);
-            tokenInput.setMaxLines(1);
-            tokenInput.setGravity(Gravity.LEFT | Gravity.TOP);
-            tokenInput.setPadding(16, 8, 16, 8);
+            final EditText tokenInput = (EditText) pinView.findViewById(R.id.verify_pin_edit);
+
             tokenInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(token.length())});
 
             tokenInput.addTextChangedListener(new TextWatcher() {
@@ -1089,10 +1091,37 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            builder.setView(tokenInput);
+            final TextView helpText = (TextView) pinView.findViewById(R.id.verify_pin_text);
+            helpText.setText(Html.fromHtml(getResources().getString(R.string.pinLink)));
+            helpText.setMovementMethod(new TextViewLinkHandler() {
+                @Override
+                public void onLinkClick(String url) {
+                    if (StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(phoneNumber)) {
+                        Intent newIntent = new Intent();
+                        newIntent.putExtra("telegramId", telegramId);
+                        newIntent.putExtra("command", SmsReceiver.PIN_COMMAND);
+                        newIntent.putExtra("phoneNumber", phoneNumber);
+                        Messenger.sendCommandMessage(MainActivity.this, newIntent);
+                        if (StringUtils.isNotEmpty(email)) {
+                            Messenger.sendEmail(MainActivity.this, email, "Your Security PIN is " + token, "Message from Device Locator", 1);
+                        }
+                        Toast.makeText(MainActivity.this, "Security PIN has been sent to notifiers", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "No notifier has been set. Unable to send Security PIN.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            builder.setView(pinView);
+
+            builder.setCancelable(false);
 
             pinDialog = builder.create();
         }
+
+        //show keyboard
+        pinDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
         pinDialog.show();
     }
 
@@ -1148,5 +1177,34 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private abstract class TextViewLinkHandler extends LinkMovementMethod {
+
+        public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
+            if (event.getAction() != MotionEvent.ACTION_UP)
+                return super.onTouchEvent(widget, buffer, event);
+
+            int x = (int) event.getX();
+            int y = (int) event.getY();
+
+            x -= widget.getTotalPaddingLeft();
+            y -= widget.getTotalPaddingTop();
+
+            x += widget.getScrollX();
+            y += widget.getScrollY();
+
+            Layout layout = widget.getLayout();
+            int line = layout.getLineForVertical(y);
+            int off = layout.getOffsetForHorizontal(line, x);
+
+            URLSpan[] link = buffer.getSpans(off, off, URLSpan.class);
+            if (link.length != 0) {
+                onLinkClick(link[0].getURL());
+            }
+            return true;
+        }
+
+        abstract public void onLinkClick(String url);
     }
 }

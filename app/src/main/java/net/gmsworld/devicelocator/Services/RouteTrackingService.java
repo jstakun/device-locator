@@ -243,7 +243,7 @@ public class RouteTrackingService extends Service {
                                              "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
 
-                            if (email != null && email.length() > 0) {
+                            if (StringUtils.isEmpty(email)) {
                                 String title = "Message from Device Locator";
                                 String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(RouteTrackingService.this);
                                 if (deviceId != null) {
@@ -252,7 +252,7 @@ public class RouteTrackingService extends Service {
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, email, message, title, 1);
                             }
 
-                            if (telegramId != null && telegramId.length() > 0) {
+                            if (StringUtils.isNotEmpty(telegramId)) {
                                 message = message.replace("\n", ", ");
                                 net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message, 1);
                             }

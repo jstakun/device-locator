@@ -121,6 +121,28 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="left"/>
+
+                   </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp"
+                        android:paddingTop="15dp">
+
+                        <CheckBox
+                            android:id="@+id/settings_verify_pin"
+                            android:text="@string/verify_security_pin"
+                            android:textColor="@color/gray"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="false"
+                            android:onClick="onLocationSMSCheckboxClicked"
+                            android:paddingLeft="8dp"
+                            android:paddingTop="15dp"
+                            android:paddingBottom="8dp"/>
+
                     </LinearLayout>
 
                 </LinearLayout>

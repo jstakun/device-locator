@@ -60,13 +60,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
         this.r = getResources();
 
-        String email = intent.getExtras().getString("email");
-
-        String notificationNumber = intent.getExtras().getString("notificationNumber");
-
         String command = intent.getExtras().getString("command");
-
-        String param1 = intent.getExtras().getString("param1");
 
         if (StringUtils.isEmpty(command)) {
             if (!isRunning) {
@@ -75,7 +69,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 Log.d(TAG, "GPS provider is already running!");
             }
         } else {
-            Messenger.sendCommandMessage(this, intent, command, phoneNumber, email, telegramId, notificationNumber, param1);
+            Messenger.sendCommandMessage(this, intent);
         }
     }
 
