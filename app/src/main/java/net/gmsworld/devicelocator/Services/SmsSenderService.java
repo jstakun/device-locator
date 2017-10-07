@@ -25,7 +25,7 @@ import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWith
 public class SmsSenderService extends IntentService implements OnLocationUpdatedListener {
     private final static String TAG = SmsSenderService.class.getSimpleName();
 
-    private final static int LOCATION_REQUEST_MAX_WAIT_TIME = 60;
+    private final static int LOCATION_REQUEST_MAX_WAIT_TIME = 120;
 
     private static boolean isRunning = false;
 
@@ -94,7 +94,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         startTime = System.currentTimeMillis() / 1000;
         bestLocation = null;
 
-
         if (SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
 
             isRunning = true;
@@ -143,23 +142,24 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             if (!bestLocation.getProvider().equals(LocationManager.GPS_PROVIDER) || bestLocation.getProvider().equals(location.getProvider())) {
                 //Log.d(TAG, "NOT GPS OR BOTH GPS!");
-                if (location.getAccuracy() < bestLocation.getAccuracy()) {
+                if (location.hasAccuracy() && bestLocation.hasAccuracy() && location.getAccuracy() < bestLocation.getAccuracy()) {
                     //Log.d(TAG, "Update best location.");
                     bestLocation = location;
                 }
             }
 
 
-            if (isLocationFused(bestLocation)) {
+            //if (isLocationFused(bestLocation)) {
                 //Log.d(TAG, "Location still fused.");
-                return;
-            }
+            //    return;
+            //}
 
             if (bestLocation.getAccuracy() > 100) {
                 //Log.d(TAG, "Accuracy more than 100, check again.");
                 return;
             }
 
+            //check if location is older than 10 minutes
             if ((System.currentTimeMillis() - bestLocation.getTime()) > 10 * 60 * 1000) {
                 //Log.d(TAG, "Location is older than 10 minutes");
                 return;
@@ -167,7 +167,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         }
 
         //stop the location updates
-
         SmartLocation.with(this).location().stop();
 
         if (bestLocation == null) {
