@@ -25,10 +25,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,6 +40,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -88,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
     //private Messenger mMessenger;
     private boolean isTrackingServiceBound = false;
 
+    private AlertDialog pinDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +122,17 @@ public class MainActivity extends AppCompatActivity {
             findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.trackerSettings).setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //long pinVerificationMillis = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getLong("pinVerificationMillis", 0);
+        //Log.d(TAG, "Checking if Security PIN should be verified...");
+        //if (StringUtils.isNotEmpty(token) && System.currentTimeMillis() - pinVerificationMillis > 10 * 60 * 1000) {
+            //show pin dalog only if not shown in last 10 minutes
+        //    showPinDialog();
+        //}
     }
 
     @Override
@@ -505,6 +523,7 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String input = charSequence.toString();
                 try {
+                    //token is empty or up to 8 digits string
                     token = input;
                     saveData();
                 } catch (Exception e) {
@@ -1031,6 +1050,50 @@ public class MainActivity extends AppCompatActivity {
         }
 
         editor.commit();
+    }
+
+    private void showPinDialog() {
+        if (pinDialog == null) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Enter Security PIN");
+
+            final EditText tokenInput = new EditText(this);
+
+            tokenInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+            tokenInput.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            tokenInput.setLines(1);
+            tokenInput.setMaxLines(1);
+            tokenInput.setGravity(Gravity.LEFT | Gravity.TOP);
+            tokenInput.setPadding(16, 8, 16, 8);
+            tokenInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(token.length())});
+
+            tokenInput.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    String input = charSequence.toString();
+                    if (StringUtils.equals(input, token)) {
+                        Log.d(TAG, "Security PIN verified!");
+                        pinDialog.dismiss();
+                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).commit();
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+
+                }
+            });
+
+            builder.setView(tokenInput);
+
+            pinDialog = builder.create();
+        }
+        pinDialog.show();
     }
 
     //----------------------------- route tracking service -----------------------------------

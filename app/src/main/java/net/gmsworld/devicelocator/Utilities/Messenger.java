@@ -304,6 +304,13 @@ public class Messenger {
                     text = "Front camera photo: " + param1;
                 }
                 break;
+            case SmsReceiver.PIN_COMMAND:
+                String pin = PreferenceManager.getDefaultSharedPreferences(context).getString("token","");
+                if (StringUtils.isEmpty(pin)) {
+                    text = "No Security PIN is set!";
+                } else {
+                    text = "Your Security PIN is " + pin;
+                }
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;

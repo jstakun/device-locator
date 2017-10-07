@@ -52,6 +52,7 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String NOAUDIO_COMMAND = "noaudiodl"; //disable audio transmitter
     //private
     public final static String TAKE_PHOTO_COMMAND = "photodl"; //if all permissions set take photo and send link
+    public final static String PIN_COMMAND = "pindl";
 
     @Override
     public void onReceive(Context context, Intent intent) {
