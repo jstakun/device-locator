@@ -277,6 +277,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }*/
 
+    private void initLocationSMSCheckbox() {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        ((CheckBox) findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean("settings_detected_sms", true));
+        ((CheckBox) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean("settings_gps_sms", true));
+        ((CheckBox) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean("settings_google_sms", true));
+    }
+
     public void onLocationSMSCheckboxClicked(View view) {
         boolean checked = ((CheckBox) view).isChecked();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -474,6 +481,7 @@ public class MainActivity extends AppCompatActivity {
         initTelegramButton();
         initTokenInput();
         initGpsRadioGroup();
+        initLocationSMSCheckbox();
         TextView commandLink = (TextView) findViewById(R.id.docsLink);
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
         commandLink.setText(Html.fromHtml(getResources().getString(R.string.docsLink)));
