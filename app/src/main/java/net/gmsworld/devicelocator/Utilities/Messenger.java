@@ -223,7 +223,7 @@ public class Messenger {
 
         switch (command) {
             case SmsReceiver.START_COMMAND:
-                text = "Device location tracking service has been started. Battery level: " + getBatteryLevel(context);
+                text = "Device location tracking service has been resumed. Battery level: " + getBatteryLevel(context);
                 if (StringUtils.isNotEmpty(notificationNumber)) {
                     notifications.add(notificationNumber);
                 }
@@ -243,7 +243,7 @@ public class Messenger {
                 text = "Device location tracking service has been stopped. Battery level: " + getBatteryLevel(context);
                 break;
             case SmsReceiver.RESET_COMMAND:
-                text = "Device location tracking service has been reset. Battery level: " + getBatteryLevel(context);
+                text = "Device location tracking service has been started. Battery level: " + getBatteryLevel(context);
                 break;
             case SmsReceiver.MUTE_COMMAND:
                 text = "Device has been muted.";
