@@ -66,7 +66,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
 
                 startCamera(cameraConfig);
 
-                new android.os.Handler().post(new Runnable() {
+                new android.os.Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         try {
@@ -75,7 +75,8 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                             Log.e(TAG, "Failed to take a picture!", e);
                         }
                     }
-                });
+                }, 2000);
+
             } else {
                 Log.e(TAG, "Draw over other apps permission is missing. Can't take a picture");
             }
