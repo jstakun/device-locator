@@ -45,8 +45,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -507,7 +505,7 @@ public class MainActivity extends AppCompatActivity {
         initContactButton();
         initTelegramButton();
         initTokenInput();
-        initGpsRadioGroup();
+        //initGpsRadioGroup();
         initLocationSMSCheckbox();
         TextView commandLink = (TextView) findViewById(R.id.docsLink);
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
@@ -773,7 +771,7 @@ public class MainActivity extends AppCompatActivity {
 
     //------------------------------------------------------------------------------------------------
 
-    private void initGpsRadioGroup() {
+    /*private void initGpsRadioGroup() {
         final RadioGroup gpsAccuracyGroup = (RadioGroup) this.findViewById(R.id.gpsAccuracyGroup);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -784,8 +782,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             gpsAccuracyGroup.check(R.id.radio_gps_low);
         }
-
-    }
+    }*/
 
     private void initShareRouteButton() {
         Button shareRouteButton = (Button) this.findViewById(R.id.route_button);
@@ -1031,7 +1028,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
-    public void onGpsRadioButtonClicked(View view) {
+    /*public void onGpsRadioButtonClicked(View view) {
         // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
 
@@ -1056,7 +1053,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         editor.commit();
-    }
+    }*/
 
     private void showPinDialog() {
         if (pinDialog == null) {
@@ -1159,7 +1156,7 @@ public class MainActivity extends AppCompatActivity {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
                     clipboard.setPrimaryClip(urlClip);
-                    Toast.makeText(getApplicationContext(), "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
                     startActivity(browserIntent);
                     String message = "Check out your route at " + showRouteUrl;
@@ -1173,7 +1170,7 @@ public class MainActivity extends AppCompatActivity {
                         net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(MainActivity.this, MainActivity.this.telegramId, message, 1);
                     }
                 } else {
-                    Toast.makeText(getApplicationContext(), "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
                 }
             }
         }

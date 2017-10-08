@@ -57,7 +57,7 @@
     <string name="docsLink">Check all available SMS commands &lt;a href="http://www.gms-world.net/dl">here&lt;a></string>
     <string name="pinLink">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a></string>
     <string name="Crash.error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
-    <string name="security_pin">Security PIN</string>
+    <string name="security_pin">Your Security PIN</string>
     <string name="motion_radius">Notify me when the device moves outside the area in meters</string>
     <string name="gps_accuracy">GPS Accuracy</string>
     <string name="gps_balanced">Balanced</string>
@@ -72,5 +72,5 @@
     <string name="failed_login_tracker">Failed login tracker</string>
     <string name="camera_control">Camera control</string>
     <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
-    <string name="verify_security_pin">Verify Security PIN at application startup</string>
+    <string name="verify_security_pin">From time to time verify your Security PIN at application startup</string>
 </resources>

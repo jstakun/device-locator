@@ -64,51 +64,6 @@
                             android:textColor="@android:color/white" />
                     </RelativeLayout>
 
-                    <android.support.design.widget.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="8dp"
-                        android:paddingTop="15dp">
-
-                        <android.support.v7.widget.AppCompatEditText
-                            android:id="@+id/token"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/security_pin"
-                            android:inputType="numberPassword"
-                            android:maxLines="1"
-                            android:maxLength="8"
-                            android:lines="1"
-                            android:textColor="@color/gray"/>
-
-                    </android.support.design.widget.TextInputLayout>
-
-
-                    <!--LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingBottom="8dp"
-                        android:paddingTop="15dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:text="@string/security_pin"/>
-
-                        <EditText
-                            android:id="@+id/token"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="number"
-                            android:lines="1"
-                            android:maxLength="8"
-                            android:maxLines="1"
-                            android:textColor="@color/gray"/>
-
-                    </LinearLayout-->
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -124,32 +79,58 @@
 
                    </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingBottom="8dp"
-                        android:paddingTop="15dp">
-
-                        <CheckBox
-                            android:id="@+id/settings_verify_pin"
-                            android:text="@string/verify_security_pin"
-                            android:textColor="@color/gray"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="false"
-                            android:onClick="onLocationSMSCheckboxClicked"
-                            android:paddingLeft="8dp"
-                            android:paddingTop="15dp"
-                            android:paddingBottom="8dp"/>
-
-                    </LinearLayout>
 
                 </LinearLayout>
 
             </net.gmsworld.devicelocator.Views.LDCard>
 
-            <net.gmsworld.devicelocator.Views.LDCard
+              <net.gmsworld.devicelocator.Views.LDCard
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_margin="8dp"
+                  ldcard:title="Security PIN">
+
+                  <android.support.design.widget.TextInputLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:paddingBottom="8dp"
+                      android:paddingTop="15dp">
+
+                      <android.support.v7.widget.AppCompatEditText
+                          android:id="@+id/token"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:hint="@string/security_pin"
+                          android:inputType="numberPassword"
+                          android:maxLines="1"
+                          android:maxLength="8"
+                          android:lines="1"
+                          android:textColor="@color/gray"/>
+
+                  </android.support.design.widget.TextInputLayout>
+
+                  <LinearLayout
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:paddingBottom="8dp"
+                      android:paddingTop="8dp">
+
+                      <CheckBox
+                          android:id="@+id/settings_verify_pin"
+                          android:text="@string/verify_security_pin"
+                          android:textColor="@color/gray"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:checked="false"
+                          android:onClick="onLocationSMSCheckboxClicked"/>
+
+                  </LinearLayout>
+
+
+              </net.gmsworld.devicelocator.Views.LDCard>
+
+              <net.gmsworld.devicelocator.Views.LDCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
@@ -176,7 +157,7 @@
                     android:checked="true"
                     android:onClick="onLocationSMSCheckboxClicked"
                     android:paddingLeft="8dp"
-                    android:paddingTop="15dp"
+                    android:paddingTop="8dp"
                     android:paddingBottom="8dp"/>
 
                 <CheckBox
@@ -265,7 +246,7 @@
                                 android:textColor="@color/gray"/>
                         </LinearLayout>
 
-                        <LinearLayout
+                        <!--LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -302,7 +283,7 @@
 
                             </RadioGroup>
 
-                        </LinearLayout>
+                        </LinearLayout-->
                     </LinearLayout>
 
                 </net.gmsworld.devicelocator.Views.LDCard>
