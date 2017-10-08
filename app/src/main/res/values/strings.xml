@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Device Locator</string>
+    <string name="message">Message from Device Locator</string>
     <string name="current_state_card_title">Setup</string>
     <string name="settings_card_title">Notification settings</string>
     <string name="about_card_title">About</string>

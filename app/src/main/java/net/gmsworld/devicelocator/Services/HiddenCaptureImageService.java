@@ -35,6 +35,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import static android.graphics.Bitmap.CompressFormat.JPEG;
+
 /**
  * Created by jstakun on 9/6/17.
  */
@@ -88,11 +90,15 @@ public class HiddenCaptureImageService extends HiddenCameraService {
         if (!isTest) {
             if (Network.isNetworkAvailable(this)) {
                 BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888; //.RGB_565;
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888; //.RGB_565; //
                 Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
-
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+
+                //final String suffix = ".png";
+                //bitmap.compress(PNG, 0, out);
+
+                final String suffix = ".jpg";
+                bitmap.compress(JPEG, 100, out);
 
                 Log.d(TAG, "Image will be sent to server");
 
@@ -111,10 +117,10 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                 headers.put("X-GMS-AppId", "2");
                 headers.put("X-GMS-Scope", "dl");
 
-                Network.uploadScreenshot(uploadUrl + "/imageUpload", out.toByteArray(), "screenshot_device_locator.jpg", headers, new Network.OnGetFinishListener() {
+                Network.uploadScreenshot(uploadUrl + "/imageUpload", out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String imageUrl, int responseCode, String url) {
-                        if (StringUtils.isNotEmpty(imageUrl)) {
+                        if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {
                             //send notification with image url
                             String email = settings.getString("email", "");
                             String phoneNumber = settings.getString("phoneNumber", "");
@@ -132,7 +138,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                             }
                             HiddenCaptureImageService.this.startService(newIntent);
                         } else {
-                            Log.e(TAG, "Received empty image url!");
+                            Log.e(TAG, "Received error response: " + imageUrl);
                         }
                     }
                 });

@@ -199,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 });
                 builder.setNegativeButton(R.string.no, null);
                 builder.setMessage(Html.fromHtml(getResources().getString(R.string.take_photo_prompt)));
+                builder.setTitle(R.string.app_name);
                 AlertDialog dialog = builder.create();
                 dialog.show();
             } else {
@@ -353,6 +354,7 @@ public class MainActivity extends AppCompatActivity {
             });
             builder.setNegativeButton(R.string.no, null);
             builder.setMessage(Html.fromHtml(getResources().getString(R.string.disable_fln_prompt)));
+            builder.setTitle(R.string.app_name);
             AlertDialog dialog = builder.create();
             dialog.show();
         } else {
@@ -393,6 +395,7 @@ public class MainActivity extends AppCompatActivity {
             });
             builder.setNegativeButton(R.string.no, null);
             builder.setMessage(Html.fromHtml(getResources().getString(R.string.disable_photo_prompt)));
+            builder.setTitle(R.string.app_name);
             AlertDialog dialog = builder.create();
             dialog.show();
         }
@@ -875,6 +878,7 @@ public class MainActivity extends AppCompatActivity {
         });
         builder.setNegativeButton(R.string.cancel, null);
         builder.setMessage(Html.fromHtml(getResources().getString(R.string.location_prompt, phoneNumber)));
+        builder.setTitle(R.string.app_name);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -894,6 +898,7 @@ public class MainActivity extends AppCompatActivity {
                 });
                 builder.setNegativeButton(R.string.no, null);
                 builder.setMessage(Html.fromHtml(getResources().getString(R.string.enable_sms_command_prompt)));
+                builder.setTitle(R.string.app_name);
                 AlertDialog dialog = builder.create();
                 dialog.show();
             }
@@ -1108,6 +1113,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+
+            builder.setTitle(R.string.app_name);
 
             builder.setView(pinView);
 
