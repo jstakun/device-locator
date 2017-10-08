@@ -209,7 +209,7 @@ public class RouteTrackingService extends Service {
 
     private class IncomingHandler extends Handler {
 
-        final MorseSoundGenerator morseSoundGenerator = new MorseSoundGenerator(44100, 800.0, 50);;
+        final MorseSoundGenerator morseSoundGenerator = new MorseSoundGenerator(44100, 800.0, 50);
 
         @Override
         public void handleMessage(Message msg) {

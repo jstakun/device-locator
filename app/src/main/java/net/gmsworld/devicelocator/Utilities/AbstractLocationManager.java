@@ -244,7 +244,7 @@ public abstract class AbstractLocationManager {
 
     public void executeRouteUploadTask(Context activity, String title, String phoneNumber, long creationTimestamp, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
         if (Network.isNetworkAvailable(activity)) {
-            new RouteUploadTask(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener).execute();;
+            new RouteUploadTask(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener).execute();
         } else {
             Toast.makeText(activity, R.string.no_network_error, Toast.LENGTH_LONG).show();
             return;

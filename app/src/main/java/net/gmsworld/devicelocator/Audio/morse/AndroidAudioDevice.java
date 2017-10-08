@@ -59,7 +59,7 @@ public class AndroidAudioDevice {
             buffer = new short[samples.length];
 
         for (int i = 0; i < samples.length; i++)
-            buffer[i] = (short) (samples[i] * Short.MAX_VALUE);;
+            buffer[i] = (short) (samples[i] * Short.MAX_VALUE);
     }
 
     public void stop() {
