@@ -198,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 builder.setNegativeButton(R.string.no, null);
-                builder.setMessage("Do you want Device Locator to take photo when wrong password or pin will be entered?");
+                builder.setMessage(Html.fromHtml(getResources().getString(R.string.take_photo_prompt)));
                 AlertDialog dialog = builder.create();
                 dialog.show();
             } else {
@@ -352,7 +352,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             builder.setNegativeButton(R.string.no, null);
-            builder.setMessage("Are you sure you want to disable failed login notification service?");
+            builder.setMessage(Html.fromHtml(getResources().getString(R.string.disable_fln_prompt)));
             AlertDialog dialog = builder.create();
             dialog.show();
         } else {
@@ -392,7 +392,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             builder.setNegativeButton(R.string.no, null);
-            builder.setMessage("Are you sure you want Device Locator to stop taking photo on failed login?");
+            builder.setMessage(Html.fromHtml(getResources().getString(R.string.disable_photo_prompt)));
             AlertDialog dialog = builder.create();
             dialog.show();
         }
@@ -410,15 +410,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateUI() {
         ((Button) this.findViewById(R.id.running_button)).setText((running) ? getResources().getString(R.string.stop) : getResources().getString(R.string.start));
-        ((TintableBackgroundView) this.findViewById(R.id.running_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
-        ((TintableBackgroundView) this.findViewById(R.id.send_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ((TintableBackgroundView) (Button)this.findViewById(R.id.running_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
+        ((TintableBackgroundView) (Button)this.findViewById(R.id.send_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
 
         ((Button) this.findViewById(R.id.motion_button)).setText((motionDetectorRunning) ? getResources().getString(R.string.stop) : getResources().getString(R.string.start));
-        ((TintableBackgroundView) this.findViewById(R.id.motion_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
+        ((TintableBackgroundView) (Button)this.findViewById(R.id.motion_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
 
-        ((TintableBackgroundView) this.findViewById(R.id.route_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-        ((TintableBackgroundView) this.findViewById(R.id.contact_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-        ((TintableBackgroundView) this.findViewById(R.id.telegram_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ((TintableBackgroundView) (Button)this.findViewById(R.id.route_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ((TintableBackgroundView) (ImageButton)this.findViewById(R.id.contact_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ((TintableBackgroundView) (ImageButton)this.findViewById(R.id.telegram_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
     }
 
     private void toggleRunning() {
@@ -874,7 +874,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton(R.string.cancel, null);
-        builder.setMessage(this.getResources().getString(R.string.are_you_sure) + " " + phoneNumber + "?");
+        builder.setMessage(Html.fromHtml(getResources().getString(R.string.location_prompt, phoneNumber)));
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -893,7 +893,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 builder.setNegativeButton(R.string.no, null);
-                builder.setMessage("Do you want to enable now SMS commands to your device?");
+                builder.setMessage(Html.fromHtml(getResources().getString(R.string.enable_sms_command_prompt)));
                 AlertDialog dialog = builder.create();
                 dialog.show();
             }

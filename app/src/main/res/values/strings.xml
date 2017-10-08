@@ -45,7 +45,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="send">Send</string>
-    <string name="are_you_sure">Are you sure you want to send your location to</string>
     <string name="approximate">Approximate</string>
     <string name="accurate">Accurate</string>
     <string name="no_speed_or_altitude">No speed or altitude.</string>
@@ -55,7 +54,7 @@
     <string name="notification_title">Locate driver not working</string>
     <string name="notification_content">SMS and Location permissions needed.</string>
     <string name="docsLink">Check all available SMS commands &lt;a href="http://www.gms-world.net/dl">here&lt;a></string>
-    <string name="pinLink">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a></string>
+    <string name="pinLink">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a>&lt;/font></string>
     <string name="Crash.error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
     <string name="security_pin">Your Security PIN</string>
     <string name="motion_radius">Notify me when the device moves outside the area in meters</string>
@@ -73,4 +72,9 @@
     <string name="camera_control">Camera control</string>
     <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
     <string name="verify_security_pin">From time to time verify your Security PIN at application startup</string>
+    <string name="location_prompt">&lt;font color="#808080">Are you sure you want to send your location to %1$s&lt;/font></string>
+    <string name="take_photo_prompt">&lt;font color="#808080">Do you want Device Locator to take photo when wrong password or pin will be entered?&lt;/font></string>
+    <string name="disable_fln_prompt">&lt;font color="#808080">Are you sure you want to disable failed login notification service?&lt;/font></string>
+    <string name="disable_photo_prompt">&lt;font color="#808080">Are you sure you want Device Locator to stop taking photo on failed login?&lt;/font></string>
+    <string name="enable_sms_command_prompt">&lt;font color="#808080">Do you want to enable now SMS commands to your device?&lt;/font></string>
 </resources>
