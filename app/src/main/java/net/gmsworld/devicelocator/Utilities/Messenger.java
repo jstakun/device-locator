@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.location.Location;
 import android.os.BatteryManager;
 import android.preference.PreferenceManager;
@@ -172,25 +171,23 @@ public class Messenger {
 
     public static void sendLocationMessage(Context context, Location location, boolean fused, int speedType, String phoneNumber, String telegramId) {
         //Log.d(TAG, "sendLocationMessage()" + location.getAccuracy());
-        Resources r = context.getResources();
+        String text = context.getString(fused ? R.string.approximate : R.string.accurate) + " location:\n";
 
-        String text = r.getString(fused ? R.string.approximate : R.string.accurate) + " location:\n";
-
-        text += r.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
-        text += r.getString(R.string.latitude) + " " + latAndLongFormat.format(location.getLatitude()) + "\n";
-        text += r.getString(R.string.longitude) + " " + latAndLongFormat.format(location.getLongitude()) + "\n";
+        text += context.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
+        text += context.getString(R.string.latitude) + " " + latAndLongFormat.format(location.getLatitude()) + "\n";
+        text += context.getString(R.string.longitude) + " " + latAndLongFormat.format(location.getLongitude()) + "\n";
         text += "Battery level: " + getBatteryLevel(context);
 
         if (location.hasSpeed()) {
             if (speedType == 0) {
-                text += "\n" + r.getString(R.string.speed) + " " + ((int) convertMPStoKMH(location.getSpeed())) + "KM/H";
+                text += "\n" + context.getString(R.string.speed) + " " + ((int) convertMPStoKMH(location.getSpeed())) + "KM/H";
             } else {
-                text += "\n" + r.getString(R.string.speed) + " " + ((int) convertMPStoMPH(location.getSpeed())) + "MPH";
+                text += "\n" + context.getString(R.string.speed) + " " + ((int) convertMPStoMPH(location.getSpeed())) + "MPH";
             }
         }
 
         if (location.hasAltitude() && location.getAltitude() != 0) {
-            text += "\n" + r.getString(R.string.altitude) + " " + ((int) location.getAltitude()) + "m";
+            text += "\n" + context.getString(R.string.altitude) + " " + ((int) location.getAltitude()) + "m";
         }
 
         if (StringUtils.isNotEmpty(phoneNumber)) {
@@ -264,7 +261,7 @@ public class Messenger {
                 String title = intent.getStringExtra("title");
                 int size = intent.getIntExtra("size", 0);
                 if (size > 1) {
-                    String showRouteUrl = context.getResources().getString(R.string.showRouteUrl);
+                    String showRouteUrl = context.getString(R.string.showRouteUrl);
                     text = "Check your route at: " + showRouteUrl + "/" + title;
                 } else if (size == 0) {
                     text = "No route points has been recorder yet. Try again later.";
@@ -334,10 +331,9 @@ public class Messenger {
     }
 
     public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId) {
-        Resources r = context.getResources();
-        String text = r.getString(R.string.acknowledgeMessage);
-        text += " " + r.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context));
-        text += ", " + r.getString(R.string.gps) + " " + SmsSenderService.locationToString(context);
+        String text = context.getString(R.string.acknowledgeMessage);
+        text += " " + context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context));
+        text += ", " + context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context);
         text += ", Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
@@ -358,7 +354,7 @@ public class Messenger {
     }
 
     private static String booleanToString(Context context, Boolean enabled) {
-        return (enabled) ? context.getResources().getString(R.string.enabled) : context.getResources().getString(R.string.disabled);
+        return (enabled) ? context.getString(R.string.enabled) : context.getString(R.string.disabled);
     }
 
     private static double convertMPStoKMH(double speed) {

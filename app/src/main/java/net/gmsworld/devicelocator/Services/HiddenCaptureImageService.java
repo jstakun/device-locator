@@ -75,7 +75,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                             Log.e(TAG, "Failed to take a picture!", e);
                         }
                     }
-                }, 2000);
+                }, 1000);
 
             } else {
                 Log.e(TAG, "Draw over other apps permission is missing. Can't take a picture");

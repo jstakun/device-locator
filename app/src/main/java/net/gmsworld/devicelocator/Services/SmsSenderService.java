@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationManager;
 import android.preference.PreferenceManager;
@@ -29,7 +28,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
     private static boolean isRunning = false;
 
-    private Resources r = null;
     private String phoneNumber = null;
     private String telegramId = null;
 
@@ -57,8 +55,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             //Log.d(TAG, "Phonenumber empty, return.");
             return;
         }
-
-        this.r = getResources();
 
         String command = intent.getExtras().getString("command");
 
@@ -164,7 +160,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         SmartLocation.with(this).location().stop();
 
         if (bestLocation == null) {
-            final String message = r.getString(R.string.error_getting_location);
+            final String message = getString(R.string.error_getting_location);
             if (StringUtils.isNotEmpty(phoneNumber)) {
                 Messenger.sendSMS(this, phoneNumber, message);
             } else if (StringUtils.isNotEmpty(telegramId)) {
@@ -224,13 +220,13 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         int mode = getLocationMode(context);
         switch (mode) {
             case Settings.Secure.LOCATION_MODE_OFF:
-                return context.getResources().getString(R.string.location_mode_off);
+                return context.getString(R.string.location_mode_off);
             case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
-                return context.getResources().getString(R.string.location_battery_saving);
+                return context.getString(R.string.location_battery_saving);
             case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
-                return context.getResources().getString(R.string.locateion_sensors_only);
+                return context.getString(R.string.locateion_sensors_only);
             case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
-                return context.getResources().getString(R.string.location_high_accuracy);
+                return context.getString(R.string.location_high_accuracy);
             default:
                 //API version <= 17
                 String status =  Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);

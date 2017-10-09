@@ -198,8 +198,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 builder.setNegativeButton(R.string.no, null);
-                builder.setMessage(Html.fromHtml(getResources().getString(R.string.take_photo_prompt)));
-                builder.setTitle(R.string.app_name);
+                builder.setMessage(Html.fromHtml(getString(R.string.take_photo_prompt)));
+                builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
                 AlertDialog dialog = builder.create();
                 dialog.show();
             } else {
@@ -353,8 +353,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             builder.setNegativeButton(R.string.no, null);
-            builder.setMessage(Html.fromHtml(getResources().getString(R.string.disable_fln_prompt)));
-            builder.setTitle(R.string.app_name);
+            builder.setMessage(Html.fromHtml(getString(R.string.disable_fln_prompt)));
+            builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
             AlertDialog dialog = builder.create();
             dialog.show();
         } else {
@@ -394,8 +394,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
             builder.setNegativeButton(R.string.no, null);
-            builder.setMessage(Html.fromHtml(getResources().getString(R.string.disable_photo_prompt)));
-            builder.setTitle(R.string.app_name);
+            builder.setMessage(Html.fromHtml(getString(R.string.disable_photo_prompt)));
+            builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
             AlertDialog dialog = builder.create();
             dialog.show();
         }
@@ -412,11 +412,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        ((Button) this.findViewById(R.id.running_button)).setText((running) ? getResources().getString(R.string.stop) : getResources().getString(R.string.start));
+        ((Button) this.findViewById(R.id.running_button)).setText((running) ? getString(R.string.stop) : getString(R.string.start));
         ((TintableBackgroundView) (Button)this.findViewById(R.id.running_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
         ((TintableBackgroundView) (Button)this.findViewById(R.id.send_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
 
-        ((Button) this.findViewById(R.id.motion_button)).setText((motionDetectorRunning) ? getResources().getString(R.string.stop) : getResources().getString(R.string.start));
+        ((Button) this.findViewById(R.id.motion_button)).setText((motionDetectorRunning) ? getString(R.string.stop) : getString(R.string.start));
         ((TintableBackgroundView) (Button)this.findViewById(R.id.motion_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
 
         ((TintableBackgroundView) (Button)this.findViewById(R.id.route_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
@@ -442,7 +442,19 @@ public class MainActivity extends AppCompatActivity {
         toggleBroadcastReceiver();
 
         if (running) {
-            Toast.makeText(getApplicationContext(), "From now on you can send SMS commands to this device", Toast.LENGTH_LONG).show();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setPositiveButton("OK", null);
+            builder.setNegativeButton("Commands",  new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("http://www.gms-world.net/dl"));
+                    startActivity(intent);
+                }
+            });
+            builder.setMessage(Html.fromHtml(getString(R.string.commands_enabled_prompt)));
+            builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
     }
 
@@ -512,7 +524,7 @@ public class MainActivity extends AppCompatActivity {
         initLocationSMSCheckbox();
         TextView commandLink = (TextView) findViewById(R.id.docsLink);
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
-        commandLink.setText(Html.fromHtml(getResources().getString(R.string.docsLink)));
+        commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         initRemoteControl();
     }
 
@@ -877,8 +889,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton(R.string.cancel, null);
-        builder.setMessage(Html.fromHtml(getResources().getString(R.string.location_prompt, phoneNumber)));
-        builder.setTitle(R.string.app_name);
+        builder.setMessage(Html.fromHtml(getString(R.string.location_prompt, phoneNumber)));
+        builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
         AlertDialog dialog = builder.create();
         dialog.show();
     }
@@ -897,8 +909,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 builder.setNegativeButton(R.string.no, null);
-                builder.setMessage(Html.fromHtml(getResources().getString(R.string.enable_sms_command_prompt)));
-                builder.setTitle(R.string.app_name);
+                builder.setMessage(Html.fromHtml(getString(R.string.enable_sms_command_prompt)));
+                builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
                 AlertDialog dialog = builder.create();
                 dialog.show();
             }
@@ -1094,7 +1106,7 @@ public class MainActivity extends AppCompatActivity {
             });
 
             final TextView helpText = (TextView) pinView.findViewById(R.id.verify_pin_text);
-            helpText.setText(Html.fromHtml(getResources().getString(R.string.pinLink)));
+            helpText.setText(Html.fromHtml(getString(R.string.pinLink)));
             helpText.setMovementMethod(new TextViewLinkHandler() {
                 @Override
                 public void onLinkClick(String url) {
@@ -1114,7 +1126,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            builder.setTitle(R.string.app_name);
+            builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
 
             builder.setView(pinView);
 
@@ -1159,7 +1171,7 @@ public class MainActivity extends AppCompatActivity {
                 int responseCode = msg.arg1;
                 String title = (String)msg.obj;
                 if (responseCode == 200) {
-                    String showRouteUrl = MainActivity.this.getResources().getString(R.string.showRouteUrl) + "/" + title;
+                    String showRouteUrl = MainActivity.this.getString(R.string.showRouteUrl) + "/" + title;
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
                     clipboard.setPrimaryClip(urlClip);

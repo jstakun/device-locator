@@ -72,7 +72,7 @@ public class DeviceLocatorApp extends Application {
     private void initAcra(Map<String, String> headers) {
         try {
             ACRAConfiguration config = new ConfigurationBuilder(this)
-                    .setFormUri(getResources().getString(R.string.crashReportUrl))
+                    .setFormUri(getString(R.string.crashReportUrl))
                     .setMode(ReportingInteractionMode.TOAST)
                     .setHttpHeaders(headers)
                     .setResToastText(R.string.Crash_error)
