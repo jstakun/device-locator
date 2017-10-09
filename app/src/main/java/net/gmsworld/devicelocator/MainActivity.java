@@ -301,7 +301,7 @@ public class MainActivity extends AppCompatActivity {
     private void initLocationSMSCheckbox() {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         ((CheckBox) findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean("settings_detected_sms", true));
-        ((CheckBox) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean("settings_gps_sms", true));
+        ((CheckBox) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean("settings_gps_sms", false));
         ((CheckBox) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean("settings_google_sms", true));
         ((CheckBox) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
     }

@@ -79,5 +79,5 @@
     <string name="disable_fln_prompt">&lt;font color="#808080">Are you sure you want to disable failed login notification service?&lt;/font></string>
     <string name="disable_photo_prompt">&lt;font color="#808080">Are you sure you want Device Locator to stop taking photo on failed login?&lt;/font></string>
     <string name="enable_sms_command_prompt">&lt;font color="#808080">Do you want to enable now SMS commands to your device?&lt;/font></string>
-    <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change Security PIN on main screen and check list of available SMS commands below or on the main screen.&lt;/font></string>
+    <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and check list of available commands below or on SMS control card.&lt;/font></string>
 </resources>
