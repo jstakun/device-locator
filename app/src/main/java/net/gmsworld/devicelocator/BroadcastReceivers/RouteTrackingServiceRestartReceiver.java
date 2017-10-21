@@ -27,7 +27,7 @@ public class RouteTrackingServiceRestartReceiver extends BroadcastReceiver {
         Log.d(TAG, "RouteTrackingService will be restarted if needed...");
         restoreSavedData(context);
         if (motionDetectorRunning) {
-            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false);
+            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
         } else {
             Log.d(TAG, "No need to restart RouteTrackingService.");
         }

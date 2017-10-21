@@ -73,11 +73,11 @@
     <string name="failed_login_tracker">Failed login tracker</string>
     <string name="camera_control">Camera control</string>
     <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
-    <string name="verify_security_pin">From time to time verify your Security PIN at application startup</string>
-    <string name="location_prompt">&lt;font color="#808080">Are you sure you want to send your location to %1$s&lt;/font></string>
-    <string name="take_photo_prompt">&lt;font color="#808080">Do you want Device Locator to take photo when wrong password or pin will be entered?&lt;/font></string>
-    <string name="disable_fln_prompt">&lt;font color="#808080">Are you sure you want to disable failed login notification service?&lt;/font></string>
-    <string name="disable_photo_prompt">&lt;font color="#808080">Are you sure you want Device Locator to stop taking photo on failed login?&lt;/font></string>
-    <string name="enable_sms_command_prompt">&lt;font color="#808080">Do you want to enable now SMS commands to your device?&lt;/font></string>
+    <string name="verify_security_pin">From time to time at application startup verify my Security PIN</string>
+    <string name="location_prompt">&lt;font color="#808080">Send your location to %1$s?&lt;/font></string>
+    <string name="take_photo_prompt">&lt;font color="#808080">Take photo when wrong password or pin will be entered?&lt;/font></string>
+    <string name="disable_fln_prompt">&lt;font color="#808080">Disable failed login notifications?&lt;/font></string>
+    <string name="disable_photo_prompt">&lt;font color="#808080">Stop taking photo on failed login?&lt;/font></string>
+    <string name="enable_sms_command_prompt">&lt;font color="#808080">Do you want to enable now SMS commands on your device?&lt;/font></string>
     <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and check list of available commands below or on SMS control card.&lt;/font></string>
 </resources>

@@ -53,6 +53,7 @@ public class RouteTrackingService extends Service {
     private Messenger mClient;
     private String phoneNumber, email, telegramId;
     private long startTime;
+    private boolean silentMode = false;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -85,6 +86,7 @@ public class RouteTrackingService extends Service {
                         this.email = intent.getExtras().getString("email");
                         this.telegramId = intent.getExtras().getString("telegramId");
                         boolean resetRoute = intent.getBooleanExtra("resetRoute", false);
+                        silentMode = intent.getBooleanExtra("silentMode", false);
                         int gpsAccuracy = PreferenceManager.getDefaultSharedPreferences(this).getInt("gpsAccuracy", 1);
                         startTracking(gpsAccuracy, resetRoute);
                         break;
@@ -141,7 +143,7 @@ public class RouteTrackingService extends Service {
     }
 
     private synchronized void startTracking(int priority, boolean resetRoute) {
-        Log.d(TAG, "startTracking()");
+        Log.d(TAG, "startTracking() in silent mode " + silentMode);
 
         if (this.mWakeLock != null)
         {
@@ -232,29 +234,31 @@ public class RouteTrackingService extends Service {
                         Location location = (Location) msg.obj;
                         int distance = msg.arg1;
                         if (location != null) {
-                            if (phoneNumber != null && phoneNumber.length() > 0) {
-                                net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, 0, phoneNumber, null);
-                                net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber, null);
-                            }
-                            DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
-                            String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
-                                             " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m." +
-                                             "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
-                                             "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
-
-
-                            if (StringUtils.isEmpty(email)) {
-                                String title = "Message from Device Locator";
-                                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(RouteTrackingService.this);
-                                if (deviceId != null) {
-                                    title += " installed on device " + deviceId;
+                            if (!silentMode) {
+                                if (StringUtils.isNotEmpty(phoneNumber)) {
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, 0, phoneNumber, null);
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber, null);
                                 }
-                                net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, email, message, title, 1);
-                            }
+                                DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
+                                String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
+                                        " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m." +
+                                        "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
+                                        "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
-                            if (StringUtils.isNotEmpty(telegramId)) {
-                                message = message.replace("\n", ", ");
-                                net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message, 1);
+
+                                if (StringUtils.isEmpty(email)) {
+                                    String title = "Message from Device Locator";
+                                    String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(RouteTrackingService.this);
+                                    if (deviceId != null) {
+                                        title += " installed on device " + deviceId;
+                                    }
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, email, message, title, 1);
+                                }
+
+                                if (StringUtils.isNotEmpty(telegramId)) {
+                                    message = message.replace("\n", ", ");
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message, 1);
+                                }
                             }
 
                             //audio transmitter

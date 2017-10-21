@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         loadingHandler = new UIHandler();
         //mMessenger = new Messenger(loadingHandler);
         if (motionDetectorRunning) {
-            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, false);
+            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, false, false);
         }
 
         boolean isTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isTrackerShown", false);
@@ -934,7 +934,7 @@ public class MainActivity extends AppCompatActivity {
     private void launchMotionDetectorService() {
         saveData();
         updateUI();
-        isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, true);
+        isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, true, false);
         Toast.makeText(getApplicationContext(), "You'll receive notification when this device will move up " + radius + " meters", Toast.LENGTH_LONG).show();
     }
 

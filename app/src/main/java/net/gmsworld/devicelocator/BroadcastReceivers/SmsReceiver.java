@@ -83,7 +83,7 @@ public class SmsReceiver extends BroadcastReceiver {
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
 
-            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false);
+            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
 
             SharedPreferences.Editor editor = settings.edit();
             editor.putBoolean("motionDetectorRunning", true);
@@ -108,7 +108,7 @@ public class SmsReceiver extends BroadcastReceiver {
                     String phoneNumber = settings.getString("phoneNumber", "");
                     String email = settings.getString("email", "");
 
-                    RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false);
+                    RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
 
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putBoolean("motionDetectorRunning", true);
@@ -126,7 +126,23 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     private boolean findResetRouteTrackerServiceStartCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, RESET_COMMAND);
+        String sender = null;
+        boolean silentMode = false;
+        try {
+            String keyword = RESET_COMMAND;
+            String token = PreferenceManager.getDefaultSharedPreferences(context).getString("token", "");
+            keyword += token;
+            ArrayList<SmsMessage> list = getMessagesWithKeyword(keyword, intent.getExtras());
+            if (list.size() > 0) {
+                sender = list.get(0).getOriginatingAddress();
+                String[] tokens = list.get(0).getMessageBody().split(" ");
+                if (tokens.length == 2 && tokens[1].equals("silent"))  {
+                    silentMode = true;
+                }
+            }
+        } catch (Exception e) {
+            return false;
+        }
 
         if (sender != null) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
@@ -135,11 +151,9 @@ public class SmsReceiver extends BroadcastReceiver {
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
 
-            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true);
+            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, silentMode);
 
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putBoolean("motionDetectorRunning", true);
-            editor.commit();
+            settings.edit().putBoolean("motionDetectorRunning", true).commit();
 
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", sender);
@@ -157,11 +171,9 @@ public class SmsReceiver extends BroadcastReceiver {
                     String phoneNumber = settings.getString("phoneNumber", "");
                     String email = settings.getString("email", "");
 
-                    RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true);
+                    RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, false);
 
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putBoolean("motionDetectorRunning", true);
-                    editor.commit();
+                    settings.edit().putBoolean("motionDetectorRunning", true).commit();
 
                     Intent newIntent = new Intent(context, SmsSenderService.class);
                     newIntent.putExtra("telegramId", telegramId);
@@ -598,12 +610,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
                 if (StringUtils.equalsIgnoreCase(sms.getMessageBody(), keyword)) {
                     list.add(sms);
-                } else if (keyword.startsWith(RADIUS_COMMAND)) {
-                    StringTokenizer tokens = new StringTokenizer(sms.getMessageBody());
-                    if (tokens.hasMoreTokens() && StringUtils.equalsIgnoreCase(tokens.nextToken(), keyword)) {
-                        list.add(sms);
-                    }
-                } else if (keyword.startsWith(NOTIFY_COMMAND)) {
+                } else if (keyword.startsWith(RADIUS_COMMAND) || keyword.startsWith(NOTIFY_COMMAND) || keyword.startsWith(RESET_COMMAND)) {
                     StringTokenizer tokens = new StringTokenizer(sms.getMessageBody());
                     if (tokens.hasMoreTokens() && StringUtils.equalsIgnoreCase(tokens.nextToken(), keyword)) {
                         list.add(sms);
