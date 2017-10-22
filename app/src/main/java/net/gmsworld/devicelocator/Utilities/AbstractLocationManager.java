@@ -311,8 +311,9 @@ public abstract class AbstractLocationManager {
             }
             if (size > 1) {
                 try {
-                    String desc = "Device id: " + Messenger.getDeviceId(context);
-                    String content = routeToGeoJson(route, title, desc, creationDate);
+                    String deviceId = Messenger.getDeviceId(context);
+                    String desc = "Route recorded by Device Locator on device: " + deviceId;
+                    String content = routeToGeoJson(route, title, desc, deviceId, creationDate);
                     String url = context.getString(R.string.routeProviderUrl);
                     //Log.d(TAG, "Uploading route " + content);
                     Network.post(url, "route=" + content, null, null, onFinishListener);
@@ -333,11 +334,12 @@ public abstract class AbstractLocationManager {
             return size;
         }
 
-        private String routeToGeoJson(List<String> routePoints, String filename, String description, long creationDate) throws Exception {
+        private String routeToGeoJson(List<String> routePoints, String filename, String description, String deviceId, long creationDate) throws Exception {
             Gson gson = new Gson();
 
             FeatureCollection fc = new FeatureCollection();
             fc.name = filename;
+            fc.deviceId = deviceId;
 
             Feature[] f = {new Feature()};
             fc.features = f;
@@ -346,6 +348,7 @@ public abstract class AbstractLocationManager {
             p.name = filename;
             p.username = "device-locator";
             p.creationDate = creationDate;
+            p.deviceId = deviceId;
 
             f[0].properties = p;
 
