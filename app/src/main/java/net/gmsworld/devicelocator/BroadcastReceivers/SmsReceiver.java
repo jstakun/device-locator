@@ -42,7 +42,7 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String STOP_COMMAND = "stopdl"; //sp stop route tracking
     public final static String ROUTE_COMMAND = "routedl"; //r   share currently recorded route
     public final static String MUTE_COMMAND = "mutedl"; //m mute phone
-    public final static String NORMAL_COMMAND = "normaldl"; //u unmute phone
+    public final static String NORMAL_COMMAND = "normaldl"; //um unmute phone
     public final static String SHARE_COMMAND = "locatedl"; //l  share current location via sms
     public final static String RADIUS_COMMAND = "radiusdl"; //ra change tracking radius, usage radiusdl x where is number of meters > 0
     public final static String CALL_COMMAND = "calldl"; //c call to sender
@@ -56,7 +56,8 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String TAKE_PHOTO_COMMAND = "photodl"; //p if all permissions set take photo and send link
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
 
-    private static AbstractCommand[] commands = {new StartRouteTrackerServiceStartCommand(), new ResumeRouteTrackerServiceStartCommand(), new StopRouteTrackerServiceStartCommand() };
+    private static AbstractCommand[] commands = {new StartRouteTrackerServiceStartCommand(), new ResumeRouteTrackerServiceStartCommand(),
+            new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand() };
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -67,13 +68,13 @@ public class SmsReceiver extends BroadcastReceiver {
 
         //if (findResumeRouteTrackerServiceStartCommand(context, intent)) return;
         //if (findStartRouteTrackerServiceStartCommand(context, intent)) return;
-        if (findKeyword(context, intent)) return;
+        //if (findKeyword(context, intent)) return;
         //if (findStopRouteTrackerServiceStartCommand(context, intent)) return;
+        //if (findShareRouteCommand(context, intent)) return;
         if (findMuteCommand(context, intent)) return;
-        if (findNormalCommand(context, intent)) return;
+        if (findUnmuteCommand(context, intent)) return;
         if (findChangeRadiusRouteTrackerServiceCommand(context, intent)) return;
         if (findStartPhoneCallCommand(context, intent)) return;
-        if (findShareRouteCommand(context, intent)) return;
         if (findGpsHighAccuracyCommand(context, intent)) return;
         if (findGpsLowAccuracyCommand(context, intent)) return;
         if (findNotifyCommand(context, intent)) return;
@@ -300,7 +301,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    private boolean findShareRouteCommand(Context context, Intent intent) {
+    /*private boolean findShareRouteCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, ROUTE_COMMAND);
 
         if (sender != null) {
@@ -347,7 +348,7 @@ public class SmsReceiver extends BroadcastReceiver {
             }
         }
         return false;
-    }
+    }*/
 
     private boolean findMuteCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, MUTE_COMMAND);
@@ -404,7 +405,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    private boolean findNormalCommand(Context context, Intent intent) {
+    private boolean findUnmuteCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, NORMAL_COMMAND);
 
         if (sender != null) {
@@ -421,7 +422,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    private boolean findKeyword(Context context, Intent intent) {
+    /*private boolean findKeyword(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, SHARE_COMMAND);
 
         if (sender != null) {
@@ -451,7 +452,7 @@ public class SmsReceiver extends BroadcastReceiver {
             }
         }
         return false;
-    }
+    }*/
 
     private boolean findGpsHighAccuracyCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, GPS_HIGH_COMMAND);
@@ -649,7 +650,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
     //---------------------------------- Commands classes --------------------------------------
 
-    private static class StartRouteTrackerServiceStartCommand extends AbstractCommand {
+    private static final class StartRouteTrackerServiceStartCommand extends AbstractCommand {
 
         public StartRouteTrackerServiceStartCommand() {
             super(START_COMMAND, "s", Finder.STARTS);
@@ -702,7 +703,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    private static class ResumeRouteTrackerServiceStartCommand extends AbstractCommand {
+    private static final class ResumeRouteTrackerServiceStartCommand extends AbstractCommand {
 
         public ResumeRouteTrackerServiceStartCommand() {
             super(RESUME_COMMAND, "rs", Finder.EQUALS);
@@ -748,7 +749,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    private static class StopRouteTrackerServiceStartCommand extends  AbstractCommand {
+    private static final class StopRouteTrackerServiceStartCommand extends AbstractCommand {
 
         public StopRouteTrackerServiceStartCommand() {
             super(STOP_COMMAND, "sp", Finder.EQUALS);
@@ -778,6 +779,80 @@ public class SmsReceiver extends BroadcastReceiver {
             newIntent.putExtra("telegramId", telegramId);
             newIntent.putExtra("command", STOP_COMMAND);
             context.startService(newIntent);
+        }
+    }
+
+    private static final class ShareLocationCommand extends AbstractCommand {
+
+        public ShareLocationCommand() {
+            super(SHARE_COMMAND, "l", Finder.EQUALS);
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            if (!Permissions.haveSendSMSAndLocationPermission(context)) {
+                try {
+                    Permissions.setPermissionNotification(context);
+                } catch (Exception e) {
+                    Toast.makeText(context, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+                }
+                Log.e(TAG, "Missing SMS and/or Locatoin permission");
+                return;
+            }
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            context.startService(newIntent);
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            String telegramId = PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "");
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("telegramId", telegramId);
+            context.startService(newIntent);
+        }
+    }
+
+    private static final class ShareRouteCommand extends AbstractCommand {
+
+        public ShareRouteCommand() {
+            super(ROUTE_COMMAND, "r", Finder.EQUALS);
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            Intent routeTracingService = new Intent(context, RouteTrackingService.class);
+
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String title = settings.getString("routeTitle", "");
+
+            if (StringUtils.isEmpty(title)) {
+                title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
+                settings.edit().putString("routeTitle", title).commit();
+            }
+
+            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
+            routeTracingService.putExtra("title", title);
+            routeTracingService.putExtra("phoneNumber", sender);
+            context.startService(routeTracingService);
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String title = settings.getString("routeTitle", "");
+            String telegramId = settings.getString("telegramId", "");
+
+            if (StringUtils.isEmpty(title)) {
+                title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
+                settings.edit().putString("routeTitle", title).commit();
+            }
+
+            Intent routeTracingService = new Intent(context, RouteTrackingService.class);
+            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
+            routeTracingService.putExtra("title", title);
+            routeTracingService.putExtra("telegramId", telegramId);
+            context.startService(routeTracingService);
         }
     }
 }
