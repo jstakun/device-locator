@@ -245,7 +245,7 @@ public class Messenger {
             case SmsReceiver.MUTE_COMMAND:
                 text = "Device has been muted.";
                 break;
-            case SmsReceiver.NORMAL_COMMAND:
+            case SmsReceiver.UNMUTE_COMMAND:
                 text = "Device has been set to normal audio settings.";
                 break;
             case SmsReceiver.RADIUS_COMMAND:

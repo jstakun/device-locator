@@ -37,32 +37,34 @@ public class SmsReceiver extends BroadcastReceiver {
     private final static String TAG = SmsReceiver.class.getSimpleName();
 
     //public
-    public final static String RESUME_COMMAND = "resumedl"; //rs  resume route tracking
-    public final static String START_COMMAND = "startdl"; //s   start route tracking and delete old route points if exists
+    public final static String RESUME_COMMAND = "resumedl"; //rs resume route tracking
+    public final static String START_COMMAND = "startdl"; //s start route tracking and delete old route points if exists
     public final static String STOP_COMMAND = "stopdl"; //sp stop route tracking
-    public final static String ROUTE_COMMAND = "routedl"; //r   share currently recorded route
+    public final static String ROUTE_COMMAND = "routedl"; //r share currently recorded route
+    public final static String SHARE_COMMAND = "locatedl"; //l hare current location via sms
     public final static String MUTE_COMMAND = "mutedl"; //m mute phone
-    public final static String NORMAL_COMMAND = "normaldl"; //um unmute phone
-    public final static String SHARE_COMMAND = "locatedl"; //l  share current location via sms
+    public final static String UNMUTE_COMMAND = "normaldl"; //um unmute phone
+
     public final static String RADIUS_COMMAND = "radiusdl"; //ra change tracking radius, usage radiusdl x where is number of meters > 0
     public final static String CALL_COMMAND = "calldl"; //c call to sender
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //g set high gps accuracy
-    public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //gb  set balanced gps accuracy
-    public final static String NOTIFY_COMMAND = "notifydl"; //n set notification email, phone or telegram chat id
-    public final static String AUDIO_COMMAND = "audiodl"; //a   enable audio transmitter
-    public final static String NOAUDIO_COMMAND = "noaudiodl"; //na  disable audio transmitter
+    public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //gb set balanced gps accuracy
+    public final static String NOTIFY_COMMAND = "notifydl"; //n set notification email, phone or telegram chat id usage notifydl p:x m:y t:z where x is mobile phone number, y is email address and z is Telegram chat or channel id.
+    public final static String AUDIO_COMMAND = "audiodl"; //a enable audio transmitter
+    public final static String NOAUDIO_COMMAND = "noaudiodl"; //na disable audio transmitter
 
     //private
     public final static String TAKE_PHOTO_COMMAND = "photodl"; //p if all permissions set take photo and send link
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
 
     private static AbstractCommand[] commands = {new StartRouteTrackerServiceStartCommand(), new ResumeRouteTrackerServiceStartCommand(),
-            new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand() };
+            new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand(),
+            new MuteCommand(), new UnMuteCommand()};
 
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        for (int i=0;i<commands.length;i++) {
+        for (int i = 0; i < commands.length; i++) {
             if (commands[i].findCommand(context, intent)) return;
         }
 
@@ -71,8 +73,9 @@ public class SmsReceiver extends BroadcastReceiver {
         //if (findKeyword(context, intent)) return;
         //if (findStopRouteTrackerServiceStartCommand(context, intent)) return;
         //if (findShareRouteCommand(context, intent)) return;
-        if (findMuteCommand(context, intent)) return;
-        if (findUnmuteCommand(context, intent)) return;
+        //if (findMuteCommand(context, intent)) return;
+        //if (findUnmuteCommand(context, intent)) return;
+
         if (findChangeRadiusRouteTrackerServiceCommand(context, intent)) return;
         if (findStartPhoneCallCommand(context, intent)) return;
         if (findGpsHighAccuracyCommand(context, intent)) return;
@@ -348,7 +351,7 @@ public class SmsReceiver extends BroadcastReceiver {
             }
         }
         return false;
-    }*/
+    }
 
     private boolean findMuteCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, MUTE_COMMAND);
@@ -365,17 +368,13 @@ public class SmsReceiver extends BroadcastReceiver {
         } else {
             return false;
         }
-    }
+    }*/
 
     private boolean findAudioCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, AUDIO_COMMAND);
 
         if (sender != null) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putBoolean("useAudio", true);
-            editor.commit();
-
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", AUDIO_COMMAND);
@@ -390,11 +389,7 @@ public class SmsReceiver extends BroadcastReceiver {
         String sender = getSenderAddress(context, intent, NOAUDIO_COMMAND);
 
         if (sender != null) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putBoolean("useAudio", false);
-            editor.commit();
-
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", sender);
             newIntent.putExtra("command", NOAUDIO_COMMAND);
@@ -405,8 +400,8 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    private boolean findUnmuteCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, NORMAL_COMMAND);
+    /*private boolean findUnmuteCommand(Context context, Intent intent) {
+        String sender = getSenderAddress(context, intent, UNMUTE_COMMAND);
 
         if (sender != null) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -414,7 +409,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", NORMAL_COMMAND);
+            newIntent.putExtra("command", UNMUTE_COMMAND);
             context.startService(newIntent);
             return true;
         } else {
@@ -422,7 +417,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    /*private boolean findKeyword(Context context, Intent intent) {
+    private boolean findKeyword(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, SHARE_COMMAND);
 
         if (sender != null) {
@@ -510,7 +505,7 @@ public class SmsReceiver extends BroadcastReceiver {
             String telegramId = null;
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
-            for (int i=0;i<tokens.length;i++) {
+            for (int i = 0; i < tokens.length; i++) {
                 String token = tokens[i]; //validate
                 if (token.startsWith("m:")) {
                     String newEmailAddress = token.substring(2);
@@ -535,7 +530,7 @@ public class SmsReceiver extends BroadcastReceiver {
                     }
                 }
             }
-            
+
             if (telegramId != null || phoneNumber != null || email != null) {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
@@ -558,7 +553,7 @@ public class SmsReceiver extends BroadcastReceiver {
                 int radius = settings.getInt("radius", 100);
 
                 RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
-                
+
                 Intent newIntent = new Intent(context, SmsSenderService.class);
                 newIntent.putExtra("phoneNumber", list.get(0).getOriginatingAddress());
                 newIntent.putExtra("notificationNumber", phoneNumber);
@@ -665,7 +660,7 @@ public class SmsReceiver extends BroadcastReceiver {
             String telegramId = settings.getString("telegramId", "");
 
             boolean silentMode = false;
-            if (commandTokens.length == 2 && (commandTokens[1].equalsIgnoreCase("silent") || commandTokens[1].equalsIgnoreCase("s")))  {
+            if (commandTokens.length == 2 && (commandTokens[1].equalsIgnoreCase("silent") || commandTokens[1].equalsIgnoreCase("s"))) {
                 silentMode = true;
             }
 
@@ -853,6 +848,66 @@ public class SmsReceiver extends BroadcastReceiver {
             routeTracingService.putExtra("title", title);
             routeTracingService.putExtra("telegramId", telegramId);
             context.startService(routeTracingService);
+        }
+    }
+
+    private static final class MuteCommand extends AbstractCommand {
+
+        public MuteCommand() {
+            super(MUTE_COMMAND, "m", Finder.EQUALS);
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", MUTE_COMMAND);
+            context.startService(newIntent);
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            String telegramId = PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "");
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("command", MUTE_COMMAND);
+            context.startService(newIntent);
+        }
+    }
+
+    private static final class UnMuteCommand extends AbstractCommand {
+
+        public UnMuteCommand() {
+            super(UNMUTE_COMMAND, "um", Finder.EQUALS);
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", UNMUTE_COMMAND);
+            context.startService(newIntent);
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            String telegramId = PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "");
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("command", UNMUTE_COMMAND);
+            context.startService(newIntent);
         }
     }
 }
