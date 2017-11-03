@@ -44,9 +44,9 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String SHARE_COMMAND = "locatedl"; //l hare current location via sms
     public final static String MUTE_COMMAND = "mutedl"; //m mute phone
     public final static String UNMUTE_COMMAND = "normaldl"; //um unmute phone
+    public final static String CALL_COMMAND = "calldl"; //c call to sender
 
     public final static String RADIUS_COMMAND = "radiusdl"; //ra change tracking radius, usage radiusdl x where is number of meters > 0
-    public final static String CALL_COMMAND = "calldl"; //c call to sender
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //g set high gps accuracy
     public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //gb set balanced gps accuracy
     public final static String NOTIFY_COMMAND = "notifydl"; //n set notification email, phone or telegram chat id usage notifydl p:x m:y t:z where x is mobile phone number, y is email address and z is Telegram chat or channel id.
@@ -59,7 +59,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
     private static AbstractCommand[] commands = {new StartRouteTrackerServiceStartCommand(), new ResumeRouteTrackerServiceStartCommand(),
             new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand(),
-            new MuteCommand(), new UnMuteCommand()};
+            new MuteCommand(), new UnMuteCommand(), new StartPhoneCallCommand(), new ChangeRouteTrackerServiceRadiusCommand()};
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -75,9 +75,9 @@ public class SmsReceiver extends BroadcastReceiver {
         //if (findShareRouteCommand(context, intent)) return;
         //if (findMuteCommand(context, intent)) return;
         //if (findUnmuteCommand(context, intent)) return;
+        //if (findStartPhoneCallCommand(context, intent)) return;
+        //if (findChangeRadiusRouteTrackerServiceCommand(context, intent)) return;
 
-        if (findChangeRadiusRouteTrackerServiceCommand(context, intent)) return;
-        if (findStartPhoneCallCommand(context, intent)) return;
         if (findGpsHighAccuracyCommand(context, intent)) return;
         if (findGpsLowAccuracyCommand(context, intent)) return;
         if (findNotifyCommand(context, intent)) return;
@@ -239,7 +239,7 @@ public class SmsReceiver extends BroadcastReceiver {
             }
         }
         return false;
-    }*/
+    }
 
     private boolean findChangeRadiusRouteTrackerServiceCommand(Context context, Intent intent) {
         ArrayList<SmsMessage> list = null;
@@ -304,7 +304,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    /*private boolean findShareRouteCommand(Context context, Intent intent) {
+    private boolean findShareRouteCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, ROUTE_COMMAND);
 
         if (sender != null) {
@@ -908,6 +908,97 @@ public class SmsReceiver extends BroadcastReceiver {
             newIntent.putExtra("telegramId", telegramId);
             newIntent.putExtra("command", UNMUTE_COMMAND);
             context.startService(newIntent);
+        }
+    }
+
+    private static final class StartPhoneCallCommand extends AbstractCommand {
+
+        public StartPhoneCallCommand() {
+            super(CALL_COMMAND, "c", Finder.EQUALS);
+        }
+
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            initPhoneCall(sender, context);
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            initPhoneCall(sender, context);
+        }
+
+        private void initPhoneCall(String sender, Context context) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "Unable to initiate phone call due to missing permission");
+                return;
+            }
+            Uri call = Uri.parse("tel:" + sender);
+            Intent surf = new Intent(Intent.ACTION_CALL, call);
+            //surf.setPackage("com.android.phone"); //use default phone
+            //surf.setPackage("com.google.android.dialer");
+            surf.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(surf);
+        }
+    }
+
+    private static final class ChangeRouteTrackerServiceRadiusCommand extends AbstractCommand {
+        public ChangeRouteTrackerServiceRadiusCommand() {
+            super(RADIUS_COMMAND, "ra", Finder.STARTS);
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            int radius = -1;
+            if (commandTokens.length == 2) {
+                try {
+                    radius = Integer.parseInt(commandTokens[1]);
+                } catch (Exception e) {
+                    Log.e(TAG, "Wrong radius: " + commandTokens[1]);
+                }
+            }
+            if (radius > 0) {
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+                String phoneNumber = settings.getString("phoneNumber", "");
+                String email = settings.getString("email", "");
+                String telegramId = settings.getString("telegramId", "");
+
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+
+                settings.edit().putInt("radius", radius).commit();
+
+                Intent newIntent = new Intent(context, SmsSenderService.class);
+                newIntent.putExtra("phoneNumber", sender);
+                newIntent.putExtra("command", RADIUS_COMMAND);
+                context.startService(newIntent);
+            }
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            int radius = -1;
+            if (commandTokens.length == 2) {
+                try {
+                    radius = Integer.parseInt(commandTokens[1]);
+                } catch (Exception e) {
+                    Log.e(TAG, "Wrong radius: " + commandTokens[1]);
+                }
+            }
+            if (radius > 0) {
+                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+                String phoneNumber = settings.getString("phoneNumber", "");
+                String email = settings.getString("email", "");
+                String telegramId = settings.getString("telegramId", "");
+
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+
+                settings.edit().putInt("radius", radius).commit();
+
+                Intent newIntent = new Intent(context, SmsSenderService.class);
+                newIntent.putExtra("telegramId", telegramId);
+                newIntent.putExtra("command", RADIUS_COMMAND);
+                context.startService(newIntent);
+            }
         }
     }
 }
