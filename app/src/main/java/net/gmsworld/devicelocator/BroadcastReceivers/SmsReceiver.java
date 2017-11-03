@@ -45,8 +45,8 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String MUTE_COMMAND = "mutedl"; //m mute phone
     public final static String UNMUTE_COMMAND = "normaldl"; //um unmute phone
     public final static String CALL_COMMAND = "calldl"; //c call to sender
-
     public final static String RADIUS_COMMAND = "radiusdl"; //ra change tracking radius, usage radiusdl x where is number of meters > 0
+
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //g set high gps accuracy
     public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //gb set balanced gps accuracy
     public final static String NOTIFY_COMMAND = "notifydl"; //n set notification email, phone or telegram chat id usage notifydl p:x m:y t:z where x is mobile phone number, y is email address and z is Telegram chat or channel id.
@@ -68,16 +68,6 @@ public class SmsReceiver extends BroadcastReceiver {
             if (commands[i].findCommand(context, intent)) return;
         }
 
-        //if (findResumeRouteTrackerServiceStartCommand(context, intent)) return;
-        //if (findStartRouteTrackerServiceStartCommand(context, intent)) return;
-        //if (findKeyword(context, intent)) return;
-        //if (findStopRouteTrackerServiceStartCommand(context, intent)) return;
-        //if (findShareRouteCommand(context, intent)) return;
-        //if (findMuteCommand(context, intent)) return;
-        //if (findUnmuteCommand(context, intent)) return;
-        //if (findStartPhoneCallCommand(context, intent)) return;
-        //if (findChangeRadiusRouteTrackerServiceCommand(context, intent)) return;
-
         if (findGpsHighAccuracyCommand(context, intent)) return;
         if (findGpsLowAccuracyCommand(context, intent)) return;
         if (findNotifyCommand(context, intent)) return;
@@ -85,290 +75,6 @@ public class SmsReceiver extends BroadcastReceiver {
         if (findNoAudioCommand(context, intent)) return;
         if (findTakePhotoCommand(context, intent)) return;
     }
-
-    /*private boolean findResumeRouteTrackerServiceStartCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, RESUME_COMMAND);
-
-        if (sender != null) {
-            //onSmsCommandFound(String sender)
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
-
-            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
-
-            settings.edit().putBoolean("motionDetectorRunning", true).commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("notificationNumber", phoneNumber);
-            newIntent.putExtra("email", email);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", RESUME_COMMAND);
-            context.startService(newIntent);
-            //
-            return true;
-        } else {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String telegramId = settings.getString("telegramId", "");
-
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sender = getSenderAddress(context, intent, RESUME_COMMAND + "t");
-                if (sender != null) {
-                    //onSmsSocialCommandFound(String sender)
-                    int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-                    String phoneNumber = settings.getString("phoneNumber", "");
-                    String email = settings.getString("email", "");
-
-                    RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
-
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putBoolean("motionDetectorRunning", true);
-                    editor.commit();
-
-                    Intent newIntent = new Intent(context, SmsSenderService.class);
-                    newIntent.putExtra("telegramId", telegramId);
-                    newIntent.putExtra("command", RESUME_COMMAND);
-                    context.startService(newIntent);
-                    //
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean findStartRouteTrackerServiceStartCommand(Context context, Intent intent) {
-        String sender = null;
-        boolean silentMode = false;
-        try {
-            String keyword = START_COMMAND;
-            String token = PreferenceManager.getDefaultSharedPreferences(context).getString("token", "");
-            keyword += token;
-            ArrayList<SmsMessage> list = getMessagesWithKeyword(keyword, intent.getExtras());
-            if (list.size() > 0) {
-                sender = list.get(0).getOriginatingAddress();
-                String[] tokens = list.get(0).getMessageBody().split(" ");
-                if (tokens.length == 2 && tokens[1].equals("silent"))  {
-                    silentMode = true;
-                }
-            }
-        } catch (Exception e) {
-            return false;
-        }
-
-        if (sender != null) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
-
-            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, silentMode);
-
-            settings.edit().putBoolean("motionDetectorRunning", true).commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", START_COMMAND);
-            context.startService(newIntent);
-            return true;
-        } else {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String telegramId = settings.getString("telegramId", "");
-
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sender = getSenderAddress(context, intent, START_COMMAND + "t");
-                if (sender != null) {
-                    int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-                    String phoneNumber = settings.getString("phoneNumber", "");
-                    String email = settings.getString("email", "");
-
-                    RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, false);
-
-                    settings.edit().putBoolean("motionDetectorRunning", true).commit();
-
-                    Intent newIntent = new Intent(context, SmsSenderService.class);
-                    newIntent.putExtra("telegramId", telegramId);
-                    newIntent.putExtra("command", START_COMMAND);
-                    context.startService(newIntent);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean findStopRouteTrackerServiceStartCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, STOP_COMMAND);
-
-        if (sender != null) {
-            RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false);
-
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putBoolean("motionDetectorRunning", false);
-            editor.commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", STOP_COMMAND);
-            context.startService(newIntent);
-            return true;
-        } else {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String telegramId = settings.getString("telegramId", "");
-
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sender = getSenderAddress(context, intent, STOP_COMMAND + "t");
-                if (sender != null) {
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false);
-
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putBoolean("motionDetectorRunning", false);
-                    editor.commit();
-
-                    Intent newIntent = new Intent(context, SmsSenderService.class);
-                    newIntent.putExtra("telegramId", telegramId);
-                    newIntent.putExtra("command", STOP_COMMAND);
-                    context.startService(newIntent);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean findChangeRadiusRouteTrackerServiceCommand(Context context, Intent intent) {
-        ArrayList<SmsMessage> list = null;
-        try {
-            String keyword = RADIUS_COMMAND;
-            String token = PreferenceManager.getDefaultSharedPreferences(context).getString("token", "");
-            keyword += token;
-            list = getMessagesWithKeyword(keyword, intent.getExtras());
-        } catch (Exception e) {
-            return false;
-        }
-
-        if (list.size() > 0) {
-            int radius = -1;
-            String[] tokens = list.get(0).getMessageBody().split(" ");
-            if (tokens.length == 2) {
-                try {
-                    radius = Integer.parseInt(tokens[1]);
-                } catch (Exception e) {
-                    Log.e(TAG, "Wrong radius: " + tokens[1]);
-                }
-            }
-            if (radius > 0) {
-                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-                String phoneNumber = settings.getString("phoneNumber", "");
-                String email = settings.getString("email", "");
-                String telegramId = settings.getString("telegramId", "");
-
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
-
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putInt("radius", radius);
-                editor.commit();
-
-                Intent newIntent = new Intent(context, SmsSenderService.class);
-                newIntent.putExtra("phoneNumber", list.get(0).getOriginatingAddress());
-                newIntent.putExtra("command", RADIUS_COMMAND);
-                context.startService(newIntent);
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean findStartPhoneCallCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, CALL_COMMAND);
-
-        if (sender != null) {
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                return true;
-            }
-            Uri call = Uri.parse("tel:" + sender);
-            Intent surf = new Intent(Intent.ACTION_CALL, call);
-            //surf.setPackage("com.android.phone"); //use default phone
-            //surf.setPackage("com.google.android.dialer");
-            surf.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(surf);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean findShareRouteCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, ROUTE_COMMAND);
-
-        if (sender != null) {
-            Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String title = settings.getString("routeTitle", "");
-
-            if (StringUtils.isEmpty(title)) {
-                title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString("routeTitle", title);
-                editor.commit();
-            }
-
-            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("title", title);
-            routeTracingService.putExtra("phoneNumber", sender);
-            context.startService(routeTracingService);
-
-            return true;
-        } else {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String telegramId = settings.getString("telegramId", "");
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sender = getSenderAddress(context, intent, ROUTE_COMMAND + "t");
-                if (sender != null) {
-                    String title = settings.getString("routeTitle", "");
-
-                    if (StringUtils.isEmpty(title)) {
-                        title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putString("routeTitle", title);
-                        editor.commit();
-                    }
-
-                    Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-                    routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-                    routeTracingService.putExtra("title", title);
-                    routeTracingService.putExtra("telegramId", telegramId);
-                    context.startService(routeTracingService);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean findMuteCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, MUTE_COMMAND);
-
-        if (sender != null) {
-            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", MUTE_COMMAND);
-            context.startService(newIntent);
-            return true;
-        } else {
-            return false;
-        }
-    }*/
 
     private boolean findAudioCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, AUDIO_COMMAND);
@@ -399,55 +105,6 @@ public class SmsReceiver extends BroadcastReceiver {
             return false;
         }
     }
-
-    /*private boolean findUnmuteCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, UNMUTE_COMMAND);
-
-        if (sender != null) {
-            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", UNMUTE_COMMAND);
-            context.startService(newIntent);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean findKeyword(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, SHARE_COMMAND);
-
-        if (sender != null) {
-            if (!Permissions.haveSendSMSAndLocationPermission(context)) {
-                try {
-                    Permissions.setPermissionNotification(context);
-                } catch (Exception e) {
-                    Toast.makeText(context, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
-                }
-                return true;
-            }
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            context.startService(newIntent);
-            return true;
-        } else {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String telegramId = settings.getString("telegramId", "");
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sender = getSenderAddress(context, intent, SHARE_COMMAND + "t");
-                if (sender != null) {
-                    Intent newIntent = new Intent(context, SmsSenderService.class);
-                    newIntent.putExtra("telegramId", telegramId);
-                    context.startService(newIntent);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }*/
 
     private boolean findGpsHighAccuracyCommand(Context context, Intent intent) {
         String sender = getSenderAddress(context, intent, GPS_HIGH_COMMAND);
@@ -652,6 +309,11 @@ public class SmsReceiver extends BroadcastReceiver {
         }
 
         @Override
+        protected boolean validateTokens() {
+            return true;
+        }
+
+        @Override
         protected void onSmsCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
@@ -690,11 +352,6 @@ public class SmsReceiver extends BroadcastReceiver {
             newIntent.putExtra("telegramId", telegramId);
             newIntent.putExtra("command", START_COMMAND);
             context.startService(newIntent);
-        }
-
-        @Override
-        protected boolean validateTokens() {
-            return true;
         }
     }
 
@@ -948,7 +605,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
 
         @Override
-        protected void onSmsCommandFound(String sender, Context context) {
+        protected boolean validateTokens() {
             int radius = -1;
             if (commandTokens.length == 2) {
                 try {
@@ -957,48 +614,43 @@ public class SmsReceiver extends BroadcastReceiver {
                     Log.e(TAG, "Wrong radius: " + commandTokens[1]);
                 }
             }
-            if (radius > 0) {
-                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-                String phoneNumber = settings.getString("phoneNumber", "");
-                String email = settings.getString("email", "");
-                String telegramId = settings.getString("telegramId", "");
+            return radius > 0;
+        }
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            final int radius = Integer.parseInt(commandTokens[1]);
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String phoneNumber = settings.getString("phoneNumber", "");
+            String email = settings.getString("email", "");
+            String telegramId = settings.getString("telegramId", "");
 
-                settings.edit().putInt("radius", radius).commit();
+            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
 
-                Intent newIntent = new Intent(context, SmsSenderService.class);
-                newIntent.putExtra("phoneNumber", sender);
-                newIntent.putExtra("command", RADIUS_COMMAND);
-                context.startService(newIntent);
-            }
+            settings.edit().putInt("radius", radius).commit();
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", RADIUS_COMMAND);
+            context.startService(newIntent);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            int radius = -1;
-            if (commandTokens.length == 2) {
-                try {
-                    radius = Integer.parseInt(commandTokens[1]);
-                } catch (Exception e) {
-                    Log.e(TAG, "Wrong radius: " + commandTokens[1]);
-                }
-            }
-            if (radius > 0) {
-                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-                String phoneNumber = settings.getString("phoneNumber", "");
-                String email = settings.getString("email", "");
-                String telegramId = settings.getString("telegramId", "");
+            final int radius = Integer.parseInt(commandTokens[1]);
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String phoneNumber = settings.getString("phoneNumber", "");
+            String email = settings.getString("email", "");
+            String telegramId = settings.getString("telegramId", "");
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
 
-                settings.edit().putInt("radius", radius).commit();
+            settings.edit().putInt("radius", radius).commit();
 
-                Intent newIntent = new Intent(context, SmsSenderService.class);
-                newIntent.putExtra("telegramId", telegramId);
-                newIntent.putExtra("command", RADIUS_COMMAND);
-                context.startService(newIntent);
-            }
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("command", RADIUS_COMMAND);
+            context.startService(newIntent);
         }
     }
 }
