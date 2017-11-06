@@ -46,7 +46,6 @@ public class SmsReceiver extends BroadcastReceiver {
     public final static String UNMUTE_COMMAND = "normaldl"; //um unmute phone
     public final static String CALL_COMMAND = "calldl"; //c call to sender
     public final static String RADIUS_COMMAND = "radiusdl"; //ra change tracking radius, usage radiusdl x where is number of meters > 0
-
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //g set high gps accuracy
     public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //gb set balanced gps accuracy
     public final static String NOTIFY_COMMAND = "notifydl"; //n set notification email, phone or telegram chat id usage notifydl p:x m:y t:z where x is mobile phone number, y is email address and z is Telegram chat or channel id.
@@ -59,7 +58,8 @@ public class SmsReceiver extends BroadcastReceiver {
 
     private static AbstractCommand[] commands = {new StartRouteTrackerServiceStartCommand(), new ResumeRouteTrackerServiceStartCommand(),
             new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand(),
-            new MuteCommand(), new UnMuteCommand(), new StartPhoneCallCommand(), new ChangeRouteTrackerServiceRadiusCommand()};
+            new MuteCommand(), new UnMuteCommand(), new StartPhoneCallCommand(), new ChangeRouteTrackerServiceRadiusCommand(),
+            new AudioCommand(), new NoAudioCommand(), new HighGpsCommand(), new BalancedGpsCommand()};
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -68,80 +68,8 @@ public class SmsReceiver extends BroadcastReceiver {
             if (commands[i].findCommand(context, intent)) return;
         }
 
-        if (findGpsHighAccuracyCommand(context, intent)) return;
-        if (findGpsLowAccuracyCommand(context, intent)) return;
         if (findNotifyCommand(context, intent)) return;
-        if (findAudioCommand(context, intent)) return;
-        if (findNoAudioCommand(context, intent)) return;
         if (findTakePhotoCommand(context, intent)) return;
-    }
-
-    private boolean findAudioCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, AUDIO_COMMAND);
-
-        if (sender != null) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", AUDIO_COMMAND);
-            context.startService(newIntent);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean findNoAudioCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, NOAUDIO_COMMAND);
-
-        if (sender != null) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", NOAUDIO_COMMAND);
-            context.startService(newIntent);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean findGpsHighAccuracyCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, GPS_HIGH_COMMAND);
-
-        if (sender != null) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putInt("gpsAccuracy", 1);
-            editor.commit();
-            RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", GPS_HIGH_COMMAND);
-            context.startService(newIntent);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private boolean findGpsLowAccuracyCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, GPS_BALANCED_COMMAND);
-
-        if (sender != null) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor editor = settings.edit();
-            editor.putInt("gpsAccuracy", 0);
-            editor.commit();
-            RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_BALANCED);
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", GPS_BALANCED_COMMAND);
-            context.startService(newIntent);
-            return true;
-        } else {
-            return false;
-        }
     }
 
     private boolean findNotifyCommand(Context context, Intent intent) {
@@ -650,6 +578,125 @@ public class SmsReceiver extends BroadcastReceiver {
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("telegramId", telegramId);
             newIntent.putExtra("command", RADIUS_COMMAND);
+            context.startService(newIntent);
+        }
+    }
+
+    private static final class AudioCommand extends AbstractCommand {
+
+        public AudioCommand() {
+            super(AUDIO_COMMAND, "a", Finder.EQUALS);
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", AUDIO_COMMAND);
+            context.startService(newIntent);
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String telegramId = settings.getString("telegramId", "");
+            settings.edit().putBoolean("useAudio", true).commit();
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("command", AUDIO_COMMAND);
+            context.startService(newIntent);
+        }
+    }
+
+    private static final class NoAudioCommand extends AbstractCommand {
+
+        public NoAudioCommand() {
+            super(NOAUDIO_COMMAND, "na", Finder.EQUALS);
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", NOAUDIO_COMMAND);
+            context.startService(newIntent);
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String telegramId = settings.getString("telegramId", "");
+            settings.edit().putBoolean("useAudio", false).commit();
+
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("command", NOAUDIO_COMMAND);
+            context.startService(newIntent);
+        }
+    }
+
+    private static final class HighGpsCommand extends AbstractCommand {
+
+        public HighGpsCommand() {
+            super(GPS_HIGH_COMMAND, "g", Finder.EQUALS);
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).commit();
+            RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", GPS_HIGH_COMMAND);
+            context.startService(newIntent);
+
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String telegramId = settings.getString("telegramId", "");
+            settings.edit().putInt("gpsAccuracy", 1).commit();
+
+            RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("command", GPS_HIGH_COMMAND);
+            context.startService(newIntent);
+        }
+    }
+
+    private static final class BalancedGpsCommand extends AbstractCommand {
+
+        public BalancedGpsCommand() {
+            super(GPS_BALANCED_COMMAND, "gb", Finder.EQUALS);
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).commit();
+            RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_BALANCED);
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", GPS_BALANCED_COMMAND);
+            context.startService(newIntent);
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String telegramId = settings.getString("telegramId", "");
+            settings.edit().putInt("gpsAccuracy", 0).commit();
+
+            RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_BALANCED);
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("command", GPS_BALANCED_COMMAND);
             context.startService(newIntent);
         }
     }
