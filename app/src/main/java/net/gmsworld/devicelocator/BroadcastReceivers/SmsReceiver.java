@@ -59,7 +59,8 @@ public class SmsReceiver extends BroadcastReceiver {
     private static AbstractCommand[] commands = {new StartRouteTrackerServiceStartCommand(), new ResumeRouteTrackerServiceStartCommand(),
             new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand(),
             new MuteCommand(), new UnMuteCommand(), new StartPhoneCallCommand(), new ChangeRouteTrackerServiceRadiusCommand(),
-            new AudioCommand(), new NoAudioCommand(), new HighGpsCommand(), new BalancedGpsCommand()};
+            new AudioCommand(), new NoAudioCommand(), new HighGpsCommand(), new BalancedGpsCommand(),
+            new TakePhotoCommand() };
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -69,7 +70,6 @@ public class SmsReceiver extends BroadcastReceiver {
         }
 
         if (findNotifyCommand(context, intent)) return;
-        if (findTakePhotoCommand(context, intent)) return;
     }
 
     private boolean findNotifyCommand(Context context, Intent intent) {
@@ -151,40 +151,6 @@ public class SmsReceiver extends BroadcastReceiver {
         } else {
             return false;
         }
-    }
-
-    private boolean findTakePhotoCommand(Context context, Intent intent) {
-        String sender = getSenderAddress(context, intent, TAKE_PHOTO_COMMAND);
-        boolean hiddenCamera = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false);
-
-        if (sender != null) {
-            if (hiddenCamera) {
-                Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
-                context.startService(cameraIntent);
-            }
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", TAKE_PHOTO_COMMAND);
-            context.startService(newIntent);
-            return true;
-        } else {
-            String telegramId = PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "");
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sender = getSenderAddress(context, intent, TAKE_PHOTO_COMMAND + "t");
-                if (sender != null) {
-                    if (hiddenCamera) {
-                        Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
-                        context.startService(cameraIntent);
-                    }
-                    Intent newIntent = new Intent(context, SmsSenderService.class);
-                    newIntent.putExtra("telegramId", telegramId);
-                    newIntent.putExtra("command", TAKE_PHOTO_COMMAND);
-                    context.startService(newIntent);
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private ArrayList<SmsMessage> getMessagesWithKeyword(String keyword, Bundle bundle) {
@@ -697,6 +663,38 @@ public class SmsReceiver extends BroadcastReceiver {
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("telegramId", telegramId);
             newIntent.putExtra("command", GPS_BALANCED_COMMAND);
+            context.startService(newIntent);
+        }
+    }
+
+    private static final class TakePhotoCommand extends AbstractCommand {
+
+        public TakePhotoCommand() { super(TAKE_PHOTO_COMMAND, "p", Finder.EQUALS); }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false)) {
+                Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+                context.startService(cameraIntent);
+            }
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", sender);
+            newIntent.putExtra("command", TAKE_PHOTO_COMMAND);
+            context.startService(newIntent);
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String telegramId = settings.getString("telegramId", "");
+            boolean hiddenCamera = settings.getBoolean("hiddenCamera", false);
+            if (hiddenCamera) {
+                Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+                context.startService(cameraIntent);
+            }
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("command", TAKE_PHOTO_COMMAND);
             context.startService(newIntent);
         }
     }
