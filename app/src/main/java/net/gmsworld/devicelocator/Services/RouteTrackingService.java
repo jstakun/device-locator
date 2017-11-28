@@ -246,7 +246,7 @@ public class RouteTrackingService extends Service {
                                         "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
 
-                                if (StringUtils.isEmpty(email)) {
+                                if (StringUtils.isNotEmpty(email)) {
                                     String title = "Message from Device Locator";
                                     String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(RouteTrackingService.this);
                                     if (deviceId != null) {
