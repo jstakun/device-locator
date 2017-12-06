@@ -323,10 +323,15 @@ public class Messenger {
         if (StringUtils.isNotEmpty(text)) {
             if (StringUtils.isNotEmpty(phoneNumber)) {
                 sendSMS(context, phoneNumber, text);
-            } else if (StringUtils.isNotEmpty(telegramId)) {
+            }
+
+            if (StringUtils.isNotEmpty(telegramId)) {
                 sendTelegram(context, telegramId, text, 1);
             }
 
+            if (StringUtils.isNotEmpty(email)) {
+                sendEmail(context, email, text, "Message from Device Locator", 1);
+            }
         }
     }
 

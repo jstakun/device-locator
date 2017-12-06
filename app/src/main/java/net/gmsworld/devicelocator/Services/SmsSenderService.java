@@ -51,7 +51,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
         this.telegramId = intent.getExtras().getString("telegramId");
 
-        if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId)) {
+        if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId) && StringUtils.isEmpty(intent.getExtras().getString("email"))) {
             //Log.d(TAG, "Phonenumber empty, return.");
             return;
         }

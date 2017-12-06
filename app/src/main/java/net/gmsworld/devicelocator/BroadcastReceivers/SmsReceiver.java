@@ -94,10 +94,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
             settings.edit().putBoolean("motionDetectorRunning", true).commit();
 
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", START_COMMAND);
-            context.startService(newIntent);
+            sendSmsNotification(context, sender, START_COMMAND);
         }
 
         @Override
@@ -112,10 +109,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
             settings.edit().putBoolean("motionDetectorRunning", true).commit();
 
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", START_COMMAND);
-            context.startService(newIntent);
+            sendSocialNotification(context, START_COMMAND);
         }
     }
 
@@ -153,15 +147,9 @@ public class SmsReceiver extends BroadcastReceiver {
             String phoneNumber = settings.getString("phoneNumber", "");
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
-
             RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
-
             settings.edit().putBoolean("motionDetectorRunning", true).commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", RESUME_COMMAND);
-            context.startService(newIntent);
+            sendSocialNotification(context, RESUME_COMMAND);
         }
     }
 
@@ -174,27 +162,15 @@ public class SmsReceiver extends BroadcastReceiver {
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false);
-
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("motionDetectorRunning", false).commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", STOP_COMMAND);
-            context.startService(newIntent);
+            sendSmsNotification(context, sender, STOP_COMMAND);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
             RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false);
-
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            settings.edit().putBoolean("motionDetectorRunning", false).commit();
-            String telegramId = settings.getString("telegramId", "");
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", STOP_COMMAND);
-            context.startService(newIntent);
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("motionDetectorRunning", false).commit();
+            sendSocialNotification(context, STOP_COMMAND);
         }
     }
 
@@ -215,17 +191,12 @@ public class SmsReceiver extends BroadcastReceiver {
                 Log.e(TAG, "Missing SMS and/or Locatoin permission");
                 return;
             }
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            context.startService(newIntent);
+            sendSmsNotification(context, sender, null);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            String telegramId = PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "");
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("telegramId", telegramId);
-            context.startService(newIntent);
+            sendSocialNotification(context, null);
         }
     }
 
@@ -282,23 +253,14 @@ public class SmsReceiver extends BroadcastReceiver {
         protected void onSmsCommandFound(String sender, Context context) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", MUTE_COMMAND);
-            context.startService(newIntent);
+            sendSmsNotification(context, sender, MUTE_COMMAND);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            String telegramId = PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "");
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", MUTE_COMMAND);
-            context.startService(newIntent);
+            sendSocialNotification(context, MUTE_COMMAND);
         }
     }
 
@@ -312,23 +274,14 @@ public class SmsReceiver extends BroadcastReceiver {
         protected void onSmsCommandFound(String sender, Context context) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", UNMUTE_COMMAND);
-            context.startService(newIntent);
+            sendSmsNotification(context, sender, UNMUTE_COMMAND);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            String telegramId = PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "");
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", UNMUTE_COMMAND);
-            context.startService(newIntent);
+            sendSocialNotification(context, UNMUTE_COMMAND);
         }
     }
 
@@ -388,15 +341,9 @@ public class SmsReceiver extends BroadcastReceiver {
             String phoneNumber = settings.getString("phoneNumber", "");
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
-
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
-
             settings.edit().putInt("radius", radius).commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", RADIUS_COMMAND);
-            context.startService(newIntent);
+            sendSmsNotification(context, sender, RADIUS_COMMAND);
         }
 
         @Override
@@ -406,15 +353,9 @@ public class SmsReceiver extends BroadcastReceiver {
             String phoneNumber = settings.getString("phoneNumber", "");
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
-
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
-
             settings.edit().putInt("radius", radius).commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", RADIUS_COMMAND);
-            context.startService(newIntent);
+            sendSocialNotification(context, RADIUS_COMMAND);
         }
     }
 
@@ -427,23 +368,13 @@ public class SmsReceiver extends BroadcastReceiver {
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", AUDIO_COMMAND);
-            context.startService(newIntent);
+            sendSmsNotification(context, sender, AUDIO_COMMAND);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String telegramId = settings.getString("telegramId", "");
-            settings.edit().putBoolean("useAudio", true).commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", AUDIO_COMMAND);
-            context.startService(newIntent);
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
+            sendSocialNotification(context, AUDIO_COMMAND);
         }
     }
 
@@ -456,23 +387,13 @@ public class SmsReceiver extends BroadcastReceiver {
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", NOAUDIO_COMMAND);
-            context.startService(newIntent);
+            sendSmsNotification(context, sender, NOAUDIO_COMMAND);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String telegramId = settings.getString("telegramId", "");
-            settings.edit().putBoolean("useAudio", false).commit();
-
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", NOAUDIO_COMMAND);
-            context.startService(newIntent);
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
+            sendSocialNotification(context, NOAUDIO_COMMAND);
         }
     }
 
@@ -486,24 +407,14 @@ public class SmsReceiver extends BroadcastReceiver {
         protected void onSmsCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).commit();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", GPS_HIGH_COMMAND);
-            context.startService(newIntent);
-
+            sendSmsNotification(context, sender, GPS_HIGH_COMMAND);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String telegramId = settings.getString("telegramId", "");
-            settings.edit().putInt("gpsAccuracy", 1).commit();
-
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).commit();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", GPS_HIGH_COMMAND);
-            context.startService(newIntent);
+            sendSocialNotification(context, GPS_HIGH_COMMAND);
         }
     }
 
@@ -517,23 +428,13 @@ public class SmsReceiver extends BroadcastReceiver {
         protected void onSmsCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).commit();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_BALANCED);
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", GPS_BALANCED_COMMAND);
-            context.startService(newIntent);
+            sendSmsNotification(context, sender, GPS_BALANCED_COMMAND);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String telegramId = settings.getString("telegramId", "");
-            settings.edit().putInt("gpsAccuracy", 0).commit();
-
-            RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_BALANCED);
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", GPS_BALANCED_COMMAND);
-            context.startService(newIntent);
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).commit();
+            sendSocialNotification(context, GPS_BALANCED_COMMAND);
         }
     }
 
@@ -547,25 +448,16 @@ public class SmsReceiver extends BroadcastReceiver {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
                 context.startService(cameraIntent);
             }
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("command", TAKE_PHOTO_COMMAND);
-            context.startService(newIntent);
+            sendSmsNotification(context, sender, TAKE_PHOTO_COMMAND);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String telegramId = settings.getString("telegramId", "");
-            boolean hiddenCamera = settings.getBoolean("hiddenCamera", false);
-            if (hiddenCamera) {
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false)) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
                 context.startService(cameraIntent);
             }
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", TAKE_PHOTO_COMMAND);
-            context.startService(newIntent);
+            sendSocialNotification(context, TAKE_PHOTO_COMMAND);
         }
     }
 

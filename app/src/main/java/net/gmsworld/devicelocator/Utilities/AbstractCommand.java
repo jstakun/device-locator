@@ -2,11 +2,14 @@ package net.gmsworld.devicelocator.Utilities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
+
+import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -134,5 +137,27 @@ public abstract class AbstractCommand {
             Log.e(TAG, e.getMessage(), e);
         }
         return null;
+    }
+
+    protected void sendSocialNotification(final Context context, final String command) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        final String email = settings.getString("email", "");
+        final String telegramId = settings.getString("telegramId", "");
+        Intent newIntent = new Intent(context, SmsSenderService.class);
+        newIntent.putExtra("telegramId", telegramId);
+        newIntent.putExtra("email", email);
+        if (StringUtils.isNotEmpty(command)) {
+            newIntent.putExtra("command", command);
+        }
+        context.startService(newIntent);
+    }
+
+    protected void sendSmsNotification(final Context context, final String sender, final String command) {
+        Intent newIntent = new Intent(context, SmsSenderService.class);
+        newIntent.putExtra("phoneNumber", sender);
+        if (StringUtils.isNotEmpty(command)) {
+            newIntent.putExtra("command", command);
+        }
+        context.startService(newIntent);
     }
 }
