@@ -30,6 +30,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
     private String phoneNumber = null;
     private String telegramId = null;
+    private String email = null;
 
     private boolean keywordReceivedSms = false;
     private boolean gpsSms = false;
@@ -51,7 +52,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
         this.telegramId = intent.getExtras().getString("telegramId");
 
-        if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId) && StringUtils.isEmpty(intent.getExtras().getString("email"))) {
+        this.email = intent.getExtras().getString("email");
+
+        if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId) && StringUtils.isEmpty(email)) {
             //Log.d(TAG, "Phonenumber empty, return.");
             return;
         }
@@ -75,9 +78,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         readSettings();
 
         if (StringUtils.equals(source, DeviceAdminEventReceiver.SOURCE)) {
-            Messenger.sendLoginFailedMessage(this, phoneNumber, telegramId);
+            Messenger.sendLoginFailedMessage(this, phoneNumber, telegramId, email);
         } else if (keywordReceivedSms) {
-            Messenger.sendAcknowledgeMessage(this, phoneNumber, telegramId);
+            Messenger.sendAcknowledgeMessage(this, phoneNumber, telegramId, email);
         }
 
         //set bestLocation to null and start time
@@ -172,13 +175,13 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         }
 
         if (gpsSms) {
-            Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), speedType, phoneNumber, telegramId);
+            Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), speedType, phoneNumber, telegramId, email);
         } else {
             Log.d(TAG, "Location message won't be send");
         }
 
         if (googleMapsSms) {
-            Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId);
+            Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId, email);
         } else {
             Log.d(TAG, "Google Maps link message won't be send");
         }

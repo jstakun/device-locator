@@ -1117,7 +1117,7 @@ public class MainActivity extends AppCompatActivity {
                         newIntent.putExtra("phoneNumber", phoneNumber);
                         Messenger.sendCommandMessage(MainActivity.this, newIntent);
                         if (StringUtils.isNotEmpty(email)) {
-                            Messenger.sendEmail(MainActivity.this, email, "Your Security PIN is " + token, "Message from Device Locator", 1);
+                            Messenger.sendEmail(MainActivity.this, email, "Your Security PIN is " + token, MainActivity.this.getString(R.string.message), 1);
                         }
                         Toast.makeText(MainActivity.this, "Security PIN has been sent to notifiers", Toast.LENGTH_SHORT).show();
                     } else {
@@ -1183,7 +1183,7 @@ public class MainActivity extends AppCompatActivity {
                         net.gmsworld.devicelocator.Utilities.Messenger.sendSMS(MainActivity.this, MainActivity.this.phoneNumber, message);
                     }
                     if (StringUtils.isNotEmpty(MainActivity.this.email)) {
-                        net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(MainActivity.this, MainActivity.this.email, message, "Message from Device Locator", 1);
+                        net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(MainActivity.this, MainActivity.this.email, message, MainActivity.this.getString(R.string.message), 1);
                     }
                     if (StringUtils.isNotEmpty(MainActivity.this.telegramId)) {
                         net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(MainActivity.this, MainActivity.this.telegramId, message, 1);

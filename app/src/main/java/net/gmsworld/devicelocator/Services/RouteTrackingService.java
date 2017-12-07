@@ -236,8 +236,8 @@ public class RouteTrackingService extends Service {
                         if (location != null) {
                             if (!silentMode) {
                                 if (StringUtils.isNotEmpty(phoneNumber)) {
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, 0, phoneNumber, null);
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber, null);
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, 0, phoneNumber, null, null);
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber, null, null);
                                 }
                                 DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
                                 String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +

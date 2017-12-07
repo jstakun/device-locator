@@ -61,7 +61,7 @@ public class Messenger {
 
 
     public static void sendEmail(final Context context, final String email, final String message, final String title, final int retryCount) {
-        if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message) || StringUtils.isNotEmpty(title))) {
+        if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message))) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
@@ -169,7 +169,7 @@ public class Messenger {
         }
     }
 
-    public static void sendLocationMessage(Context context, Location location, boolean fused, int speedType, String phoneNumber, String telegramId) {
+    public static void sendLocationMessage(Context context, Location location, boolean fused, int speedType, String phoneNumber, String telegramId, String email) {
         //Log.d(TAG, "sendLocationMessage()" + location.getAccuracy());
         String text = context.getString(fused ? R.string.approximate : R.string.accurate) + " location:\n";
 
@@ -192,19 +192,28 @@ public class Messenger {
 
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
-        } else if (StringUtils.isNotEmpty(telegramId)) {
-            //text = text.replace("\n", ", ");
-            sendTelegram(context, telegramId, text, 1);
+        } else {
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sendTelegram(context, telegramId, text, 1);
+            }
+            if (StringUtils.isNotEmpty(email)) {
+                sendEmail(context, email, text, "Device Locator location information", 1);
+            }
         }
     }
 
-    public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId) {
+    public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email) {
         String text = "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') + "\n" +
                 "Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
-        } else if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, telegramId, text, 1);
+        } else {
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sendTelegram(context, telegramId, text, 1);
+            }
+            if (StringUtils.isNotEmpty(email)) {
+                sendEmail(context, email, text, "Device Locator location map link", 1);
+            }
         }
     }
 
@@ -323,38 +332,48 @@ public class Messenger {
         if (StringUtils.isNotEmpty(text)) {
             if (StringUtils.isNotEmpty(phoneNumber)) {
                 sendSMS(context, phoneNumber, text);
-            }
+            } else {
+                if (StringUtils.isNotEmpty(telegramId)) {
+                    sendTelegram(context, telegramId, text, 1);
+                }
 
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, telegramId, text, 1);
-            }
-
-            if (StringUtils.isNotEmpty(email)) {
-                sendEmail(context, email, text, "Message from Device Locator", 1);
+                if (StringUtils.isNotEmpty(email)) {
+                    sendEmail(context, email, text, context.getString(R.string.message), 1);
+                }
             }
         }
     }
 
-    public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId) {
+    public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId, String email) {
         String text = context.getString(R.string.acknowledgeMessage);
         text += " " + context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context));
         text += ", " + context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context);
         text += ", Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
-        } else if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, telegramId, text, 1);
+        } else {
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sendTelegram(context, telegramId, text, 1);
+            }
+            if (StringUtils.isNotEmpty(email)) {
+                sendEmail(context, email, text, "Device Locator location request", 1);
+            }
         }
     }
 
-    public static void sendLoginFailedMessage(Context context, String phoneNumber, String telegramId) {
+    public static void sendLoginFailedMessage(Context context, String phoneNumber, String telegramId, String email) {
         String text = "Failed login attempt to your device " + getDeviceId(context) + "."
                 + " You should receive device location message soon."
                 + " Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
-        } else if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, telegramId, text, 1);
+        } else {
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sendTelegram(context, telegramId, text, 1);
+            }
+            if (StringUtils.isNotEmpty(email)) {
+                sendEmail(context, email, text, "Device Locator failed login", 1);
+            }
         }
     }
 
