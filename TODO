@@ -2,7 +2,7 @@
 
 2. Send notification to telegram - done
 
-2.1 Send notification to messanger, whatsapp, slack and other - rfe
+2.1 Send notification to Messanger, WhatsApp, Slack and other - rfe
 
 3. Send notification via email - done
 
@@ -40,6 +40,6 @@
 
 20. Change package to net.gmsworld - done
 
-21. Audio Transmiter - wip
+21. Audio Transmitter - wip
 
 22. Add remote command to set notification email, telegram chat id and phone number - done

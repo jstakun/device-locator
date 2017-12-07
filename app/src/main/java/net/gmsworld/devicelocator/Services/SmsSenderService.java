@@ -166,10 +166,13 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             final String message = getString(R.string.error_getting_location);
             if (StringUtils.isNotEmpty(phoneNumber)) {
                 Messenger.sendSMS(this, phoneNumber, message);
-            } else if (StringUtils.isNotEmpty(telegramId)) {
-                Messenger.sendTelegram(this, telegramId, message, 1);
             } else {
-                Log.e(TAG, message);
+                if (StringUtils.isNotEmpty(telegramId)) {
+                    Messenger.sendTelegram(this, null, telegramId, message, 1);
+                }
+                if (StringUtils.isNotEmpty(email)) {
+                    Messenger.sendEmail(this, null, email, message, getString(R.string.message), 1);
+                }
             }
             return;
         }

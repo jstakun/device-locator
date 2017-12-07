@@ -258,12 +258,12 @@ public class RouteTrackingService extends Service {
                                     if (deviceId != null) {
                                         title += " installed on device " + deviceId;
                                     }
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, email, message, title, 1);
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, location, email, message, title, 1);
                                 }
 
                                 if (StringUtils.isNotEmpty(telegramId)) {
                                     message = message.replace("\n", ", ");
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, telegramId, message, 1);
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, location, telegramId, message, 1);
                                 }
                             }
 
