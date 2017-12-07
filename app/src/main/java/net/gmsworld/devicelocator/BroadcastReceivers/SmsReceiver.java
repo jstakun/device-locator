@@ -229,6 +229,7 @@ public class SmsReceiver extends BroadcastReceiver {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String title = settings.getString("routeTitle", "");
             String telegramId = settings.getString("telegramId", "");
+            String email = settings.getString("email", "");
 
             if (StringUtils.isEmpty(title)) {
                 title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
@@ -239,6 +240,7 @@ public class SmsReceiver extends BroadcastReceiver {
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
             routeTracingService.putExtra("title", title);
             routeTracingService.putExtra("telegramId", telegramId);
+            routeTracingService.putExtra("email", email);
             context.startService(routeTracingService);
         }
     }

@@ -19,6 +19,7 @@ import android.util.Log;
 
 import net.gmsworld.devicelocator.Audio.morse.MorseSoundGenerator;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.Utilities.Network;
@@ -95,7 +96,7 @@ public class RouteTrackingService extends Service {
                         break;
                     case COMMAND_ROUTE:
                         String title = intent.getStringExtra("title");
-                        shareRoute(title, intent.getExtras().getString("phoneNumber"), intent.getExtras().getString("telegramId"));
+                        shareRoute(title, intent.getExtras().getString("phoneNumber"), intent.getExtras().getString("telegramId"), intent.getExtras().getString("email"));
                         break;
                     case COMMAND_CONFIGURE:
                         this.phoneNumber = intent.getExtras().getString("phoneNumber");
@@ -185,7 +186,7 @@ public class RouteTrackingService extends Service {
         editor.commit();
     }
 
-    private void shareRoute(final String title, final String phoneNumber, final String telegramId) {
+    private void shareRoute(final String title, final String phoneNumber, final String telegramId, final String email) {
         Log.d(TAG, "shareRoute()");
         GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, title, phoneNumber, startTime, true, new Network.OnGetFinishListener() {
             @Override
@@ -194,8 +195,13 @@ public class RouteTrackingService extends Service {
                 final Intent newIntent = new Intent(RouteTrackingService.this, SmsSenderService.class);
                 if (StringUtils.isNotEmpty(phoneNumber)) {
                     newIntent.putExtra("phoneNumber", phoneNumber);
-                } else if (StringUtils.isNotEmpty(telegramId)) {
-                    newIntent.putExtra("telegramId", telegramId);
+                } else {
+                    if (StringUtils.isNotEmpty(telegramId)) {
+                        newIntent.putExtra("telegramId", telegramId);
+                    }
+                    if (StringUtils.isNotEmpty(email)) {
+                        newIntent.putExtra("email", email);
+                    }
                 }
                 newIntent.putExtra("command", SmsReceiver.ROUTE_COMMAND);
                 newIntent.putExtra("title", title);
@@ -247,7 +253,7 @@ public class RouteTrackingService extends Service {
 
 
                                 if (StringUtils.isNotEmpty(email)) {
-                                    String title = "Message from Device Locator";
+                                    String title = getString(R.string.message);
                                     String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(RouteTrackingService.this);
                                     if (deviceId != null) {
                                         title += " installed on device " + deviceId;
