@@ -25,7 +25,7 @@
     <string name="network_message_summary">Informations about current address and remaining distance to destination.</string>
     <string name="acknowledgeMessage">Wait for a while for response. Retry if no response after a few minutes.</string>
     <string name="network">Internet:</string>
-    <string name="gps">GPS:</string>
+    <string name="gps">Location source:</string>
     <string name="enabled">enabled</string>
     <string name="disabled">disabled</string>
     <string name="location_mode_off">Disabled</string>
