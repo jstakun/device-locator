@@ -191,12 +191,12 @@ public class SmsReceiver extends BroadcastReceiver {
                 Log.e(TAG, "Missing SMS and/or Locatoin permission");
                 return;
             }
-            sendSmsNotification(context, sender, null);
+            sendSmsNotification(context, sender, null); //don't set command to SHARE_COMMAND
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            sendSocialNotification(context, null);
+            sendSocialNotification(context, null); //don't set command to SHARE_COMMAND
         }
     }
 

@@ -62,11 +62,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         String command = intent.getExtras().getString("command");
 
         if (StringUtils.isEmpty(command)) {
-            if (!isRunning) {
-                initSending(intent.getExtras().getString("source"));
-            } else {
-                Log.d(TAG, "GPS provider is already running!");
-            }
+            initSending(intent.getExtras().getString("source"));
         } else {
             Messenger.sendCommandMessage(this, intent);
         }
@@ -87,7 +83,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         startTime = System.currentTimeMillis() / 1000;
         bestLocation = null;
 
-        if (SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
+        if (!isRunning && SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
 
             isRunning = true;
 
@@ -174,6 +170,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                     Messenger.sendEmail(this, null, email, message, getString(R.string.message), 1);
                 }
             }
+            isRunning = false;
             return;
         }
 
