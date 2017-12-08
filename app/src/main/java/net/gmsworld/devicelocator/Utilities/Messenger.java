@@ -140,7 +140,7 @@ public class Messenger {
         }
 
         try {
-            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&user=" + getDeviceId(context);
+            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context);
             Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -170,7 +170,7 @@ public class Messenger {
         }
 
         try {
-            String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title;
+            String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title + "&username=" + getDeviceId(context);
             Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
