@@ -135,8 +135,8 @@ public class Messenger {
             headers.put("X-GMS-DeviceId", deviceId);
         }
         if (location != null) {
-            headers.put("X-GMS-Lat", Double.toString(location.getLatitude()));
-            headers.put("X-GMS-Lng", Double.toString(location.getLongitude()));
+            headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
+            headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
         }
 
         try {
@@ -165,8 +165,8 @@ public class Messenger {
             headers.put("X-GMS-DeviceId", deviceId);
         }
         if (location != null) {
-            headers.put("X-GMS-Lat", Double.toString(location.getLatitude()));
-            headers.put("X-GMS-Lng", Double.toString(location.getLongitude()));
+            headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
+            headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
         }
 
         try {
