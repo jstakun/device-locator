@@ -251,19 +251,18 @@ public class RouteTrackingService extends Service {
                                         "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
                                         "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
-
-                                if (StringUtils.isNotEmpty(email)) {
+                                //First send notification to telegram and if not configured to email
+                                //REMEBER this could send a lot of messages and your email account could be overloaded
+                                if (StringUtils.isNotEmpty(telegramId)) {
+                                    message = message.replace("\n", ", ");
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, location, telegramId, message, 1);
+                                } else if (StringUtils.isNotEmpty(email)) {
                                     String title = getString(R.string.message);
                                     String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(RouteTrackingService.this);
                                     if (deviceId != null) {
                                         title += " installed on device " + deviceId;
                                     }
                                     net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, location, email, message, title, 1);
-                                }
-
-                                if (StringUtils.isNotEmpty(telegramId)) {
-                                    message = message.replace("\n", ", ");
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, location, telegramId, message, 1);
                                 }
                             }
 

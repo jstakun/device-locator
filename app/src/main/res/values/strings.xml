@@ -66,7 +66,7 @@
     <string name="phone_number">Phone number</string>
     <string name="find">Find</string>
     <string name="email_address">Email address</string>
-    <string name="telegram_chat_id">Telegram Messenger chat id</string>
+    <string name="telegram_chat_id">Telegram chat or group id</string>
     <string name="share_route">Share route</string>
     <string name="device_tracker">Device tracker</string>
     <string name="sms_control">SMS control</string>
