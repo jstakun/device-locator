@@ -248,8 +248,8 @@ public class RouteTrackingService extends Service {
                                 DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
                                 String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
                                         " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m." +
-                                        "\nBattery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
-                                        "\nhttps://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
+                                        "\n" + "Battery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
+                                        "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
                                 //First send notification to telegram and if not configured to email
                                 //REMEBER this could send a lot of messages and your email account could be overloaded

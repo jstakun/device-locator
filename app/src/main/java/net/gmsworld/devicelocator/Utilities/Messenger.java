@@ -41,14 +41,6 @@ public class Messenger {
 
     protected static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
 
-    private Network.OnGetFinishListener telegramNotifier = new Network.OnGetFinishListener() {
-        @Override
-        public void onGetFinish(String results, int responseCode, String url) {
-            Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-        }
-    };
-
-
     public static void sendSMS(final Context context, final String phoneNumber, final String message) {
         //on samsung intents can't be null. the messages are not sent if intents are null
         ArrayList<PendingIntent> samsungFix = new ArrayList<>();
@@ -343,6 +335,7 @@ public class Messenger {
                 } else {
                     text = "Front camera photo: " + imageUrl;
                 }
+                text +=  "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case SmsReceiver.PIN_COMMAND:
                 String pin = PreferenceManager.getDefaultSharedPreferences(context).getString("token","");
@@ -351,6 +344,7 @@ public class Messenger {
                 } else {
                     text = "Your Security PIN is " + pin;
                 }
+                text += "\n" + "Battery level: " + getBatteryLevel(context);
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;
@@ -398,9 +392,10 @@ public class Messenger {
     }
 
     public static void sendLoginFailedMessage(Context context, String phoneNumber, String telegramId, String email) {
-        String text = "Failed login attempt to your device " + getDeviceId(context) + "."
+        String deviceId = getDeviceId(context);
+        String text = "Failed login attempt to your device " + deviceId + "."
                 + " You should receive device location message soon."
-                + " Battery level: " + getBatteryLevel(context);
+                + "\n" + "Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         } else {
@@ -409,7 +404,6 @@ public class Messenger {
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
-                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - failed login";
                 }
