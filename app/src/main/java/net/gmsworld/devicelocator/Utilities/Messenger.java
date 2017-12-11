@@ -213,7 +213,12 @@ public class Messenger {
                 sendTelegram(context, location, telegramId, text, 1);
             }
             if (StringUtils.isNotEmpty(email)) {
-                sendEmail(context, location, email, text, "Device Locator location information", 1);
+                String title = context.getString(R.string.message);
+                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
+                if (deviceId != null) {
+                    title += " installed on device " + deviceId + " - current location";
+                }
+                sendEmail(context, location, email, text, title, 1);
             }
         }
     }
@@ -228,7 +233,12 @@ public class Messenger {
                 sendTelegram(context, location, telegramId, text, 1);
             }
             if (StringUtils.isNotEmpty(email)) {
-                sendEmail(context, location, email, text, "Device Locator location map link", 1);
+                String title = context.getString(R.string.message);
+                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
+                if (deviceId != null) {
+                    title += " installed on device " + deviceId + " - location map link";
+                }
+                sendEmail(context, location, email, text, title, 1);
             }
         }
     }
@@ -354,7 +364,12 @@ public class Messenger {
                 }
 
                 if (StringUtils.isNotEmpty(email)) {
-                    sendEmail(context, null, email, text, context.getString(R.string.message), 1);
+                    String title = context.getString(R.string.message);
+                    String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
+                    if (deviceId != null) {
+                        title += " installed on device " + deviceId;
+                    }
+                    sendEmail(context, null, email, text, title, 1);
                 }
             }
         }
@@ -372,7 +387,12 @@ public class Messenger {
                 sendTelegram(context, null, telegramId, text, 1);
             }
             if (StringUtils.isNotEmpty(email)) {
-                sendEmail(context, null, email, text, "Device Locator location request", 1);
+                String title = context.getString(R.string.message);
+                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
+                if (deviceId != null) {
+                    title += " installed on device " + deviceId + " - location request";
+                }
+                sendEmail(context, null, email, text, title, 1);
             }
         }
     }
@@ -388,7 +408,12 @@ public class Messenger {
                 sendTelegram(context, null, telegramId, text, 1);
             }
             if (StringUtils.isNotEmpty(email)) {
-                sendEmail(context, null, email, text, "Device Locator failed login", 1);
+                String title = context.getString(R.string.message);
+                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
+                if (deviceId != null) {
+                    title += " installed on device " + deviceId + " - failed login";
+                }
+                sendEmail(context, null, email, text, title, 1);
             }
         }
     }

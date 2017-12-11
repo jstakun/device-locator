@@ -260,7 +260,7 @@ public class RouteTrackingService extends Service {
                                     String title = getString(R.string.message);
                                     String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(RouteTrackingService.this);
                                     if (deviceId != null) {
-                                        title += " installed on device " + deviceId;
+                                        title += " installed on device " + deviceId +  " - location change";
                                     }
                                     net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, location, email, message, title, 1);
                                 }

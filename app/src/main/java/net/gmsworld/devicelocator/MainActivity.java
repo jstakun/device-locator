@@ -1117,7 +1117,12 @@ public class MainActivity extends AppCompatActivity {
                         newIntent.putExtra("phoneNumber", phoneNumber);
                         Messenger.sendCommandMessage(MainActivity.this, newIntent);
                         if (StringUtils.isNotEmpty(email)) {
-                            Messenger.sendEmail(MainActivity.this, null, email, "Your Security PIN is " + token, MainActivity.this.getString(R.string.message), 1);
+                            String title = getString(R.string.message);
+                            String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(MainActivity.this);
+                            if (deviceId != null) {
+                                title += " installed on device " + deviceId  + " - security pin request";
+                            }
+                            Messenger.sendEmail(MainActivity.this, null, email, "Your Security PIN is " + token, title, 1);
                         }
                         Toast.makeText(MainActivity.this, "Security PIN has been sent to notifiers", Toast.LENGTH_SHORT).show();
                     } else {
@@ -1183,7 +1188,12 @@ public class MainActivity extends AppCompatActivity {
                         net.gmsworld.devicelocator.Utilities.Messenger.sendSMS(MainActivity.this, MainActivity.this.phoneNumber, message);
                     }
                     if (StringUtils.isNotEmpty(MainActivity.this.email)) {
-                        net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(MainActivity.this, null, MainActivity.this.email, message, MainActivity.this.getString(R.string.message), 1);
+                        String msgtitle = getString(R.string.message);
+                        String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(MainActivity.this);
+                        if (deviceId != null) {
+                            msgtitle += " installed on device " + deviceId +  " - route map link";
+                        }
+                        net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(MainActivity.this, null, MainActivity.this.email, message, msgtitle, 1);
                     }
                     if (StringUtils.isNotEmpty(MainActivity.this.telegramId)) {
                         net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(MainActivity.this, null, MainActivity.this.telegramId, message, 1);

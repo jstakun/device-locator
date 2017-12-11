@@ -167,7 +167,12 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                     Messenger.sendTelegram(this, null, telegramId, message, 1);
                 }
                 if (StringUtils.isNotEmpty(email)) {
-                    Messenger.sendEmail(this, null, email, message, getString(R.string.message), 1);
+                    String title = getString(R.string.message);
+                    String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(this);
+                    if (deviceId != null) {
+                        title += " installed on device " + deviceId +  " - current location";
+                    }
+                    Messenger.sendEmail(this, null, email, message, title, 1);
                 }
             }
             isRunning = false;
