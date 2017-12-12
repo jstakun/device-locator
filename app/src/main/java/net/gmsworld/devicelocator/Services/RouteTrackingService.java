@@ -252,7 +252,7 @@ public class RouteTrackingService extends Service {
                                         "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
                                 //First send notification to telegram and if not configured to email
-                                //REMEBER this could send a lot of messages and your email account could be overloaded
+                                //REMEMBER this could send a lot of messages and your email account could be overloaded
                                 if (StringUtils.isNotEmpty(telegramId)) {
                                     message = message.replace("\n", ", ");
                                     net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, location, telegramId, message, 1);
@@ -266,7 +266,8 @@ public class RouteTrackingService extends Service {
                                 }
                             }
 
-                            //audio transmitter
+                            //EXPERIMENTAL FEATURE audio transmitter
+                            //you should plug antenna to your device audio transmitter
                             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this);
                             boolean useAudio = settings.getBoolean("useAudio", false);
                             if (useAudio) {

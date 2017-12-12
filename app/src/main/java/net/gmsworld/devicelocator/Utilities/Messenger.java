@@ -210,14 +210,15 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - current location";
                 }
+                text += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
                 sendEmail(context, location, email, text, title, 1);
             }
         }
     }
 
     public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email) {
-        String text = "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') + "\n" +
-                "Battery level: " + getBatteryLevel(context);
+        String text = "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
+                "\n" + "Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         } else {
@@ -230,6 +231,7 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - location map link";
                 }
+                text += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
                 sendEmail(context, location, email, text, title, 1);
             }
         }
@@ -363,6 +365,7 @@ public class Messenger {
                     if (deviceId != null) {
                         title += " installed on device " + deviceId;
                     }
+                    text += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
                     sendEmail(context, null, email, text, title, 1);
                 }
             }
@@ -386,6 +389,7 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - location request";
                 }
+                text += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
                 sendEmail(context, null, email, text, title, 1);
             }
         }
@@ -407,6 +411,7 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - failed login";
                 }
+                text += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
                 sendEmail(context, null, email, text, title, 1);
             }
         }

@@ -159,7 +159,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         SmartLocation.with(this).location().stop();
 
         if (bestLocation == null) {
-            final String message = getString(R.string.error_getting_location);
+            String message = getString(R.string.error_getting_location) +
+                             "\n" + "Battery level: " + Messenger.getBatteryLevel(this);
             if (StringUtils.isNotEmpty(phoneNumber)) {
                 Messenger.sendSMS(this, phoneNumber, message);
             } else {
@@ -168,10 +169,11 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 }
                 if (StringUtils.isNotEmpty(email)) {
                     String title = getString(R.string.message);
-                    String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(this);
+                    String deviceId = Messenger.getDeviceId(this);
                     if (deviceId != null) {
                         title += " installed on device " + deviceId +  " - current location";
                     }
+                    message += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
                     Messenger.sendEmail(this, null, email, message, title, 1);
                 }
             }
