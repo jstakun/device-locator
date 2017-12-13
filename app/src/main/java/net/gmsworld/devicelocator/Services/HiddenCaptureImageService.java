@@ -109,16 +109,16 @@ public class HiddenCaptureImageService extends HiddenCameraService {
 
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
-                String uploadUrl = "https://www.gms-world.net/";
+                String uploadUrl = getString(R.string.photoUploadUrl);
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
-                    uploadUrl += "s";
+                    uploadUrl = getString(R.string.securePhotoUploadUrl);
                 }
 
                 headers.put("X-GMS-AppId", "2");
                 headers.put("X-GMS-Scope", "dl");
 
-                Network.uploadScreenshot(uploadUrl + "/imageUpload", out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
+                Network.uploadScreenshot(uploadUrl, out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String imageUrl, int responseCode, String url) {
                         if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {

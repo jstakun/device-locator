@@ -19,6 +19,7 @@ import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
@@ -133,7 +134,7 @@ public class Messenger {
 
         try {
             String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context);
-            Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
+            Network.post(context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -163,7 +164,7 @@ public class Messenger {
 
         try {
             String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title + "&username=" + getDeviceId(context);
-            Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
+            Network.post(context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -340,7 +341,7 @@ public class Messenger {
                 text +=  "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case SmsReceiver.PIN_COMMAND:
-                String pin = PreferenceManager.getDefaultSharedPreferences(context).getString("token","");
+                String pin = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN,"");
                 if (StringUtils.isEmpty(pin)) {
                     text = "No Security PIN is set!";
                 } else {
@@ -449,7 +450,7 @@ public class Messenger {
                 sendEmailRegistrationRequest(context, email, tokenStr, 1);
             } else {
                 String queryString = "scope=dl&user=" + getDeviceId(context);
-                Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+                Network.get(context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -478,7 +479,7 @@ public class Messenger {
                 sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
             } else {
                 String queryString = "scope=dl&user=" + getDeviceId(context);
-                Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+                Network.get(context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -505,7 +506,7 @@ public class Messenger {
 
         try {
             String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context);
-            Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
+            Network.post(context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -537,7 +538,7 @@ public class Messenger {
 
         try {
             String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context);
-            Network.post("https://www.gms-world.net/s/notifications", queryString, null, headers, new Network.OnGetFinishListener() {
+            Network.post(context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url + " with content " + results);

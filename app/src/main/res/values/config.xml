@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="routeProviderUrl">http://www.gms-world.net/routeProvider</string>
+    <string name="routeProviderUrl">https://www.gms-world.net/routeProvider</string>
+    <string name="secureRouteProviderUrl">https://www.gms-world.net/s/routeProvider</string>
     <string name="showRouteUrl">http://www.gms-world.net/showRoute</string>
     <string name="crashReportUrl">https://www.gms-world.net/s/crashReport</string>
+    <string name="notificationUrl">https://www.gms-world.net/s/notifications</string>
+    <string name="tokenUrl">https://www.gms-world.net/token</string>
+    <string name="deviceManagerUrl">https://www.gms-world.net/s/deviceManager</string>
+    <string name="photoUploadUrl">https://www.gms-world.net/imageUpload</string>
+    <string name="securePhotoUploadUrl">https://www.gms-world.net/s/imageUpload</string>
 </resources>

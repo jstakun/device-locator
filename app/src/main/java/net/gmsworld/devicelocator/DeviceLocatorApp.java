@@ -5,9 +5,11 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.gmsworld.devicelocator.Services.DlFirebaseInstanceIdService;
 import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
 
@@ -38,9 +40,9 @@ public class DeviceLocatorApp extends Application {
     public void onCreate() {
         super.onCreate();
         final Map<String, String> headers = new HashMap<String, String>();
-        //headers.put("Authorization", "Bearer:");
         final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         String tokenStr = settings.getString(GMS_TOKEN_KEY, "");
+
         if (StringUtils.isNotEmpty(tokenStr)) {
             headers.put("Authorization", "Bearer " + tokenStr);
             headers.put("X-GMS-AppId", "2");
@@ -48,17 +50,15 @@ public class DeviceLocatorApp extends Application {
             initAcra(headers);
         } else if (Network.isNetworkAvailable(this)) {
             String queryString = "scope=dl&user=" + Messenger.getDeviceId(this);
-            Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+            Network.get(getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 200) {
                         JsonObject token = new JsonParser().parse(results).getAsJsonObject();
-                        SharedPreferences.Editor editor = settings.edit();
                         String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
                         Log.d(TAG, "Received following token: " + token);
-                        editor.putString(GMS_TOKEN_KEY, tokenStr);
-                        editor.commit();
+                        settings.edit().putString(GMS_TOKEN_KEY, tokenStr).apply();
                         headers.put("Authorization", "Bearer " + tokenStr);
                         headers.put("X-GMS-AppId", "2");
                         headers.put("X-GMS-Scope", "dl");
@@ -66,6 +66,15 @@ public class DeviceLocatorApp extends Application {
                     }
                 }
             });
+        }
+
+        if (StringUtils.isNotEmpty(tokenStr)) {
+            String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
+            if (StringUtils.isEmpty(firebaseToken)) {
+                String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+                Log.d(TAG, "Refreshed Firebase token: " + refreshedToken);
+                DlFirebaseInstanceIdService.sendRegistrationToServer(this, refreshedToken, PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, ""));
+            }
         }
     }
 

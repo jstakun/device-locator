@@ -6,12 +6,14 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
+import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.Model.Feature;
 import net.gmsworld.devicelocator.Model.FeatureCollection;
 import net.gmsworld.devicelocator.Model.Geometry;
@@ -315,8 +317,15 @@ public abstract class AbstractLocationManager {
                     String desc = "Route recorded by Device Locator on device: " + deviceId;
                     String content = routeToGeoJson(route, title, desc, deviceId, creationDate);
                     String url = context.getString(R.string.routeProviderUrl);
-                    //Log.d(TAG, "Uploading route " + content);
-                    Network.post(url, "route=" + content, null, null, onFinishListener);
+                    final Map<String, String> headers = new HashMap<String, String>();
+                    String tokenStr = PreferenceManager.getDefaultSharedPreferences(context).getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+                    if (StringUtils.isNotEmpty(tokenStr)) {
+                        url = context.getString(R.string.secureRouteProviderUrl);
+                        headers.put("Authorization", "Bearer " + tokenStr);
+                        headers.put("X-GMS-AppId", "2");
+                        headers.put("X-GMS-Scope", "dl");
+                    }
+                    Network.post(url, "route=" + content, null, headers, onFinishListener);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
                     if (smsNotify) {

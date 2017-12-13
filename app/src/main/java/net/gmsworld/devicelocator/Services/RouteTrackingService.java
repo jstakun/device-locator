@@ -121,7 +121,7 @@ public class RouteTrackingService extends Service {
                 Log.d(TAG, "onStartCommand()");
             }
         } else {
-            Log.e(TAG, "Started without intent. This is wrong! --------------------------------------");
+            Log.e(TAG, "Started without intent. This is wrong!");
         }
 
         return START_REDELIVER_INTENT;   //START_STICKY;
@@ -268,8 +268,7 @@ public class RouteTrackingService extends Service {
 
                             //EXPERIMENTAL FEATURE audio transmitter
                             //you should plug antenna to your device audio transmitter
-                            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this);
-                            boolean useAudio = settings.getBoolean("useAudio", false);
+                            boolean useAudio = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this).getBoolean("useAudio", false);
                             if (useAudio) {
                                 synchronized (morseSoundGenerator) {
                                     final String signal = ((int) (location.getLatitude() * 1e6)) + "," + ((int) (location.getLongitude() * 1e6));

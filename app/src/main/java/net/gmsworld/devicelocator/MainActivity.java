@@ -52,6 +52,7 @@ import com.androidhiddencamera.HiddenCameraUtils;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
+import net.gmsworld.devicelocator.Services.DlFirebaseInstanceIdService;
 import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
@@ -83,11 +84,13 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int MAX_RADIUS = 10000; //meters
 
+    public static final String DEVICE_PIN = "token";
+
     private Boolean running = null;
 
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
-    private boolean motionDetectorRunning = false;
-    private String phoneNumber = null, email = null, telegramId = null, token = null;
+    private boolean motionDetectorRunning = false, pinChanged = false;
+    private String phoneNumber = null, email = null, telegramId = null, pin = null;
     private String newEmailAddress = null, newTelegramId = null, newPhoneNumber = null;
 
     private Handler loadingHandler;
@@ -131,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         long pinVerificationMillis = PreferenceManager.getDefaultSharedPreferences(this).getLong("pinVerificationMillis", 0);
         boolean settingsVerifyPin = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("settings_verify_pin", false);
         //Log.d(TAG, "Checking if Security PIN should be verified...");
-        if (StringUtils.isNotEmpty(token) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > 10 * 60 * 1000) {
+        if (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > 10 * 60 * 1000) {
             //show pin dialog only if not shown in last 10 minutes
             showPinDialog();
         }
@@ -171,6 +174,15 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else {
                 Toast.makeText(MainActivity.this, "No network available! Please connect to networking service and set Telegram chat or channel id again.", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        //update cloud platform,
+        if (pinChanged) {
+            String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
+            if (StringUtils.isNotEmpty(firebaseToken)) {
+                editor.remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
+                DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin);
             }
         }
 
@@ -530,7 +542,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initTokenInput() {
         final TextView tokenInput = (TextView) this.findViewById(R.id.token);
-        tokenInput.setText(token);
+        tokenInput.setText(pin);
 
         tokenInput.addTextChangedListener(new TextWatcher() {
             @Override
@@ -542,9 +554,16 @@ public class MainActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String input = charSequence.toString();
                 try {
-                    //token is empty or up to 8 digits string
-                    token = input;
-                    saveData();
+                    //token is 4 to 8 digits string
+                    if (input.length() >= 4) {
+                        if (!StringUtils.equals(pin, input)) {
+                            pin = input;
+                            saveData();
+                            pinChanged = true;
+                        }
+                    } else {
+                        Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_LONG).show();
+                    }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
                 }
@@ -1016,7 +1035,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("running", this.running);
-        editor.putString("token", token);
+        editor.putString(DEVICE_PIN, pin);
         editor.putBoolean("motionDetectorRunning" , this.motionDetectorRunning);
         editor.putInt("radius" , this.radius);
         editor.putString("phoneNumber", phoneNumber);
@@ -1031,7 +1050,7 @@ public class MainActivity extends AppCompatActivity {
 
         this.running = settings.getBoolean("running", false);
         //this.keyword = settings.getString("keyword", "");
-        this.token = settings.getString("token", RandomStringUtils.random(4, false, true));
+        this.pin = settings.getString(DEVICE_PIN, RandomStringUtils.random(4, false, true));
 
         this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
         this.radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
@@ -1081,7 +1100,7 @@ public class MainActivity extends AppCompatActivity {
 
             final EditText tokenInput = (EditText) pinView.findViewById(R.id.verify_pin_edit);
 
-            tokenInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(token.length())});
+            tokenInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(pin.length())});
 
             tokenInput.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -1092,8 +1111,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                     String input = charSequence.toString();
-                    if (StringUtils.equals(input, token)) {
-                        Log.d(TAG, "Security PIN verified!");
+                    if (StringUtils.equals(input, pin)) {
+                        //Log.d(TAG, "Security PIN verified!");
                         pinDialog.dismiss();
                         PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).commit();
                     }

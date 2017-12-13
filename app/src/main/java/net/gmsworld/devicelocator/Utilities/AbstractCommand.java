@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -116,7 +117,7 @@ public abstract class AbstractCommand {
 
     private String getSenderAddress(Context context, Intent intent, String command) {
         try {
-            String token = PreferenceManager.getDefaultSharedPreferences(context).getString("token", "");
+            String token = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
             command += token;
             ArrayList<SmsMessage> list = null;
             switch (finder) {
