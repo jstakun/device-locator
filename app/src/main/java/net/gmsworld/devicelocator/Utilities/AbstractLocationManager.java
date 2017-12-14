@@ -50,17 +50,17 @@ public abstract class AbstractLocationManager {
     private static final Queue<Double> mAltitudes = new LinkedList<Double>();
     private boolean mSpeedSanityCheck = true;
 
-    protected int radius = -1;
+    private int radius = -1;
 
-    static Map<String, Handler> mLocationHandlers = new HashMap<String, Handler>();
-    Location recentLocationSent;
-    Location lastLocation;
+    private static Map<String, Handler> mLocationHandlers = new HashMap<String, Handler>();
+    private Location recentLocationSent;
+    private Location lastLocation;
 
-    protected Context callerContext;
+    private Context callerContext;
 
     boolean isEnabled = false;
 
-    void checkRadius(Location location) {
+    private void checkRadius(Location location) {
         lastLocation = location;
         boolean update = false;
         float distWithAccuracy = 0;
@@ -117,7 +117,7 @@ public abstract class AbstractLocationManager {
         this.radius = radius;
         if (resetRoute) {
             Log.d(TAG, "Route has been cleared");
-            Files.deleteFileFromContextDir(ROUTE_FILE, callerContext);
+            Files.deleteFileFromContextDir(ROUTE_FILE, context);
         }
         mLocationHandlers.put(handlerName, handler);
     }
@@ -133,7 +133,7 @@ public abstract class AbstractLocationManager {
         this.lastLocation = null;
     }
 
-    void addLocationToRoute(Location location) {
+    private void addLocationToRoute(Location location) {
         Location l = filterLocation(location);
         if (l != null) {
             Log.d(TAG, "Route point will be added to data store");
@@ -248,7 +248,6 @@ public abstract class AbstractLocationManager {
             new RouteUploadTask(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener).execute();
         } else {
             Toast.makeText(activity, R.string.no_network_error, Toast.LENGTH_LONG).show();
-            return;
         }
     }
 

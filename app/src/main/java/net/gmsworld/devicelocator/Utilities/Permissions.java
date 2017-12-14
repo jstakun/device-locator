@@ -21,7 +21,7 @@ import java.util.ArrayList;
 public class Permissions {
 
     public static void checkAndRequestPermissionsAtStartup(Activity activity) {
-        ArrayList<String> permissions = new ArrayList();
+        ArrayList<String> permissions = new ArrayList<String>();
         permissions.add(0, Manifest.permission.SEND_SMS);
         permissions.add(1, Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(2, Manifest.permission.READ_CONTACTS);
@@ -44,10 +44,6 @@ public class Permissions {
 
         String[] arr = new String[neededPermissions.size()];
         arr = neededPermissions.toArray(arr);
-
-        if(arr == null) {
-            return;
-        }
 
         ActivityCompat.requestPermissions(activity, arr, 1);
     }

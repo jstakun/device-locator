@@ -22,9 +22,9 @@ import java.util.ArrayList;
 
 public abstract class AbstractCommand {
 
-    protected static String TAG = "SmsCommand";
+    static String TAG = "SmsCommand";
 
-    protected enum Finder {STARTS, EQUALS};
+    protected enum Finder {STARTS, EQUALS}
 
     private String smsCommand = null;
 
@@ -32,9 +32,9 @@ public abstract class AbstractCommand {
 
     private Finder finder;
 
-    protected String[] commandTokens;
+    String[] commandTokens;
 
-    protected AbstractCommand(String smsCommand, String smsShortCommand, Finder finder) {
+    AbstractCommand(String smsCommand, String smsShortCommand, Finder finder) {
         this.smsCommand = smsCommand;
         this.smsShortCommand = smsShortCommand;
         this.finder = finder;
@@ -44,7 +44,7 @@ public abstract class AbstractCommand {
 
     protected abstract void onSmsSocialCommandFound(String sender, Context context);
 
-    protected boolean validateTokens() {
+    boolean validateTokens() {
         return false;
     }
 
@@ -134,7 +134,7 @@ public abstract class AbstractCommand {
                 }
 
                 commandTokens = sms.getMessageBody().split(" ");
-                if (commandTokens != null  && commandTokens.length > 0 && StringUtils.equalsIgnoreCase(commandTokens[0], keyword) && validateTokens()) {
+                if (commandTokens.length > 0 && StringUtils.equalsIgnoreCase(commandTokens[0], keyword) && validateTokens()) {
                     list.add(sms);
                 }
             }
@@ -167,7 +167,7 @@ public abstract class AbstractCommand {
         return null;
     }
 
-    protected void sendSocialNotification(final Context context, final String command) {
+    void sendSocialNotification(final Context context, final String command) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         final String email = settings.getString("email", "");
         final String telegramId = settings.getString("telegramId", "");
@@ -180,7 +180,7 @@ public abstract class AbstractCommand {
         context.startService(newIntent);
     }
 
-    protected void sendSmsNotification(final Context context, final String sender, final String command) {
+    void sendSmsNotification(final Context context, final String sender, final String command) {
         Intent newIntent = new Intent(context, SmsSenderService.class);
         newIntent.putExtra("phoneNumber", sender);
         if (StringUtils.isNotEmpty(command)) {
