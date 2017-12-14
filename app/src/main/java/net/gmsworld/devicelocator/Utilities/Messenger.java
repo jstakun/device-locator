@@ -17,7 +17,6 @@ import android.widget.Toast;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
@@ -62,7 +61,7 @@ public class Messenger {
                     sendEmail(context, location, email, message, title, tokenStr, 1);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context);
-                    Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+                    Network.get(context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -95,7 +94,7 @@ public class Messenger {
                     sendTelegram(context, location, telegramId, message, tokenStr, 1);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context);
-                    Network.get("https://www.gms-world.net/token?" + queryString, new Network.OnGetFinishListener() {
+                    Network.get(context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -211,7 +210,7 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - current location";
                 }
-                text += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
+                text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
                 sendEmail(context, location, email, text, title, 1);
             }
         }
@@ -232,7 +231,7 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - location map link";
                 }
-                text += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
+                text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
                 sendEmail(context, location, email, text, title, 1);
             }
         }
@@ -249,7 +248,7 @@ public class Messenger {
         List<String> notifications = new ArrayList<String>();
 
         switch (command) {
-            case SmsReceiver.RESUME_COMMAND:
+            case Command.RESUME_COMMAND:
                 text = "Device location tracking service has been resumed. Battery level: " + getBatteryLevel(context);
                 if (StringUtils.isNotEmpty(notificationNumber)) {
                     notifications.add(notificationNumber);
@@ -266,19 +265,19 @@ public class Messenger {
                     text += " Notifications will be sent to " + StringUtils.joinWith(", ", notifications);
                 }
                 break;
-            case SmsReceiver.STOP_COMMAND:
+            case Command.STOP_COMMAND:
                 text = "Device location tracking service has been stopped. Battery level: " + getBatteryLevel(context);
                 break;
-            case SmsReceiver.START_COMMAND:
+            case Command.START_COMMAND:
                 text = "Device location tracking service has been started. Battery level: " + getBatteryLevel(context);
                 break;
-            case SmsReceiver.MUTE_COMMAND:
+            case Command.MUTE_COMMAND:
                 text = "Device has been muted.";
                 break;
-            case SmsReceiver.UNMUTE_COMMAND:
+            case Command.UNMUTE_COMMAND:
                 text = "Device has been set to normal audio settings.";
                 break;
-            case SmsReceiver.RADIUS_COMMAND:
+            case Command.RADIUS_COMMAND:
                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 int radius = settings.getInt("radius", -1);
                 if (radius > 0) {
@@ -287,7 +286,7 @@ public class Messenger {
                     text = "Device location tracking service radius is incorrect. Please try again.";
                 }
                 break;
-            case SmsReceiver.ROUTE_COMMAND:
+            case Command.ROUTE_COMMAND:
                 String title = intent.getStringExtra("title");
                 int size = intent.getIntExtra("size", 0);
                 if (size > 1) {
@@ -299,13 +298,13 @@ public class Messenger {
                     text = "No route points has been uploaded yet. Try again later.";
                 }
                 break;
-            case SmsReceiver.GPS_HIGH_COMMAND:
+            case Command.GPS_HIGH_COMMAND:
                 text = "GPS settings as been changed to high accuracy.";
                 break;
-            case SmsReceiver.GPS_BALANCED_COMMAND:
+            case Command.GPS_BALANCED_COMMAND:
                 text = "GPS settings has been changed to balanced accuracy.";
                 break;
-            case SmsReceiver.NOTIFY_COMMAND:
+            case Command.NOTIFY_COMMAND:
                 text = "";
                 if (StringUtils.isNotEmpty(notificationNumber)) {
                     notifications.add(notificationNumber);
@@ -322,13 +321,13 @@ public class Messenger {
                     text += "Notifications will be sent to " + StringUtils.joinWith(", ", notifications);
                 }
                 break;
-            case SmsReceiver.AUDIO_COMMAND:
+            case Command.AUDIO_COMMAND:
                 text = "Audio transmitter has been started.";
                 break;
-            case SmsReceiver.NOAUDIO_COMMAND:
+            case Command.NOAUDIO_COMMAND:
                 text = "Audio transmitter has been stopped.";
                 break;
-            case SmsReceiver.TAKE_PHOTO_COMMAND:
+            case Command.TAKE_PHOTO_COMMAND:
                 boolean hiddenCamera = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false);
                 String imageUrl = intent.getExtras().getString("imageUrl");
                 if (StringUtils.isEmpty(imageUrl) && hiddenCamera) {
@@ -340,7 +339,7 @@ public class Messenger {
                 }
                 text +=  "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
-            case SmsReceiver.PIN_COMMAND:
+            case Command.PIN_COMMAND:
                 String pin = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN,"");
                 if (StringUtils.isEmpty(pin)) {
                     text = "No Security PIN is set!";
@@ -366,7 +365,7 @@ public class Messenger {
                     if (deviceId != null) {
                         title += " installed on device " + deviceId;
                     }
-                    text += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
+                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
                     sendEmail(context, null, email, text, title, 1);
                 }
             }
@@ -390,7 +389,7 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - location request";
                 }
-                text += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
+                text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
                 sendEmail(context, null, email, text, title, 1);
             }
         }
@@ -412,7 +411,7 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - failed login";
                 }
-                text += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
+                text += "\n" + context.getString(R.string.deviceUrl)+ "/" + deviceId;
                 sendEmail(context, null, email, text, title, 1);
             }
         }

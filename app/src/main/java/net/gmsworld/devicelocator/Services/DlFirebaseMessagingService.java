@@ -5,6 +5,10 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import net.gmsworld.devicelocator.Utilities.Command;
+
+import java.util.Map;
+
 public class DlFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "DlFirebaseMsgService";
@@ -15,8 +19,17 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
+            Map<String, String> message = remoteMessage.getData();
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
-            //TODO handle command message
+            if (message.containsKey("command") && message.containsKey("pin")) {
+                String command = message.get("command") + message.get("pin");
+                if (message.containsKey("args")) {
+                    command += " " + message.get("args");
+                }
+                Command.findCommandInMessage(this, command);
+            } else {
+                Log.e(TAG, "Invalid data payload!");
+            }
         }
 
         //we are not interested in notification messages

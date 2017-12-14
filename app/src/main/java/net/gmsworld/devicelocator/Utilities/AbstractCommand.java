@@ -59,7 +59,7 @@ public abstract class AbstractCommand {
         if (sender != null) {
             onSmsCommandFound(sender, context);
             return true;
-        } else if (StringUtils.isNotEmpty(smsCommand ) &&  StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", ""))) {
+        } else if (StringUtils.isNotEmpty(smsCommand) &&  (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("email", "")))) {
             sender = getSenderAddress(context, intent, smsCommand + "t");
             if (sender == null && StringUtils.isNotEmpty(smsShortCommand)) {
                 sender = getSenderAddress(context, intent, smsShortCommand + "t");
@@ -70,6 +70,33 @@ public abstract class AbstractCommand {
             }
         }
         return false;
+    }
+
+    public boolean findCommand(Context context, String message) {
+        if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("email", "")))) {
+            if (findKeyword(context, smsCommand + "t", message)) {
+                onSmsSocialCommandFound(null, context);
+                return true;
+            } else if (findKeyword(context, smsShortCommand + "t", message)) {
+                onSmsSocialCommandFound(null, context);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean findKeyword(Context context, String keyword, String message) {
+        String token = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
+        keyword += token;
+        Log.d(TAG, "Searching " + keyword + " in message " + message);
+        if (finder.equals(Finder.EQUALS)) {
+            return (StringUtils.equalsIgnoreCase(message, keyword));
+        } else if (finder.equals(Finder.STARTS)) {
+            commandTokens = message.split(" ");
+            return (commandTokens != null  && commandTokens.length > 0 && StringUtils.equalsIgnoreCase(commandTokens[0], keyword) && validateTokens());
+        } else {
+            return false;
+        }
     }
 
     private ArrayList<SmsMessage> getMessagesWithKeywordEquals(String keyword, Bundle bundle) {

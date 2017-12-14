@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.Model.Feature;
 import net.gmsworld.devicelocator.Model.FeatureCollection;
@@ -308,7 +307,7 @@ public abstract class AbstractLocationManager {
             final Intent newIntent = new Intent(context, SmsSenderService.class);
             if (smsNotify) {
                 newIntent.putExtra("phoneNumber", phoneNumber);
-                newIntent.putExtra("command", SmsReceiver.ROUTE_COMMAND);
+                newIntent.putExtra("command", Command.ROUTE_COMMAND);
                 newIntent.putExtra("title", title);
             }
             if (size > 1) {

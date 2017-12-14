@@ -23,9 +23,9 @@ import com.androidhiddencamera.config.CameraImageFormat;
 import com.androidhiddencamera.config.CameraResolution;
 import com.androidhiddencamera.config.CameraRotation;
 
-import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Network;
 
 import org.apache.commons.lang3.StringUtils;
@@ -130,7 +130,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                             Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
                             newIntent.putExtra("email", email);
                             newIntent.putExtra("telegramId", telegramId);
-                            newIntent.putExtra("command", SmsReceiver.TAKE_PHOTO_COMMAND);
+                            newIntent.putExtra("command", Command.TAKE_PHOTO_COMMAND);
                             newIntent.putExtra("imageUrl", imageUrl);
                             if (StringUtils.isNotEmpty(sender)) {
                                 newIntent.putExtra("phoneNumber", sender);

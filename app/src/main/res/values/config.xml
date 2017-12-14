@@ -9,4 +9,6 @@
     <string name="deviceManagerUrl">https://www.gms-world.net/s/deviceManager</string>
     <string name="photoUploadUrl">https://www.gms-world.net/imageUpload</string>
     <string name="securePhotoUploadUrl">https://www.gms-world.net/s/imageUpload</string>
+    <string name="commandsUrl">http://www.gms-world.net/dl</string>
+    <string name="deviceUrl">https://www.gms-world.net/showDevice</string>
 </resources>

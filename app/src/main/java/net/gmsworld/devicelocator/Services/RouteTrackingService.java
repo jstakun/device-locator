@@ -18,9 +18,9 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.Audio.morse.MorseSoundGenerator;
-import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
+import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
@@ -203,7 +203,7 @@ public class RouteTrackingService extends Service {
                         newIntent.putExtra("email", email);
                     }
                 }
-                newIntent.putExtra("command", SmsReceiver.ROUTE_COMMAND);
+                newIntent.putExtra("command", Command.ROUTE_COMMAND);
                 newIntent.putExtra("title", title);
                 if (responseCode == 200) {
                     newIntent.putExtra("size", 2); //we know only size > 1

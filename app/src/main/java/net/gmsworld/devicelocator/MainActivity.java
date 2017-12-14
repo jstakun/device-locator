@@ -49,6 +49,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
@@ -57,6 +58,7 @@ import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
+import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Files;
 import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.Utilities.Messenger;
@@ -182,7 +184,9 @@ public class MainActivity extends AppCompatActivity {
             String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
             if (StringUtils.isNotEmpty(firebaseToken)) {
                 editor.remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
-                DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin);
+                if (Network.isNetworkAvailable(MainActivity.this)) {
+                    DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin);
+                }
             }
         }
 
@@ -437,7 +441,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toggleRunning() {
-        //String currentKeyword = ((TextView) this.findViewById(R.id.keyword)).getText() + "";
+
+        //enable Firebase
+        if (! this.running) {
+            String firebaseToken = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
+            if (StringUtils.isEmpty(firebaseToken)) {
+                String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+                DlFirebaseInstanceIdService.sendRegistrationToServer(this, refreshedToken, PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, ""));
+            }
+        }
+
         if (!this.running && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
             Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
             Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
@@ -459,7 +472,7 @@ public class MainActivity extends AppCompatActivity {
             builder.setNegativeButton("Commands",  new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     Intent intent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://www.gms-world.net/dl"));
+                            Uri.parse(getString(R.string.commandsUrl)));
                     startActivity(intent);
                 }
             });
@@ -1132,7 +1145,7 @@ public class MainActivity extends AppCompatActivity {
                     if (StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(phoneNumber)) {
                         Intent newIntent = new Intent();
                         newIntent.putExtra("telegramId", telegramId);
-                        newIntent.putExtra("command", SmsReceiver.PIN_COMMAND);
+                        newIntent.putExtra("command", Command.PIN_COMMAND);
                         newIntent.putExtra("phoneNumber", phoneNumber);
                         newIntent.putExtra("email", email);
                         Messenger.sendCommandMessage(MainActivity.this, newIntent);

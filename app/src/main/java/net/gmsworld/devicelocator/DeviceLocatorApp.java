@@ -5,11 +5,9 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.gmsworld.devicelocator.Services.DlFirebaseInstanceIdService;
 import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
 
@@ -66,15 +64,6 @@ public class DeviceLocatorApp extends Application {
                     }
                 }
             });
-        }
-
-        if (StringUtils.isNotEmpty(tokenStr)) {
-            String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
-            if (StringUtils.isEmpty(firebaseToken)) {
-                String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-                Log.d(TAG, "Refreshed Firebase token: " + refreshedToken);
-                DlFirebaseInstanceIdService.sendRegistrationToServer(this, refreshedToken, PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, ""));
-            }
         }
     }
 
