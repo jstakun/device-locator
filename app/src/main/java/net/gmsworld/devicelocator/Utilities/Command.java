@@ -48,12 +48,13 @@ public class Command {
     //private
     public final static String TAKE_PHOTO_COMMAND = "photodl"; //p if all permissions set take photo and send link
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
+    public final static String PING_COMMAND = "pingdl"; //pg
 
     private static AbstractCommand[] commands = {new StartRouteTrackerServiceStartCommand(), new ResumeRouteTrackerServiceStartCommand(),
             new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand(),
             new MuteCommand(), new UnMuteCommand(), new StartPhoneCallCommand(), new ChangeRouteTrackerServiceRadiusCommand(),
             new AudioCommand(), new NoAudioCommand(), new HighGpsCommand(), new BalancedGpsCommand(),
-            new TakePhotoCommand(), new NotifiySettingsCommand() };
+            new TakePhotoCommand(), new NotifiySettingsCommand(), new PingCommand() };
 
 
     public static void findCommandInSms(Context context, Intent intent) {
@@ -608,6 +609,21 @@ public class Command {
             } else {
                 return false;
             }
+        }
+    }
+
+    private static final class PingCommand extends AbstractCommand {
+
+        public PingCommand() { super(PING_COMMAND, "pg", Finder.EQUALS); }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            sendSmsNotification(context, sender, PING_COMMAND);
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            sendSocialNotification(context, PING_COMMAND);
         }
     }
 

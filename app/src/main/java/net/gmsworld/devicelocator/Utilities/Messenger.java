@@ -347,6 +347,9 @@ public class Messenger {
                     text = "Your Security PIN is " + pin;
                 }
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
+            case Command.PING_COMMAND:
+                text = "Pong!";
+                text += "\n" + "Battery level: " + getBatteryLevel(context);
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;

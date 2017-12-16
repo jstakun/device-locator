@@ -47,7 +47,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        //Log.d(TAG, "onHandleIntent");
+        Log.d(TAG, "onHandleIntent()");
+
         this.phoneNumber = intent.getExtras().getString("phoneNumber");
 
         this.telegramId = intent.getExtras().getString("telegramId");
@@ -70,7 +71,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
 
     private void initSending(String source) {
-        //Log.d(TAG, "initSending()");
+        Log.d(TAG, "initSending()");
+
         readSettings();
 
         if (StringUtils.equals(source, DeviceAdminEventReceiver.SOURCE)) {
@@ -79,13 +81,13 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             Messenger.sendAcknowledgeMessage(this, phoneNumber, telegramId, email);
         }
 
-        //set bestLocation to null and start time
-        startTime = System.currentTimeMillis() / 1000;
-        bestLocation = null;
-
         if (!isRunning && SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
 
             isRunning = true;
+
+            //set bestLocation to null and start time
+            startTime = System.currentTimeMillis() / 1000;
+            bestLocation = null;
 
             SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
                     .config(LocationParams.NAVIGATION)
@@ -101,7 +103,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
     @Override
     public void onLocationUpdated(Location location) {
-        //Log.d(TAG, "LOCATION UPDATE");
+        Log.d(TAG, "onLocationUpdated()");
 
         long currentTime = System.currentTimeMillis() / 1000;
 
