@@ -75,6 +75,8 @@ public class Messenger {
                                 sendEmail(context, location, email, message, title, tokenStr, 1);
                             } else if (responseCode == 500 && retryCount > 0) {
                                 sendEmail(context, location, email, message, title, retryCount - 1);
+                            } else {
+                                Log.d(TAG, "Failed to receive token: " + results);
                             }
                         }
                     });
@@ -108,6 +110,8 @@ public class Messenger {
                                 sendTelegram(context, location, telegramId, message, tokenStr, 1);
                             } else if (responseCode == 500 && retryCount > 0) {
                                 sendTelegram(context, location, telegramId, message, retryCount - 1);
+                            } else {
+                                Log.d(TAG, "Failed to receive token: " + results);
                             }
                         }
                     });
@@ -466,6 +470,8 @@ public class Messenger {
                             sendEmailRegistrationRequest(context, email, tokenStr, 1);
                         } else if (responseCode == 500 && retryCount > 0) {
                             sendEmailRegistrationRequest(context, email, retryCount-1);
+                        } else {
+                            Log.d(TAG, "Failed to receive token: " + results);
                         }
                     }
                 });
@@ -495,6 +501,8 @@ public class Messenger {
                             sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
                         } else if (responseCode == 500 && retryCount > 0) {
                             sendTelegramRegistrationRequest(context, telegramId, retryCount-1);
+                        } else {
+                            Log.d(TAG, "Failed to receive token: " + results);
                         }
                     }
                 });

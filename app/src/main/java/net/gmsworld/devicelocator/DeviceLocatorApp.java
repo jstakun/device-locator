@@ -55,12 +55,14 @@ public class DeviceLocatorApp extends Application {
                     if (responseCode == 200) {
                         JsonObject token = new JsonParser().parse(results).getAsJsonObject();
                         String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
-                        Log.d(TAG, "Received following token: " + token);
+                        Log.d(TAG, "Received gms token");
                         settings.edit().putString(GMS_TOKEN_KEY, tokenStr).apply();
                         headers.put("Authorization", "Bearer " + tokenStr);
                         headers.put("X-GMS-AppId", "2");
                         headers.put("X-GMS-Scope", "dl");
                         initAcra(headers);
+                    } else {
+                        Log.d(TAG, "Failed to receive token: " + results);
                     }
                 }
             });
