@@ -25,11 +25,7 @@ public class RouteTrackingServiceUtils {
         routeTracingService.putExtra("silentMode", silentMode);
         routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_START);
         context.startService(routeTracingService);
-        if (mConnection != null) {
-            return context.bindService(routeTracingService, mConnection, Context.BIND_AUTO_CREATE);
-        } else {
-            return false;
-        }
+        return mConnection != null && context.bindService(routeTracingService, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     public static void stopRouteTrackingService(Context context, ServiceConnection mConnection, boolean isBound) {

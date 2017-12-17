@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 public abstract class AbstractCommand {
 
-    static String TAG = "SmsCommand";
+    static final String TAG = "SmsCommand";
 
     protected enum Finder {STARTS, EQUALS}
 
@@ -93,7 +93,7 @@ public abstract class AbstractCommand {
             return (StringUtils.equalsIgnoreCase(message, keyword));
         } else if (finder.equals(Finder.STARTS)) {
             commandTokens = message.split(" ");
-            return (commandTokens != null  && commandTokens.length > 0 && StringUtils.equalsIgnoreCase(commandTokens[0], keyword) && validateTokens());
+            return commandTokens.length > 0 && StringUtils.equalsIgnoreCase(commandTokens[0], keyword) && validateTokens();
         } else {
             return false;
         }
@@ -104,7 +104,7 @@ public abstract class AbstractCommand {
         if (bundle != null) {
             Object[] pdus = (Object[]) bundle.get("pdus");
             for (int i = 0; i < pdus.length; i++) {
-                SmsMessage sms = null;
+                SmsMessage sms;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     String format = bundle.getString("format");
                     sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);
@@ -125,7 +125,7 @@ public abstract class AbstractCommand {
         if (bundle != null) {
             Object[] pdus = (Object[]) bundle.get("pdus");
             for (int i = 0; i < pdus.length; i++) {
-                SmsMessage sms = null;
+                SmsMessage sms;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     String format = bundle.getString("format");
                     sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);

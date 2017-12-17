@@ -52,7 +52,7 @@ public abstract class AbstractLocationManager {
 
     private int radius = -1;
 
-    private static Map<String, Handler> mLocationHandlers = new HashMap<String, Handler>();
+    private static final Map<String, Handler> mLocationHandlers = new HashMap<String, Handler>();
     private Location recentLocationSent;
     private Location lastLocation;
 
@@ -63,7 +63,7 @@ public abstract class AbstractLocationManager {
     private void checkRadius(Location location) {
         lastLocation = location;
         boolean update = false;
-        float distWithAccuracy = 0;
+        float distWithAccuracy;
         if (recentLocationSent != null) {
             float distance = lastLocation.distanceTo(recentLocationSent);
             distWithAccuracy = distance + lastLocation.getAccuracy();
@@ -225,7 +225,6 @@ public abstract class AbstractLocationManager {
     }
 
     private boolean addSaneAltitude(double altitude) {
-        boolean sane = true;
         double avg = 0;
         int elements = 0;
         // Even insane altitude shifts increases alter perception
@@ -238,9 +237,8 @@ public abstract class AbstractLocationManager {
             elements++;
         }
         avg = avg / elements;
-        sane = Math.abs(altitude - avg) < MAX_REASONABLE_ALTITUDECHANGE;
 
-        return sane;
+        return Math.abs(altitude - avg) < MAX_REASONABLE_ALTITUDECHANGE;
     }
 
     public void executeRouteUploadTask(Context activity, String title, String phoneNumber, long creationTimestamp, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
@@ -253,10 +251,11 @@ public abstract class AbstractLocationManager {
 
     static class RouteUploadTask extends AsyncTask<Void, Integer, Integer> {
         private final WeakReference<Context> callerActivity;
-        private String title, phoneNumber;
-        private long creationTimestamp;
-        private Network.OnGetFinishListener onGetFinishListener;
-        private boolean smsNotify;
+        private final String title;
+        private final String phoneNumber;
+        private final long creationTimestamp;
+        private final Network.OnGetFinishListener onGetFinishListener;
+        private final boolean smsNotify;
 
         RouteUploadTask(Context activity, String title, String phoneNumber, long creationTimestamp, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
             this.callerActivity = new WeakReference<>(activity);
@@ -341,7 +340,7 @@ public abstract class AbstractLocationManager {
             return size;
         }
 
-        private String routeToGeoJson(List<String> routePoints, String filename, String description, String deviceId, long creationDate) throws Exception {
+        private String routeToGeoJson(List<String> routePoints, String filename, String description, String deviceId, long creationDate) {
             Gson gson = new Gson();
 
             FeatureCollection fc = new FeatureCollection();

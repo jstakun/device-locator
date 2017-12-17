@@ -1072,7 +1072,7 @@ public class MainActivity extends AppCompatActivity {
         this.telegramId = settings.getString("telegramId", "");
     }
 
-    protected void setupToolbar(int toolbarId) {
+    private void setupToolbar(int toolbarId) {
         final Toolbar toolbar = (Toolbar) findViewById(toolbarId);
         setSupportActionBar(toolbar);
     }
@@ -1173,7 +1173,7 @@ public class MainActivity extends AppCompatActivity {
 
     //----------------------------- route tracking service -----------------------------------
 
-    private ServiceConnection mConnection = null; /*new ServiceConnection() {
+    private final ServiceConnection mConnection = null; /*new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName arg0, IBinder service) {

@@ -39,7 +39,7 @@ public class Messenger {
 
     private static final String TAG = Messenger.class.getSimpleName();
 
-    protected static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
+    private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
 
     public static void sendSMS(final Context context, final String phoneNumber, final String message) {
         //on samsung intents can't be null. the messages are not sent if intents are null
@@ -351,9 +351,11 @@ public class Messenger {
                     text = "Your Security PIN is " + pin;
                 }
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
+                break;
             case Command.PING_COMMAND:
                 text = "Pong!";
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
+                break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;
@@ -440,12 +442,16 @@ public class Messenger {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = context.registerReceiver(null, ifilter);
 
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        if (batteryStatus != null) {
+            int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
-        float batteryPct = level / (float)scale;
+            float batteryPct = level / (float) scale;
 
-        return (int)(batteryPct * 100);
+            return (int) (batteryPct * 100);
+        } else {
+            return -1;
+        }
     }
 
     public static void sendEmailRegistrationRequest(final Context context, final String email, final int retryCount) {

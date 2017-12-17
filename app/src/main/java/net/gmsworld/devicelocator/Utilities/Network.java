@@ -10,7 +10,6 @@ import org.apache.commons.io.IOUtils;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -58,9 +57,12 @@ public class Network {
 
     static class PostTask extends AsyncTask<Void, Integer, Integer> {
 
-        private OnGetFinishListener onGetFinishListener;
-        private String urlString, content, contentType, response;
-        private Map<String, String> headers;
+        private final OnGetFinishListener onGetFinishListener;
+        private final String urlString;
+        private final String content;
+        private final String contentType;
+        private String response;
+        private final Map<String, String> headers;
 
         public PostTask(final String urlString, final String content, final String contentType, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
             this.urlString = urlString;
@@ -138,10 +140,12 @@ public class Network {
 
     static class UploadImageTask extends AsyncTask<Void, Integer, Integer> {
 
-        private OnGetFinishListener onGetFinishListener;
-        private String urlString, filename, response;
-        private Map<String, String> headers;
-        private byte[] file;
+        private final OnGetFinishListener onGetFinishListener;
+        private final String urlString;
+        private final String filename;
+        private String response;
+        private final Map<String, String> headers;
+        private final byte[] file;
 
         public UploadImageTask(final String urlString, final byte[] file, final String filename, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
             this.urlString = urlString;
@@ -199,7 +203,7 @@ public class Network {
                 responseCode = conn.getResponseCode();
 
                 if (responseCode == HttpURLConnection.HTTP_OK) {
-                    if (conn.getContentType().indexOf("gzip") != -1) {
+                    if (conn.getContentType().contains("gzip")) {
                         is = new GZIPInputStream(conn.getInputStream());
                     } else {
                         is = conn.getInputStream();
@@ -221,7 +225,8 @@ public class Network {
                     if (is != null) {
                         is.close();
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
+                    Log.d(TAG, ".uploadScreenshot() exception: " + e.getMessage(), e);
                 }
                 return responseCode;
             }
@@ -235,8 +240,9 @@ public class Network {
 
     static class GetTask extends AsyncTask<Void, Integer, Integer> {
 
-        private OnGetFinishListener onGetFinishListener;
-        private String urlString, response;
+        private final OnGetFinishListener onGetFinishListener;
+        private final String urlString;
+        private String response;
 
         public GetTask(final String urlString, final OnGetFinishListener onGetFinishListener) {
             this.urlString = urlString;
@@ -245,7 +251,7 @@ public class Network {
 
         @Override
         protected Integer doInBackground(Void... params) {
-            HttpURLConnection urlConnection = null;
+            HttpURLConnection urlConnection;
             try {
                 URL url = new URL(urlString);
                 urlConnection = (HttpURLConnection) url.openConnection();

@@ -83,7 +83,6 @@ public class AndroidAudioDevice {
         if (null != track && track.getState() != AudioTrack.STATE_UNINITIALIZED) {
             track.release();
         }
-        track.release();
     }
 
     public Boolean isActive() {

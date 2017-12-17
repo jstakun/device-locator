@@ -224,10 +224,10 @@ public class RouteTrackingService extends Service {
             switch (msg.what) {
                 case COMMAND_REGISTER_CLIENT:
                     mClient = msg.replyTo;
-                    Log.d(TAG, "new client registered");
+                    Log.d(TAG, "New client registered");
                     break;
                 case AbstractLocationManager.UPDATE_LOCATION:
-                    Log.d(TAG, "received new location");
+                    Log.d(TAG, "Received new location");
                     if (mClient != null) {
                         try {
                             Message message = Message.obtain(null, COMMAND_SHOW_ROUTE);

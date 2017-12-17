@@ -97,7 +97,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         }
     }
 
-    public static boolean isLocationFused(Location location) {
+    private static boolean isLocationFused(Location location) {
         return !location.hasAltitude() || !location.hasSpeed() || location.getAltitude() == 0;
     }
 
@@ -183,13 +183,13 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             return;
         }
 
-        if (gpsSms) {
+        if (gpsSms && isRunning) {
             Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), speedType, phoneNumber, telegramId, email);
         } else {
             Log.d(TAG, "Location message won't be send");
         }
 
-        if (googleMapsSms) {
+        if (googleMapsSms && isRunning) {
             Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId, email);
         } else {
             Log.d(TAG, "Google Maps link message won't be send");
@@ -206,18 +206,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         googleMapsSms = settings.getBoolean("settings_google_sms", true);
 
         speedType = Integer.parseInt(settings.getString("settings_kmh_or_mph", "0"));
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        //Log.d(TAG, "onCreate()");
-    }
-
-    @Override
-    public void onDestroy() {
-        //Log.d(TAG, "onDestroy()");
-        super.onDestroy();
     }
 
     private static int getLocationMode(Context context) {
