@@ -60,7 +60,7 @@ public class Command {
     public static void findCommandInSms(Context context, Intent intent) {
         for (int i = 0; i < commands.length; i++) {
             if (commands[i].findCommand(context, intent)) {
-                Log.d(TAG, "Found maching command");
+                Log.d(TAG, "Found matching command");
                 return;
             }
         }
@@ -69,7 +69,7 @@ public class Command {
     public static void findCommandInMessage(Context context, String message) {
         for (int i = 0; i < commands.length; i++) {
             if (commands[i].findCommand(context, message)) {
-                Log.d(TAG, "Found maching command");
+                Log.d(TAG, "Found matching command");
                 return;
             }
         }

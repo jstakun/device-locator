@@ -20,7 +20,6 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Map<String, String> message = remoteMessage.getData();
-            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
             if (message.containsKey("command") && message.containsKey("pin")) {
                 String command = message.get("command") + message.get("pin");
                 if (message.containsKey("args")) {

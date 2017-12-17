@@ -88,7 +88,6 @@ public abstract class AbstractCommand {
     private boolean findKeyword(Context context, String keyword, String message) {
         String token = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
         keyword += token;
-        Log.d(TAG, "Searching " + keyword + " in message " + message);
         if (finder.equals(Finder.EQUALS)) {
             return (StringUtils.equalsIgnoreCase(message, keyword));
         } else if (finder.equals(Finder.STARTS)) {
