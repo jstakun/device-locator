@@ -1,6 +1,8 @@
 package net.gmsworld.devicelocator.Utilities;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -26,29 +28,23 @@ public class Network {
 
     private static final int SOCKET_TIMEOUT = 60 * 1000; //1 minute
 
-    private static final Map<String, String> defaultHeaders = new HashMap<String, String>();
-
-    static {
-        defaultHeaders.put("X-GMS-AppId", "2");
-        defaultHeaders.put("X-GMS-Scope", "dl");
-        defaultHeaders.put("User-Agent", "Device Locator/0.2-10 (+http://www.gms-world.net)");
-    }
+    private static Map<String, String> defaultHeaders;
 
     public static boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
     }
 
-    public static void get(final String urlString, final OnGetFinishListener onGetFinishListener) {
-        new GetTask(urlString, onGetFinishListener).execute();
+    public static void get(final Context context, final String urlString, final OnGetFinishListener onGetFinishListener) {
+        new GetTask(context, urlString, onGetFinishListener).execute();
     }
 
-    public static void post(final String urlString, final String content, final String contentType, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
-        new PostTask(urlString, content, contentType, headers, onGetFinishListener).execute();
+    public static void post(final Context context, final String urlString, final String content, final String contentType, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+        new PostTask(context, urlString, content, contentType, headers, onGetFinishListener).execute();
     }
 
-    public static void uploadScreenshot(final String fileUrl, final byte[] file, final String filename, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
-        new UploadImageTask(fileUrl, file, filename, headers, onGetFinishListener).execute();
+    public static void uploadScreenshot(final Context context, final String fileUrl, final byte[] file, final String filename, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+        new UploadImageTask(context, fileUrl, file, filename, headers, onGetFinishListener).execute();
     }
 
     public interface OnGetFinishListener {
@@ -63,12 +59,14 @@ public class Network {
         private final String contentType;
         private String response;
         private final Map<String, String> headers;
+        private final Context context;
 
-        public PostTask(final String urlString, final String content, final String contentType, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+        public PostTask(final Context context, final String urlString, final String content, final String contentType, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
             this.urlString = urlString;
             this.content = content;
             this.contentType = contentType;
             this.headers = headers;
+            this.context = context;
             this.onGetFinishListener = onGetFinishListener;
         }
 
@@ -81,7 +79,7 @@ public class Network {
                 urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
                 urlConnection.setReadTimeout(SOCKET_TIMEOUT);
 
-                for (Map.Entry<String, String> header : defaultHeaders.entrySet()) {
+                for (Map.Entry<String, String> header : getDefaultHeaders(context).entrySet()) {
                     urlConnection.setRequestProperty(header.getKey(), header.getValue());
                 }
 
@@ -146,8 +144,10 @@ public class Network {
         private String response;
         private final Map<String, String> headers;
         private final byte[] file;
+        private final Context context;
 
-        public UploadImageTask(final String urlString, final byte[] file, final String filename, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+        public UploadImageTask(final Context context, final String urlString, final byte[] file, final String filename, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+            this.context = context;
             this.urlString = urlString;
             this.filename = filename;
             this.file = file;
@@ -171,7 +171,7 @@ public class Network {
                 conn.setConnectTimeout(SOCKET_TIMEOUT);
                 conn.setReadTimeout(SOCKET_TIMEOUT);
 
-                for (Map.Entry<String, String> header : defaultHeaders.entrySet()) {
+                for (Map.Entry<String, String> header : getDefaultHeaders(context).entrySet()) {
                     conn.setRequestProperty(header.getKey(), header.getValue());
                 }
 
@@ -238,13 +238,34 @@ public class Network {
         }
     }
 
+    private static Map<String, String> getDefaultHeaders(Context context) {
+        if (defaultHeaders == null) {
+            defaultHeaders = new HashMap<String, String>();
+            defaultHeaders.put("X-GMS-AppId", "2");
+            defaultHeaders.put("X-GMS-Scope", "dl");
+            String versionName = "latest";
+            int versionCode = 1;
+            try {
+                PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+                versionName = pInfo.versionName;
+                versionCode = pInfo.versionCode;
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.d(TAG, e.getMessage(), e);
+            }
+            defaultHeaders.put("User-Agent", "Device Locator/" + versionName + "-" + versionCode + " (+http://www.gms-world.net)");
+        }
+        return defaultHeaders;
+    }
+
     static class GetTask extends AsyncTask<Void, Integer, Integer> {
 
         private final OnGetFinishListener onGetFinishListener;
         private final String urlString;
+        private final Context context;
         private String response;
 
-        public GetTask(final String urlString, final OnGetFinishListener onGetFinishListener) {
+        public GetTask(final Context context, final String urlString, final OnGetFinishListener onGetFinishListener) {
+            this.context = context;
             this.urlString = urlString;
             this.onGetFinishListener = onGetFinishListener;
         }
@@ -258,7 +279,7 @@ public class Network {
                 urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
                 urlConnection.setReadTimeout(SOCKET_TIMEOUT);
 
-                for (Map.Entry<String, String> header : defaultHeaders.entrySet()) {
+                for (Map.Entry<String, String> header : getDefaultHeaders(context).entrySet()) {
                     urlConnection.setRequestProperty(header.getKey(), header.getValue());
                 }
 

@@ -443,11 +443,13 @@ public class MainActivity extends AppCompatActivity {
     private void toggleRunning() {
 
         //enable Firebase
-        if (! this.running) {
+        if (!this.running) {
             String firebaseToken = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
             if (StringUtils.isEmpty(firebaseToken)) {
                 String refreshedToken = FirebaseInstanceId.getInstance().getToken();
                 DlFirebaseInstanceIdService.sendRegistrationToServer(this, refreshedToken, PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, ""));
+            } else {
+                Log.d(TAG, "Firebase token already set");
             }
         }
 

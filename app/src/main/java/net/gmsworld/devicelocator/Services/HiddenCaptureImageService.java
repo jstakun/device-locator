@@ -118,7 +118,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                 headers.put("X-GMS-AppId", "2");
                 headers.put("X-GMS-Scope", "dl");
 
-                Network.uploadScreenshot(uploadUrl, out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
+                Network.uploadScreenshot(this, uploadUrl, out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String imageUrl, int responseCode, String url) {
                         if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {

@@ -61,7 +61,7 @@ public class Messenger {
                     sendEmail(context, location, email, message, title, tokenStr, 1);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context);
-                    Network.get(context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+                    Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -96,7 +96,7 @@ public class Messenger {
                     sendTelegram(context, location, telegramId, message, tokenStr, 1);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context);
-                    Network.get(context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+                    Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -137,7 +137,7 @@ public class Messenger {
 
         try {
             String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context);
-            Network.post(context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
+            Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -167,7 +167,7 @@ public class Messenger {
 
         try {
             String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title + "&username=" + getDeviceId(context);
-            Network.post(context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
+            Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -462,7 +462,7 @@ public class Messenger {
                 sendEmailRegistrationRequest(context, email, tokenStr, 1);
             } else {
                 String queryString = "scope=dl&user=" + getDeviceId(context);
-                Network.get(context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+                Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -493,7 +493,7 @@ public class Messenger {
                 sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
             } else {
                 String queryString = "scope=dl&user=" + getDeviceId(context);
-                Network.get(context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+                Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -522,7 +522,7 @@ public class Messenger {
 
         try {
             String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context);
-            Network.post(context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
+            Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -554,7 +554,7 @@ public class Messenger {
 
         try {
             String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context);
-            Network.post(context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
+            Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url + " with content " + results);
