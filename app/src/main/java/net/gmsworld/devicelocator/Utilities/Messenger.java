@@ -353,7 +353,7 @@ public class Messenger {
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.PING_COMMAND:
-                text = "Pong!";
+                text = "Pong from " + getDeviceId(context);
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             default:
