@@ -549,9 +549,10 @@ public class MainActivity extends AppCompatActivity {
         initTokenInput();
         //initGpsRadioGroup();
         initLocationSMSCheckbox();
+        //TODO api 18 fix
         TextView commandLink = (TextView) findViewById(R.id.docsLink);
-        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
+        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
         initRemoteControl();
     }
 
@@ -1138,7 +1139,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
-
+            //TODO api 18 fix
             final TextView helpText = (TextView) pinView.findViewById(R.id.verify_pin_text);
             helpText.setText(Html.fromHtml(getString(R.string.pinLink)));
             helpText.setMovementMethod(new TextViewLinkHandler() {
