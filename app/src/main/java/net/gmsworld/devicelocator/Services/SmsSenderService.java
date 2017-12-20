@@ -202,7 +202,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         keywordReceivedSms = settings.getBoolean("settings_detected_sms", true);
-        gpsSms = settings.getBoolean("settings_gps_sms", true);
+        gpsSms = settings.getBoolean("settings_gps_sms", false);
         googleMapsSms = settings.getBoolean("settings_google_sms", true);
 
         speedType = Integer.parseInt(settings.getString("settings_kmh_or_mph", "0"));

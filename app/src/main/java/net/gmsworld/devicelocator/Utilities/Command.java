@@ -44,11 +44,11 @@ public class Command {
     public final static String NOTIFY_COMMAND = "notifydl"; //n set notification email, phone or telegram chat id usage notifydl p:x m:y t:z where x is mobile phone number, y is email address and z is Telegram chat or channel id.
     public final static String AUDIO_COMMAND = "audiodl"; //a enable audio transmitter
     public final static String NOAUDIO_COMMAND = "noaudiodl"; //na disable audio transmitter
+    public final static String TAKE_PHOTO_COMMAND = "photodl"; //p if all permissions set take photo and send link
+    public final static String PING_COMMAND = "pingdl"; //pg send ping to test connectivity
 
     //private
-    public final static String TAKE_PHOTO_COMMAND = "photodl"; //p if all permissions set take photo and send link
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
-    public final static String PING_COMMAND = "pingdl"; //pg
 
     private static final AbstractCommand[] commands = {new StartRouteTrackerServiceStartCommand(), new ResumeRouteTrackerServiceStartCommand(),
             new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand(),
