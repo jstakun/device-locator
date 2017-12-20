@@ -550,7 +550,7 @@ public class MainActivity extends AppCompatActivity {
         //initGpsRadioGroup();
         initLocationSMSCheckbox();
         //TODO api 18 fix
-        TextView commandLink = (TextView) findViewById(R.id.docsLink);
+        TextView commandLink = (TextView) findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
         initRemoteControl();

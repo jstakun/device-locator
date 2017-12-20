@@ -72,9 +72,9 @@
                         android:paddingTop="15dp">
 
                         <TextView
-                            android:id="@+id/docsLink"
+                            android:id="@+id/docs_link"
                             android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
+                            android:layout_height="wrap_content"
                             android:gravity="left"/>
 
                    </LinearLayout>
