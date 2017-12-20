@@ -552,7 +552,15 @@ public class MainActivity extends AppCompatActivity {
         //TODO api 18 fix
         TextView commandLink = (TextView) findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
-        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
+        //commandLink.setMovementMethod(LinkMovementMethod.getInstance());
+        commandLink.setMovementMethod(new TextViewLinkHandler() {
+            @Override
+            public void onLinkClick(String url) {
+                Toast.makeText(MainActivity.this, "Redirecting to " + url + " ...", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
         initRemoteControl();
     }
 
@@ -578,7 +586,7 @@ public class MainActivity extends AppCompatActivity {
                             pinChanged = true;
                         }
                     } else {
-                        Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
