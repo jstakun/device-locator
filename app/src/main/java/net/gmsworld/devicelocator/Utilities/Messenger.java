@@ -185,9 +185,10 @@ public class Messenger {
         //Log.d(TAG, "sendLocationMessage()" + location.getAccuracy());
         String text = context.getString(fused ? R.string.approximate : R.string.accurate) + " location:\n";
 
-        text += context.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
         text += context.getString(R.string.latitude) + " " + latAndLongFormat.format(location.getLatitude()) + "\n";
         text += context.getString(R.string.longitude) + " " + latAndLongFormat.format(location.getLongitude()) + "\n";
+        text += context.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
+        text += "Taken " + (System.currentTimeMillis() - location.getTime()) + " milliseconds ago" + "\n";
         text += "Battery level: " + getBatteryLevel(context);
 
         if (location.hasSpeed()) {
@@ -382,10 +383,10 @@ public class Messenger {
     }
 
     public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId, String email) {
-        String text = context.getString(R.string.acknowledgeMessage);
-        text += " " + context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context));
-        text += ", " + context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context);
-        text += ", Battery level: " + getBatteryLevel(context);
+        String text = context.getString(R.string.acknowledgeMessage) + "\n";
+        text +=  context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context)) + "\n";
+        text += context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context) + "\n";
+        text += "Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         } else {

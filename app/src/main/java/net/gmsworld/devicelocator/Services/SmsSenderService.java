@@ -113,6 +113,12 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         if (currentTime - startTime < LOCATION_REQUEST_MAX_WAIT_TIME) {
             //Log.d(TAG, "NOT EXPIRED YET. CHECK");
 
+            //check if location is older than 10 minutes
+            if ((System.currentTimeMillis() - location.getTime()) > 10 * 60 * 1000) {
+                //Log.d(TAG, "Location is older than 10 minutes");
+                return;
+            }
+
             if (bestLocation == null) {
                 bestLocation = location;
             }
@@ -147,12 +153,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             if (bestLocation.getAccuracy() > 100) {
                 //Log.d(TAG, "Accuracy more than 100, check again.");
-                return;
-            }
-
-            //check if location is older than 10 minutes
-            if ((System.currentTimeMillis() - bestLocation.getTime()) > 10 * 60 * 1000) {
-                //Log.d(TAG, "Location is older than 10 minutes");
                 return;
             }
         }
