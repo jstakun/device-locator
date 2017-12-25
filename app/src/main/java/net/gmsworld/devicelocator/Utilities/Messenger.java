@@ -188,7 +188,16 @@ public class Messenger {
         text += context.getString(R.string.latitude) + " " + latAndLongFormat.format(location.getLatitude()) + "\n";
         text += context.getString(R.string.longitude) + " " + latAndLongFormat.format(location.getLongitude()) + "\n";
         text += context.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
-        text += "Taken " + (System.currentTimeMillis() - location.getTime()) + " milliseconds ago" + "\n";
+
+        long diff = System.currentTimeMillis() - location.getTime();
+        if (diff < 1000) {
+            text += "Taken " + diff + " milliseconds ago" + "\n";
+        } else if (diff < 60000) {
+            text += "Taken " + (diff / 1000) + " seconds ago" + "\n";
+        } else {
+            text += "Taken " + (diff / 60000) + " minutes ago" + "\n";
+        }
+
         text += "Battery level: " + getBatteryLevel(context);
 
         if (location.hasSpeed()) {
