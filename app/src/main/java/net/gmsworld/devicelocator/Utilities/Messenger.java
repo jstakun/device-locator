@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -546,10 +547,16 @@ public class Messenger {
                         } else if (StringUtils.equals(status, "unverified")) {
                             Toast.makeText(context, "You'll receive verification instruction to your chat or channel", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(context, "Oops! Something went wrong. Please add again Telegram chat id!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Oops! Something went wrong on our side. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Toast.makeText(context, "Oops! Something went wrong. Please add again Telegram chat id!", Toast.LENGTH_LONG).show();
+                        //TODO testing
+                        if (telegramId.startsWith("-")) {
+                            Toast.makeText(context, "Please add @device_locator_bot to your channel with sending message permission and send us email with your Telegram channel id to finish registration!", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(context, "Oops! Something went wrong on our side. Please send us email with your Telegram chat id to finish registration!", Toast.LENGTH_LONG).show();
+                        }
+                        composeEmail(context, new String[] {"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram channel " + telegramId + " to Device Locator notifications service.", false);
                     }
                 }
             });
@@ -618,5 +625,18 @@ public class Messenger {
         }
 
         return androidDeviceId;
+    }
+
+    private static void composeEmail(Context context, String[] addresses, String subject, String message, boolean showToast) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.putExtra(Intent.EXTRA_TEXT, message);
+        if (intent.resolveActivity(context.getPackageManager()) != null) {
+            context.startActivity(intent);
+        } else if (showToast) {
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+        }
     }
 }
