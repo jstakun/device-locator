@@ -634,6 +634,7 @@ public class Command {
     private static final class BeepCommand extends AbstractCommand {
 
         Ringtone ringtone = null;
+        int currentMode = -1;
 
         public BeepCommand() { super(RING_COMMAND, "rn", Finder.EQUALS); }
 
@@ -660,20 +661,24 @@ public class Command {
         private void playBeep(Context context) {
             try {
                 final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-                int currentMode = audioMode.getMode();
-                if (currentMode != AudioManager.MODE_NORMAL) {
-                    audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-                }
                 if (ringtone == null) {
+                    currentMode = audioMode.getMode();
+                    if (currentMode != AudioManager.RINGER_MODE_NORMAL) {
+                        audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                    }
                     //RingtoneManager.TYPE_ALARM    RingtoneManager.TYPE_RINGTONE
-                    ringtone = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+                    Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                    ringtone = RingtoneManager.getRingtone(context, ringtoneUri);
                     ringtone.play();
+                    Log.d(TAG, "Ringtone " + ringtoneUri.toString() + " should be playing now");
                 } else {
                     ringtone.stop();
                     ringtone = null;
-                }
-                if (currentMode != audioMode.getMode()) {
-                    audioMode.setRingerMode(currentMode);
+                    Log.d(TAG, "Ringtone should stop playing now");
+                    if (currentMode != audioMode.getMode() && currentMode != -1) {
+                        audioMode.setRingerMode(currentMode);
+                        currentMode = -1;
+                    }
                 }
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
