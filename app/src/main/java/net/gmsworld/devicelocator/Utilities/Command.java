@@ -635,6 +635,7 @@ public class Command {
 
         Ringtone ringtone = null;
         int currentMode = -1;
+        int currentVolume = -1;
 
         public BeepCommand() { super(RING_COMMAND, "rn", Finder.EQUALS); }
 
@@ -662,9 +663,13 @@ public class Command {
             try {
                 final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
                 if (ringtone == null) {
-                    currentMode = audioMode.getMode();
+                    currentMode = audioMode.getRingerMode();
                     if (currentMode != AudioManager.RINGER_MODE_NORMAL) {
                         audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                    }
+                    currentVolume = audioMode.getStreamVolume(AudioManager.STREAM_RING);
+                    if (currentVolume < audioMode.getStreamMaxVolume(AudioManager.STREAM_RING)) {
+                        audioMode.setStreamVolume(AudioManager.STREAM_RING, audioMode.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_SHOW_UI);
                     }
                     //RingtoneManager.TYPE_ALARM    RingtoneManager.TYPE_RINGTONE
                     Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
@@ -679,6 +684,11 @@ public class Command {
                         audioMode.setRingerMode(currentMode);
                         currentMode = -1;
                     }
+                    if (currentVolume != audioMode.getStreamVolume(AudioManager.STREAM_RING) && currentVolume != -1) {
+                        audioMode.setStreamVolume(AudioManager.STREAM_RING, currentVolume, AudioManager.FLAG_SHOW_UI);
+                        currentVolume = -1;
+                    }
+
                 }
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
