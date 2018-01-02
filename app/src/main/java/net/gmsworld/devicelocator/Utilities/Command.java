@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
@@ -43,9 +45,11 @@ public class Command {
     public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //gb set balanced gps accuracy
     public final static String NOTIFY_COMMAND = "notifydl"; //n set notification email, phone or telegram chat id usage notifydl p:x m:y t:z where x is mobile phone number, y is email address and z is Telegram chat or channel id.
     public final static String AUDIO_COMMAND = "audiodl"; //a enable audio transmitter
-    public final static String NOAUDIO_COMMAND = "noaudiodl"; //na disable audio transmitter
+    public final static String AUDIO_OFF_COMMAND = "noaudiodl"; //na disable audio transmitter
     public final static String TAKE_PHOTO_COMMAND = "photodl"; //p if all permissions set take photo and send link
     public final static String PING_COMMAND = "pingdl"; //pg send ping to test connectivity
+    public final static String RING_COMMAND = "ringdl"; //rn play ringtone
+    public final static String RING_OFF_COMMAND = "ringoffdl"; //rn stop playing ringtone
 
     //private
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
@@ -54,7 +58,7 @@ public class Command {
             new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand(),
             new MuteCommand(), new UnMuteCommand(), new StartPhoneCallCommand(), new ChangeRouteTrackerServiceRadiusCommand(),
             new AudioCommand(), new NoAudioCommand(), new HighGpsCommand(), new BalancedGpsCommand(),
-            new TakePhotoCommand(), new NotifiySettingsCommand(), new PingCommand() };
+            new TakePhotoCommand(), new NotifiySettingsCommand(), new PingCommand(), new BeepCommand() };
 
 
     public static void findCommandInSms(Context context, Intent intent) {
@@ -398,19 +402,19 @@ public class Command {
     private static final class NoAudioCommand extends AbstractCommand {
 
         public NoAudioCommand() {
-            super(NOAUDIO_COMMAND, "na", Finder.EQUALS);
+            super(AUDIO_OFF_COMMAND, "na", Finder.EQUALS);
         }
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
-            sendSmsNotification(context, sender, NOAUDIO_COMMAND);
+            sendSmsNotification(context, sender, AUDIO_OFF_COMMAND);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
-            sendSocialNotification(context, NOAUDIO_COMMAND);
+            sendSocialNotification(context, AUDIO_OFF_COMMAND);
         }
     }
 
@@ -624,6 +628,56 @@ public class Command {
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
             sendSocialNotification(context, PING_COMMAND);
+        }
+    }
+
+    private static final class BeepCommand extends AbstractCommand {
+
+        Ringtone ringtone = null;
+
+        public BeepCommand() { super(RING_COMMAND, "rn", Finder.EQUALS); }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            playBeep(context);
+            if (ringtone != null) {
+                sendSmsNotification(context, sender, RING_COMMAND);
+            } else {
+                sendSmsNotification(context, sender, RING_OFF_COMMAND);
+            }
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            playBeep(context);
+            if (ringtone != null) {
+                sendSocialNotification(context, RING_COMMAND);
+            } else {
+                sendSocialNotification(context, RING_OFF_COMMAND);
+            }
+        }
+
+        private void playBeep(Context context) {
+            try {
+                final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                int currentMode = audioMode.getMode();
+                if (currentMode != AudioManager.MODE_NORMAL) {
+                    audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                }
+                if (ringtone == null) {
+                    //RingtoneManager.TYPE_ALARM    RingtoneManager.TYPE_RINGTONE
+                    ringtone = RingtoneManager.getRingtone(context, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+                    ringtone.play();
+                } else {
+                    ringtone.stop();
+                    ringtone = null;
+                }
+                if (currentMode != audioMode.getMode()) {
+                    audioMode.setRingerMode(currentMode);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
         }
     }
 

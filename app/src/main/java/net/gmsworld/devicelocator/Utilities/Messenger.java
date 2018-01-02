@@ -339,7 +339,7 @@ public class Messenger {
             case Command.AUDIO_COMMAND:
                 text = "Audio transmitter has been started.";
                 break;
-            case Command.NOAUDIO_COMMAND:
+            case Command.AUDIO_OFF_COMMAND:
                 text = "Audio transmitter has been stopped.";
                 break;
             case Command.TAKE_PHOTO_COMMAND:
@@ -365,6 +365,14 @@ public class Messenger {
                 break;
             case Command.PING_COMMAND:
                 text = "Pong from " + getDeviceId(context);
+                text += "\n" + "Battery level: " + getBatteryLevel(context);
+                break;
+            case Command.RING_COMMAND:
+                text = "You should now hear ringtone from your device";
+                text += "\n" + "Battery level: " + getBatteryLevel(context);
+                break;
+            case Command.RING_OFF_COMMAND:
+                text = "You should now stop hearing ringtone from your device";
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             default:
