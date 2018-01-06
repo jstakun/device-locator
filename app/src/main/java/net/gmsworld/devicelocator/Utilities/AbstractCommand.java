@@ -108,7 +108,7 @@ public abstract class AbstractCommand {
                     sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
                 }
 
-                if (findCommand(context, sms.getMessageBody(), keyword)) {
+                if (findCommand(context, sms.getMessageBody(), keyword) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()))) {
                     list.add(sms);
                 }
             }
