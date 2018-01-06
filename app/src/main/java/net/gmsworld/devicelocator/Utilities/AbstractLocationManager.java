@@ -68,13 +68,13 @@ public abstract class AbstractLocationManager {
             float distance = lastLocation.distanceTo(recentLocationSent);
             distWithAccuracy = distance + lastLocation.getAccuracy();
             Log.d(TAG, "checkRadius compared " + distance + " + " + lastLocation.getAccuracy() + " with " + radius);
-            if (distWithAccuracy > radius && radius > 0 && lastLocation.getAccuracy() < radius) {
+            if (distWithAccuracy > radius && radius > 0 && lastLocation.getAccuracy() < MAX_REASONABLE_ACCURACY) { //radius * 0.9f) {
                 update = true;
             }
         } else { //if (recentLocationSent == null) {
             Log.d(TAG, "checkRadius compared " + lastLocation.getAccuracy() + " with " + radius);
             distWithAccuracy = lastLocation.getAccuracy();
-            if (distWithAccuracy < radius) {
+            if (distWithAccuracy < MAX_REASONABLE_ACCURACY) { //radius * 0.9f) {
                 update = true;
             }
         }

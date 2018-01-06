@@ -241,20 +241,28 @@ public class RouteTrackingService extends Service {
                         int distance = msg.arg1;
                         if (location != null) {
                             if (!silentMode) {
+                                int speedType = 0; //TODO read from Integer.parseInt(settings.getString("settings_kmh_or_mph", "0"));
                                 if (StringUtils.isNotEmpty(phoneNumber)) {
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, 0, phoneNumber, null, null);
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, speedType, phoneNumber, null, null);
                                     net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber, null, null);
                                 }
                                 DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
                                 String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
-                                        " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m." +
-                                        "\n" + "Battery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
+                                        " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m.";
+                                if (location.hasSpeed()) {
+                                    if (speedType == 0) {
+                                        message += " and speed " + ((int) net.gmsworld.devicelocator.Utilities.Messenger.convertMPStoKMH(location.getSpeed())) + "KM/H";
+                                    } else {
+                                        message += " and speed " + ((int) net.gmsworld.devicelocator.Utilities.Messenger.convertMPStoMPH(location.getSpeed())) + "MPH";
+                                    }
+                                }
+                                message += "\n" + "Battery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
                                         "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
                                 //First send notification to telegram and if not configured to email
                                 //REMEMBER this could send a lot of messages and your email account could be overloaded
                                 if (StringUtils.isNotEmpty(telegramId)) {
-                                    message = message.replace("\n", ", ");
+                                    //message = message.replace("\n", ", ");
                                     net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, location, telegramId, message, 1);
                                 } else if (StringUtils.isNotEmpty(email)) {
                                     String title = getString(R.string.message);

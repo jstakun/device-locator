@@ -252,6 +252,29 @@ public class Messenger {
         }
     }
 
+    public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId, String email) {
+        String text = context.getString(R.string.acknowledgeMessage) + "\n";
+        text +=  context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context)) + "\n";
+        text += context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context) + "\n";
+        text += "Battery level: " + getBatteryLevel(context);
+        if (StringUtils.isNotEmpty(phoneNumber)) {
+            sendSMS(context, phoneNumber, text);
+        } else {
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sendTelegram(context, null, telegramId, text, 1);
+            }
+            if (StringUtils.isNotEmpty(email)) {
+                String title = context.getString(R.string.message);
+                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
+                if (deviceId != null) {
+                    title += " installed on device " + deviceId + " - location request";
+                }
+                text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
+                sendEmail(context, null, email, text, title, 1);
+            }
+        }
+    }
+
     public static void sendCommandMessage(final Context context, final Intent intent) {
         String text = null;
         String phoneNumber = intent.getExtras().getString("phoneNumber");
@@ -400,29 +423,6 @@ public class Messenger {
         }
     }
 
-    public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId, String email) {
-        String text = context.getString(R.string.acknowledgeMessage) + "\n";
-        text +=  context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context)) + "\n";
-        text += context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context) + "\n";
-        text += "Battery level: " + getBatteryLevel(context);
-        if (StringUtils.isNotEmpty(phoneNumber)) {
-            sendSMS(context, phoneNumber, text);
-        } else {
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, null, telegramId, text, 1);
-            }
-            if (StringUtils.isNotEmpty(email)) {
-                String title = context.getString(R.string.message);
-                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
-                if (deviceId != null) {
-                    title += " installed on device " + deviceId + " - location request";
-                }
-                text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
-                sendEmail(context, null, email, text, title, 1);
-            }
-        }
-    }
-
     public static void sendLoginFailedMessage(Context context, String phoneNumber, String telegramId, String email) {
         String deviceId = getDeviceId(context);
         String text = "Failed login attempt to your device " + deviceId + "."
@@ -449,11 +449,9 @@ public class Messenger {
         return (enabled) ? context.getString(R.string.enabled) : context.getString(R.string.disabled);
     }
 
-    private static double convertMPStoKMH(double speed) {
-        return speed * 3.6;
-    }
+    public static double convertMPStoKMH(double speed) { return speed * 3.6; }
 
-    private static double convertMPStoMPH(double speed) {
+    public static double convertMPStoMPH(double speed) {
         return speed * 2.23694;
     }
 
