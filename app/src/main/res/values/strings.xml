@@ -59,14 +59,14 @@
     <string name="pinLink">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a>&lt;/font></string>
     <string name="Crash.error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
     <string name="security_pin">Your Security PIN</string>
-    <string name="motion_radius">Notify me when the device moves outside the area in meters</string>
+    <string name="motion_radius">Notify me when the device moves outside the area with the radius (in meters)</string>
     <string name="gps_accuracy">GPS Accuracy</string>
     <string name="gps_balanced">Balanced</string>
     <string name="gps_high">High</string>
     <string name="phone_number">Phone number</string>
     <string name="find">Find</string>
     <string name="email_address">Email address</string>
-    <string name="telegram_chat_id">Telegram chat or group id</string>
+    <string name="telegram_chat_id">Telegram chat or channel id</string>
     <string name="share_route">Share route</string>
     <string name="device_tracker">Device tracker</string>
     <string name="sms_control">SMS control</string>
