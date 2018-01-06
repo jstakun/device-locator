@@ -249,7 +249,7 @@ public class RouteTrackingService extends Service {
                                 DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
                                 String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
                                         " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m.";
-                                if (location.hasSpeed()) {
+                                if (location.hasSpeed() && location.getSpeed() > 0f) {
                                     if (speedType == 0) {
                                         message += " and speed " + ((int) net.gmsworld.devicelocator.Utilities.Messenger.convertMPStoKMH(location.getSpeed())) + "KM/H";
                                     } else {
