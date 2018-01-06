@@ -22,7 +22,7 @@ import java.util.ArrayList;
 
 public abstract class AbstractCommand {
 
-    static final String TAG = "SmsCommand";
+    static final String TAG = "DeviceCommand";
 
     protected enum Finder {STARTS, EQUALS}
 
@@ -107,7 +107,6 @@ public abstract class AbstractCommand {
                 } else {
                     sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
                 }
-
                 if (findCommand(context, sms.getMessageBody(), keyword) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()))) {
                     list.add(sms);
                 }
@@ -138,13 +137,17 @@ public abstract class AbstractCommand {
     }
 
     private boolean findCommand(Context context, String message, String command) {
-        //<command><token> or <command> <token>
+        //<command><token> <args> or <command> <token> <args>
         commandTokens = message.split(" ");
+        Log.d(TAG, "Found tokens: ");
+        for (int i=0;i<commandTokens.length;i++) {
+            Log.d(TAG, i + " " + commandTokens[i]);
+        }
         final String token = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
         if (commandTokens.length == 1) {
             return StringUtils.equalsIgnoreCase(message, command + token);
-        } else if (commandTokens.length > 1 && StringUtils.isNumeric(commandTokens[1])) {
-            return StringUtils.equalsIgnoreCase(commandTokens[0], command) && StringUtils.equals(commandTokens[1], token);
+        } else if (commandTokens.length > 1) {
+            return (StringUtils.equalsIgnoreCase(commandTokens[0], command + token) || (StringUtils.equalsIgnoreCase(commandTokens[0], command) && StringUtils.equals(commandTokens[1], token)));
         } else {
             return false;
         }

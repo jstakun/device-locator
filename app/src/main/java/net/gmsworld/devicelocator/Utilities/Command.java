@@ -101,7 +101,7 @@ public class Command {
             String telegramId = settings.getString("telegramId", "");
 
             boolean silentMode = false;
-            if (commandTokens.length == 2 && (commandTokens[1].equalsIgnoreCase("silent") || commandTokens[1].equalsIgnoreCase("s"))) {
+            if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("silent") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
                 silentMode = true;
             }
 
