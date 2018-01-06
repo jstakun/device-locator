@@ -345,11 +345,11 @@ public class Command {
         @Override
         protected boolean validateTokens() {
             int radius = -1;
-            if (commandTokens.length == 2) {
+            if (commandTokens.length > 1) {
                 try {
-                    radius = Integer.parseInt(commandTokens[1]);
+                    radius = Integer.parseInt(commandTokens[commandTokens.length-1]);
                 } catch (Exception e) {
-                    Log.e(TAG, "Wrong radius: " + commandTokens[1]);
+                    Log.e(TAG, "Wrong radius: " + commandTokens[commandTokens.length-1]);
                 }
             }
             return radius > 0;

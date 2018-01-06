@@ -378,7 +378,7 @@ public class Messenger {
                 text +=  "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.PIN_COMMAND:
-                String pin = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN,"");
+                final String pin = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN,"");
                 if (StringUtils.isEmpty(pin)) {
                     text = "No Security PIN is set!";
                 } else {

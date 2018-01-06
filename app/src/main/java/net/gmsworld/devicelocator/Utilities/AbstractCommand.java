@@ -86,19 +86,16 @@ public abstract class AbstractCommand {
     }
 
     private boolean findKeyword(Context context, String keyword, String message) {
-        String token = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
-        keyword += token;
         if (finder.equals(Finder.EQUALS)) {
-            return (StringUtils.equalsIgnoreCase(message, keyword));
+            return findCommand(context, message, keyword);
         } else if (finder.equals(Finder.STARTS)) {
-            commandTokens = message.split(" ");
-            return commandTokens.length > 0 && StringUtils.equalsIgnoreCase(commandTokens[0], keyword) && validateTokens();
+            return findCommand(context, message, keyword) && validateTokens();
         } else {
             return false;
         }
     }
 
-    private ArrayList<SmsMessage> getMessagesWithKeywordEquals(String keyword, Bundle bundle) {
+    private ArrayList<SmsMessage> getMessagesWithKeyword(Context context, String keyword, Bundle bundle) {
         ArrayList<SmsMessage> list = new ArrayList<SmsMessage>();
         if (bundle != null) {
             Object[] pdus = (Object[]) bundle.get("pdus");
@@ -111,29 +108,7 @@ public abstract class AbstractCommand {
                     sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
                 }
 
-                if (StringUtils.equalsIgnoreCase(sms.getMessageBody(), keyword)) {
-                    list.add(sms);
-                }
-            }
-        }
-        return list;
-    }
-
-    private ArrayList<SmsMessage> getMessagesWithKeywordStarts(String keyword, Bundle bundle) {
-        ArrayList<SmsMessage> list = new ArrayList<SmsMessage>();
-        if (bundle != null) {
-            Object[] pdus = (Object[]) bundle.get("pdus");
-            for (int i = 0; i < pdus.length; i++) {
-                SmsMessage sms;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    String format = bundle.getString("format");
-                    sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);
-                } else {
-                    sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                }
-
-                commandTokens = sms.getMessageBody().split(" ");
-                if (commandTokens.length > 0 && StringUtils.equalsIgnoreCase(commandTokens[0], keyword) && validateTokens()) {
+                if (findCommand(context, sms.getMessageBody(), keyword)) {
                     list.add(sms);
                 }
             }
@@ -143,15 +118,11 @@ public abstract class AbstractCommand {
 
     private String getSenderAddress(Context context, Intent intent, String command) {
         try {
-            String token = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
-            command += token;
             ArrayList<SmsMessage> list = null;
             switch (finder) {
                 case EQUALS:
-                    list = getMessagesWithKeywordEquals(command, intent.getExtras());
-                    break;
                 case STARTS:
-                    list =  getMessagesWithKeywordStarts(command, intent.getExtras());
+                    list =  getMessagesWithKeyword(context, command, intent.getExtras());
                     break;
                 default:
                     Log.d(TAG, "No command finder set");
@@ -164,6 +135,19 @@ public abstract class AbstractCommand {
             Log.e(TAG, e.getMessage(), e);
         }
         return null;
+    }
+
+    private boolean findCommand(Context context, String message, String command) {
+        //<command><token> or <command> <token>
+        commandTokens = message.split(" ");
+        final String token = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
+        if (commandTokens.length == 1) {
+            return StringUtils.equalsIgnoreCase(message, command + token);
+        } else if (commandTokens.length > 1 && StringUtils.isNumeric(commandTokens[1])) {
+            return StringUtils.equalsIgnoreCase(commandTokens[0], command) && StringUtils.equals(commandTokens[1], token);
+        } else {
+            return false;
+        }
     }
 
     void sendSocialNotification(final Context context, final String command) {
