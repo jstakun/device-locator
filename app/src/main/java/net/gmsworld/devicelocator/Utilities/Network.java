@@ -228,8 +228,8 @@ public class Network {
                 } catch (Exception e) {
                     Log.d(TAG, ".uploadScreenshot() exception: " + e.getMessage(), e);
                 }
-                return responseCode;
             }
+            return responseCode;
         }
 
         @Override

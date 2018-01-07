@@ -30,7 +30,7 @@ public abstract class AbstractCommand {
 
     private String smsShortCommand= null;
 
-    private Finder finder;
+    private final Finder finder;
 
     String[] commandTokens;
 
