@@ -337,7 +337,7 @@ public class Messenger {
                 }
                 break;
             case Command.GPS_HIGH_COMMAND:
-                text = "GPS settings as been changed to high accuracy.";
+                text = "GPS settings has been changed to high accuracy.";
                 break;
             case Command.GPS_BALANCED_COMMAND:
                 text = "GPS settings has been changed to balanced accuracy.";

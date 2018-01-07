@@ -357,7 +357,7 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            final int radius = Integer.parseInt(commandTokens[1]);
+            final int radius = Integer.parseInt(commandTokens[commandTokens.length-1]);
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String phoneNumber = settings.getString("phoneNumber", "");
             String email = settings.getString("email", "");
