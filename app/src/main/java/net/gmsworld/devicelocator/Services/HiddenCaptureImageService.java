@@ -50,7 +50,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         isTest = intent.getBooleanExtra("test", false);
-        sender = intent.getStringExtra(sender);
+        sender = intent.getStringExtra("sender");
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 

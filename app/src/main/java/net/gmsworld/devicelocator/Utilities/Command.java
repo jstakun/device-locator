@@ -58,7 +58,7 @@ public class Command {
             new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand(),
             new MuteCommand(), new UnMuteCommand(), new StartPhoneCallCommand(), new ChangeRouteTrackerServiceRadiusCommand(),
             new AudioCommand(), new NoAudioCommand(), new HighGpsCommand(), new BalancedGpsCommand(),
-            new TakePhotoCommand(), new NotifiySettingsCommand(), new PingCommand(), new BeepCommand() };
+            new TakePhotoCommand(), new NotifiySettingsCommand(), new PingCommand(), new RingCommand() };
 
 
     public static void findCommandInSms(Context context, Intent intent) {
@@ -467,6 +467,7 @@ public class Command {
         protected void onSmsCommandFound(String sender, Context context) {
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false)) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+                cameraIntent.putExtra("sender", sender);
                 context.startService(cameraIntent);
             }
             sendSmsNotification(context, sender, TAKE_PHOTO_COMMAND);
@@ -631,13 +632,13 @@ public class Command {
         }
     }
 
-    private static final class BeepCommand extends AbstractCommand {
+    private static final class RingCommand extends AbstractCommand {
 
         Ringtone ringtone = null;
         int currentMode = -1;
         int currentVolume = -1;
 
-        public BeepCommand() { super(RING_COMMAND, "rn", Finder.EQUALS); }
+        public RingCommand() { super(RING_COMMAND, "rn", Finder.EQUALS); }
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
