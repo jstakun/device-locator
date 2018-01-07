@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         if (pinChanged) {
             String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
             if (StringUtils.isNotEmpty(firebaseToken)) {
-                editor.remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
+                editor.remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN); //remove token so that it will be added again after successfull registration
                 if (Network.isNetworkAvailable(MainActivity.this)) {
                     DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin);
                 }
@@ -444,14 +444,20 @@ public class MainActivity extends AppCompatActivity {
 
         //enable Firebase
         if (!this.running) {
-            String firebaseToken = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
-            if (StringUtils.isEmpty(firebaseToken)) {
-                String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-                DlFirebaseInstanceIdService.sendRegistrationToServer(this, refreshedToken, PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, ""));
+            final String firebaseToken = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
+            final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, "");
+            if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(pin)) {
+                new Thread(new Runnable() {
+                    public void run() {
+                        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+                        DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, refreshedToken, pin);
+                    }
+                }).start();
             } else {
                 Log.d(TAG, "Firebase token already set");
             }
         }
+        //
 
         if (!this.running && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
             Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
