@@ -398,6 +398,12 @@ public class Messenger {
                 text = "You should now stop hearing ringtone from your device";
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
+            case Command.CALL_COMMAND:
+                text = "Failed to initiate phone call!";
+                break;
+            case Command.SHARE_COMMAND:
+                text = "Unable to share location. Required permissions are not granted!";
+                break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;

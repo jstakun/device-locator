@@ -13,9 +13,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.Patterns;
-import android.widget.Toast;
 
-import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
@@ -58,7 +56,7 @@ public class Command {
             new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand(),
             new MuteCommand(), new UnMuteCommand(), new StartPhoneCallCommand(), new ChangeRouteTrackerServiceRadiusCommand(),
             new AudioCommand(), new NoAudioCommand(), new HighGpsCommand(), new BalancedGpsCommand(),
-            new TakePhotoCommand(), new NotifiySettingsCommand(), new PingCommand(), new RingCommand() };
+            new TakePhotoCommand(), new NotifySettingsCommand(), new PingCommand(), new RingCommand() };
 
 
     public static void findCommandInSms(Context context, Intent intent) {
@@ -201,17 +199,22 @@ public class Command {
                 try {
                     Permissions.setPermissionNotification(context);
                 } catch (Exception e) {
-                    Toast.makeText(context, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, e.getMessage(), e);
                 }
-                Log.e(TAG, "Missing SMS and/or Locatoin permission");
-                return;
+                Log.e(TAG, "Missing SMS and/or Location permission");
+                sendSmsNotification(context, sender, SHARE_COMMAND);
+            } else {
+                sendSmsNotification(context, sender, null); //don't set SHARE_COMMAND here!
             }
-            sendSmsNotification(context, sender, null); //don't set command to SHARE_COMMAND
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            sendSocialNotification(context, null); //don't set command to SHARE_COMMAND
+            if (!Permissions.haveLocationPermission(context)) {
+                sendSocialNotification(context, SHARE_COMMAND);
+            } else {
+                sendSocialNotification(context, null); //don't set SHARE_COMMAND here!
+            }
         }
     }
 
@@ -311,29 +314,38 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            initPhoneCall(sender, context);
+            if (!initPhoneCall(sender, context)) {
+                sendSmsNotification(context, sender, CALL_COMMAND);
+            }
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            if (sender != null) {
-                initPhoneCall(sender, context);
-            } else {
-                Log.d(TAG, "No sender is specified. Call can't be initiated.");
+            if (sender != null && !initPhoneCall(sender, context)) {
+                sendSocialNotification(context, CALL_COMMAND);
+            } else if (sender == null) {
+                sendSocialNotification(context, CALL_COMMAND);
             }
         }
 
-        private void initPhoneCall(String sender, Context context) {
+        private boolean initPhoneCall(String sender, Context context) {
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                 Log.e(TAG, "Unable to initiate phone call due to missing permission");
-                return;
+                return false;
+            } else {
+                try {
+                    Uri call = Uri.parse("tel:" + sender);
+                    Intent surf = new Intent(Intent.ACTION_CALL, call);
+                    //surf.setPackage("com.android.phone"); //use default phone
+                    //surf.setPackage("com.google.android.dialer");
+                    surf.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(surf);
+                    return true;
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    return false;
+                }
             }
-            Uri call = Uri.parse("tel:" + sender);
-            Intent surf = new Intent(Intent.ACTION_CALL, call);
-            //surf.setPackage("com.android.phone"); //use default phone
-            //surf.setPackage("com.google.android.dialer");
-            surf.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(surf);
         }
     }
 
@@ -483,8 +495,8 @@ public class Command {
         }
     }
 
-    private static final class NotifiySettingsCommand extends AbstractCommand {
-        public NotifiySettingsCommand() {super(NOTIFY_COMMAND, "n", Finder.STARTS);}
+    private static final class NotifySettingsCommand extends AbstractCommand {
+        public NotifySettingsCommand() {super(NOTIFY_COMMAND, "n", Finder.STARTS);}
 
 
         @Override
@@ -689,7 +701,6 @@ public class Command {
                         audioMode.setStreamVolume(AudioManager.STREAM_RING, currentVolume, AudioManager.FLAG_SHOW_UI);
                         currentVolume = -1;
                     }
-
                 }
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);

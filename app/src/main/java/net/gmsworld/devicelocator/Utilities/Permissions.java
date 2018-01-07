@@ -94,7 +94,7 @@ public class Permissions {
         Intent resultIntent = new Intent(context, MainActivity.class);
         PendingIntent resultPendingIntent = PendingIntent.getActivity(context, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationCompat.Builder notificaitonBuilder = new NotificationCompat.Builder(context)
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 //.setSmallIcon(R.drawable.notification_icon)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentTitle(context.getString(R.string.notification_title))
@@ -103,6 +103,6 @@ public class Permissions {
                 .setAutoCancel(true)
                 .setDefaults(Notification.DEFAULT_ALL);
 
-        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(0, notificaitonBuilder.build());
+        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(0, notificationBuilder.build());
     }
 }
