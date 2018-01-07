@@ -453,8 +453,10 @@ public class MainActivity extends AppCompatActivity {
                         DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, refreshedToken, pin);
                     }
                 }).start();
-            } else {
+            } else if (StringUtils.isNotEmpty(firebaseToken)) {
                 Log.d(TAG, "Firebase token already set");
+            } else {
+                Log.e(TAG, "Something is wrong here with either empty pin:" + StringUtils.isEmpty(pin) + " or with empty Firebase token:" + StringUtils.isEmpty(firebaseToken));
             }
         }
         //
