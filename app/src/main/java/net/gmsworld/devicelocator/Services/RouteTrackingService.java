@@ -53,7 +53,7 @@ public class RouteTrackingService extends Service {
     private final Messenger mMessenger = new Messenger(incomingHandler);
     private Messenger mClient;
     private String phoneNumber, email, telegramId;
-    private long startTime;
+    private static long startTime;
     private boolean silentMode = false;
 
     @Override

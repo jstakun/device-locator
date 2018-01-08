@@ -301,7 +301,7 @@ public abstract class AbstractLocationManager {
         private Integer uploadRouteToServer(final Context context, final String title, final String phoneNumber, final long creationDate, final boolean smsNotify, Network.OnGetFinishListener onFinishListener) {
             List<String> route = Files.readFileByLinesFromContextDir(ROUTE_FILE, context);
             final int size = route.size();
-            Log.d(TAG, "Route has " + size + " points");
+            Log.d(TAG, "Route created at " + creationTimestamp + " has " + size + " points");
             final Intent newIntent = new Intent(context, SmsSenderService.class);
             if (smsNotify) {
                 newIntent.putExtra("phoneNumber", phoneNumber);
