@@ -241,20 +241,15 @@ public class RouteTrackingService extends Service {
                         int distance = msg.arg1;
                         if (location != null) {
                             if (!silentMode) {
-                                int speedType = 0; //TODO read from Integer.parseInt(settings.getString("settings_kmh_or_mph", "0"));
                                 if (StringUtils.isNotEmpty(phoneNumber)) {
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, speedType, phoneNumber, null, null);
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, phoneNumber, null, null);
                                     net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber, null, null);
                                 }
                                 DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
                                 String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
                                         " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m.";
                                 if (location.hasSpeed() && location.getSpeed() > 0f) {
-                                    if (speedType == 0) {
-                                        message += " and speed " + ((int) net.gmsworld.devicelocator.Utilities.Messenger.convertMPStoKMH(location.getSpeed())) + "KM/H";
-                                    } else {
-                                        message += " and speed " + ((int) net.gmsworld.devicelocator.Utilities.Messenger.convertMPStoMPH(location.getSpeed())) + "MPH";
-                                    }
+                                    message += " and speed " + net.gmsworld.devicelocator.Utilities.Messenger.getSpeed(RouteTrackingService.this, location.getSpeed());
                                 }
                                 message += "\n" + "Battery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
                                         "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');

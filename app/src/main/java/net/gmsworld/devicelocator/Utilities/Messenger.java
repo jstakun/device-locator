@@ -30,6 +30,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -182,7 +183,7 @@ public class Messenger {
         }
     }
 
-    public static void sendLocationMessage(Context context, Location location, boolean fused, int speedType, String phoneNumber, String telegramId, String email) {
+    public static void sendLocationMessage(Context context, Location location, boolean fused, String phoneNumber, String telegramId, String email) {
         //Log.d(TAG, "sendLocationMessage()" + location.getAccuracy());
         String text = context.getString(fused ? R.string.approximate : R.string.accurate) + " location:\n";
 
@@ -202,11 +203,7 @@ public class Messenger {
         text += "Battery level: " + getBatteryLevel(context);
 
         if (location.hasSpeed()) {
-            if (speedType == 0) {
-                text += "\n" + context.getString(R.string.speed) + " " + ((int) convertMPStoKMH(location.getSpeed())) + "KM/H";
-            } else {
-                text += "\n" + context.getString(R.string.speed) + " " + ((int) convertMPStoMPH(location.getSpeed())) + "MPH";
-            }
+            text += "\n" + context.getString(R.string.speed) + " " + getSpeed(context, location.getSpeed());
         }
 
         if (location.hasAltitude() && location.getAltitude() != 0) {
@@ -455,10 +452,23 @@ public class Messenger {
         return (enabled) ? context.getString(R.string.enabled) : context.getString(R.string.disabled);
     }
 
-    public static double convertMPStoKMH(double speed) { return speed * 3.6; }
+    //public static double convertMPStoKMH(double speed) { return speed * 3.6; }
 
-    public static double convertMPStoMPH(double speed) {
-        return speed * 2.23694;
+    //public static double convertMPStoMPH(double speed) { return speed * 2.23694; }
+
+    public static String getSpeed(Context context, float speed) {
+        Locale l = null;
+        try {
+            l = context.getResources().getConfiguration().locale;
+        } catch (Exception e) { //might cause NPE on some devices
+            l = java.util.Locale.getDefault();
+        }
+
+        if (l != null && StringUtils.equalsAny(l.getISO3Country(), "USA", "GBR")) {
+            return (int)(speed * 2.23694) + "MPH";
+        } else {
+            return (int)(speed * 3.6) + "KM/H";
+        }
     }
 
     public static int getBatteryLevel(Context context) {

@@ -36,8 +36,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private boolean gpsSms = false;
     private boolean googleMapsSms = false;
 
-    private int speedType = 0;
-
     private Location bestLocation = null;
     private long startTime = 0;
 
@@ -184,7 +182,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         }
 
         if (gpsSms && isRunning) {
-            Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), speedType, phoneNumber, telegramId, email);
+            Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), phoneNumber, telegramId, email);
         } else {
             Log.d(TAG, "Location message won't be send");
         }
@@ -200,12 +198,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
     private void readSettings() {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-
         keywordReceivedSms = settings.getBoolean("settings_detected_sms", true);
         gpsSms = settings.getBoolean("settings_gps_sms", false);
         googleMapsSms = settings.getBoolean("settings_google_sms", true);
-
-        speedType = Integer.parseInt(settings.getString("settings_kmh_or_mph", "0"));
     }
 
     private static int getLocationMode(Context context) {
