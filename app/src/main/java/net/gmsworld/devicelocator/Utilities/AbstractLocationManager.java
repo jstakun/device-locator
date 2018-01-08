@@ -241,9 +241,9 @@ public abstract class AbstractLocationManager {
         return Math.abs(altitude - avg) < MAX_REASONABLE_ALTITUDECHANGE;
     }
 
-    public void executeRouteUploadTask(Context activity, String title, String phoneNumber, long creationTimestamp, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
+    public void executeRouteUploadTask(Context activity, String title, String phoneNumber, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
         if (Network.isNetworkAvailable(activity)) {
-            new RouteUploadTask(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener).execute();
+            new RouteUploadTask(activity, title, phoneNumber, smsNotify, onGetFinishListener).execute();
         } else {
             Toast.makeText(activity, R.string.no_network_error, Toast.LENGTH_LONG).show();
         }
@@ -253,15 +253,13 @@ public abstract class AbstractLocationManager {
         private final WeakReference<Context> callerActivity;
         private final String title;
         private final String phoneNumber;
-        private final long creationTimestamp;
         private final Network.OnGetFinishListener onGetFinishListener;
         private final boolean smsNotify;
 
-        RouteUploadTask(Context activity, String title, String phoneNumber, long creationTimestamp, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
+        RouteUploadTask(Context activity, String title, String phoneNumber, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
             this.callerActivity = new WeakReference<>(activity);
             this.title = title;
             this.phoneNumber = phoneNumber;
-            this.creationTimestamp = creationTimestamp;
             this.smsNotify = smsNotify;
             this.onGetFinishListener = onGetFinishListener;
         }
@@ -283,7 +281,7 @@ public abstract class AbstractLocationManager {
             if (activity == null) {
                 return -1;
             } else {
-                return uploadRouteToServer(activity, title, phoneNumber, creationTimestamp, smsNotify, onGetFinishListener);
+                return uploadRouteToServer(activity, title, phoneNumber, smsNotify, onGetFinishListener);
             }
         }
 
@@ -298,10 +296,10 @@ public abstract class AbstractLocationManager {
             }
         }
 
-        private Integer uploadRouteToServer(final Context context, final String title, final String phoneNumber, final long creationDate, final boolean smsNotify, Network.OnGetFinishListener onFinishListener) {
+        private Integer uploadRouteToServer(final Context context, final String title, final String phoneNumber, final boolean smsNotify, Network.OnGetFinishListener onFinishListener) {
             List<String> route = Files.readFileByLinesFromContextDir(ROUTE_FILE, context);
             final int size = route.size();
-            Log.d(TAG, "Route created at " + creationTimestamp + " has " + size + " points");
+            Log.d(TAG, "Route has " + size + " points");
             final Intent newIntent = new Intent(context, SmsSenderService.class);
             if (smsNotify) {
                 newIntent.putExtra("phoneNumber", phoneNumber);
@@ -312,7 +310,7 @@ public abstract class AbstractLocationManager {
                 try {
                     String deviceId = Messenger.getDeviceId(context);
                     String desc = "Route recorded by Device Locator on device: " + deviceId;
-                    String content = routeToGeoJson(route, title, desc, deviceId, creationDate);
+                    String content = routeToGeoJson(route, title, desc, deviceId);
                     String url = context.getString(R.string.routeProviderUrl);
                     final Map<String, String> headers = new HashMap<String, String>();
                     String tokenStr = PreferenceManager.getDefaultSharedPreferences(context).getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
@@ -340,7 +338,7 @@ public abstract class AbstractLocationManager {
             return size;
         }
 
-        private String routeToGeoJson(List<String> routePoints, String filename, String description, String deviceId, long creationDate) {
+        private String routeToGeoJson(List<String> routePoints, String filename, String description, String deviceId) {
             Gson gson = new Gson();
 
             FeatureCollection fc = new FeatureCollection();
@@ -353,7 +351,6 @@ public abstract class AbstractLocationManager {
             Properties p = new Properties();
             p.name = filename;
             p.username = "device-locator";
-            p.creationDate = creationDate;
             p.deviceId = deviceId;
 
             f[0].properties = p;
@@ -364,6 +361,7 @@ public abstract class AbstractLocationManager {
             double[][] coordinates = new double[routeSize][2];
             Log.d(TAG, "Creating route geojson containing " + routeSize + " points");
             long routeTime = -1L;
+            long creationTime = 0L;
             float routeDistance = 0L;
             for (int i = 0; i < routeSize; i++) {
                 String coordsStr = routePoints.get(i);
@@ -375,7 +373,7 @@ public abstract class AbstractLocationManager {
                 }
 
                 if (i == 0 && coords.length >= 3) {
-                    routeTime = Long.parseLong(coords[2]);
+                    routeTime = creationTime = Long.parseLong(coords[2]);
                 } else if (i == (routeSize - 1) && coords.length >= 3) {
                     routeTime = Long.parseLong(coords[2]) - routeTime;
                 }
@@ -399,6 +397,8 @@ public abstract class AbstractLocationManager {
                 description += ", distance: " + routeDistance + " meters";
                 p.distance = routeDistance;
             }
+
+            p.creationDate = creationTime;
 
             p.description = description;
             p.uploadDate = System.currentTimeMillis();

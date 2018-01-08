@@ -53,7 +53,6 @@ public class RouteTrackingService extends Service {
     private final Messenger mMessenger = new Messenger(incomingHandler);
     private Messenger mClient;
     private String phoneNumber, email, telegramId;
-    private static long startTime;
     private boolean silentMode = false;
 
     @Override
@@ -156,8 +155,6 @@ public class RouteTrackingService extends Service {
         this.mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         this.mWakeLock.acquire();
 
-        startTime = System.currentTimeMillis();
-
         //NotificationUtils.notify(this, NOTIFICATION_ID);
         startForeground(NOTIFICATION_ID, NotificationUtils.buildNotification(this, NOTIFICATION_ID));
 
@@ -188,7 +185,7 @@ public class RouteTrackingService extends Service {
 
     private void shareRoute(final String title, final String phoneNumber, final String telegramId, final String email) {
         Log.d(TAG, "shareRoute()");
-        GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, title, phoneNumber, startTime, true, new Network.OnGetFinishListener() {
+        GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, title, phoneNumber, true, new Network.OnGetFinishListener() {
             @Override
             public void onGetFinish(String results, int responseCode, String url) {
                 Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);

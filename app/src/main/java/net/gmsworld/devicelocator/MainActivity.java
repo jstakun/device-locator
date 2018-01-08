@@ -850,9 +850,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (Files.isRouteTracked(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
-                    final long now = System.currentTimeMillis();
-                    final String title = "devicelocatorroute_" + Messenger.getDeviceId(MainActivity.this) + "_" + now;
-                    GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, title, null, now, false, new Network.OnGetFinishListener() {
+                    final String title = "devicelocatorroute_" + Messenger.getDeviceId(MainActivity.this) + "_" + System.currentTimeMillis();
+                    GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, title, null, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: "+ responseCode + " from url " + url);
