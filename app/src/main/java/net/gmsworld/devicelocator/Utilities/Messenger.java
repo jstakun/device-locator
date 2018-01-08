@@ -202,7 +202,7 @@ public class Messenger {
 
         text += "Battery level: " + getBatteryLevel(context);
 
-        if (location.hasSpeed()) {
+        if (location.hasSpeed() && location.getSpeed() > 0f) {
             text += "\n" + context.getString(R.string.speed) + " " + getSpeed(context, location.getSpeed());
         }
 
