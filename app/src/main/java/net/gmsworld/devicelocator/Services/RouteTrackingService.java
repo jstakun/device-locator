@@ -36,6 +36,7 @@ public class RouteTrackingService extends Service {
     public static final String COMMAND = "RouteTracingService.COMMAND";
     public static final int COMMAND_START = 1;
     public static final int COMMAND_STOP = 0;
+    public static final int COMMAND_STOP_SHARE = 7;
     public static final int COMMAND_REGISTER_CLIENT = 2;
     public static final int COMMAND_ROUTE = 3;
     public static final int COMMAND_CONFIGURE = 4;
@@ -91,11 +92,13 @@ public class RouteTrackingService extends Service {
                         startTracking(gpsAccuracy, resetRoute);
                         break;
                     case COMMAND_STOP:
-                        stopTracking();
+                        stopSelf();
                         break;
                     case COMMAND_ROUTE:
-                        String title = intent.getStringExtra("title");
-                        shareRoute(title, intent.getExtras().getString("phoneNumber"), intent.getExtras().getString("telegramId"), intent.getExtras().getString("email"));
+                        shareRoute(intent.getStringExtra("title"), intent.getExtras().getString("phoneNumber"), intent.getExtras().getString("telegramId"), intent.getExtras().getString("email"), false);
+                        break;
+                    case COMMAND_STOP_SHARE:
+                        shareRoute(intent.getStringExtra("title"), intent.getExtras().getString("phoneNumber"), intent.getExtras().getString("telegramId"), intent.getExtras().getString("email"), true);
                         break;
                     case COMMAND_CONFIGURE:
                         this.phoneNumber = intent.getExtras().getString("phoneNumber");
@@ -183,7 +186,7 @@ public class RouteTrackingService extends Service {
         editor.commit();
     }
 
-    private void shareRoute(final String title, final String phoneNumber, final String telegramId, final String email) {
+    private void shareRoute(final String title, final String phoneNumber, final String telegramId, final String email, final boolean stopSelf) {
         Log.d(TAG, "shareRoute()");
         GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, title, phoneNumber, true, new Network.OnGetFinishListener() {
             @Override
@@ -208,6 +211,9 @@ public class RouteTrackingService extends Service {
                     newIntent.putExtra("size", -1);
                 }
                 RouteTrackingService.this.startService(newIntent);
+                if (stopSelf) {
+                    RouteTrackingService.this.stopSelf();
+                }
             }
         });
     }

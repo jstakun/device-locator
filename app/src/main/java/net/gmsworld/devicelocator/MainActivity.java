@@ -529,7 +529,7 @@ public class MainActivity extends AppCompatActivity {
             launchMotionDetectorService();
         } else {
             saveData();
-            RouteTrackingServiceUtils.stopRouteTrackingService(this, mConnection, isTrackingServiceBound);
+            RouteTrackingServiceUtils.stopRouteTrackingService(this, mConnection, isTrackingServiceBound, false, null, null, null, null);
             updateUI();
         }
     }

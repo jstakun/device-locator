@@ -169,20 +169,48 @@ public class Command {
     private static final class StopRouteTrackerServiceStartCommand extends AbstractCommand {
 
         public StopRouteTrackerServiceStartCommand() {
-            super(STOP_COMMAND, "sp", Finder.EQUALS);
+            super(STOP_COMMAND, "sp", Finder.STARTS);
+        }
+
+        @Override
+        protected boolean validateTokens() {
+            return true;
         }
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false);
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("motionDetectorRunning", false).commit();
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
+                String title = settings.getString("routeTitle", "");
+                if (StringUtils.isEmpty(title)) {
+                    title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
+                    settings.edit().putString("routeTitle", title).commit();
+                }
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, null, null);
+            } else {
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
+            }
+            settings.edit().putBoolean("motionDetectorRunning", false).commit();
             sendSmsNotification(context, sender, STOP_COMMAND);
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
-            RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false);
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("motionDetectorRunning", false).commit();
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
+                String title = settings.getString("routeTitle", "");
+                String telegramId = settings.getString("telegramId", "");
+                String email = settings.getString("email", "");
+
+                if (StringUtils.isEmpty(title)) {
+                    title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
+                    settings.edit().putString("routeTitle", title).commit();
+                }
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, telegramId, email);
+            } else {
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
+            }
+            settings.edit().putBoolean("motionDetectorRunning", false).commit();
             sendSocialNotification(context, STOP_COMMAND);
         }
     }
