@@ -7,7 +7,6 @@ package net.gmsworld.devicelocator.Services;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Handler;
 import android.os.IBinder;
@@ -180,10 +179,7 @@ public class RouteTrackingService extends Service {
         //use smart location lib
         GmsSmartLocationManager.getInstance().disable(IncomingHandler.class.getName(), this);
 
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.remove("routeTitle");
-        editor.commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().remove("routeTitle").commit();
     }
 
     private void shareRoute(final String title, final String phoneNumber, final String telegramId, final String email, final boolean stopSelf) {

@@ -184,7 +184,7 @@ public class Command {
                 String title = settings.getString("routeTitle", "");
                 if (StringUtils.isEmpty(title)) {
                     title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
-                    settings.edit().putString("routeTitle", title).commit();
+                    settings.edit().putString("routeTitle", title);
                 }
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, null, null);
             } else {
@@ -204,9 +204,9 @@ public class Command {
 
                 if (StringUtils.isEmpty(title)) {
                     title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
-                    settings.edit().putString("routeTitle", title).commit();
+                    settings.edit().putString("routeTitle", title);
                 }
-                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, telegramId, email);
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId);
             } else {
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
             }

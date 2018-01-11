@@ -72,8 +72,7 @@ public class Messenger {
                                 SharedPreferences.Editor editor = settings.edit();
                                 String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
                                 Log.d(TAG, "Received following token: " + token);
-                                editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
-                                editor.commit();
+                                editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr).commit();
                                 sendEmail(context, location, email, message, title, tokenStr, 1);
                             } else if (responseCode == 500 && retryCount > 0) {
                                 sendEmail(context, location, email, message, title, retryCount - 1);
@@ -107,8 +106,7 @@ public class Messenger {
                                 SharedPreferences.Editor editor = settings.edit();
                                 String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
                                 Log.d(TAG, "Received following token: " + token);
-                                editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
-                                editor.commit();
+                                editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr).commit();
                                 sendTelegram(context, location, telegramId, message, tokenStr, 1);
                             } else if (responseCode == 500 && retryCount > 0) {
                                 sendTelegram(context, location, telegramId, message, retryCount - 1);
@@ -121,6 +119,8 @@ public class Messenger {
             } else {
                 Toast.makeText(context, R.string.no_network_error, Toast.LENGTH_LONG).show();
             }
+        } else {
+            Log.e(TAG, "Invalid Telegram Id: " + telegramId);
         }
     }
 
@@ -138,7 +138,7 @@ public class Messenger {
         }
 
         try {
-            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context);
+            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + deviceId;
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
