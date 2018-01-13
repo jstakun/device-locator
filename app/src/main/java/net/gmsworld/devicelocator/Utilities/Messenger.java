@@ -54,13 +54,23 @@ public class Messenger {
     }
 
 
-    public static void sendEmail(final Context context, final Location location, final String email, final String message, final String title, final int retryCount) {
+    public static void sendEmail(final Context context, final Location location, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
         if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message))) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
                 if (StringUtils.isNotEmpty(tokenStr)) {
-                    sendEmail(context, location, email, message, title, tokenStr, 1);
+                    headers.put("Authorization", "Bearer " + tokenStr);
+                    headers.put("X-GMS-AppId", "2");
+                    String deviceId = getDeviceId(context);
+                    if (StringUtils.isNotEmpty(deviceId)) {
+                        headers.put("X-GMS-DeviceId", deviceId);
+                    }
+                    if (location != null) {
+                        headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
+                        headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
+                    }
+                    sendEmail(context, email, message, title, 1, headers);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context);
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
@@ -73,9 +83,9 @@ public class Messenger {
                                 String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
                                 Log.d(TAG, "Received following token: " + token);
                                 editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr).commit();
-                                sendEmail(context, location, email, message, title, tokenStr, 1);
+                                sendEmail(context, email, message, title, 1, headers);
                             } else if (responseCode == 500 && retryCount > 0) {
-                                sendEmail(context, location, email, message, title, retryCount - 1);
+                                sendEmail(context, location, email, message, title, retryCount - 1, headers);
                             } else {
                                 Log.d(TAG, "Failed to receive token: " + results);
                             }
@@ -88,13 +98,23 @@ public class Messenger {
         }
     }
 
-    public static void sendTelegram(final Context context, final Location location, final String telegramId, final String message, final int retryCount) {
+    public static void sendTelegram(final Context context, final Location location, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
         if (NumberUtils.isCreatable(telegramId)) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
                 if (StringUtils.isNotEmpty(tokenStr)) {
-                    sendTelegram(context, location, telegramId, message, tokenStr, 1);
+                    headers.put("Authorization", "Bearer " + tokenStr);
+                    headers.put("X-GMS-AppId", "2");
+                    String deviceId = getDeviceId(context);
+                    if (StringUtils.isNotEmpty(deviceId)) {
+                        headers.put("X-GMS-DeviceId", deviceId);
+                    }
+                    if (location != null) {
+                        headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
+                        headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
+                    }
+                    sendTelegram(context, telegramId, message, 1, headers);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context);
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
@@ -107,9 +127,9 @@ public class Messenger {
                                 String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
                                 Log.d(TAG, "Received following token: " + token);
                                 editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr).commit();
-                                sendTelegram(context, location, telegramId, message, tokenStr, 1);
+                                sendTelegram(context, telegramId, message, 1, headers);
                             } else if (responseCode == 500 && retryCount > 0) {
-                                sendTelegram(context, location, telegramId, message, retryCount - 1);
+                                sendTelegram(context, location, telegramId, message, retryCount - 1, headers);
                             } else {
                                 Log.d(TAG, "Failed to receive token: " + results);
                             }
@@ -124,27 +144,15 @@ public class Messenger {
         }
     }
 
-    private static void sendTelegram(final Context context, final Location location, final String telegramId, final String message, final String tokenStr, final int retryCount) {
-        Map<String, String> headers = new HashMap<String, String>();
-        headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppId", "2");
-        String deviceId = getDeviceId(context);
-        if (StringUtils.isNotEmpty(deviceId)) {
-            headers.put("X-GMS-DeviceId", deviceId);
-        }
-        if (location != null) {
-            headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
-            headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
-        }
-
+    private static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
         try {
-            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + deviceId;
+            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 500 && retryCount > 0) {
-                        sendTelegram(context, location, telegramId, message, tokenStr, retryCount-1);
+                        sendTelegram(context, telegramId, message, retryCount-1, headers);
                     }
                 }
             });
@@ -154,19 +162,7 @@ public class Messenger {
 
     }
 
-    private static void sendEmail(final Context context, final Location location, final String email, final String message, final String title, final String tokenStr, final int retryCount) {
-        Map<String, String> headers = new HashMap<String, String>();
-        headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppId", "2");
-        String deviceId = getDeviceId(context);
-        if (StringUtils.isNotEmpty(deviceId)) {
-            headers.put("X-GMS-DeviceId", deviceId);
-        }
-        if (location != null) {
-            headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
-            headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
-        }
-
+    private static void sendEmail(final Context context, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
         try {
             String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title + "&username=" + getDeviceId(context);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
@@ -174,7 +170,7 @@ public class Messenger {
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 500 && retryCount > 0) {
-                        sendEmail(context, location, email, message, title, tokenStr, retryCount-1);
+                        sendEmail(context, email, message, title, retryCount-1, headers);
                     }
                 }
             });
@@ -214,7 +210,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         } else {
             if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, location, telegramId, text, 1);
+                sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
@@ -223,7 +219,7 @@ public class Messenger {
                     title += " installed on device " + deviceId + " - current location";
                 }
                 text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
-                sendEmail(context, location, email, text, title, 1);
+                sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
             }
         }
     }
@@ -235,7 +231,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         } else {
             if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, location, telegramId, text, 1);
+                sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
@@ -244,7 +240,7 @@ public class Messenger {
                     title += " installed on device " + deviceId + " - location map link";
                 }
                 text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
-                sendEmail(context, location, email, text, title, 1);
+                sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
             }
         }
     }
@@ -258,7 +254,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         } else {
             if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, null, telegramId, text, 1);
+                sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
@@ -267,7 +263,7 @@ public class Messenger {
                     title += " installed on device " + deviceId + " - location request";
                 }
                 text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
-                sendEmail(context, null, email, text, title, 1);
+                sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
             }
         }
     }
@@ -410,7 +406,7 @@ public class Messenger {
                 sendSMS(context, phoneNumber, text);
             } else {
                 if (StringUtils.isNotEmpty(telegramId)) {
-                    sendTelegram(context, null, telegramId, text, 1);
+                    sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
                 }
 
                 if (StringUtils.isNotEmpty(email)) {
@@ -420,7 +416,7 @@ public class Messenger {
                         title += " installed on device " + deviceId;
                     }
                     text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
-                    sendEmail(context, null, email, text, title, 1);
+                    sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
                 }
             }
         }
@@ -435,7 +431,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         } else {
             if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, null, telegramId, text, 1);
+                sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
@@ -443,7 +439,7 @@ public class Messenger {
                     title += " installed on device " + deviceId + " - failed login";
                 }
                 text += "\n" + context.getString(R.string.deviceUrl)+ "/" + deviceId;
-                sendEmail(context, null, email, text, title, 1);
+                sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
             }
         }
     }

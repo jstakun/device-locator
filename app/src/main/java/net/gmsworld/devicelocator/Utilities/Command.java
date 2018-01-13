@@ -198,14 +198,10 @@ public class Command {
         protected void onSmsSocialCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
-                String title = settings.getString("routeTitle", "");
+                String title = RouteTrackingServiceUtils.getRouteId(context);
                 String telegramId = settings.getString("telegramId", "");
                 String email = settings.getString("email", "");
 
-                if (StringUtils.isEmpty(title)) {
-                    title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
-                    settings.edit().putString("routeTitle", title);
-                }
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId);
             } else {
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);

@@ -17,6 +17,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
+        remoteMessage.getSentTime(); remoteMessage.getTtl();
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Map<String, String> message = remoteMessage.getData();

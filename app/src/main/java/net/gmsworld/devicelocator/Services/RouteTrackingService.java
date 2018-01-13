@@ -23,10 +23,13 @@ import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
+import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RouteTrackingService extends Service {
 
@@ -253,18 +256,22 @@ public class RouteTrackingService extends Service {
                                 message += "\n" + "Battery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
                                         "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
+                                Map<String, String> headers = new HashMap<String, String>();
+                                headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(RouteTrackingService.this));
                                 //First send notification to telegram and if not configured to email
                                 //REMEMBER this could send a lot of messages and your email account could be overloaded
                                 if (StringUtils.isNotEmpty(telegramId)) {
                                     //message = message.replace("\n", ", ");
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, location, telegramId, message, 1);
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, location, telegramId, message, 1, headers);
                                 } else if (StringUtils.isNotEmpty(email)) {
                                     String title = getString(R.string.message);
                                     String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(RouteTrackingService.this);
                                     if (deviceId != null) {
                                         title += " installed on device " + deviceId +  " - location change";
                                     }
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, location, email, message, title, 1);
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, location, email, message, title, 1, headers);
+                                } else {
+                                    //TODO send route point for online tracking
                                 }
                             }
 

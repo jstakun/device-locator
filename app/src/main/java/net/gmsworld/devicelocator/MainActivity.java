@@ -70,6 +70,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
+import java.util.HashMap;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -850,7 +852,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (Files.isRouteTracked(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
-                    final String title = "devicelocatorroute_" + Messenger.getDeviceId(MainActivity.this) + "_" + System.currentTimeMillis();
+                    final String title = RouteTrackingServiceUtils.getRouteId(MainActivity.this);
                     GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, title, null, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
@@ -1229,10 +1231,10 @@ public class MainActivity extends AppCompatActivity {
                         if (deviceId != null) {
                             msgtitle += " installed on device " + deviceId +  " - route map link";
                         }
-                        Messenger.sendEmail(MainActivity.this, null, MainActivity.this.email, message, msgtitle, 1);
+                        Messenger.sendEmail(MainActivity.this, null, MainActivity.this.email, message, msgtitle, 1, new HashMap<String, String>());
                     }
                     if (StringUtils.isNotEmpty(MainActivity.this.telegramId)) {
-                        Messenger.sendTelegram(MainActivity.this, null, MainActivity.this.telegramId, message, 1);
+                        Messenger.sendTelegram(MainActivity.this, null, MainActivity.this.telegramId, message, 1, new HashMap<String, String>());
                     }
                 } else {
                     Toast.makeText(MainActivity.this, "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();

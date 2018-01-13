@@ -3,9 +3,13 @@ package net.gmsworld.devicelocator.Utilities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by jstakun on 5/9/17.
@@ -71,5 +75,17 @@ public class RouteTrackingServiceUtils {
         } else {
             Log.d(TAG, "RouteTrackingService is not bound to MainActivity");
         }
+    }
+
+    public static String getRouteId(Context context) {
+        final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        String title = settings.getString("routeTitle", "");
+
+        if (StringUtils.isEmpty(title)) {
+            title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
+            settings.edit().putString("routeTitle", title);
+        }
+
+        return title;
     }
 }

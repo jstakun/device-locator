@@ -16,6 +16,8 @@ import net.gmsworld.devicelocator.Utilities.Messenger;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
+
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.config.LocationParams;
@@ -165,7 +167,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 Messenger.sendSMS(this, phoneNumber, message);
             } else {
                 if (StringUtils.isNotEmpty(telegramId)) {
-                    Messenger.sendTelegram(this, null, telegramId, message, 1);
+                    Messenger.sendTelegram(this, null, telegramId, message, 1, new HashMap<String, String>());
                 }
                 if (StringUtils.isNotEmpty(email)) {
                     String title = getString(R.string.message);
@@ -174,7 +176,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                         title += " installed on device " + deviceId +  " - current location";
                     }
                     message += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
-                    Messenger.sendEmail(this, null, email, message, title, 1);
+                    Messenger.sendEmail(this, null, email, message, title, 1, new HashMap<String, String>());
                 }
             }
             isRunning = false;
