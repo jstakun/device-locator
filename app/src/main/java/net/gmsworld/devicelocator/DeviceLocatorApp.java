@@ -5,9 +5,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
 
@@ -40,7 +37,6 @@ public class DeviceLocatorApp extends Application {
         final Map<String, String> headers = new HashMap<String, String>();
         final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         String tokenStr = settings.getString(GMS_TOKEN_KEY, "");
-
         if (StringUtils.isNotEmpty(tokenStr)) {
             headers.put("Authorization", "Bearer " + tokenStr);
             headers.put("X-GMS-AppId", "2");
@@ -53,11 +49,7 @@ public class DeviceLocatorApp extends Application {
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 200) {
-                        JsonObject token = new JsonParser().parse(results).getAsJsonObject();
-                        String tokenStr = token.get(GMS_TOKEN_KEY).getAsString();
-                        Log.d(TAG, "Received gms token");
-                        settings.edit().putString(GMS_TOKEN_KEY, tokenStr).apply();
-                        headers.put("Authorization", "Bearer " + tokenStr);
+                        headers.put("Authorization", "Bearer " + Messenger.getToken(DeviceLocatorApp.this, results));
                         headers.put("X-GMS-AppId", "2");
                         headers.put("X-GMS-Scope", "dl");
                         initAcra(headers);

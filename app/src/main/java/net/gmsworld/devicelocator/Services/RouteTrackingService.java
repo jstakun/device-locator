@@ -271,7 +271,7 @@ public class RouteTrackingService extends Service {
                                     }
                                     net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, location, email, message, title, 1, headers);
                                 } else {
-                                    //TODO send route point for online tracking
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendRoutePoint(RouteTrackingService.this, location, 1, headers);
                                 }
                             }
 

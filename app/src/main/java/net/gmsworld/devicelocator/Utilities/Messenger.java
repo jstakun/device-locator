@@ -79,12 +79,11 @@ public class Messenger {
                         public void onGetFinish(String results, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                             if (responseCode == 200) {
-                                JsonObject token = new JsonParser().parse(results).getAsJsonObject();
-                                SharedPreferences.Editor editor = settings.edit();
-                                String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
-                                Log.d(TAG, "Received following token: " + token);
-                                editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr).commit();
-                                sendEmail(context, email, message, title, 1, headers);
+                                if (StringUtils.isNotEmpty(getToken(context, results))) {
+                                    sendEmail(context, location, email, message, title, 1, headers);
+                                } else {
+                                    Log.e(TAG, "Failed to parse token!");
+                                }
                             } else if (responseCode == 500 && retryCount > 0) {
                                 sendEmail(context, location, email, message, title, retryCount - 1, headers);
                             } else {
@@ -96,6 +95,23 @@ public class Messenger {
             } else {
                 Toast.makeText(context, R.string.no_network_error, Toast.LENGTH_LONG).show();
             }
+        }
+    }
+
+    private static void sendEmail(final Context context, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
+        try {
+            String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title + "&username=" + getDeviceId(context);
+            Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                    if (responseCode == 500 && retryCount > 0) {
+                        sendEmail(context, email, message, title, retryCount-1, headers);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, e.getMessage(), e);
         }
     }
 
@@ -124,12 +140,11 @@ public class Messenger {
                         public void onGetFinish(String results, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                             if (responseCode == 200) {
-                                JsonObject token = new JsonParser().parse(results).getAsJsonObject();
-                                SharedPreferences.Editor editor = settings.edit();
-                                String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
-                                Log.d(TAG, "Received following token: " + token);
-                                editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr).commit();
-                                sendTelegram(context, telegramId, message, 1, headers);
+                                if (StringUtils.isNotEmpty(getToken(context, results))) {
+                                    sendTelegram(context, location, telegramId, message, 1, headers);
+                                } else {
+                                    Log.e(TAG, "Failed to parse token!");
+                                }
                             } else if (responseCode == 500 && retryCount > 0) {
                                 sendTelegram(context, location, telegramId, message, retryCount - 1, headers);
                             } else {
@@ -164,15 +179,57 @@ public class Messenger {
 
     }
 
-    private static void sendEmail(final Context context, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
+    public static void sendRoutePoint(final Context context, final Location location, final int retryCount, final Map<String, String> headers) {
+        if (Network.isNetworkAvailable(context)) {
+            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+            if (StringUtils.isNotEmpty(tokenStr)) {
+                headers.put("Authorization", "Bearer " + tokenStr);
+                headers.put("X-GMS-AppId", "2");
+                String deviceId = getDeviceId(context);
+                if (StringUtils.isNotEmpty(deviceId)) {
+                    headers.put("X-GMS-DeviceId", deviceId);
+                }
+                if (location != null) {
+                    headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
+                    headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
+                }
+                headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
+                sendRoutePoint(context, 1, headers);
+            } else {
+                String queryString = "scope=dl&user=" + getDeviceId(context);
+                Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                        if (responseCode == 200) {
+                            if (StringUtils.isNotEmpty(getToken(context, results))) {
+                                sendRoutePoint(context, location, 1, headers);
+                            } else {
+                                Log.e(TAG, "Failed to parse token!");
+                            }
+                        } else if (responseCode == 500 && retryCount > 0) {
+                            sendRoutePoint(context, location, retryCount - 1, headers);
+                        } else {
+                            Log.d(TAG, "Failed to receive token: " + results);
+                        }
+                    }
+                });
+            }
+        } else {
+                Toast.makeText(context, R.string.no_network_error, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private static void sendRoutePoint(final Context context, final int retryCount, final Map<String, String> headers) {
         try {
-            String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title + "&username=" + getDeviceId(context);
+            String queryString = "type=routePoint&username=" + getDeviceId(context);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 500 && retryCount > 0) {
-                        sendEmail(context, email, message, title, retryCount-1, headers);
+                        sendRoutePoint(context, retryCount-1, headers);
                     }
                 }
             });
@@ -496,13 +553,7 @@ public class Messenger {
                     public void onGetFinish(String results, int responseCode, String url) {
                         Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                         if (responseCode == 200) {
-                            JsonObject token = new JsonParser().parse(results).getAsJsonObject();
-                            SharedPreferences.Editor editor = settings.edit();
-                            String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
-                            Log.d(TAG, "Received following token: " + token);
-                            editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
-                            editor.commit();
-                            sendEmailRegistrationRequest(context, email, tokenStr, 1);
+                            sendEmailRegistrationRequest(context, email, getToken(context, results), 1);
                         } else if (responseCode == 500 && retryCount > 0) {
                             sendEmailRegistrationRequest(context, email, retryCount-1);
                         } else {
@@ -527,13 +578,7 @@ public class Messenger {
                     public void onGetFinish(String results, int responseCode, String url) {
                         Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                         if (responseCode == 200) {
-                            JsonObject token = new JsonParser().parse(results).getAsJsonObject();
-                            SharedPreferences.Editor editor = settings.edit();
-                            String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
-                            Log.d(TAG, "Received following token: " + token);
-                            editor.putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr);
-                            editor.commit();
-                            sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
+                            sendTelegramRegistrationRequest(context, telegramId, getToken(context, results), 1);
                         } else if (responseCode == 500 && retryCount > 0) {
                             sendTelegramRegistrationRequest(context, telegramId, retryCount-1);
                         } else {
@@ -655,5 +700,15 @@ public class Messenger {
         } else if (showToast) {
             Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         }
+    }
+
+    public static String getToken(Context context, String response) {
+        JsonObject token = new JsonParser().parse(response).getAsJsonObject();
+        String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
+        Log.d(TAG, "Received following token: " + token);
+        if (StringUtils.isNotEmpty(tokenStr)) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr).commit();
+        }
+        return tokenStr;
     }
 }

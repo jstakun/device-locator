@@ -7,8 +7,6 @@ import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
@@ -46,11 +44,7 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 200) {
-                        JsonObject tokenJson = new JsonParser().parse(results).getAsJsonObject();
-                        String tokenStr = tokenJson.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
-                        Log.d(TAG, "Received gms token");
-                        settings.edit().putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr).apply();
-                        sendRegistrationToServer(context, token, pin, tokenStr);
+                        sendRegistrationToServer(context, token, pin, Messenger.getToken(context, results));
                     } else {
                         Log.d(TAG, "Failed to receive token: " + results);
                     }
