@@ -368,8 +368,8 @@ public abstract class AbstractLocationManager {
                 //Log.d(TAG, "Parsing: " + coordsStr);
                 String[] coords = StringUtils.split(coordsStr, ",");
                 if (coords.length >= 2) {
-                    //Log.d(TAG, "Adding point " + coords[0] + "," + coords[1]);
-                    coordinates[i] = new double[]{Double.parseDouble(coords[0]), Double.parseDouble(coords[1])};
+                    //LNG, LAT
+                    coordinates[i] = new double[]{Double.parseDouble(coords[1]), Double.parseDouble(coords[0])};
                 }
 
                 if (i == 0 && coords.length >= 3) {
