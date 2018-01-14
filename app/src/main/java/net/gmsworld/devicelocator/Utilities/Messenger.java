@@ -70,6 +70,7 @@ public class Messenger {
                         headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
                         headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
                     }
+                    headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     sendEmail(context, email, message, title, 1, headers);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context);
@@ -114,6 +115,7 @@ public class Messenger {
                         headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
                         headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
                     }
+                    headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     sendTelegram(context, telegramId, message, 1, headers);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context);
