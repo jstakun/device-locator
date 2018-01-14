@@ -251,17 +251,7 @@ public class Command {
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String title = settings.getString("routeTitle", "");
-
-            if (StringUtils.isEmpty(title)) {
-                title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
-                settings.edit().putString("routeTitle", title).commit();
-            }
-
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("title", title);
             routeTracingService.putExtra("phoneNumber", sender);
             context.startService(routeTracingService);
         }
@@ -269,20 +259,10 @@ public class Command {
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String title = settings.getString("routeTitle", "");
-            String telegramId = settings.getString("telegramId", "");
-            String email = settings.getString("email", "");
-
-            if (StringUtils.isEmpty(title)) {
-                title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
-                settings.edit().putString("routeTitle", title).commit();
-            }
-
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("title", title);
-            routeTracingService.putExtra("telegramId", telegramId);
-            routeTracingService.putExtra("email", email);
+            routeTracingService.putExtra("telegramId", settings.getString("telegramId", ""));
+            routeTracingService.putExtra("email", settings.getString("email", ""));
             context.startService(routeTracingService);
         }
     }

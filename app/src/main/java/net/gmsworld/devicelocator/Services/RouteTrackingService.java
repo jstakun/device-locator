@@ -256,7 +256,7 @@ public class RouteTrackingService extends Service {
                                 message += "\n" + "Battery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
                                         "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
-                                Map<String, String> headers = new HashMap<String, String>();
+                                final Map<String, String> headers = new HashMap<String, String>();
                                 headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(RouteTrackingService.this));
                                 //First send notification to telegram and if not configured to email
                                 //REMEMBER this could send a lot of messages and your email account could be overloaded

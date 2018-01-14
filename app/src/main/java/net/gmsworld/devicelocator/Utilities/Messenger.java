@@ -302,7 +302,7 @@ public class Messenger {
                 text = "Device location tracking service has been stopped. Battery level: " + getBatteryLevel(context);
                 break;
             case Command.START_COMMAND:
-                text = "Device location tracking service has been started. Battery level: " + getBatteryLevel(context);
+                text = "Device location tracking service has been started. Track your route at: " + context.getString(R.string.showRouteUrl) + "/" + RouteTrackingServiceUtils.getRouteId(context) + ".\nBattery level: " + getBatteryLevel(context);
                 break;
             case Command.MUTE_COMMAND:
                 text = "Device has been muted.";
@@ -320,11 +320,9 @@ public class Messenger {
                 }
                 break;
             case Command.ROUTE_COMMAND:
-                String title = intent.getStringExtra("title");
                 int size = intent.getIntExtra("size", 0);
                 if (size > 1) {
-                    String showRouteUrl = context.getString(R.string.showRouteUrl);
-                    text = "Check your route at: " + showRouteUrl + "/" + title;
+                    text = "Check your route at: " + context.getString(R.string.showRouteUrl) + "/" + RouteTrackingServiceUtils.getRouteId(context);
                 } else if (size == 0) {
                     text = "No route points has been recorder yet. Try again later.";
                 } else if (size < 0) {

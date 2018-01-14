@@ -1083,7 +1083,7 @@ public class MainActivity extends AppCompatActivity {
         this.phoneNumber = settings.getString("phoneNumber", "");
         this.email = settings.getString("email", "");
         this.telegramId = settings.getString("telegramId", "");
-        //TODO tesing use count
+        //TODO testing use count
         int useCount = settings.getInt("useCount", 0);
         settings.edit().putInt("useCount", useCount+1).commit();
     }
