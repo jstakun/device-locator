@@ -7,6 +7,7 @@ package net.gmsworld.devicelocator.Services;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Handler;
 import android.os.IBinder;
@@ -244,8 +245,13 @@ public class RouteTrackingService extends Service {
                         if (location != null) {
                             if (!silentMode) {
                                 if (StringUtils.isNotEmpty(phoneNumber)) {
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, phoneNumber, null, null);
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber, null, null);
+                                    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this);
+                                    if (settings.getBoolean("settings_gps_sms", false)) {
+                                        net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, phoneNumber, null, null);
+                                    }
+                                    if (settings.getBoolean("settings_google_sms", true)) {
+                                        net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber, null, null);
+                                    }
                                 }
                                 DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
                                 String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
@@ -261,7 +267,6 @@ public class RouteTrackingService extends Service {
                                 //First send notification to telegram and if not configured to email
                                 //REMEMBER this could send a lot of messages and your email account could be overloaded
                                 if (StringUtils.isNotEmpty(telegramId)) {
-                                    //message = message.replace("\n", ", ");
                                     net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, location, telegramId, message, 1, headers);
                                 } else if (StringUtils.isNotEmpty(email)) {
                                     String title = getString(R.string.message);
@@ -271,6 +276,7 @@ public class RouteTrackingService extends Service {
                                     }
                                     net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, location, email, message, title, 1, headers);
                                 } else {
+                                    //send route point for online route tracking
                                     net.gmsworld.devicelocator.Utilities.Messenger.sendRoutePoint(RouteTrackingService.this, location, 1, headers);
                                 }
                             }

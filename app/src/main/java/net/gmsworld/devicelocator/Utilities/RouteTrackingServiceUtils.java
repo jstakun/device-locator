@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -82,10 +83,20 @@ public class RouteTrackingServiceUtils {
         String title = settings.getString("routeTitle", "");
 
         if (StringUtils.isEmpty(title)) {
-            title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
+            title = "device_locator_route_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
             settings.edit().putString("routeTitle", title).commit();
         }
 
         return title;
+    }
+
+    public static String getRouteUrl(Context context) {
+        String routeId = getRouteId(context);
+        String[] tokens = StringUtils.split(routeId, "_");
+        if (tokens.length == 5) {
+            return context.getString(R.string.showRouteUrl) + "/" + tokens[3] + "/" + tokens[4];
+        } else {
+            return context.getString(R.string.showRouteUrl) + "/" + routeId;
+        }
     }
 }

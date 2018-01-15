@@ -857,7 +857,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: "+ responseCode + " from url " + url);
-                            Message message = loadingHandler.obtainMessage(SHARE_ROUTE_MESSAGE, responseCode, 0, title);
+                            Message message = loadingHandler.obtainMessage(SHARE_ROUTE_MESSAGE, responseCode, 0);
                             message.sendToTarget();
                         }
                     });
@@ -1215,16 +1215,15 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             if (msg.what == SHARE_ROUTE_MESSAGE) {
                 int responseCode = msg.arg1;
-                String title = (String)msg.obj;
                 if (responseCode == 200) {
-                    String showRouteUrl = MainActivity.this.getString(R.string.showRouteUrl) + "/" + title;
+                    String showRouteUrl = RouteTrackingServiceUtils.getRouteUrl(MainActivity.this);
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
                     clipboard.setPrimaryClip(urlClip);
                     Toast.makeText(MainActivity.this, "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
                     startActivity(browserIntent);
-                    String message = "Check out your route at " + showRouteUrl;
+                    String message = "Check your route at " + showRouteUrl;
                     if (StringUtils.isNotEmpty(MainActivity.this.phoneNumber)) {
                         Messenger.sendSMS(MainActivity.this, MainActivity.this.phoneNumber, message);
                     }

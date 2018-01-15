@@ -339,7 +339,7 @@ public class Messenger {
 
         switch (command) {
             case Command.RESUME_COMMAND:
-                text = "Device location tracking service has been resumed. Battery level: " + getBatteryLevel(context);
+                text = "Device location tracking has been resumed. Battery level: " + getBatteryLevel(context);
                 if (StringUtils.isNotEmpty(notificationNumber)) {
                     notifications.add(notificationNumber);
                 }
@@ -356,10 +356,10 @@ public class Messenger {
                 }
                 break;
             case Command.STOP_COMMAND:
-                text = "Device location tracking service has been stopped. Battery level: " + getBatteryLevel(context);
+                text = "Device location tracking has been stopped. Battery level: " + getBatteryLevel(context);
                 break;
             case Command.START_COMMAND:
-                text = "Device location tracking service has been started. Track your route at: " + context.getString(R.string.showRouteUrl) + "/" + RouteTrackingServiceUtils.getRouteId(context) + ".\nBattery level: " + getBatteryLevel(context);
+                text = "Device location tracking is running. Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now\nBattery level: " + getBatteryLevel(context);
                 break;
             case Command.MUTE_COMMAND:
                 text = "Device has been muted.";
@@ -371,15 +371,15 @@ public class Messenger {
                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 int radius = settings.getInt("radius", -1);
                 if (radius > 0) {
-                    text = "Device location tracking service radius has been changed to " + radius + " meters.";
+                    text = "Device location tracking radius has been changed to " + radius + " meters.";
                 } else {
-                    text = "Device location tracking service radius is incorrect. Please try again.";
+                    text = "Device location tracking radius is incorrect. Please try again.";
                 }
                 break;
             case Command.ROUTE_COMMAND:
                 int size = intent.getIntExtra("size", 0);
                 if (size > 1) {
-                    text = "Check your route at: " + context.getString(R.string.showRouteUrl) + "/" + RouteTrackingServiceUtils.getRouteId(context);
+                    text = "Check your route at: " + RouteTrackingServiceUtils.getRouteUrl(context);
                 } else if (size == 0) {
                     text = "No route points has been recorder yet. Try again later.";
                 } else if (size < 0) {
