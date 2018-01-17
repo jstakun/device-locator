@@ -339,7 +339,7 @@ public class Messenger {
 
         switch (command) {
             case Command.RESUME_COMMAND:
-                text = "Device location tracking has been resumed. Battery level: " + getBatteryLevel(context);
+                text = "Device location tracking has been resumed.\nBattery level: " + getBatteryLevel(context);
                 if (StringUtils.isNotEmpty(notificationNumber)) {
                     notifications.add(notificationNumber);
                 }
@@ -356,7 +356,7 @@ public class Messenger {
                 }
                 break;
             case Command.STOP_COMMAND:
-                text = "Device location tracking has been stopped. Battery level: " + getBatteryLevel(context);
+                text = "Device location tracking has been stopped.\nBattery level: " + getBatteryLevel(context);
                 break;
             case Command.START_COMMAND:
                 text = "Device location tracking is running. Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now\nBattery level: " + getBatteryLevel(context);
