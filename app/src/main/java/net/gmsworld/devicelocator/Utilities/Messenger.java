@@ -305,10 +305,16 @@ public class Messenger {
     }
 
     public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId, String email) {
-        String text = context.getString(R.string.acknowledgeMessage) + "\n";
-        text +=  context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context)) + "\n";
-        text += context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context) + "\n";
+        String text;
+        if (SmsSenderService.isLocationEnabled(context)) {
+            text = context.getString(R.string.acknowledgeMessage) + "\n";
+            text += context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context)) + "\n";
+            text += context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context) + "\n";
+        } else {
+            text = "Location service is disabled! Unable to send location. Please enable location service and send the command again.\n";
+        }
         text += "Battery level: " + getBatteryLevel(context);
+
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         } else {
@@ -339,27 +345,52 @@ public class Messenger {
 
         switch (command) {
             case Command.RESUME_COMMAND:
-                text = "Device location tracking has been resumed.\nBattery level: " + getBatteryLevel(context);
-                if (StringUtils.isNotEmpty(notificationNumber)) {
-                    notifications.add(notificationNumber);
-                }
-                if (StringUtils.isNotEmpty(email)) {
-                    notifications.add(email);
-                }
-                if (StringUtils.isNotEmpty(telegramId)) {
-                    notifications.add("Telegram chat id: " + telegramId);
-                }
-                if (notifications.isEmpty()) {
-                    text += " No notifications will be sent!";
+                text = "Device location tracking has been resumed. ";
+                if (SmsSenderService.isLocationEnabled(context)) {
+                    if (StringUtils.isNotEmpty(notificationNumber)) {
+                        notifications.add(notificationNumber);
+                    }
+                    if (StringUtils.isNotEmpty(email)) {
+                        notifications.add(email);
+                    }
+                    if (StringUtils.isNotEmpty(telegramId)) {
+                        notifications.add("Telegram chat id: " + telegramId);
+                    }
+                    if (notifications.isEmpty()) {
+                        text += "No notifications will be sent!";
+                    } else {
+                        text += "Notifications will be sent to " + StringUtils.joinWith(", ", notifications);
+                    }
                 } else {
-                    text += " Notifications will be sent to " + StringUtils.joinWith(", ", notifications);
+                    text += "Location service is disabled! No notifications will be sent!";
                 }
+                text += "\nBattery level: " + getBatteryLevel(context);
                 break;
             case Command.STOP_COMMAND:
                 text = "Device location tracking has been stopped.\nBattery level: " + getBatteryLevel(context);
                 break;
             case Command.START_COMMAND:
-                text = "Device location tracking is running. Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now\nBattery level: " + getBatteryLevel(context);
+                text = "Device location tracking is running. ";
+                if (SmsSenderService.isLocationEnabled(context)) {
+                    text += "Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
+                    if (StringUtils.isNotEmpty(notificationNumber)) {
+                        notifications.add(notificationNumber);
+                    }
+                    if (StringUtils.isNotEmpty(email)) {
+                        notifications.add(email);
+                    }
+                    if (StringUtils.isNotEmpty(telegramId)) {
+                        notifications.add("Telegram chat id: " + telegramId);
+                    }
+                    if (notifications.isEmpty()) {
+                        text += "\nNo notifications will be sent!";
+                    } else {
+                        text += "\nNotifications will be sent to " + StringUtils.joinWith(", ", notifications);
+                    }
+                } else {
+                    text += "Location service is disabled! No notifications will be sent!";
+                }
+                text += "\nBattery level: " + getBatteryLevel(context);
                 break;
             case Command.MUTE_COMMAND:
                 text = "Device has been muted.";

@@ -213,6 +213,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         }
     }
 
+    public static boolean isLocationEnabled(Context context) {
+        return getLocationMode(context) != Settings.Secure.LOCATION_MODE_OFF;
+    }
+
     public static String locationToString(Context context) {
         int mode = getLocationMode(context);
         switch (mode) {
