@@ -34,7 +34,7 @@ dependencies {
     compile 'com.google.firebase:firebase-messaging:10.2.4'
     compile 'com.google.code.gson:gson:2.8.2'
     compile 'org.apache.commons:commons-lang3:3.7'
-    compile 'ch.acra:acra:4.9.2'
+    compile 'ch.acra:acra:4.9.1'
     compile 'commons-io:commons-io:2.6'
 }
 

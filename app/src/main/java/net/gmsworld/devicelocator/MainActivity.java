@@ -192,6 +192,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        if (pinDialog != null) {
+            pinDialog.dismiss();
+            pinDialog = null;
+        }
+
         editor.commit();
     }
 

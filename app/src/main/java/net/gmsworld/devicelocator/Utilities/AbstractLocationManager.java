@@ -106,9 +106,14 @@ public abstract class AbstractLocationManager {
 
     void onLocationReceived(Location location) {
         Log.d(TAG, "Received new location");
-        if (location != null) {
+        //location must be newer than 1 minute
+        if (location != null && (System.currentTimeMillis() - location.getTime()) < 60 * 1000) {
             checkRadius(location);
             addLocationToRoute(location);
+        } else if (location == null) {
+            Log.d(TAG, "Received null location!");
+        } else {
+            Log.d(TAG, "Received old location: " + (System.currentTimeMillis() - location.getTime()) + "!");
         }
     }
 
