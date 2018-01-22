@@ -306,7 +306,7 @@ public class Messenger {
 
     public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId, String email) {
         String text;
-        if (SmsSenderService.isLocationEnabled(context)) {
+        if (GmsSmartLocationManager.isLocationEnabled(context)) {
             text = context.getString(R.string.acknowledgeMessage) + "\n";
             text += context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context)) + "\n";
             text += context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context) + "\n";
@@ -346,7 +346,7 @@ public class Messenger {
         switch (command) {
             case Command.RESUME_COMMAND:
                 text = "Device location tracking has been resumed. ";
-                if (SmsSenderService.isLocationEnabled(context)) {
+                if (GmsSmartLocationManager.isLocationEnabled(context)) {
                     if (StringUtils.isNotEmpty(notificationNumber)) {
                         notifications.add(notificationNumber);
                     }
@@ -371,7 +371,7 @@ public class Messenger {
                 break;
             case Command.START_COMMAND:
                 text = "Device location tracking is running. ";
-                if (SmsSenderService.isLocationEnabled(context)) {
+                if (GmsSmartLocationManager.isLocationEnabled(context)) {
                     text += "Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
                     if (StringUtils.isNotEmpty(notificationNumber)) {
                         notifications.add(notificationNumber);

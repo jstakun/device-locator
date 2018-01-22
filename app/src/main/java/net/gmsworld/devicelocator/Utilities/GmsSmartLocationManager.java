@@ -55,4 +55,8 @@ public class GmsSmartLocationManager extends AbstractLocationManager implements 
 
         onLocationReceived(location);
     }
+
+    public static boolean isLocationEnabled(Context context) {
+        return SmartLocation.with(context).location().state().locationServicesEnabled();
+    }
 }

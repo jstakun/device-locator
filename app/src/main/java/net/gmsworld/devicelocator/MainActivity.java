@@ -448,7 +448,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toggleRunning() {
-
         //enable Firebase
         if (!this.running) {
             final String firebaseToken = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
@@ -482,6 +481,12 @@ public class MainActivity extends AppCompatActivity {
         saveData();
         updateUI();
         toggleBroadcastReceiver();
+
+        //check if location settings are enabled
+        if (!GmsSmartLocationManager.isLocationEnabled(this)) {
+            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            Toast.makeText(getApplicationContext(), "Please enable location services in order to receive device location updates!", Toast.LENGTH_SHORT).show();
+        }
 
         if (running) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -534,6 +539,11 @@ public class MainActivity extends AppCompatActivity {
     private void toogleLocationDetector() {
         if (this.motionDetectorRunning) {
             launchMotionDetectorService();
+            //check if location settings are enabled
+            if (!GmsSmartLocationManager.isLocationEnabled(this)) {
+                Toast.makeText(getApplicationContext(), "Please enable location services in order to receive device location updates!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+            }
         } else {
             saveData();
             RouteTrackingServiceUtils.stopRouteTrackingService(this, mConnection, isTrackingServiceBound, false, null, null, null, null);
