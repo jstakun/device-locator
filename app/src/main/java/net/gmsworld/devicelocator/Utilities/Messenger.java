@@ -359,7 +359,7 @@ public class Messenger {
                     if (notifications.isEmpty()) {
                         text += "No notifications will be sent!";
                     } else {
-                        text += "Notifications will be sent to " + StringUtils.joinWith(", ", notifications);
+                        text += "Notifications will be sent to " + StringUtils.join(notifications, ',');
                     }
                 } else {
                     text += "Location service is disabled! No notifications will be sent!";
@@ -385,7 +385,7 @@ public class Messenger {
                     if (notifications.isEmpty()) {
                         text += "\nNo notifications will be sent!";
                     } else {
-                        text += "\nNotifications will be sent to " + StringUtils.joinWith(", ", notifications);
+                        text += "\nNotifications will be sent to " + StringUtils.join(notifications, ',');
                     }
                 } else {
                     text += "Location service is disabled! No notifications will be sent!";
@@ -437,7 +437,7 @@ public class Messenger {
                 if (notifications.isEmpty()) {
                     text += "No notifications will be sent! Please specify valid email, phone number or Telegram chat id.";
                 } else {
-                    text += "Notifications will be sent to " + StringUtils.joinWith(", ", notifications);
+                    text += "Notifications will be sent to " + StringUtils.join(notifications, ',');
                 }
                 break;
             case Command.AUDIO_COMMAND:
