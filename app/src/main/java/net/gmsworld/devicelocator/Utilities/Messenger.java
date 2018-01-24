@@ -340,12 +340,17 @@ public class Messenger {
         String email = intent.getExtras().getString("email");
         String notificationNumber = intent.getExtras().getString("notificationNumber");
         String command = intent.getExtras().getString("command");
-
+        String title = null;
+        String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
         List<String> notifications = new ArrayList<String>();
 
         switch (command) {
             case Command.RESUME_COMMAND:
                 text = "Device location tracking has been resumed. ";
+                title = "Device Locator resumed location tracking";
+                if (deviceId != null) {
+                    title += " on device " + deviceId;
+                }
                 if (GmsSmartLocationManager.isLocationEnabled(context)) {
                     if (StringUtils.isNotEmpty(notificationNumber)) {
                         notifications.add(notificationNumber);
@@ -368,9 +373,17 @@ public class Messenger {
                 break;
             case Command.STOP_COMMAND:
                 text = "Device location tracking has been stopped.\nBattery level: " + getBatteryLevel(context);
+                title = "Device Locator stopped location tracking";
+                if (deviceId != null) {
+                    title += " on device " + deviceId;
+                }
                 break;
             case Command.START_COMMAND:
                 text = "Device location tracking is running. ";
+                title = "Device Locator started location tracking";
+                if (deviceId != null) {
+                    title += " on device " + deviceId;
+                }
                 if (GmsSmartLocationManager.isLocationEnabled(context)) {
                     text += "Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
                     if (StringUtils.isNotEmpty(notificationNumber)) {
@@ -498,10 +511,11 @@ public class Messenger {
                 }
 
                 if (StringUtils.isNotEmpty(email)) {
-                    String title = context.getString(R.string.message);
-                    String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
-                    if (deviceId != null) {
-                        title += " installed on device " + deviceId;
+                    if (title == null) {
+                        title = context.getString(R.string.message);
+                        if (deviceId != null) {
+                            title += " installed on device " + deviceId;
+                        }
                     }
                     text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
                     sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
