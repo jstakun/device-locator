@@ -658,7 +658,7 @@ public class Messenger {
                             Toast.makeText(context, "Oops! Something went wrong on our side. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        if (telegramId.startsWith("-")) {
+                        if (telegramId.startsWith("-") || telegramId.startsWith("@")) {
                             Toast.makeText(context, "Please add @device_locator_bot to your channel with sending message permission and send us email with your Telegram channel id to finish registration!", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(context, "Oops! Something went wrong on our side. Please send us email with your Telegram chat id to finish registration!", Toast.LENGTH_LONG).show();
