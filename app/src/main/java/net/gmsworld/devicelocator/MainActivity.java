@@ -134,12 +134,38 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume()");
         long pinVerificationMillis = PreferenceManager.getDefaultSharedPreferences(this).getLong("pinVerificationMillis", 0);
         boolean settingsVerifyPin = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("settings_verify_pin", false);
         //Log.d(TAG, "Checking if Security PIN should be verified...");
         if (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > 10 * 60 * 1000) {
             //show pin dialog only if not shown in last 10 minutes
             showPinDialog();
+        }
+        //TODO telegram paste
+        boolean telegramPaste = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("telegramPaste", false);
+        if (telegramPaste) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("telegramPaste", false).commit();
+            final TextView telegramInput = (TextView) this.findViewById(R.id.telegramId);
+            //paste telegram id from clipboard
+            try {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                if (clipboard.hasPrimaryClip()) {
+                    int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
+                    for (int i=0;i<clipboardItemCount; i++) {
+                        ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
+                        String pasteData = item.getText().toString();
+                        Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
+                        if (Messenger.isValidTelegramId(pasteData)) {
+                            telegramInput.setText(pasteData);
+                            Toast.makeText(getApplicationContext(), "Pasted Telegram chat or channel ID from clipboard!", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to paste text from clipboard", e);
+            }
         }
     }
 
@@ -773,30 +799,8 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "Make sure to specify valid Telegram chat id!", Toast.LENGTH_SHORT).show();
                         telegramInput.setText("");
                     }
-                } else {
-                    //paste telegramid from clipboard
-                    String currentText = telegramInput.getText().toString();
-                    if (currentText.isEmpty()) {
-                        try {
-                            ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                            if (clipboard.hasPrimaryClip()) {
-                                int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
-                                for (int i=0;i<clipboardItemCount; i++) {
-                                    ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
-                                    String pasteData = item.getText().toString();
-                                    Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
-                                    if (Messenger.isValidTelegramId(pasteData)) {
-                                        telegramInput.setText(pasteData);
-                                        Toast.makeText(getApplicationContext(), "Pasted Telegram chat or channel ID from clipboard!", Toast.LENGTH_SHORT).show();
-                                        break;
-                                    }
-                                }
-                            }
-                        } catch (Exception e) {
-                            Log.e(TAG, "Failed to paste text from clipboard", e);
-                        }
-                    }
                 }
+                //TODO telegram paste
             }
         });
     }
@@ -1057,6 +1061,8 @@ public class MainActivity extends AppCompatActivity {
                     intent.setPackage(appName);
                     //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
                     MainActivity.this.startActivity(intent);
+                    //TODO telegram paste
+                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("telegramPaste",true).commit();
                     Toast.makeText(getApplicationContext(), "In order to get your Chat ID please select Device Locator bot now.", Toast.LENGTH_LONG).show();
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, appName + " not found on this device");
