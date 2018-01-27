@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
             editor.putString("phoneNumber", newPhoneNumber);
         }
 
-        if (!StringUtils.equals(telegramId, newTelegramId) && ((StringUtils.isEmpty(newTelegramId) && newTelegramId != null) || isValidTelegramId(newTelegramId))) {
+        if (!StringUtils.equals(telegramId, newTelegramId) && ((StringUtils.isEmpty(newTelegramId) && newTelegramId != null) || Messenger.isValidTelegramId(newTelegramId))) {
             Log.d(TAG, "New telegram id has been set: " + newTelegramId);
             if (Network.isNetworkAvailable(MainActivity.this)) {
                 editor.putString("telegramId", newTelegramId);
@@ -752,7 +752,7 @@ public class MainActivity extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
                     newTelegramId = telegramInput.getText().toString();
-                    if (!StringUtils.equals(telegramId, newTelegramId) && (StringUtils.isEmpty(newTelegramId) || isValidTelegramId(newTelegramId))) {
+                    if (!StringUtils.equals(telegramId, newTelegramId) && (StringUtils.isEmpty(newTelegramId) || Messenger.isValidTelegramId(newTelegramId))) {
                         if (Network.isNetworkAvailable(MainActivity.this)) {
                             Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
                             telegramId = newTelegramId;
@@ -785,7 +785,7 @@ public class MainActivity extends AppCompatActivity {
                                     ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
                                     String pasteData = item.getText().toString();
                                     Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
-                                    if (isValidTelegramId(pasteData)) {
+                                    if (Messenger.isValidTelegramId(pasteData)) {
                                         telegramInput.setText(pasteData);
                                         Toast.makeText(getApplicationContext(), "Pasted Telegram chat or channel ID from clipboard!", Toast.LENGTH_SHORT).show();
                                         break;
@@ -1201,28 +1201,6 @@ public class MainActivity extends AppCompatActivity {
         pinDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
         pinDialog.show();
-    }
-
-    private static boolean isValidTelegramId(String telegramId) {
-        //channel id could be negative number starting from -100 or string starting with @
-        //chat id must be positive integer
-        if (StringUtils.startsWith(telegramId, "@") && !StringUtils.containsWhitespace(telegramId)) {
-            return true;
-        } else  {
-            if (StringUtils.isNotEmpty(telegramId)) {
-                try {
-                    int id = Integer.parseInt(telegramId);
-                    if (id < 0) {
-                        return StringUtils.startsWith(telegramId, "-100");
-                    } else {
-                        return true;
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Invalid telegram chat or channel id " + telegramId);
-                }
-            }
-        }
-        return false;
     }
 
     //----------------------------- route tracking service -----------------------------------

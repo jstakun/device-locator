@@ -15,7 +15,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
@@ -24,7 +24,6 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -116,7 +115,7 @@ public class Messenger {
     }
 
     public static void sendTelegram(final Context context, final Location location, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
-        if (NumberUtils.isCreatable(telegramId)) {
+        if (isValidTelegramId(telegramId)) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
@@ -611,7 +610,7 @@ public class Messenger {
     }
 
     public static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final int retryCount) {
-        if (NumberUtils.isCreatable(telegramId)) {
+        if (isValidTelegramId(telegramId)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
@@ -648,8 +647,14 @@ public class Messenger {
                     if (responseCode != 200 && retryCount > 0) {
                         sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount-1);
                     } else if (responseCode == 200  && StringUtils.startsWith(results, "{")) {
-                        JsonObject reply = new JsonParser().parse(results).getAsJsonObject();
-                        String status = reply.get("status").getAsString();
+                        JsonElement reply = new JsonParser().parse(results);
+                        String status = null;
+                        if (reply != null) {
+                            JsonElement st = reply.getAsJsonObject().get("status");
+                            if (st != null) {
+                                status = st.getAsString();
+                            }
+                        }
                         if (StringUtils.equals(status, "registered")) {
                             Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equals(status, "unverified")) {
@@ -685,8 +690,14 @@ public class Messenger {
                     if (responseCode != 200 && retryCount > 0) {
                         sendEmailRegistrationRequest(context, email, tokenStr, retryCount-1);
                     } else if (responseCode == 200  && StringUtils.startsWith(results, "{")) {
-                        JsonObject reply = new JsonParser().parse(results).getAsJsonObject();
-                        String status = reply.get("status").getAsString();
+                        JsonElement reply = new JsonParser().parse(results);
+                        String status = null;
+                        if (reply != null) {
+                            JsonElement st = reply.getAsJsonObject().get("status");
+                            if (st != null) {
+                                status = st.getAsString();
+                            }
+                        }
                         if (StringUtils.equals(status, "registered")) {
                             Toast.makeText(context, "Your email address is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equals(status, "unverified")) {
@@ -748,12 +759,40 @@ public class Messenger {
     }
 
     public static String getToken(Context context, String response) {
-        JsonObject token = new JsonParser().parse(response).getAsJsonObject();
-        String tokenStr = token.get(DeviceLocatorApp.GMS_TOKEN_KEY).getAsString();
-        Log.d(TAG, "Received following token: " + token);
+        JsonElement reply = new JsonParser().parse(response);
+        String tokenStr = null;
+        if (reply != null) {
+            JsonElement t = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN_KEY);
+            if (t != null) {
+                tokenStr = t.getAsString();
+            }
+        }
+        //Log.d(TAG, "Received following token: " + tokenStr);
         if (StringUtils.isNotEmpty(tokenStr)) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr).commit();
         }
         return tokenStr;
+    }
+
+    public static boolean isValidTelegramId(String telegramId) {
+        //channel id could be negative number starting from -100 or string starting with @
+        //chat id must be positive integer
+        if (StringUtils.startsWith(telegramId, "@") && !StringUtils.containsWhitespace(telegramId)) {
+            return true;
+        } else  {
+            if (StringUtils.isNotEmpty(telegramId)) {
+                try {
+                    long id = Long.parseLong(telegramId);
+                    if (id < 0) {
+                        return StringUtils.startsWith(telegramId, "-100");
+                    } else {
+                        return true;
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Invalid telegram chat or channel id " + telegramId);
+                }
+            }
+        }
+        return false;
     }
 }
