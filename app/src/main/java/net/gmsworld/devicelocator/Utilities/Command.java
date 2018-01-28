@@ -181,11 +181,7 @@ public class Command {
         protected void onSmsCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
-                String title = settings.getString("routeTitle", "");
-                if (StringUtils.isEmpty(title)) {
-                    title = "devicelocatorroute_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
-                    settings.edit().putString("routeTitle", title);
-                }
+                String title = RouteTrackingServiceUtils.getRouteId(context);
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, null, null);
             } else {
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
@@ -253,6 +249,7 @@ public class Command {
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
             routeTracingService.putExtra("phoneNumber", sender);
+            routeTracingService.putExtra("title", RouteTrackingServiceUtils.getRouteId(context));
             context.startService(routeTracingService);
         }
 
@@ -261,6 +258,7 @@ public class Command {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
+            routeTracingService.putExtra("title", RouteTrackingServiceUtils.getRouteId(context));
             routeTracingService.putExtra("telegramId", settings.getString("telegramId", ""));
             routeTracingService.putExtra("email", settings.getString("email", ""));
             context.startService(routeTracingService);

@@ -325,6 +325,7 @@ public abstract class AbstractLocationManager {
                         headers.put("X-GMS-AppId", "2");
                         headers.put("X-GMS-Scope", "dl");
                     }
+                    //Log.d(TAG, "Route:\n" + route);
                     Network.post(context, url, "route=" + content, null, headers, onFinishListener);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
@@ -364,7 +365,7 @@ public abstract class AbstractLocationManager {
 
             int routeSize = routePoints.size();
             double[][] coordinates = new double[routeSize][2];
-            Log.d(TAG, "Creating route geojson containing " + routeSize + " points");
+            Log.d(TAG, "Creating route " + filename + " geojson containing " + routeSize + " points");
             long routeTime = -1L;
             long creationTime = 0L;
             float routeDistance = 0L;
