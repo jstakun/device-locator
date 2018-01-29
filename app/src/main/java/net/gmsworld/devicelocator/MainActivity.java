@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             //show pin dialog only if not shown in last 10 minutes
             showPinDialog();
         }
-        //TODO telegram paste
+
         boolean telegramPaste = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("telegramPaste", false);
         if (telegramPaste) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("telegramPaste", false).commit();
@@ -800,7 +800,6 @@ public class MainActivity extends AppCompatActivity {
                         telegramInput.setText("");
                     }
                 }
-                //TODO telegram paste
             }
         });
     }
@@ -1061,7 +1060,6 @@ public class MainActivity extends AppCompatActivity {
                     intent.setPackage(appName);
                     //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
                     MainActivity.this.startActivity(intent);
-                    //TODO telegram paste
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("telegramPaste",true).commit();
                     Toast.makeText(getApplicationContext(), "In order to get your Chat ID please select Device Locator bot now.", Toast.LENGTH_LONG).show();
                 } catch (PackageManager.NameNotFoundException e) {
@@ -1165,7 +1163,7 @@ public class MainActivity extends AppCompatActivity {
                         pinDialog.dismiss();
                         PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).commit();
                     } else {
-                        //TODO send failed login notification
+                        //TODO send failed login notification after 10 attempts
                     }
                 }
 
