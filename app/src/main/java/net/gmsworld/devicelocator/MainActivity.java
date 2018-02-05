@@ -1161,9 +1161,32 @@ public class MainActivity extends AppCompatActivity {
                     if (StringUtils.equals(input, pin)) {
                         //Log.d(TAG, "Security PIN verified!");
                         pinDialog.dismiss();
-                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).commit();
-                    } else {
-                        //TODO send failed login notification after 10 attempts
+                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
+                                .remove("pinFailedCount")
+                                .putLong("pinVerificationMillis", System.currentTimeMillis())
+                                .commit();
+                    } else if (input != null && input.length() == pin.length()) {
+                        int pinFailedCount = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getInt("pinFailedCount", 0);
+                        if (pinFailedCount == 2) {
+                            pinFailedCount = -1;
+                            //send failed login notification
+                            Log.d(TAG, "Wrong pin has been entered to unlock the app. SENDING NOTIFICATION!");
+                            Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
+                            newIntent.putExtra("phoneNumber", phoneNumber);
+                            newIntent.putExtra("email", email);
+                            newIntent.putExtra("telegramId", telegramId);
+                            newIntent.putExtra("source", DeviceAdminEventReceiver.SOURCE);
+                            MainActivity.this.startService(newIntent);
+                            if (PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getBoolean("hiddenCamera", false)) {
+                                Intent cameraIntent = new Intent(MainActivity.this, HiddenCaptureImageService.class);
+                                MainActivity.this.startService(cameraIntent);
+                            } else {
+                                Log.d(TAG, "Camera is disable. No photo will be taken");
+                            }
+                        }
+                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
+                                .putInt("pinFailedCount", pinFailedCount+1)
+                                .commit();
                     }
                 }
 
@@ -1196,9 +1219,18 @@ public class MainActivity extends AppCompatActivity {
 
             builder.setView(pinView);
 
-            builder.setCancelable(false);
+            //builder.setCancelable(false);
 
             pinDialog = builder.create();
+
+            pinDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+
+                public void onCancel(DialogInterface dialog) {
+                    // finish activity
+                    Log.d(TAG, "Closing App!");
+                    MainActivity.this.finish();
+                }
+            });
         }
 
         //show keyboard

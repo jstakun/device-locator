@@ -35,7 +35,7 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
     @Override
     public void onPasswordFailed(Context context, Intent intent) {
         super.onPasswordFailed(context, intent);
-        Log.d(TAG, "Wrong password has been entered to unlock this device. SENT NOTIFICATION!");
+        Log.d(TAG, "Wrong password has been entered to unlock this device. SENDING NOTIFICATION!");
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         String email = settings.getString("email", "");
         String phoneNumber = settings.getString("phoneNumber", "");

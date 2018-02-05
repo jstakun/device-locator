@@ -7,7 +7,7 @@ android {
         applicationId "net.gmsworld.devicelocator"
         minSdkVersion 16
         targetSdkVersion 24
-        versionCode 13
+        versionCode 14
         versionName "0.3"
     }
     buildTypes {
