@@ -92,8 +92,8 @@ public class MainActivity extends AppCompatActivity {
     private Boolean running = null;
 
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
-    private boolean motionDetectorRunning = false, pinChanged = false;
-    private String phoneNumber = null, email = null, telegramId = null, pin = null;
+    private boolean motionDetectorRunning = false;
+    private String phoneNumber = null, email = null, telegramId = null, pin = null, oldPin = null;
     private String newEmailAddress = null, newTelegramId = null, newPhoneNumber = null;
 
     private Handler loadingHandler;
@@ -207,12 +207,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //update cloud platform,
-        if (pinChanged) {
+        if (oldPin != null) {
             String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
             if (StringUtils.isNotEmpty(firebaseToken)) {
                 editor.remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN); //remove token so that it will be added again after successfull registration
                 if (Network.isNetworkAvailable(MainActivity.this)) {
-                    DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin);
+                    DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin, oldPin);
                 }
             }
         }
@@ -481,7 +481,7 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     public void run() {
                         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-                        DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, refreshedToken, pin);
+                        DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, refreshedToken, pin, null);
                     }
                 }).start();
             } else if (StringUtils.isNotEmpty(firebaseToken)) {
@@ -624,9 +624,9 @@ public class MainActivity extends AppCompatActivity {
                     //token is 4 to 8 digits string
                     if (input.length() >= 4) {
                         if (!StringUtils.equals(pin, input)) {
+                            oldPin = pin;
                             pin = input;
                             saveData();
-                            pinChanged = true;
                         }
                     } else {
                         Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_SHORT).show();
@@ -1226,8 +1226,7 @@ public class MainActivity extends AppCompatActivity {
             pinDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
                 public void onCancel(DialogInterface dialog) {
-                    // finish activity
-                    Log.d(TAG, "Closing App!");
+                    //Log.d(TAG, "Closing App!");
                     MainActivity.this.finish();
                 }
             });

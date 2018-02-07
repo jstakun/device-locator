@@ -659,6 +659,8 @@ public class Messenger {
                             Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equals(status, "unverified")) {
                             Toast.makeText(context, "You'll receive verification instruction to your chat or channel", Toast.LENGTH_LONG).show();
+                        } else if (StringUtils.equals(status, "failed")) {
+                            Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(context, "Oops! Something went wrong on our side. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
                         }
@@ -668,7 +670,7 @@ public class Messenger {
                         } else {
                             Toast.makeText(context, "Oops! Something went wrong on our side. Please send us email with your Telegram chat id to finish registration!", Toast.LENGTH_LONG).show();
                         }
-                        composeEmail(context, new String[] {"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram channel " + telegramId + " to Device Locator notifications service.", false);
+                        composeEmail(context, new String[] {"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram chat or channel " + telegramId + " to Device Locator notifications service.", false);
                     }
                 }
             });
