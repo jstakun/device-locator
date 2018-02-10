@@ -144,7 +144,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                     }
                 });
             } else {
-                Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                Log.w(TAG, getString(R.string.no_network_error));
             }
         } else {
             Toast.makeText(this, "Camera enabled", Toast.LENGTH_LONG).show();
