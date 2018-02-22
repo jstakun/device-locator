@@ -92,7 +92,7 @@ public class Messenger {
                     });
                 }
             } else {
-                Toast.makeText(context, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                Log.w(TAG, context.getString(R.string.no_network_error));
             }
         }
     }
@@ -153,7 +153,7 @@ public class Messenger {
                     });
                 }
             } else {
-                Toast.makeText(context, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                Log.w(TAG, context.getString(R.string.no_network_error));
             }
         } else {
             Log.e(TAG, "Invalid Telegram Id: " + telegramId);
@@ -216,7 +216,7 @@ public class Messenger {
                 });
             }
         } else {
-                Toast.makeText(context, R.string.no_network_error, Toast.LENGTH_LONG).show();
+            Log.w(TAG, context.getString(R.string.no_network_error));
         }
     }
 
