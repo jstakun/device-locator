@@ -7,7 +7,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ public class Files {
 
     private static final String TAG = Files.class.getSimpleName();
 
-    private static String readLine(InputStreamReader reader) throws IOException {
+    /*private static String readLine(InputStreamReader reader) throws IOException {
         int readChar = reader.read();
         if (readChar == -1) {
             return null;
@@ -34,24 +33,16 @@ public class Files {
             readChar = reader.read();
         }
         return string.toString();
-    }
-
+    }*/
 
     public static List<String> readFileByLinesFromContextDir(String filename, Context context) {
         InputStream is = null;
-        //InputStreamReader isr = null;
         List<String> lines = new ArrayList<String>();
 
         try {
             File fc = new File(context.getFilesDir(), filename);
             if (fc.exists()) {
                 is = new FileInputStream(fc);
-                //isr = new InputStreamReader(is, "UTF8");
-
-                //String line;
-                //while ((line = readLine(isr)) != null) {
-                //    lines.add(line);
-                //}
                 long start = System.nanoTime();
                 BufferedReader in = new BufferedReader(new InputStreamReader(is));
                 String line;
@@ -64,13 +55,6 @@ public class Files {
         } catch (Exception e) {
             Log.d(TAG, e.getMessage(), e);
         } finally {
-            //if (isr != null) {
-            //    try {
-            //        isr.close();
-            //    } catch (Exception e) {
-            //        Log.d(TAG, e.getMessage(), e);
-            //    }
-            //}
             if (is != null) {
                 try {
                     is.close();
@@ -82,7 +66,7 @@ public class Files {
         return lines;
     }
 
-    public static boolean isRouteTracked(String filename, Context context, int numOfPoints) {
+    public static boolean hasRoutePoints(String filename, Context context, int numOfPoints) {
         InputStream is = null;
         int i=0;
 
@@ -114,7 +98,7 @@ public class Files {
         return (i == numOfPoints);
     }
 
-    public static int countLinesFromContextDir(String filename, Context context) {
+    /*public static int countLinesFromContextDir(String filename, Context context) {
         InputStream is = null;
         int lines= 0;
 
@@ -140,7 +124,7 @@ public class Files {
             }
         }
         return lines;
-    }
+    }*/
 
     public static void deleteFileFromContextDir(String filename, Context context) {
         File file = new File(context.getFilesDir(), filename);
@@ -153,6 +137,7 @@ public class Files {
     }
 
     public static void appendLineToFileFromContextDir(String filename, Context context, String line) {
+        //TODO limit file size to 10k points
         FileOutputStream outputStream = null;
         try {
             line += "\n";

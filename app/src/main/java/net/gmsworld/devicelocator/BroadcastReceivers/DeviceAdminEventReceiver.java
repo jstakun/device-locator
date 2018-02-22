@@ -7,8 +7,10 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
+import net.gmsworld.devicelocator.Utilities.Network;
 
 /**
  * Created by jstakun on 8/24/17.
@@ -36,29 +38,33 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
     public void onPasswordFailed(Context context, Intent intent) {
         super.onPasswordFailed(context, intent);
         Log.d(TAG, "Wrong password has been entered to unlock this device. SENDING NOTIFICATION!");
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String email = settings.getString("email", "");
-        String phoneNumber = settings.getString("phoneNumber", "");
-        String telegramId = settings.getString("telegramId", "");
+        if (Network.isNetworkAvailable(context)) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String email = settings.getString("email", "");
+            String phoneNumber = settings.getString("phoneNumber", "");
+            String telegramId = settings.getString("telegramId", "");
 
-        Intent newIntent = new Intent(context, SmsSenderService.class);
-        newIntent.putExtra("phoneNumber", phoneNumber);
-        newIntent.putExtra("email", email);
-        newIntent.putExtra("telegramId", telegramId);
-        newIntent.putExtra("source", SOURCE);
-        context.startService(newIntent);
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", phoneNumber);
+            newIntent.putExtra("email", email);
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("source", SOURCE);
+            context.startService(newIntent);
 
-        if (settings.getBoolean("hiddenCamera", false)) {
-            Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
-            context.startService(cameraIntent);
+            if (settings.getBoolean("hiddenCamera", false)) {
+                Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+                context.startService(cameraIntent);
+            } else {
+                Log.d(TAG, "Camera is disable. No photo will be taken");
+            }
         } else {
-            Log.d(TAG, "Camera is disable. No photo will be taken");
+            Log.w(TAG, context.getString(R.string.no_network_error));
         }
     }
 
     @Override
     public void onPasswordSucceeded(Context context, Intent intent) {
-        super.onPasswordFailed(context, intent);
+        super.onPasswordSucceeded(context, intent);
         Log.d(TAG, "Correct password has been entered to unlock this device.");
     }
 

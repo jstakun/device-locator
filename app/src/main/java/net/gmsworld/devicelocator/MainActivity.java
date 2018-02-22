@@ -868,7 +868,7 @@ public class MainActivity extends AppCompatActivity {
         shareRouteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Files.isRouteTracked(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
+                if (Files.hasRoutePoints(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
                     final String title = RouteTrackingServiceUtils.getRouteId(MainActivity.this);
                     GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, title, null, false, new Network.OnGetFinishListener() {
                         @Override
