@@ -3,13 +3,12 @@ package net.gmsworld.devicelocator.Utilities;
 import android.content.Context;
 import android.util.Log;
 
-import java.io.BufferedReader;
+import com.squareup.tape2.QueueFile;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -20,24 +19,11 @@ public class Files {
 
     private static final String TAG = Files.class.getSimpleName();
 
-    /*private static String readLine(InputStreamReader reader) throws IOException {
-        int readChar = reader.read();
-        if (readChar == -1) {
-            return null;
-        }
-        StringBuilder string = new StringBuilder("");
-        while (readChar != -1 && readChar != '\n') {
-            if (readChar != '\r') {
-                string.append((char) readChar);
-            }
-            readChar = reader.read();
-        }
-        return string.toString();
-    }*/
-
     public static List<String> readFileByLinesFromContextDir(String filename, Context context) {
-        InputStream is = null;
         List<String> lines = new ArrayList<String>();
+        QueueFile queueFile = null;
+        //v1
+        /*InputStream is = null;
 
         try {
             File fc = new File(context.getFilesDir(), filename);
@@ -62,13 +48,42 @@ public class Files {
                     Log.d(TAG, e.getMessage(), e);
                 }
             }
+        }*/
+
+        //v2
+        try {
+            File fc = new File(context.getFilesDir(), filename);
+            if (fc.exists()) {
+                long start = System.nanoTime();
+                queueFile = new QueueFile.Builder(fc).build();
+                Iterator<byte[]> iterator = queueFile.iterator();
+                while (iterator.hasNext()) {
+                    byte[] element = iterator.next();
+                    lines.add(new String(element));
+                }
+                long time = System.nanoTime() - start;
+                Log.d(TAG, "Route file processed in " + time + " ns.");
+            }
+        } catch(Exception e){
+            Log.d(TAG, e.getMessage(), e);
+        } finally {
+            if (queueFile != null) {
+                try {
+                    queueFile.close();
+                } catch (IOException e) {
+                    Log.d(TAG, e.getMessage(), e);
+                }
+            }
         }
+
         return lines;
     }
 
     public static boolean hasRoutePoints(String filename, Context context, int numOfPoints) {
-        InputStream is = null;
         int i=0;
+        QueueFile queueFile = null;
+        //v1
+        /*InputStream is = null;
 
         try {
             File fc = new File(context.getFilesDir(), filename);
@@ -94,37 +109,28 @@ public class Files {
                     Log.d(TAG, e.getMessage(), e);
                 }
             }
-        }
-        return (i == numOfPoints);
-    }
-
-    /*public static int countLinesFromContextDir(String filename, Context context) {
-        InputStream is = null;
-        int lines= 0;
-
+        }*/
+        //v2
         try {
             File fc = new File(context.getFilesDir(), filename);
             if (fc.exists()) {
-                is = new FileInputStream(fc);
-                BufferedReader in = new BufferedReader(new InputStreamReader(is));
-                String line;
-                while ((line = in.readLine()) != null) {
-                    lines++;
-                }
+                queueFile = new QueueFile.Builder(fc).build();
+                i = queueFile.size();
+                Log.d(TAG, "Route file has " + i + " points.");
             }
-        } catch (Exception e) {
+        } catch(Exception e){
             Log.d(TAG, e.getMessage(), e);
         } finally {
-            if (is != null) {
+            if (queueFile != null) {
                 try {
-                    is.close();
-                } catch (Exception e) {
+                    queueFile.close();
+                } catch (IOException e) {
                     Log.d(TAG, e.getMessage(), e);
                 }
             }
         }
-        return lines;
-    }*/
+        return (i >= numOfPoints);
+    }
 
     public static void deleteFileFromContextDir(String filename, Context context) {
         File file = new File(context.getFilesDir(), filename);
@@ -137,8 +143,8 @@ public class Files {
     }
 
     public static void appendLineToFileFromContextDir(String filename, Context context, String line) {
-        //TODO limit file size to 10k points
-        FileOutputStream outputStream = null;
+        //v1
+        /*FileOutputStream outputStream = null;
         try {
             line += "\n";
             outputStream = context.openFileOutput(filename, Context.MODE_APPEND);
@@ -150,6 +156,26 @@ public class Files {
                 try {
                     outputStream.close();
                 } catch (Exception e) {
+                    Log.d(TAG, e.getMessage(), e);
+                }
+            }
+        }*/
+        //v2
+        QueueFile queueFile = null;
+        try {
+            File fc = new File(context.getFilesDir(), filename);
+            queueFile = new QueueFile.Builder(fc).build();
+            queueFile.add(line.getBytes());
+            if (queueFile.size() > 20000) {
+                queueFile.remove(1000);
+            }
+        } catch(Exception e){
+            Log.d(TAG, e.getMessage(), e);
+        } finally {
+            if (queueFile != null) {
+                try {
+                    queueFile.close();
+                } catch (IOException e) {
                     Log.d(TAG, e.getMessage(), e);
                 }
             }

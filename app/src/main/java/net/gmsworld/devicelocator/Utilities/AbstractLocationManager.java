@@ -38,7 +38,7 @@ public abstract class AbstractLocationManager {
 
     private static final String TAG = AbstractLocationManager.class.getSimpleName();
 
-    public static final String ROUTE_FILE = "routeFile.txt";
+    public static final String ROUTE_FILE = "routeFile.bin";
 
     public static final int UPDATE_LOCATION = 301;
 
