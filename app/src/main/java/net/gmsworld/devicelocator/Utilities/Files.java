@@ -19,12 +19,23 @@ public class Files {
 
     private static final String TAG = Files.class.getSimpleName();
 
+    private static File getFilesDir(Context context, String filename, boolean isExternal) {
+        String absolutePath = null;
+        if (isExternal) {
+            absolutePath = context.getExternalFilesDir(null).getAbsolutePath();
+            absolutePath = absolutePath.substring(0, absolutePath.length() - 6); //remove /files from the end
+        } else {
+            absolutePath = context.getFilesDir().getAbsolutePath();
+        }
+        return new File(absolutePath, filename);
+    }
+
     public static List<String> readFileByLinesFromContextDir(String filename, Context context) {
         List<String> lines = new ArrayList<String>();
         QueueFile queueFile = null;
 
         try {
-            File fc = new File(context.getFilesDir(), filename);
+            File fc = getFilesDir(context, filename, false);
             if (fc.exists()) {
                 long start = System.nanoTime();
                 queueFile = new QueueFile.Builder(fc).build();
@@ -56,7 +67,7 @@ public class Files {
         QueueFile queueFile = null;
 
         try {
-            File fc = new File(context.getFilesDir(), filename);
+            File fc = getFilesDir(context, filename, false);
             if (fc.exists()) {
                 queueFile = new QueueFile.Builder(fc).build();
                 i = queueFile.size();
@@ -77,13 +88,13 @@ public class Files {
         return (i >= numOfPoints);
     }
 
-    public static void deleteFileFromContextDir(String filename, Context context) {
-        File file = new File(context.getFilesDir(), filename);
+    public static void deleteFileFromContextDir(String filename, Context context, boolean external) {
+        File file = getFilesDir(context, filename, external);
         if (file.exists()) {
             boolean deleted = file.delete();
-            Log.d(TAG, "File " + filename + " deleted: " + deleted);
+            Log.d(TAG, "File " + file.getAbsolutePath() + " deleted: " + deleted);
         } else {
-            Log.d(TAG, "File " + filename + " doesn't exists");
+            Log.d(TAG, "File " + file.getAbsolutePath() + " doesn't exists!");
         }
     }
 
@@ -91,7 +102,7 @@ public class Files {
         QueueFile queueFile = null;
 
         try {
-            File fc = new File(context.getFilesDir(), filename);
+            File fc = getFilesDir(context, filename, false);
             queueFile = new QueueFile.Builder(fc).build();
             queueFile.add(line.getBytes());
             if (queueFile.size() > 20000) {

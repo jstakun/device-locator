@@ -122,7 +122,7 @@ public abstract class AbstractLocationManager {
         this.radius = radius;
         if (resetRoute) {
             Log.d(TAG, "Route has been cleared");
-            Files.deleteFileFromContextDir(ROUTE_FILE, context);
+            Files.deleteFileFromContextDir(ROUTE_FILE, context, false);
         }
         mLocationHandlers.put(handlerName, handler);
     }

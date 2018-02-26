@@ -26,6 +26,7 @@ import com.androidhiddencamera.config.CameraRotation;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Command;
+import net.gmsworld.devicelocator.Utilities.Files;
 import net.gmsworld.devicelocator.Utilities.Network;
 
 import org.apache.commons.lang3.StringUtils;
@@ -87,7 +88,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
     }
 
     @Override
-    public void onImageCapture(@NonNull File imageFile) {
+    public void onImageCapture(final @NonNull File imageFile) {
         if (!isTest) {
             if (Network.isNetworkAvailable(this)) {
                 BitmapFactory.Options options = new BitmapFactory.Options();
@@ -137,6 +138,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                             } else {
                                 newIntent.putExtra("phoneNumber", phoneNumber);
                             }
+                            Files.deleteFileFromContextDir(imageFile.getName(), HiddenCaptureImageService.this, true);
                             HiddenCaptureImageService.this.startService(newIntent);
                         } else {
                             Log.e(TAG, "Received error response: " + imageUrl);
