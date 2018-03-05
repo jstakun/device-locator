@@ -59,7 +59,7 @@
     <string name="pinLink">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a>&lt;/font></string>
     <string name="Crash.error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
     <string name="security_pin">Your Security PIN</string>
-    <string name="motion_radius">Notify me when the device moves outside the area with the radius (in meters)</string>
+    <string name="motion_radius">Notify me when device will move %1$d meters from present location</string>
     <string name="gps_accuracy">GPS Accuracy</string>
     <string name="gps_balanced">Balanced</string>
     <string name="gps_high">High</string>
@@ -82,4 +82,6 @@
     <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and check list of available commands below or on SMS control card.&lt;/font></string>
     <string name="pin_lenght_error">Security PIN must have at least 4 digits!</string>
     <string name="enter_security_pin">Enter Security PIN</string>
+    <string name="accept_sms_commands">Accept SMS commands sent only from my contacts</string>
+    <string name="Info.about">%1$s (R)\nVersion: %2$s-%3$d built on %4$s\nCopyright © 2010–%5$s GMS World\n%6$s</string>
 </resources>

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -49,23 +50,30 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "onHandleIntent()");
 
-        this.phoneNumber = intent.getExtras().getString("phoneNumber");
+        Bundle extras = intent.getExtras();
 
-        this.telegramId = intent.getExtras().getString("telegramId");
+        if (extras != null) {
+            this.phoneNumber = extras.getString("phoneNumber");
 
-        this.email = intent.getExtras().getString("email");
+            this.telegramId = extras.getString("telegramId");
 
-        if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId) && StringUtils.isEmpty(email)) {
-            //Log.d(TAG, "Phonenumber empty, return.");
-            return;
-        }
+            this.email = extras.getString("email");
 
-        String command = intent.getExtras().getString("command");
+            if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId) && StringUtils.isEmpty(email)) {
+                //Log.d(TAG, "Phonenumber empty, return.");
+                return;
+            }
 
-        if (StringUtils.isEmpty(command)) {
-            initSending(intent.getExtras().getString("source"));
+            String command = intent.getExtras().getString("command");
+
+            if (StringUtils.isEmpty(command)) {
+                initSending(intent.getExtras().getString("source"));
+            } else {
+                Messenger.sendCommandMessage(this, intent);
+            }
         } else {
-            Messenger.sendCommandMessage(this, intent);
+            //Log.e(TAG, "This intent requires extra parameters");
+            return;
         }
     }
 

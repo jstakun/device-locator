@@ -71,11 +71,22 @@
                         android:paddingBottom="8dp"
                         android:paddingTop="15dp">
 
+                        <CheckBox
+                            android:id="@+id/settings_sms_contacts"
+                            android:text="@string/accept_sms_commands"
+                            android:textColor="@color/gray"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="false"
+                            android:onClick="onLocationSMSCheckboxClicked"
+                            />
+
                         <TextView
                             android:id="@+id/docs_link"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="left"/>
+                            android:gravity="left"
+                            android:paddingTop="15dp"/>
 
                    </LinearLayout>
 
@@ -233,57 +244,27 @@
                         android:paddingTop="15dp">
 
                             <TextView
+                                android:id="@+id/motion_radius"
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
-                                android:gravity="left"
-                                android:text="@string/motion_radius" />
+                                android:gravity="left"/>
 
-                            <EditText
+                            <!--EditText
                                 android:id="@+id/radius"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="number"
-                                android:textColor="@color/gray"/>
-                        </LinearLayout>
+                                android:textColor="@color/gray"/-->
 
-                        <!--LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingBottom="8dp"
-                        android:paddingTop="15dp">
-
-                            <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:text="@string/gps_accuracy"
-                            android:paddingBottom="8dp"/>
-
-                            <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+                            <SeekBar
+                                android:id="@+id/radiusBar"
                                 android:layout_width="fill_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:id="@+id/gpsAccuracyGroup"
-                                android:checkedButton="@+id/radio_gps_high">
+                                android:max="1000"
+                                android:progress="100"
+                                android:paddingTop="15dp"/>
+                        </LinearLayout>
 
-                                <RadioButton android:id="@+id/radio_gps_low"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/gps_balanced"
-                                    android:textColor="@color/gray"
-                                    android:onClick="onGpsRadioButtonClicked"/>
-
-                                <RadioButton android:id="@+id/radio_gps_high"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/gps_high"
-                                    android:textColor="@color/gray"
-                                    android:onClick="onGpsRadioButtonClicked"/>
-
-                            </RadioGroup>
-
-                        </LinearLayout-->
                     </LinearLayout>
 
                 </net.gmsworld.devicelocator.Views.LDCard>

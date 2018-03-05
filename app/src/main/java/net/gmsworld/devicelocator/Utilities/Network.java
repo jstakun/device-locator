@@ -1,8 +1,6 @@
 package net.gmsworld.devicelocator.Utilities;
 
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -243,16 +241,7 @@ public class Network {
             defaultHeaders = new HashMap<String, String>();
             defaultHeaders.put("X-GMS-AppId", "2");
             defaultHeaders.put("X-GMS-Scope", "dl");
-            String versionName = "latest";
-            int versionCode = 1;
-            try {
-                PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-                versionName = pInfo.versionName;
-                versionCode = pInfo.versionCode;
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.d(TAG, e.getMessage(), e);
-            }
-            defaultHeaders.put("User-Agent", "Device Locator/" + versionName + "-" + versionCode + " (+http://www.gms-world.net)");
+            defaultHeaders.put("User-Agent", AppUtils.getInstance().getUserAgent(context));
         }
         return defaultHeaders;
     }

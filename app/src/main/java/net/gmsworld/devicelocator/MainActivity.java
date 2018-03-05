@@ -45,6 +45,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -85,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int SHARE_ROUTE_MESSAGE = 1;
 
-    private static final int MAX_RADIUS = 10000; //meters
+    //private static final int MAX_RADIUS = 10000; //meters
 
     public static final String DEVICE_PIN = "token";
 
@@ -352,6 +353,7 @@ public class MainActivity extends AppCompatActivity {
         ((CheckBox) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean("settings_gps_sms", false));
         ((CheckBox) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean("settings_google_sms", true));
         ((CheckBox) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
+        ((CheckBox) findViewById(R.id.settings_sms_contacts)).setChecked(settings.getBoolean("settings_sms_contacts", false));
     }
 
     public void onLocationSMSCheckboxClicked(View view) {
@@ -361,18 +363,23 @@ public class MainActivity extends AppCompatActivity {
 
         switch (view.getId()) {
             case R.id.settings_detected_sms:
-                 editor.putBoolean("settings_detected_sms", checked);
-                 break;
+                editor.putBoolean("settings_detected_sms", checked);
+                break;
             case R.id.settings_gps_sms:
-                 editor.putBoolean("settings_gps_sms", checked);
-                 break;
+                editor.putBoolean("settings_gps_sms", checked);
+                break;
             case R.id.settings_google_sms:
-                 editor.putBoolean("settings_google_sms", checked);
-                 break;
+                editor.putBoolean("settings_google_sms", checked);
+                break;
             case R.id.settings_verify_pin:
-                 editor.putBoolean("settings_verify_pin", checked);
-                 break;
-
+                editor.putBoolean("settings_verify_pin", checked);
+                break;
+            case R.id.settings_sms_contacts:
+                editor.putBoolean("settings_sms_contacts", checked);
+                if (checked && !Permissions.haveReadContactsPermission(this)) {
+                    Permissions.requestContactsPermission(this);
+                }
+                break;
             default:
                 break;
         }
@@ -531,8 +538,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toggleMotionDetectorRunning() {
-        int currentRadius = -1;
-        try {
+        int currentRadius = ((SeekBar)findViewById(R.id.radiusBar)).getProgress();;
+        /*try {
             currentRadius = Integer.parseInt(((TextView) this.findViewById(R.id.radius)).getText() + "");
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
@@ -541,7 +548,7 @@ public class MainActivity extends AppCompatActivity {
             //can't start application with no radius
             Toast.makeText(getApplicationContext(), "Please specify radius between 1 and " + MAX_RADIUS + " meters", Toast.LENGTH_SHORT).show();
             return;
-        }
+        }*/
 
         if (StringUtils.isNotEmpty(phoneNumber)) {
             if (!this.motionDetectorRunning && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
@@ -644,7 +651,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initRadiusInput() {
-        final TextView radiusInput = (TextView) this.findViewById(R.id.radius);
+        /*final TextView radiusInput = (TextView) this.findViewById(R.id.radius);
         radiusInput.setText(Integer.toString(this.radius));
 
         radiusInput.addTextChangedListener(new TextWatcher() {
@@ -672,7 +679,35 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
 
             }
+        });*/
+        SeekBar radiusBar=(SeekBar)findViewById(R.id.radiusBar);
+        radiusBar.setProgress(radius);
+
+        ((TextView) this.findViewById(R.id.motion_radius)).setText(getString(R.string.motion_radius, radius));
+
+        radiusBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int progressChangedValue = 0;
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChangedValue = progress;
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                //Toast.makeText(MainActivity.this, "Radius has been set to " + progressChangedValue + " meters.", Toast.LENGTH_SHORT).show();
+                radius = progressChangedValue;
+                ((TextView) MainActivity.this.findViewById(R.id.motion_radius)).setText(getString(R.string.motion_radius, radius));
+                saveData();
+                //update route tracking service if running
+                if (motionDetectorRunning) {
+                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                }
+            }
         });
+
+
     }
 
     //email input setup ------------------------------------------------------------------
@@ -1071,11 +1106,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveData() {
-        try {
+        /*try {
             this.radius = Integer.parseInt(((TextView) this.findViewById(R.id.radius)).getText() + "");
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
-        }
+        }*/
+        this.radius = ((SeekBar)findViewById(R.id.radiusBar)).getProgress();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("running", this.running);

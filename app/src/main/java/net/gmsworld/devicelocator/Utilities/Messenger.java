@@ -497,6 +497,10 @@ public class Messenger {
             case Command.SHARE_COMMAND:
                 text = "Unable to share location. Required permissions are not granted!";
                 break;
+            case Command.ABOUT_COMMAND:
+                text = AppUtils.getInstance().getAboutMessage(context);
+                text += "\n" + "Battery level: " + getBatteryLevel(context);
+                break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;

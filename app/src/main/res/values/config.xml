@@ -11,4 +11,5 @@
     <string name="securePhotoUploadUrl">https://www.gms-world.net/s/imageUpload</string>
     <string name="commandsUrl">http://www.gms-world.net/dl</string>
     <string name="deviceUrl">https://www.gms-world.net/showDevice</string>
+    <string name="serverUrl">https://www.gms-world.net/</string>
 </resources>
