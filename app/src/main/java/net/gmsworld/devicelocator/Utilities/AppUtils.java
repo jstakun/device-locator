@@ -76,6 +76,7 @@ public class AppUtils {
             DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, l);
             s = formatter.format(BuildConfig.TIMESTAMP);
         } catch(Exception e) {
+            Log.e(TAG, e.getMessage(), e);
         }
         return s;
     }

@@ -73,7 +73,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             }
         } else {
             //Log.e(TAG, "This intent requires extra parameters");
-            return;
         }
     }
 
