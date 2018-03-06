@@ -86,7 +86,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int SHARE_ROUTE_MESSAGE = 1;
 
-    //private static final int MAX_RADIUS = 10000; //meters
+    private static final int MIN_RADIUS = 10; //meters
+
+    private static final int MAX_RADIUS = 1000;
 
     public static final String DEVICE_PIN = "token";
 
@@ -698,8 +700,8 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 //Toast.makeText(MainActivity.this, "Radius has been set to " + progressChangedValue + " meters.", Toast.LENGTH_SHORT).show();
                 //minimal value is 10
-                if (progressChangedValue < 10) {
-                    progressChangedValue = 10;
+                if (progressChangedValue < MIN_RADIUS) {
+                    progressChangedValue = MIN_RADIUS;
                 }
 
                 radius = progressChangedValue;
@@ -1116,7 +1118,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
         }*/
-        this.radius = ((SeekBar)findViewById(R.id.radiusBar)).getProgress();
+        //this.radius = ((SeekBar)findViewById(R.id.radiusBar)).getProgress();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("running", this.running);
@@ -1139,6 +1141,9 @@ public class MainActivity extends AppCompatActivity {
 
         this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
         this.radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
+        if (this.radius > MAX_RADIUS) {
+            this.radius = MAX_RADIUS;
+        }
         this.phoneNumber = settings.getString("phoneNumber", "");
         this.email = settings.getString("email", "");
         this.telegramId = settings.getString("telegramId", "");
