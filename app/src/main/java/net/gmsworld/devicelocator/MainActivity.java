@@ -697,6 +697,11 @@ public class MainActivity extends AppCompatActivity {
 
             public void onStopTrackingTouch(SeekBar seekBar) {
                 //Toast.makeText(MainActivity.this, "Radius has been set to " + progressChangedValue + " meters.", Toast.LENGTH_SHORT).show();
+                //minimal value is 10
+                if (progressChangedValue < 10) {
+                    progressChangedValue = 10;
+                }
+
                 radius = progressChangedValue;
                 ((TextView) MainActivity.this.findViewById(R.id.motion_radius)).setText(getString(R.string.motion_radius, radius));
                 saveData();
