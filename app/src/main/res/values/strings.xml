@@ -60,6 +60,7 @@
     <string name="Crash.error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
     <string name="security_pin">Your Security PIN</string>
     <string name="motion_radius">Notify me when device will move %1$d meters from present location</string>
+    <string name="motion_confirm">"You'll receive notification every time device will move %1$d meters from present location</string>
     <string name="gps_accuracy">GPS Accuracy</string>
     <string name="gps_balanced">Balanced</string>
     <string name="gps_high">High</string>
