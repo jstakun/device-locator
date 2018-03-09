@@ -70,6 +70,8 @@ public class Network {
 
         @Override
         protected Integer doInBackground(Void... params) {
+            int responseCode = -1;
+
             try {
                 URL url = new URL(urlString);
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -110,6 +112,8 @@ public class Network {
                     urlConnection.connect();
                 }
 
+                responseCode = urlConnection.getResponseCode();
+
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
 
                 BufferedReader r = new BufferedReader(new InputStreamReader(in));
@@ -120,12 +124,10 @@ public class Network {
                 }
 
                 response = total.toString();
-
-                return urlConnection.getResponseCode();
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
-                return -1;
             }
+            return responseCode;
         }
 
         @Override
@@ -262,6 +264,7 @@ public class Network {
         @Override
         protected Integer doInBackground(Void... params) {
             HttpURLConnection urlConnection;
+            int responseCode = -1;
             try {
                 URL url = new URL(urlString);
                 urlConnection = (HttpURLConnection) url.openConnection();
@@ -271,6 +274,10 @@ public class Network {
                 for (Map.Entry<String, String> header : getDefaultHeaders(context).entrySet()) {
                     urlConnection.setRequestProperty(header.getKey(), header.getValue());
                 }
+
+                urlConnection.connect();
+
+                responseCode = urlConnection.getResponseCode();
 
                 InputStream in = new BufferedInputStream(urlConnection.getInputStream());
 
@@ -283,12 +290,11 @@ public class Network {
 
                 response = total.toString();
 
-                return urlConnection.getResponseCode();
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
-
-                return -1;
             }
+
+            return responseCode;
         }
 
         @Override

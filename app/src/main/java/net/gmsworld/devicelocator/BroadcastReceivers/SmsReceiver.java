@@ -55,7 +55,7 @@ public class SmsReceiver extends BroadcastReceiver {
         Cursor cur = context.getContentResolver().query(lookupUri,mPhoneNumberProjection, null, null, null);
         try {
             if (cur.moveToFirst()) {
-                Log.d(TAG, "Sender exists in contact list");
+                Log.d(TAG, "Sender found in contact list");
                 return true;
             }
         } finally {
