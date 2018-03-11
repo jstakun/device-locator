@@ -29,7 +29,11 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed Firebase token: " + refreshedToken);
-        sendRegistrationToServer(this, refreshedToken, PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, ""), null);
+        PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).commit();
+        final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, "");
+        if (StringUtils.isNotEmpty(pin)) {
+            sendRegistrationToServer(this, refreshedToken, pin, null);
+        } 
     }
 
     public static void sendRegistrationToServer(final Context context, final String token, final String pin, final String oldPin) {

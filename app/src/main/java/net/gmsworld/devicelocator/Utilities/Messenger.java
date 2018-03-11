@@ -25,6 +25,8 @@ import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -121,7 +123,6 @@ public class Messenger {
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
-                    headers.put("X-GMS-AppId", "2");
                     String deviceId = getDeviceId(context);
                     if (StringUtils.isNotEmpty(deviceId)) {
                         headers.put("X-GMS-DeviceId", deviceId);
@@ -498,7 +499,11 @@ public class Messenger {
                 text = "Unable to share location. Required permissions are not granted!";
                 break;
             case Command.ABOUT_COMMAND:
-                text = AppUtils.getInstance().getAboutMessage(context);
+                try {
+                    text = URLEncoder.encode(AppUtils.getInstance().getAboutMessage(context), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             default:

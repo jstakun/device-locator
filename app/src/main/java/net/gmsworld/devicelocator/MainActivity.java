@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         if (oldPin != null) {
             String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
             if (StringUtils.isNotEmpty(firebaseToken)) {
-                editor.remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN); //remove token so that it will be added again after successfull registration
+                editor.remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN); //remove token so that it will be added again after successful registration
                 if (Network.isNetworkAvailable(MainActivity.this)) {
                     DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin, oldPin);
                 }
@@ -1137,7 +1137,11 @@ public class MainActivity extends AppCompatActivity {
 
         this.running = settings.getBoolean("running", false);
         //this.keyword = settings.getString("keyword", "");
-        this.pin = settings.getString(DEVICE_PIN, RandomStringUtils.random(4, false, true));
+        this.pin = settings.getString(DEVICE_PIN, "");
+        if (StringUtils.isEmpty(this.pin)) {
+            this.pin = RandomStringUtils.random(4, false, true);
+            settings.edit().putString(DEVICE_PIN, this.pin).commit();
+        }
 
         this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
         this.radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
