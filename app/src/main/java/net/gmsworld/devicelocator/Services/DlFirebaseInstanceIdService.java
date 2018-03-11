@@ -68,8 +68,6 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
                 Map<String, String> headers = new HashMap<String, String>();
                 headers.put("Authorization", "Bearer " + tokenStr);
-                headers.put("X-GMS-AppId", "2");
-                headers.put("X-GMS-Scope", "dl");
 
                 Network.post(context, url, content, null, headers, new Network.OnGetFinishListener() {
                     @Override

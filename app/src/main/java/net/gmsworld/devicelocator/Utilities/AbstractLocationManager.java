@@ -322,8 +322,6 @@ public abstract class AbstractLocationManager {
                     if (StringUtils.isNotEmpty(tokenStr)) {
                         url = context.getString(R.string.secureRouteProviderUrl);
                         headers.put("Authorization", "Bearer " + tokenStr);
-                        headers.put("X-GMS-AppId", "2");
-                        headers.put("X-GMS-Scope", "dl");
                     }
                     //Log.d(TAG, "Route:\n" + route);
                     Network.post(context, url, "route=" + content, null, headers, onFinishListener);
