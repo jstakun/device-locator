@@ -506,6 +506,13 @@ public class Messenger {
                 }
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
+            case Command.LOCK_SCREEN_COMMAND:
+                text = "Screen locked successfully!";
+                text += "\n" + "Battery level: " + getBatteryLevel(context);
+                break;
+            case Command.LOCK_SCREEN_FAILED:
+                text = "Screen lock failed due to insufficient privileges!";
+                break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;

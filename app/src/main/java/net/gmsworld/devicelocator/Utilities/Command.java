@@ -1,6 +1,8 @@
 package net.gmsworld.devicelocator.Utilities;
 
 import android.Manifest;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,12 +16,17 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.Patterns;
 
+import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by jstakun on 12/14/17.
@@ -48,21 +55,19 @@ public class Command {
     public final static String PING_COMMAND = "pingdl"; //pg send ping to test connectivity
     public final static String RING_COMMAND = "ringdl"; //rn play ringtone
     public final static String RING_OFF_COMMAND = "ringoffdl"; //rn stop playing ringtone
+    public final static String LOCK_SCREEN_COMMAND = "lockdl"; //ls lock screen now
 
     //private
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
     public final static String ABOUT_COMMAND = "aboutdl"; //ab send app version info
 
-    private static final AbstractCommand[] commands = {new StartRouteTrackerServiceStartCommand(), new ResumeRouteTrackerServiceStartCommand(),
-            new StopRouteTrackerServiceStartCommand(), new ShareLocationCommand(), new ShareRouteCommand(),
-            new MuteCommand(), new UnMuteCommand(), new StartPhoneCallCommand(), new ChangeRouteTrackerServiceRadiusCommand(),
-            new AudioCommand(), new NoAudioCommand(), new HighGpsCommand(), new BalancedGpsCommand(),
-            new TakePhotoCommand(), new NotifySettingsCommand(), new PingCommand(), new RingCommand(), new AboutCommand() };
+    public final static String LOCK_SCREEN_FAILED = "lockfail"; //this is not command
 
+    private static List<AbstractCommand> commands = null;
 
     public static void findCommandInSms(Context context, Intent intent) {
-        for (int i = 0; i < commands.length; i++) {
-            if (commands[i].findCommand(context, intent)) {
+        for (AbstractCommand c : getCommands()) {
+            if (c.findCommand(context, intent)) {
                 Log.d(TAG, "Found matching command");
                 return;
             }
@@ -70,12 +75,33 @@ public class Command {
     }
 
     public static void findCommandInMessage(Context context, String message) {
-        for (int i = 0; i < commands.length; i++) {
-            if (commands[i].findCommand(context, message)) {
+        for (AbstractCommand c : getCommands()) {
+            if (c.findCommand(context, message)) {
                 Log.d(TAG, "Found matching command");
                 return;
             }
         }
+    }
+
+    private static List<AbstractCommand> getCommands() {
+        Log.d(TAG, "Initializing commands...");
+        if (commands == null) {
+            commands = new ArrayList<AbstractCommand>();
+            try {
+                Class<?>[] commandClasses = Command.class.getDeclaredClasses();
+                for (Class<?> command : commandClasses) {
+                    Constructor<?> constructor = command.getDeclaredConstructors()[0];
+                    constructor.setAccessible(true);
+                    AbstractCommand c = (AbstractCommand) constructor.newInstance();
+                    Log.d(TAG, "Initialized command " + c.getClass().getName());
+                    commands.add(c);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+        }
+        Log.d(TAG, "Done");
+        return commands;
     }
 
     //---------------------------------- Commands classes --------------------------------------
@@ -659,6 +685,45 @@ public class Command {
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
             sendSocialNotification(context, ABOUT_COMMAND);
+        }
+    }
+
+    private static final class LockScreenCommand extends AbstractCommand {
+
+        public LockScreenCommand() { super(LOCK_SCREEN_COMMAND, "ls", Finder.EQUALS); }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            if (lockScreenNow(context)) {
+                sendSmsNotification(context, sender, LOCK_SCREEN_COMMAND);
+            } else {
+                sendSmsNotification(context, sender, LOCK_SCREEN_FAILED);
+            }
+        }
+
+        @Override
+        protected void onSmsSocialCommandFound(String sender, Context context) {
+            if (lockScreenNow(context)) {
+                sendSocialNotification(context, LOCK_SCREEN_COMMAND);
+            } else {
+                sendSocialNotification(context, LOCK_SCREEN_FAILED);
+            }
+        }
+
+        private boolean lockScreenNow(Context context) {
+            DevicePolicyManager deviceManger = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            final ComponentName compName = new ComponentName(context, DeviceAdminEventReceiver.class);
+            if (deviceManger.isAdminActive(compName)) {
+                try {
+                    deviceManger.lockNow();
+                    return true;
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    return false;
+                }
+            } else {
+                return false;
+            }
         }
     }
 

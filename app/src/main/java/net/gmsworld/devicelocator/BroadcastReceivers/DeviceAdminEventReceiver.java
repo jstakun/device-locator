@@ -23,13 +23,13 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
     @Override
     public void onEnabled(Context context, Intent intent) {
         super.onEnabled(context, intent);
-        Log.d(TAG, "Failed login tracker enabled");
+        Log.d(TAG, "Device admin enabled");
     }
 
     @Override
     public void onDisabled(Context context, Intent intent) {
         super.onDisabled(context, intent);
-        Log.d(TAG, "Failed login tracker disabled");
+        Log.d(TAG, "Device admin disabled");
     }
 
     @Override

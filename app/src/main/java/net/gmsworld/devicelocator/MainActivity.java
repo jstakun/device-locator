@@ -418,7 +418,7 @@ public class MainActivity extends AppCompatActivity {
             //enable tracking
             Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
             intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, deviceAdmin);
-            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Please grant this permission to enable failed login notification service.");
+            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.admin_grant_explanation));
             startActivityForResult(intent, ENABLE_ADMIN_INTENT);
         }
     }
