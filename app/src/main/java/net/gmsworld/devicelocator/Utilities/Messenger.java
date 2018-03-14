@@ -671,11 +671,11 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
-                        if (StringUtils.equals(status, "registered")) {
+                        if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
-                        } else if (StringUtils.equals(status, "unverified")) {
+                        } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             Toast.makeText(context, "You'll receive verification instruction to your chat or channel", Toast.LENGTH_LONG).show();
-                        } else if (StringUtils.equals(status, "failed")) {
+                        } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                             Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(context, "Oops! Something went wrong on our side. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
