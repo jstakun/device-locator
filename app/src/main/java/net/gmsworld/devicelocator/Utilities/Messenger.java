@@ -716,9 +716,9 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
-                        if (StringUtils.equals(status, "registered")) {
+                        if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your email address is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
-                        } else if (StringUtils.equals(status, "unverified")) {
+                        } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             Toast.makeText(context, "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(context, "Oops! Something went wrong. Please add again email address!", Toast.LENGTH_LONG).show();
