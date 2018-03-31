@@ -60,7 +60,7 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
     private static void sendRegistrationToServer(Context context, final String token, final String pin, final String oldPin, final String tokenStr) {
         try {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            if (StringUtils.isNotEmpty(pin)) {
+            if (StringUtils.isNotEmpty(pin) && !StringUtils.equalsIgnoreCase(token, "blacklisted") && pin.length() >= 4) {
                 String content = "imei=" + Messenger.getDeviceId(context) + "&pin=" + pin;
                 if (StringUtils.isNotEmpty(oldPin)) {
                     content += "&oldPin=" + oldPin;
@@ -88,7 +88,7 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
                     }
                 });
             } else {
-                Log.e(TAG, "PIN can't be empty to register for cloud commands");
+                Log.e(TAG, "Invalid pin: " + pin + " or token: " + token);
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
