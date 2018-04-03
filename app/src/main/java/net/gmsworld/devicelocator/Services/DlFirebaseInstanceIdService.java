@@ -62,10 +62,10 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (StringUtils.isNotEmpty(pin) && !StringUtils.equalsIgnoreCase(token, "blacklisted") && pin.length() >= 4) {
                 String content = "imei=" + Messenger.getDeviceId(context) + "&pin=" + pin;
-                if (StringUtils.isNotEmpty(oldPin)) {
+                if (StringUtils.isNotBlank(oldPin)) {
                     content += "&oldPin=" + oldPin;
                 }
-                if (StringUtils.isNotEmpty(token)) {
+                if (StringUtils.isNotBlank(token)) {
                     content += "&token=" + token;
                 }
                 String url = context.getString(R.string.deviceManagerUrl);
