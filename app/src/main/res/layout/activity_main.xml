@@ -33,11 +33,14 @@
                 ldcard:title="SMS control">
 
                 <LinearLayout
+                    android:id="@+id/ll_top_focus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:paddingTop="15dp"
-                    android:paddingBottom="8dp">
+                    android:paddingBottom="8dp"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true">
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -207,11 +210,14 @@
                     ldcard:title="@string/device_tracker">
 
                     <LinearLayout
+                        android:id="@+id/ll_bottom_focus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:paddingTop="15dp"
-                        android:paddingBottom="8dp">
+                        android:paddingBottom="8dp"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true">
 
                         <RelativeLayout
                             android:layout_width="match_parent"
@@ -262,7 +268,9 @@
                                 android:layout_height="wrap_content"
                                 android:max="1000"
                                 android:progress="100"
-                                android:paddingTop="15dp"/>
+                                android:paddingTop="15dp"
+                                android:focusable="true"
+                                android:focusableInTouchMode="true"/>
                         </LinearLayout>
 
                     </LinearLayout>

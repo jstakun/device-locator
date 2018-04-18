@@ -107,7 +107,26 @@ public class Messenger {
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 500 && retryCount > 0) {
-                        sendEmail(context, email, message, title, retryCount-1, headers);
+                        sendEmail(context, email, message, title, retryCount - 1, headers);
+                    } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
+                        JsonElement reply = new JsonParser().parse(results);
+                        String status = null;
+                        if (reply != null) {
+                            JsonElement st = reply.getAsJsonObject().get("status");
+                            if (st != null) {
+                                status = st.getAsString();
+                            }
+                        }
+                        if (StringUtils.equalsIgnoreCase(status, "sent")) {
+                            Log.d(TAG, "Email message sent successfully");
+                        } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
+                            Toast.makeText(context, "Unable to sent notification! Your email address is still unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
+                        } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
+                            Toast.makeText(context, "Oops! Your email seems to be wrong. Please remove and add again email address!", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(context, "Oops! Something went wrong on our side. Please remove and add again email address!", Toast.LENGTH_LONG).show();
+                        }
+
                     }
                 }
             });
@@ -169,7 +188,25 @@ public class Messenger {
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 500 && retryCount > 0) {
-                        sendTelegram(context, telegramId, message, retryCount-1, headers);
+                        sendTelegram(context, telegramId, message, retryCount - 1, headers);
+                    } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
+                        JsonElement reply = new JsonParser().parse(results);
+                        String status = null;
+                        if (reply != null) {
+                            JsonElement st = reply.getAsJsonObject().get("status");
+                            if (st != null) {
+                                status = st.getAsString();
+                            }
+                        }
+                        if (StringUtils.equalsIgnoreCase(status, "sent")) {
+                            Log.d(TAG, "Telegram notification sent successfully!");
+                        } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
+                            Toast.makeText(context, "Your chat or channel is unverified! Please remove and add again Telegram chat id.", Toast.LENGTH_LONG).show();
+                        } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
+                            Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(context, "Oops! Something went wrong on our side. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
             });
@@ -229,7 +266,7 @@ public class Messenger {
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 500 && retryCount > 0) {
-                        sendRoutePoint(context, retryCount-1, headers);
+                        sendRoutePoint(context, retryCount - 1, headers);
                     }
                 }
             });
@@ -469,10 +506,10 @@ public class Messenger {
                 } else {
                     text = "Front camera photo: " + imageUrl;
                 }
-                text +=  "\n" + "Battery level: " + getBatteryLevel(context);
+                text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.PIN_COMMAND:
-                final String pin = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN,"");
+                final String pin = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
                 if (StringUtils.isEmpty(pin)) {
                     text = "No Security PIN is set!";
                 } else {
@@ -555,7 +592,7 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - failed login";
                 }
-                text += "\n" + context.getString(R.string.deviceUrl)+ "/" + deviceId;
+                text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
                 sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
             }
         }
@@ -578,9 +615,9 @@ public class Messenger {
         }
 
         if (l != null && StringUtils.equalsAny(l.getISO3Country(), "USA", "GBR")) {
-            return (int)(speed * 2.23694) + "MPH";
+            return (int) (speed * 2.23694) + "MPH";
         } else {
-            return (int)(speed * 3.6) + "KM/H";
+            return (int) (speed * 3.6) + "KM/H";
         }
     }
 
@@ -615,7 +652,7 @@ public class Messenger {
                         if (responseCode == 200) {
                             sendEmailRegistrationRequest(context, email, getToken(context, results), 1);
                         } else if (responseCode == 500 && retryCount > 0) {
-                            sendEmailRegistrationRequest(context, email, retryCount-1);
+                            sendEmailRegistrationRequest(context, email, retryCount - 1);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
@@ -640,7 +677,7 @@ public class Messenger {
                         if (responseCode == 200) {
                             sendTelegramRegistrationRequest(context, telegramId, getToken(context, results), 1);
                         } else if (responseCode == 500 && retryCount > 0) {
-                            sendTelegramRegistrationRequest(context, telegramId, retryCount-1);
+                            sendTelegramRegistrationRequest(context, telegramId, retryCount - 1);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
@@ -661,8 +698,8 @@ public class Messenger {
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode != 200 && retryCount > 0) {
-                        sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount-1);
-                    } else if (responseCode == 200  && StringUtils.startsWith(results, "{")) {
+                        sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
+                    } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         String status = null;
                         if (reply != null) {
@@ -674,19 +711,23 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
+                            //TODO change to alert dialog
                             Toast.makeText(context, "You'll receive verification instruction to your chat or channel", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                            Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
+                            //TODO clear telegram input
+                            Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(context, "Oops! Something went wrong on our side. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
+                            //TODO clear telegram input
+                            Toast.makeText(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        if (telegramId.startsWith("-") || telegramId.startsWith("@")) {
-                            Toast.makeText(context, "Please add @device_locator_bot to your channel with sending message permission and send us email with your Telegram channel id to finish registration!", Toast.LENGTH_LONG).show();
+                        if (telegramId.startsWith("-100") || telegramId.startsWith("@")) {
+                            Toast.makeText(context, "Please add @device_locator_bot to your channel with message sending permission and send us email with your Telegram channel id to finish registration!", Toast.LENGTH_LONG).show();
+                            composeEmail(context, new String[]{"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram chat or channel " + telegramId + " to Device Locator notifications service.", false);
                         } else {
-                            Toast.makeText(context, "Oops! Something went wrong on our side. Please send us email with your Telegram chat id to finish registration!", Toast.LENGTH_LONG).show();
+                            //TODO clear telegram input
+                            Toast.makeText(context, "Oops! Something went wrong on our side. Please register again your Telegram channel or chat id!", Toast.LENGTH_LONG).show();
                         }
-                        composeEmail(context, new String[] {"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram chat or channel " + telegramId + " to Device Locator notifications service.", false);
                     }
                 }
             });
@@ -706,8 +747,8 @@ public class Messenger {
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url + " with content " + results);
                     if (responseCode != 200 && retryCount > 0) {
-                        sendEmailRegistrationRequest(context, email, tokenStr, retryCount-1);
-                    } else if (responseCode == 200  && StringUtils.startsWith(results, "{")) {
+                        sendEmailRegistrationRequest(context, email, tokenStr, retryCount - 1);
+                    } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         String status = null;
                         if (reply != null) {
@@ -719,12 +760,15 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your email address is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            Toast.makeText(context, "You'll receive verification instruction to your email address", Toast.LENGTH_LONG).show();
+                            //TODO change to alert dialog
+                            Toast.makeText(context, "You'll receive registration instruction to your email address from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(context, "Oops! Something went wrong. Please add again email address!", Toast.LENGTH_LONG).show();
+                            //TODO clear email input
+                            Toast.makeText(context, "Oops! Something went wrong. Please add again your email address!", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Toast.makeText(context, "Oops! Something went wrong. Please add again email address!", Toast.LENGTH_LONG).show();
+                        //TODO clear email input
+                        Toast.makeText(context, "Oops! Something went wrong. Please add again your email address!", Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -797,7 +841,7 @@ public class Messenger {
         //chat id must be positive integer
         if (StringUtils.startsWith(telegramId, "@") && !StringUtils.containsWhitespace(telegramId)) {
             return true;
-        } else  {
+        } else {
             if (StringUtils.isNotEmpty(telegramId)) {
                 try {
                     long id = Long.parseLong(telegramId);

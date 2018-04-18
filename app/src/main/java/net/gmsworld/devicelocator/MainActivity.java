@@ -289,6 +289,7 @@ public class MainActivity extends AppCompatActivity {
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", false).commit();
                 findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+                findViewById(R.id.ll_top_focus).requestFocus();
                 getSupportActionBar().invalidateOptionsMenu();
                 return true;
             case R.id.tracker:
@@ -296,6 +297,7 @@ public class MainActivity extends AppCompatActivity {
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).commit();
                 findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
+                findViewById(R.id.ll_bottom_focus).requestFocus();
                 getSupportActionBar().invalidateOptionsMenu();
                 return true;
             case R.id.loginTracker:
@@ -695,6 +697,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
+                seekBar.requestFocus();
             }
 
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -742,6 +745,7 @@ public class MainActivity extends AppCompatActivity {
         emailInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
+                Log.d(TAG, "Email input text focus set to " + hasFocus);
                 if(!hasFocus) {
                     newEmailAddress = emailInput.getText().toString();
                     if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
