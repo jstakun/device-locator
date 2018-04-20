@@ -43,6 +43,7 @@
     <string name="remaining_distance_to">Distance to</string>
     <string name="aprox_duration">Approximate time left</string>
     <string name="error_getting_location">GPS error. Can\'t get the location.</string>
+    <string name="done">Done</string>
     <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>

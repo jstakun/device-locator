@@ -1,7 +1,9 @@
 package net.gmsworld.devicelocator.Utilities;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -10,9 +12,11 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.JsonElement;
@@ -122,11 +126,13 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             Toast.makeText(context, "Unable to sent notification! Your email address is still unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                            Toast.makeText(context, "Oops! Your email seems to be wrong. Please remove and add again email address!", Toast.LENGTH_LONG).show();
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
+                            final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
+                            emailInput.setText("");
+                            Toast.makeText(context, "Oops! Your email seems to be wrong. Please register again email address again", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(context, "Oops! Something went wrong on our side. Please remove and add again email address!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Oops! Failed to sent email notification. Something went wrong on our side!", Toast.LENGTH_LONG).show();
                         }
-
                     }
                 }
             });
@@ -201,11 +207,17 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Telegram notification sent successfully!");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            Toast.makeText(context, "Your chat or channel is unverified! Please remove and add again Telegram chat id.", Toast.LENGTH_LONG).show();
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
+                            final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
+                            telegramInput.setText(telegramId);
+                            Toast.makeText(context, "Your chat or channel is unverified! Please register again your Telegram chat or channel.", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                            Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
+                            final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
+                            telegramInput.setText(telegramId);
+                            Toast.makeText(context, "Oops! Your Telegram chat or channel id seems to be wrong. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(context, "Oops! Something went wrong on our side. Please remove and add again Telegram chat id!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Oops! Failed to sent Telegram notification. Something went wrong on our side!", Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -711,13 +723,32 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            //TODO change to alert dialog
-                            Toast.makeText(context, "You'll receive verification instruction to your chat or channel", Toast.LENGTH_LONG).show();
+                            if (!((Activity)context).isFinishing()) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                builder.setPositiveButton(R.string.done, null);
+                                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
+                                        final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
+                                        telegramInput.setText(telegramId);
+                                    }
+                                });
+                                builder.setMessage("Please check your Telegram chat or channel and confirm your registration.");
+                                builder.setTitle("Registration confirmation");
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
+                            } else {
+                                Toast.makeText(context, "Please check your Telegram chat or channel and confirm your registration.", Toast.LENGTH_LONG).show();
+                            }
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                            //TODO clear telegram input
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
+                            final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
+                            telegramInput.setText(telegramId);
                             Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
                         } else {
-                            //TODO clear telegram input
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
+                            final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
+                            telegramInput.setText(telegramId);
                             Toast.makeText(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
                         }
                     } else {
@@ -725,7 +756,7 @@ public class Messenger {
                             Toast.makeText(context, "Please add @device_locator_bot to your channel with message sending permission and send us email with your Telegram channel id to finish registration!", Toast.LENGTH_LONG).show();
                             composeEmail(context, new String[]{"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram chat or channel " + telegramId + " to Device Locator notifications service.", false);
                         } else {
-                            //TODO clear telegram input
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
                             Toast.makeText(context, "Oops! Something went wrong on our side. Please register again your Telegram channel or chat id!", Toast.LENGTH_LONG).show();
                         }
                     }
@@ -760,14 +791,33 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your email address is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            //TODO change to alert dialog
-                            Toast.makeText(context, "You'll receive registration instruction to your email address from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
+                            if (!((Activity)context).isFinishing()) {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                                builder.setPositiveButton(R.string.done, null);
+                                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
+                                        final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
+                                        emailInput.setText("");
+                                    }
+                                });
+                                builder.setMessage("Please check your mail inbox for message from device-locator@gms-world.net and confirm your registration.");
+                                builder.setTitle("Registration confirmation");
+                                AlertDialog dialog = builder.create();
+                                dialog.show();
+                            } else {
+                                Toast.makeText(context, "Please check your mail inbox for message from device-locator@gms-world.net and confirm your registration.", Toast.LENGTH_LONG).show();
+                            }
                         } else {
-                            //TODO clear email input
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
+                            final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
+                            emailInput.setText("");
                             Toast.makeText(context, "Oops! Something went wrong. Please add again your email address!", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        //TODO clear email input
+                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
+                        final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
+                        emailInput.setText("");
                         Toast.makeText(context, "Oops! Something went wrong. Please add again your email address!", Toast.LENGTH_LONG).show();
                     }
                 }
