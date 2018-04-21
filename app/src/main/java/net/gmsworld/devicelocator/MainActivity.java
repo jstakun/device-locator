@@ -133,20 +133,28 @@ public class MainActivity extends AppCompatActivity {
             findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.trackerSettings).setVisibility(View.GONE);
         }
+
+        //send email registration request once every day if still unverified
+        String emailStatus = PreferenceManager.getDefaultSharedPreferences(this).getString("emailStatus", null);
+        long emailRegistrationMillis = PreferenceManager.getDefaultSharedPreferences(this).getLong("emailRegistrationMillis", System.currentTimeMillis());
+        if (StringUtils.equalsIgnoreCase(emailStatus, "unverified") && StringUtils.isNotEmpty(email) && (System.currentTimeMillis() - emailRegistrationMillis) > 1000 * 60 * 60 * 24 ) {
+            registerEmail((TextView)findViewById(R.id.email), true);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume()");
+
+        //show pin dialog only if not shown in last 10 minutes
         long pinVerificationMillis = PreferenceManager.getDefaultSharedPreferences(this).getLong("pinVerificationMillis", 0);
         boolean settingsVerifyPin = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("settings_verify_pin", false);
-        //Log.d(TAG, "Checking if Security PIN should be verified...");
         if (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > 10 * 60 * 1000) {
-            //show pin dialog only if not shown in last 10 minutes
             showPinDialog();
         }
 
+        //paste Telegram id
         boolean telegramPaste = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("telegramPaste", false);
         if (telegramPaste) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("telegramPaste", false).commit();
@@ -180,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
 
         RouteTrackingServiceUtils.unbindRouteTrackingService(this, mConnection, isTrackingServiceBound);
 
-        registerEmail((TextView) findViewById(R.id.email));
+        registerEmail((TextView) findViewById(R.id.email), false);
         registerTelegram((TextView) findViewById(R.id.telegramId));
         registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
 
@@ -670,7 +678,7 @@ public class MainActivity extends AppCompatActivity {
 
             public void onFocusChange(View v, boolean hasFocus) {
                 if(!hasFocus) {
-                    registerEmail(emailInput);
+                    registerEmail(emailInput, false);
                 } else {
                     //paste email from clipboard
                     String currentText = emailInput.getText().toString();
@@ -701,7 +709,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
-                    registerEmail(v);
+                    registerEmail(v, false);
                 }
                 return false;
             }
@@ -714,7 +722,7 @@ public class MainActivity extends AppCompatActivity {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (keyCode) {
                         case KeyEvent.KEYCODE_BACK:
-                            registerEmail((TextView) v);
+                            registerEmail((TextView) v, false);
                             break;
                         default:
                             break;
@@ -725,11 +733,12 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private synchronized void registerEmail(TextView emailInput) {
+    private synchronized void registerEmail(TextView emailInput, boolean retry) {
         String newEmailAddress = emailInput.getText().toString();
-        if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
+        if ((!StringUtils.equals(email, newEmailAddress) || retry) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
             if (Network.isNetworkAvailable(MainActivity.this)) {
                 Log.d(TAG, "Setting new email address: " + newEmailAddress);
+                Toast.makeText(MainActivity.this, "Email verification in progress...", Toast.LENGTH_LONG).show();
                 email = newEmailAddress;
                 saveData();
                 //update route tracking service if running
@@ -815,6 +824,7 @@ public class MainActivity extends AppCompatActivity {
         if (!StringUtils.equals(telegramId, newTelegramId) && (StringUtils.isEmpty(newTelegramId) || Messenger.isValidTelegramId(newTelegramId))) {
             if (Network.isNetworkAvailable(MainActivity.this)) {
                 Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
+                Toast.makeText(MainActivity.this, "Telegram verification in progress...", Toast.LENGTH_LONG).show();
                 telegramId = newTelegramId;
                 saveData();
                 //update route tracking service if running

@@ -121,10 +121,11 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
+                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("emailStatus", status).commit();
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            Toast.makeText(context, "Unable to sent notification! Your email address is still unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Device Locator is unable to sent notification beacuse your email address is still unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
                             final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
@@ -204,13 +205,14 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
+                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramStatus", status).commit();
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Telegram notification sent successfully!");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
                             final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
                             telegramInput.setText("");
-                            Toast.makeText(context, "Your chat or channel is unverified! Please register again your Telegram chat or channel.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Device Locator is unable to sent notification beacuse your chat or channel is unverified! Please register again your Telegram chat or channel.", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
                             final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
@@ -720,6 +722,7 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
+                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramStatus", status).commit();
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
@@ -734,7 +737,7 @@ public class Messenger {
                                     }
                                 });
                                 builder.setMessage("Please check your Telegram chat or channel and confirm your registration.");
-                                builder.setTitle("Registration confirmation");
+                                builder.setTitle("Telegram registration");
                                 AlertDialog dialog = builder.create();
                                 dialog.show();
                             } else {
@@ -788,9 +791,11 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
+                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("emailStatus", status).commit();
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your email address is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putLong("emailRegistrationMillis", System.currentTimeMillis()).commit();
                             if (!((Activity)context).isFinishing()) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                                 builder.setPositiveButton(R.string.done, null);
@@ -802,7 +807,7 @@ public class Messenger {
                                     }
                                 });
                                 builder.setMessage("Please check your mail inbox for message from device-locator@gms-world.net and confirm your registration.");
-                                builder.setTitle("Registration confirmation");
+                                builder.setTitle("Email registration");
                                 AlertDialog dialog = builder.create();
                                 dialog.show();
                             } else {
