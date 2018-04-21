@@ -209,12 +209,12 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
                             final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
-                            telegramInput.setText(telegramId);
+                            telegramInput.setText("");
                             Toast.makeText(context, "Your chat or channel is unverified! Please register again your Telegram chat or channel.", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
                             final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
-                            telegramInput.setText(telegramId);
+                            telegramInput.setText("");
                             Toast.makeText(context, "Oops! Your Telegram chat or channel id seems to be wrong. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(context, "Oops! Failed to sent Telegram notification. Something went wrong on our side!", Toast.LENGTH_LONG).show();

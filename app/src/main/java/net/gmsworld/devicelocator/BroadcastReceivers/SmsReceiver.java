@@ -13,6 +13,7 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.Utilities.Command;
+import net.gmsworld.devicelocator.Utilities.Permissions;
 
 public class SmsReceiver extends BroadcastReceiver {
 
@@ -50,20 +51,25 @@ public class SmsReceiver extends BroadcastReceiver {
     }
 
     private static boolean contactExists(Context context, String number) {
-        Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
-        String[] mPhoneNumberProjection = { ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.NUMBER, ContactsContract.PhoneLookup.DISPLAY_NAME };
-        Cursor cur = context.getContentResolver().query(lookupUri,mPhoneNumberProjection, null, null, null);
-        try {
-            if (cur.moveToFirst()) {
-                Log.d(TAG, "Sender found in contact list");
-                return true;
+        if (Permissions.haveReadContactsPermission(context)) {
+            Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
+            String[] mPhoneNumberProjection = {ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.NUMBER, ContactsContract.PhoneLookup.DISPLAY_NAME};
+            Cursor cur = context.getContentResolver().query(lookupUri, mPhoneNumberProjection, null, null, null);
+            try {
+                if (cur.moveToFirst()) {
+                    Log.d(TAG, "Sender found in contact list");
+                    return true;
+                }
+            } finally {
+                if (cur != null)
+                    cur.close();
             }
-        } finally {
-            if (cur != null)
-                cur.close();
+            Log.d(TAG, "Sender doesn't exists on contact list!");
+            return false;
+        } else {
+            Log.d(TAG, "Missing read contacts permission is required to check if " + number + " is present on the contacts list!");
+            return false;
         }
-        Log.d(TAG, "Sender doesn't exists on contact list!");
-        return false;
     }
 
 

@@ -33,6 +33,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,6 +41,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -97,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
     private boolean motionDetectorRunning = false;
     private String phoneNumber = null, email = null, telegramId = null, pin = null, oldPin = null;
-    private String newEmailAddress = null, newTelegramId = null, newPhoneNumber = null;
 
     private Handler loadingHandler;
     //private Messenger mMessenger;
@@ -176,44 +177,19 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy()");
+
         RouteTrackingServiceUtils.unbindRouteTrackingService(this, mConnection, isTrackingServiceBound);
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = settings.edit();
 
-        if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || (StringUtils.isEmpty(newEmailAddress) && newEmailAddress != null))) {
-            Log.d(TAG, "New email has been set: " + newEmailAddress);
-            if (Network.isNetworkAvailable(MainActivity.this)) {
-                editor.putString("email", newEmailAddress);
-                if (StringUtils.isNotEmpty(newEmailAddress)) {
-                    net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, newEmailAddress, 1);
-                }
-            } else {
-                Toast.makeText(MainActivity.this, "No network available! Please connect to networking service and set email again.", Toast.LENGTH_LONG).show();
-            }
-        }
-
-        if (!StringUtils.equals(phoneNumber, newPhoneNumber) && ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || (StringUtils.isEmpty(newPhoneNumber) && newPhoneNumber != null))) {
-            Log.d(TAG, "New phone number has been set: " + newPhoneNumber);
-            editor.putString("phoneNumber", newPhoneNumber);
-        }
-
-        if (!StringUtils.equals(telegramId, newTelegramId) && ((StringUtils.isEmpty(newTelegramId) && newTelegramId != null) || Messenger.isValidTelegramId(newTelegramId))) {
-            Log.d(TAG, "New telegram id has been set: " + newTelegramId);
-            if (Network.isNetworkAvailable(MainActivity.this)) {
-                editor.putString("telegramId", newTelegramId);
-                if (StringUtils.isNotEmpty(newTelegramId)) {
-                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, newTelegramId, 1);
-                }
-            } else {
-                Toast.makeText(MainActivity.this, "No network available! Please connect to networking service and set Telegram chat or channel id again.", Toast.LENGTH_LONG).show();
-            }
-        }
+        registerEmail((TextView) findViewById(R.id.email));
+        registerTelegram((TextView) findViewById(R.id.telegramId));
+        registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
 
         //update cloud platform,
         if (oldPin != null) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
             String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
             if (StringUtils.isNotEmpty(firebaseToken)) {
-                editor.remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN); //remove token so that it will be added again after successful registration
+                settings.edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).commit(); //remove token so that it will be added again after successful registration
                 if (Network.isNetworkAvailable(MainActivity.this)) {
                     DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin, oldPin);
                 }
@@ -224,8 +200,6 @@ public class MainActivity extends AppCompatActivity {
             pinDialog.dismiss();
             pinDialog = null;
         }
-
-        editor.commit();
     }
 
     @Override
@@ -341,15 +315,6 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.smsSettings).setVisibility(View.GONE);
         getSupportActionBar().invalidateOptionsMenu();
     }
-
-    /*private void scrollTop() {
-        final ScrollView scrollView = (ScrollView) this.findViewById(R.id.scrollview);
-        scrollView.post(new Runnable() {
-            public void run() {
-                scrollView.scrollTo(0, 0);
-            }
-        });
-    }*/
 
     private void initLocationSMSCheckbox() {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -542,18 +507,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toggleMotionDetectorRunning() {
-        int currentRadius = ((SeekBar)findViewById(R.id.radiusBar)).getProgress();;
-        /*try {
-            currentRadius = Integer.parseInt(((TextView) this.findViewById(R.id.radius)).getText() + "");
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
-        }
-        if ((currentRadius <= 0 || currentRadius > MAX_RADIUS) && !motionDetectorRunning) {
-            //can't start application with no radius
-            Toast.makeText(getApplicationContext(), "Please specify radius between 1 and " + MAX_RADIUS + " meters", Toast.LENGTH_SHORT).show();
-            return;
-        }*/
-
         if (StringUtils.isNotEmpty(phoneNumber)) {
             if (!this.motionDetectorRunning && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
                 Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
@@ -655,35 +608,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initRadiusInput() {
-        /*final TextView radiusInput = (TextView) this.findViewById(R.id.radius);
-        radiusInput.setText(Integer.toString(this.radius));
-
-        radiusInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String input = charSequence.toString();
-                try {
-                    radius = Integer.parseInt(input);
-                    saveData();
-                    //update route tracking service if running
-                    if (motionDetectorRunning) {
-                        RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage(), e);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });*/
         SeekBar radiusBar=(SeekBar)findViewById(R.id.radiusBar);
         radiusBar.setProgress(radius);
 
@@ -726,7 +650,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView emailInput = (TextView) this.findViewById(R.id.email);
         emailInput.setText(email);
 
-        emailInput.addTextChangedListener(new TextWatcher() {
+        /*emailInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -734,41 +658,19 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                newEmailAddress = charSequence.toString();
+                //newEmailAddress = charSequence.toString();
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
             }
-        });
+        });*/
 
         emailInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
-                Log.d(TAG, "Email input text focus set to " + hasFocus);
                 if(!hasFocus) {
-                    newEmailAddress = emailInput.getText().toString();
-                    if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
-                        if (Network.isNetworkAvailable(MainActivity.this)) {
-                            Log.d(TAG, "Setting new email address: " + newEmailAddress);
-                            email = newEmailAddress;
-                            saveData();
-                            //update route tracking service if running
-                            if (motionDetectorRunning) {
-                                RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
-                            }
-
-                            if (StringUtils.isNotEmpty(email)) {
-                                net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
-                            }
-                        } else {
-                            Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
-                            emailInput.setText("");
-                        }
-                    } else if (!StringUtils.equals(email, newEmailAddress)) {
-                        Toast.makeText(getApplicationContext(), "Make sure to specify valid email address!", Toast.LENGTH_SHORT).show();
-                        emailInput.setText("");
-                    }
+                    registerEmail(emailInput);
                 } else {
                     //paste email from clipboard
                     String currentText = emailInput.getText().toString();
@@ -794,6 +696,58 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        emailInput.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
+                    registerEmail(v);
+                }
+                return false;
+            }
+        });
+
+        emailInput.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                //Log.d(TAG, "Soft keyboard event " + keyCode);
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_BACK:
+                            registerEmail((TextView) v);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    private synchronized void registerEmail(TextView emailInput) {
+        String newEmailAddress = emailInput.getText().toString();
+        if (!StringUtils.equals(email, newEmailAddress) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
+            if (Network.isNetworkAvailable(MainActivity.this)) {
+                Log.d(TAG, "Setting new email address: " + newEmailAddress);
+                email = newEmailAddress;
+                saveData();
+                //update route tracking service if running
+                if (motionDetectorRunning) {
+                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                }
+
+                if (StringUtils.isNotEmpty(email)) {
+                    net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
+                }
+            } else {
+                Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                emailInput.setText("");
+            }
+        } else if (!StringUtils.equals(email, newEmailAddress)) {
+            Toast.makeText(getApplicationContext(), "Make sure to specify valid email address!", Toast.LENGTH_SHORT).show();
+            emailInput.setText("");
+        }
     }
 
     //telegram input setup -----------------------------------------------------------------
@@ -802,7 +756,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView telegramInput = (TextView) this.findViewById(R.id.telegramId);
         telegramInput.setText(telegramId);
 
-        telegramInput.addTextChangedListener(new TextWatcher() {
+        /*telegramInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -810,44 +764,75 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                newTelegramId = charSequence.toString();
+                //newTelegramId = charSequence.toString();
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
 
             }
-        });
+        });*/
 
         telegramInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    newTelegramId = telegramInput.getText().toString();
-                    if (!StringUtils.equals(telegramId, newTelegramId) && (StringUtils.isEmpty(newTelegramId) || Messenger.isValidTelegramId(newTelegramId))) {
-                        if (Network.isNetworkAvailable(MainActivity.this)) {
-                            Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
-                            telegramId = newTelegramId;
-                            saveData();
-                            //update route tracking service if running
-                            if (motionDetectorRunning) {
-                                RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
-                            }
-
-                            if (StringUtils.isNotEmpty(telegramId)) {
-                                net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
-                            }
-                        } else {
-                            Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
-                            telegramInput.setText("");
-                        }
-                    } else if (!StringUtils.equals(telegramId, newTelegramId)) {
-                        Toast.makeText(getApplicationContext(), "Make sure to specify valid Telegram chat id!", Toast.LENGTH_SHORT).show();
-                        telegramInput.setText("");
-                    }
+                    registerTelegram(telegramInput);
                 }
             }
         });
+
+        telegramInput.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
+                    registerTelegram(v);
+                }
+                return false;
+            }
+        });
+
+        telegramInput.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                //Log.d(TAG, "Soft keyboard event " + keyCode);
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_BACK:
+                            registerTelegram((TextView) v);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    private synchronized void registerTelegram(TextView telegramInput) {
+        String newTelegramId = telegramInput.getText().toString();
+        if (!StringUtils.equals(telegramId, newTelegramId) && (StringUtils.isEmpty(newTelegramId) || Messenger.isValidTelegramId(newTelegramId))) {
+            if (Network.isNetworkAvailable(MainActivity.this)) {
+                Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
+                telegramId = newTelegramId;
+                saveData();
+                //update route tracking service if running
+                if (motionDetectorRunning) {
+                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                }
+
+                if (StringUtils.isNotEmpty(telegramId)) {
+                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
+                }
+            } else {
+                Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                telegramInput.setText("");
+            }
+        } else if (!StringUtils.equals(telegramId, newTelegramId)) {
+            Toast.makeText(getApplicationContext(), "Make sure to specify valid Telegram chat id!", Toast.LENGTH_SHORT).show();
+            telegramInput.setText("");
+        }
     }
 
     // phone number input setup ---------------------------------------------------------------
@@ -856,7 +841,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView phoneNumberInput = (TextView) this.findViewById(R.id.phoneNumber);
         phoneNumberInput.setText(this.phoneNumber);
 
-        phoneNumberInput.addTextChangedListener(new TextWatcher() {
+        /*phoneNumberInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -864,49 +849,67 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                newPhoneNumber = charSequence.toString();
+                //newPhoneNumber = charSequence.toString();
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
             }
-        });
+        });*/
 
         phoneNumberInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    newPhoneNumber = phoneNumberInput.getText().toString();
-                    if (!StringUtils.equals(phoneNumber, newPhoneNumber) && ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || StringUtils.isEmpty(newPhoneNumber))) {
-                        Log.d(TAG, "Setting new phone number: " + newPhoneNumber);
-                        phoneNumber = newPhoneNumber;
-                        saveData();
-                        if (motionDetectorRunning) {
-                            RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
-                        }
-                    } else if (!StringUtils.equals(phoneNumber, newPhoneNumber)) {
-                        Toast.makeText(getApplicationContext(), "Make sure to specify valid phone number!", Toast.LENGTH_SHORT).show();
-                        phoneNumberInput.setText("");
+                    registerPhoneNumber((TextView)v);
+                }
+            }
+        });
+
+        phoneNumberInput.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
+                    registerPhoneNumber(v);
+                }
+                return false;
+            }
+        });
+
+        phoneNumberInput.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                //Log.d(TAG, "Soft keyboard event " + keyCode);
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_BACK:
+                            registerPhoneNumber((TextView) v);
+                            break;
+                        default:
+                            break;
                     }
                 }
+                return false;
             }
         });
     }
 
-    //------------------------------------------------------------------------------------------------
-
-    /*private void initGpsRadioGroup() {
-        final RadioGroup gpsAccuracyGroup = (RadioGroup) this.findViewById(R.id.gpsAccuracyGroup);
-
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        int gpsAccuracy = settings.getInt("gpsAccuracy", 1);
-
-        if (gpsAccuracy == 1) {
-            gpsAccuracyGroup.check(R.id.radio_gps_high);
-        } else {
-            gpsAccuracyGroup.check(R.id.radio_gps_low);
+    private synchronized void registerPhoneNumber(TextView phoneNumberInput) {
+        String newPhoneNumber = phoneNumberInput.getText().toString();
+        if (!StringUtils.equals(phoneNumber, newPhoneNumber) && ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || StringUtils.isEmpty(newPhoneNumber))) {
+            Log.d(TAG, "Setting new phone number: " + newPhoneNumber);
+            phoneNumber = newPhoneNumber;
+            saveData();
+            if (motionDetectorRunning) {
+                RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+            }
+        } else if (!StringUtils.equals(phoneNumber, newPhoneNumber)) {
+            Toast.makeText(getApplicationContext(), "Make sure to specify valid phone number!", Toast.LENGTH_SHORT).show();
+            phoneNumberInput.setText("");
         }
-    }*/
+    }
+
+    //------------------------------------------------------------------------------------------------
 
     private void initShareRouteButton() {
         Button shareRouteButton = (Button) this.findViewById(R.id.route_button);
@@ -1117,12 +1120,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveData() {
-        /*try {
-            this.radius = Integer.parseInt(((TextView) this.findViewById(R.id.radius)).getText() + "");
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
-        }*/
-        //this.radius = ((SeekBar)findViewById(R.id.radiusBar)).getProgress();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("running", this.running);
@@ -1164,33 +1161,6 @@ public class MainActivity extends AppCompatActivity {
         final Toolbar toolbar = (Toolbar) findViewById(toolbarId);
         setSupportActionBar(toolbar);
     }
-
-    /*public void onGpsRadioButtonClicked(View view) {
-        // Is the button now checked?
-        boolean checked = ((RadioButton) view).isChecked();
-
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = settings.edit();
-        // Check which radio button was clicked
-        switch(view.getId()) {
-            case R.id.radio_gps_high:
-                if (checked)
-                    editor.putInt("gpsAccuracy", 1);
-                    if (motionDetectorRunning) {
-                        RouteTrackingServiceUtils.setGpsAccuracy(this, RouteTrackingService.COMMAND_GPS_HIGH);
-                    }
-                    break;
-            case R.id.radio_gps_low:
-                if (checked)
-                    editor.putInt("gpsAccuracy", 0);
-                    if (motionDetectorRunning) {
-                        RouteTrackingServiceUtils.setGpsAccuracy(this, RouteTrackingService.COMMAND_GPS_BALANCED);
-                    }
-                    break;
-        }
-
-        editor.commit();
-    }*/
 
     private void showPinDialog() {
         if (pinDialog == null) {

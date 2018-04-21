@@ -339,7 +339,7 @@
                             android:gravity="center"
                             android:text="@string/email_address" />
 
-                        <EditText
+                        <net.gmsworld.devicelocator.Views.KeyboardEditText
                             android:id="@+id/email"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -376,7 +376,7 @@
                                 android:textColor="@android:color/white"
                                 android:src="@drawable/ic_contact_mail_white"/>
 
-                            <EditText
+                            <net.gmsworld.devicelocator.Views.KeyboardEditText
                                 android:id="@+id/telegramId"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
