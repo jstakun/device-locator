@@ -243,9 +243,12 @@ public class RouteTrackingService extends Service {
                         Location location = (Location) msg.obj;
                         int distance = msg.arg1;
                         if (location != null) {
-                            if (!silentMode) {
+                            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this);
+                            long notificationSentMillis = settings.getLong("notificationSentMillis", 0);
+                            //sent notification olnly if not in silent mode and if last notification was at least sent 10 seconds ago
+                            if (!silentMode && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
+                                settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).commit();
                                 if (StringUtils.isNotEmpty(phoneNumber)) {
-                                    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this);
                                     if (settings.getBoolean("settings_gps_sms", false)) {
                                         net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, phoneNumber, null, null);
                                     }
