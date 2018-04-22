@@ -126,11 +126,11 @@ public class Messenger {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             Toast.makeText(context, "Device Locator is unable to sent notification beacuse your email address is still unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
-                        } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
-                            final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
-                            emailInput.setText("");
-                            Toast.makeText(context, "Oops! Your email seems to be wrong. Please register again email address again", Toast.LENGTH_LONG).show();
+                        //} else if (StringUtils.equalsIgnoreCase(status, "failed")) {
+                        //    PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
+                        //    final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
+                        //    emailInput.setText("");
+                        //    Toast.makeText(context, "Oops! Your email seems to be wrong. Please register again email address again", Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(context, "Oops! Failed to sent email notification. Something went wrong on our side!", Toast.LENGTH_LONG).show();
                         }
@@ -760,7 +760,9 @@ public class Messenger {
                             composeEmail(context, new String[]{"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram chat or channel " + telegramId + " to Device Locator notifications service.", false);
                         } else {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
-                            Toast.makeText(context, "Oops! Something went wrong on our side. Please register again your Telegram channel or chat id!", Toast.LENGTH_LONG).show();
+                            final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
+                            telegramInput.setText(telegramId);
+                            Toast.makeText(context, "Oops! Your Telegram channel id seems to be wrong. Please register again your Telegram channel or chat id!", Toast.LENGTH_LONG).show();
                         }
                     }
                 }
