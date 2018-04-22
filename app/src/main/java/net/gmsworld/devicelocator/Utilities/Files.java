@@ -19,8 +19,8 @@ public class Files {
 
     private static final String TAG = Files.class.getSimpleName();
 
-    private static File getFilesDir(Context context, String filename, boolean isExternal) {
-        String absolutePath = null;
+    public static File getFilesDir(Context context, String filename, boolean isExternal) {
+        String absolutePath;
         if (isExternal) {
             absolutePath = context.getExternalFilesDir(null).getAbsolutePath();
             absolutePath = absolutePath.substring(0, absolutePath.length() - 6); //remove /files from the end
@@ -98,11 +98,10 @@ public class Files {
         }
     }
 
-    public static void appendLineToFileFromContextDir(String filename, Context context, String line) {
+    public static void appendLineToFileFromContextDir(File fc, String line) {
         QueueFile queueFile = null;
 
         try {
-            File fc = getFilesDir(context, filename, false);
             queueFile = new QueueFile.Builder(fc).build();
             queueFile.add(line.getBytes());
             if (queueFile.size() > 20000) {

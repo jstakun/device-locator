@@ -358,10 +358,7 @@ public class Command {
         }
 
         private boolean initPhoneCall(String sender, Context context) {
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "Unable to initiate phone call due to missing permission");
-                return false;
-            } else {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
                 try {
                     Uri call = Uri.parse("tel:" + sender);
                     Intent surf = new Intent(Intent.ACTION_CALL, call);
@@ -374,6 +371,9 @@ public class Command {
                     Log.e(TAG, e.getMessage(), e);
                     return false;
                 }
+            } else {
+                Log.e(TAG, "Unable to initiate phone call due to missing permission");
+                return false;
             }
         }
     }

@@ -99,16 +99,18 @@ public abstract class AbstractCommand {
         ArrayList<SmsMessage> list = new ArrayList<SmsMessage>();
         if (bundle != null) {
             Object[] pdus = (Object[]) bundle.get("pdus");
-            for (int i = 0; i < pdus.length; i++) {
-                SmsMessage sms;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    String format = bundle.getString("format");
-                    sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);
-                } else {
-                    sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                }
-                if (findCommand(context, sms.getMessageBody(), keyword) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()))) {
-                    list.add(sms);
+            if (pdus != null) {
+                for (int i = 0; i < pdus.length; i++) {
+                    SmsMessage sms;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        String format = bundle.getString("format");
+                        sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);
+                    } else {
+                        sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                    }
+                    if (findCommand(context, sms.getMessageBody(), keyword) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()))) {
+                        list.add(sms);
+                    }
                 }
             }
         }

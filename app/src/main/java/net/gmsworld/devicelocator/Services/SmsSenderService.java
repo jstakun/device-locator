@@ -71,9 +71,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             } else {
                 Messenger.sendCommandMessage(this, intent);
             }
-        } else {
+        } //else {
             //Log.e(TAG, "This intent requires extra parameters");
-        }
+        //}
     }
 
 

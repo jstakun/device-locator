@@ -29,17 +29,19 @@ public class SmsReceiver extends BroadcastReceiver {
             Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 Object[] pdus = (Object[]) bundle.get("pdus");
-                for (int i = 0; i < pdus.length; i++) {
-                    SmsMessage sms;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        String format = bundle.getString("format");
-                        sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);
-                    } else {
-                        sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                    }
-                    if (contactExists(context, sms.getOriginatingAddress())) {
-                        proceed = true;
-                        break;
+                if (pdus != null) {
+                    for (int i = 0; i < pdus.length; i++) {
+                        SmsMessage sms;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            String format = bundle.getString("format");
+                            sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);
+                        } else {
+                            sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                        }
+                        if (contactExists(context, sms.getOriginatingAddress())) {
+                            proceed = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -56,7 +58,7 @@ public class SmsReceiver extends BroadcastReceiver {
             String[] mPhoneNumberProjection = {ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.NUMBER, ContactsContract.PhoneLookup.DISPLAY_NAME};
             Cursor cur = context.getContentResolver().query(lookupUri, mPhoneNumberProjection, null, null, null);
             try {
-                if (cur.moveToFirst()) {
+                if (cur != null && cur.moveToFirst()) {
                     Log.d(TAG, "Sender found in contact list");
                     return true;
                 }

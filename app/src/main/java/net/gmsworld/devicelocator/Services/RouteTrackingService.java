@@ -28,6 +28,7 @@ import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.ref.WeakReference;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,7 +54,7 @@ public class RouteTrackingService extends Service {
     private static final String TAG = RouteTrackingService.class.getSimpleName();
     private int radius = DEFAULT_RADIUS;
 
-    private final Handler incomingHandler = new IncomingHandler();
+    private final Handler incomingHandler = new IncomingHandler(this);
     private final Messenger mMessenger = new Messenger(incomingHandler);
     private Messenger mClient;
     private String phoneNumber, email, telegramId;
@@ -218,90 +219,99 @@ public class RouteTrackingService extends Service {
         });
     }
 
-    private class IncomingHandler extends Handler {
+    private static class IncomingHandler extends Handler {
 
         final MorseSoundGenerator morseSoundGenerator = new MorseSoundGenerator(44100, 800.0, 50);
 
+        private final WeakReference<RouteTrackingService> routeTrackingService;
+
+        public IncomingHandler(RouteTrackingService service) {
+            routeTrackingService = new WeakReference<RouteTrackingService>(service);
+        }
+
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case COMMAND_REGISTER_CLIENT:
-                    mClient = msg.replyTo;
-                    Log.d(TAG, "New client registered");
-                    break;
-                case AbstractLocationManager.UPDATE_LOCATION:
-                    Log.d(TAG, "Received new location");
-                    if (mClient != null) {
+            RouteTrackingService service = routeTrackingService.get();
+            if (service != null) {
+                switch (msg.what) {
+                    case COMMAND_REGISTER_CLIENT:
+                        service.mClient = msg.replyTo;
+                        Log.d(TAG, "New client registered");
+                        break;
+                    case AbstractLocationManager.UPDATE_LOCATION:
+                        Log.d(TAG, "Received new location");
+                        if (service.mClient != null) {
+                            try {
+                                Message message = Message.obtain(null, COMMAND_SHOW_ROUTE);
+                                service.mClient.send(message);
+                            } catch (Exception e) {
+                                Log.e(TAG, e.getMessage(), e);
+                            }
+                        }
                         try {
-                            Message message = Message.obtain(null, COMMAND_SHOW_ROUTE);
-                            mClient.send(message);
+                            Location location = (Location) msg.obj;
+                            int distance = msg.arg1;
+                            if (location != null) {
+                                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(service);
+                                long notificationSentMillis = settings.getLong("notificationSentMillis", 0);
+                                //sent notification olnly if not in silent mode and if last notification was at least sent 10 seconds ago
+                                if (!service.silentMode && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
+                                    settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).commit();
+                                    if (StringUtils.isNotEmpty(service.phoneNumber)) {
+                                        if (settings.getBoolean("settings_gps_sms", false)) {
+                                            net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(service, location, true, service.phoneNumber, null, null);
+                                        }
+                                        if (settings.getBoolean("settings_google_sms", true)) {
+                                            net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(service, location, service.phoneNumber, null, null);
+                                        }
+                                    }
+                                    DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
+                                    String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
+                                            " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m.";
+                                    if (location.hasSpeed() && location.getSpeed() > 0f) {
+                                        message += " and speed " + net.gmsworld.devicelocator.Utilities.Messenger.getSpeed(service, location.getSpeed());
+                                    }
+                                    message += "\n" + "Battery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(service) +
+                                            "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
+
+                                    final Map<String, String> headers = new HashMap<String, String>();
+                                    headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(service));
+                                    //First send notification to telegram and if not configured to email
+                                    //REMEMBER this could send a lot of messages and your email account could be overloaded
+                                    if (StringUtils.isNotEmpty(service.telegramId)) {
+                                        net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(service, location, service.telegramId, message, 1, headers);
+                                    } else if (StringUtils.isNotEmpty(service.email)) {
+                                        String title = service.getString(R.string.message);
+                                        String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(service);
+                                        if (deviceId != null) {
+                                            title += " installed on device " + deviceId + " - location change";
+                                        }
+                                        net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(service, location, service.email, message, title, 1, headers);
+                                    } else {
+                                        //send route point for online route tracking
+                                        net.gmsworld.devicelocator.Utilities.Messenger.sendRoutePoint(service, location, 1, headers);
+                                    }
+                                }
+
+                                //EXPERIMENTAL FEATURE audio transmitter
+                                //you should plug antenna to your device audio transmitter
+                                boolean useAudio = PreferenceManager.getDefaultSharedPreferences(service).getBoolean("useAudio", false);
+                                if (useAudio) {
+                                    synchronized (morseSoundGenerator) {
+                                        final String signal = ((int) (location.getLatitude() * 1e6)) + "," + ((int) (location.getLongitude() * 1e6));
+                                        Log.d(TAG, "Sending audio signal: " + signal);
+                                        morseSoundGenerator.morseOnce(signal);
+                                    }
+                                }
+                                //------------------
+                            }
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage(), e);
                         }
-                    }
-                    try {
-                        Location location = (Location) msg.obj;
-                        int distance = msg.arg1;
-                        if (location != null) {
-                            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this);
-                            long notificationSentMillis = settings.getLong("notificationSentMillis", 0);
-                            //sent notification olnly if not in silent mode and if last notification was at least sent 10 seconds ago
-                            if (!silentMode && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
-                                settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).commit();
-                                if (StringUtils.isNotEmpty(phoneNumber)) {
-                                    if (settings.getBoolean("settings_gps_sms", false)) {
-                                        net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(RouteTrackingService.this, location, true, phoneNumber, null, null);
-                                    }
-                                    if (settings.getBoolean("settings_google_sms", true)) {
-                                        net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(RouteTrackingService.this, location, phoneNumber, null, null);
-                                    }
-                                }
-                                DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
-                                String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
-                                        " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m.";
-                                if (location.hasSpeed() && location.getSpeed() > 0f) {
-                                    message += " and speed " + net.gmsworld.devicelocator.Utilities.Messenger.getSpeed(RouteTrackingService.this, location.getSpeed());
-                                }
-                                message += "\n" + "Battery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(RouteTrackingService.this) +
-                                        "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
-
-                                final Map<String, String> headers = new HashMap<String, String>();
-                                headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(RouteTrackingService.this));
-                                //First send notification to telegram and if not configured to email
-                                //REMEMBER this could send a lot of messages and your email account could be overloaded
-                                if (StringUtils.isNotEmpty(telegramId)) {
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(RouteTrackingService.this, location, telegramId, message, 1, headers);
-                                } else if (StringUtils.isNotEmpty(email)) {
-                                    String title = getString(R.string.message);
-                                    String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(RouteTrackingService.this);
-                                    if (deviceId != null) {
-                                        title += " installed on device " + deviceId +  " - location change";
-                                    }
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(RouteTrackingService.this, location, email, message, title, 1, headers);
-                                } else {
-                                    //send route point for online route tracking
-                                    net.gmsworld.devicelocator.Utilities.Messenger.sendRoutePoint(RouteTrackingService.this, location, 1, headers);
-                                }
-                            }
-
-                            //EXPERIMENTAL FEATURE audio transmitter
-                            //you should plug antenna to your device audio transmitter
-                            boolean useAudio = PreferenceManager.getDefaultSharedPreferences(RouteTrackingService.this).getBoolean("useAudio", false);
-                            if (useAudio) {
-                                synchronized (morseSoundGenerator) {
-                                    final String signal = ((int) (location.getLatitude() * 1e6)) + "," + ((int) (location.getLongitude() * 1e6));
-                                    Log.d(TAG, "Sending audio signal: " + signal);
-                                    morseSoundGenerator.morseOnce(signal);
-                                }
-                            }
-                            //------------------
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, e.getMessage(), e);
-                    }
-                    break;
-                default:
-                    super.handleMessage(msg);
+                        break;
+                    default:
+                        super.handleMessage(msg);
+                }
             }
         }
     }

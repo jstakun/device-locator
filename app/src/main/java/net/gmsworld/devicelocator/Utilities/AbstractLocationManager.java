@@ -22,6 +22,7 @@ import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -48,7 +49,7 @@ public abstract class AbstractLocationManager {
 
     private static final Vector<Location> mWeakLocations = new Vector<Location>(3);
     private static final Queue<Double> mAltitudes = new LinkedList<Double>();
-    private boolean mSpeedSanityCheck = true;
+    private final boolean mSpeedSanityCheck = true;
 
     private int radius = -1;
 
@@ -56,7 +57,7 @@ public abstract class AbstractLocationManager {
     private Location recentLocationSent;
     private Location lastLocation;
 
-    private Context callerContext;
+    private File routeFile;
 
     boolean isEnabled = false;
 
@@ -117,8 +118,8 @@ public abstract class AbstractLocationManager {
         }
     }
 
-    void init(String handlerName, Handler handler, Context context, int radius, int priority, boolean resetRoute) {
-        callerContext = context;
+    void init(String handlerName, Handler handler, Context context, int radius, boolean resetRoute) {
+        routeFile = Files.getFilesDir(context, ROUTE_FILE, false);
         this.radius = radius;
         if (resetRoute) {
             Log.d(TAG, "Route has been cleared");
@@ -142,11 +143,11 @@ public abstract class AbstractLocationManager {
         Location l = filterLocation(location);
         if (l != null) {
             Log.d(TAG, "Route point will be added to data store");
-            if (callerContext != null) {
+            if (routeFile != null) {
                 String line = location.getLatitude() + "," + location.getLongitude() + "," + System.currentTimeMillis();
-                Files.appendLineToFileFromContextDir(ROUTE_FILE, callerContext, line);
+                Files.appendLineToFileFromContextDir(routeFile, line);
             } else {
-                Log.e(TAG, "Caller context is null. I'm unable to persist route point!");
+                Log.e(TAG, "Route file object is null. I'm unable to persist route point!");
             }
         } else {
             Log.d(TAG, "Weak location won't be added to route");

@@ -19,7 +19,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.Settings;
-import android.support.v4.view.TintableBackgroundView;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -72,6 +72,7 @@ import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
@@ -100,7 +101,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean motionDetectorRunning = false;
     private String phoneNumber = null, email = null, telegramId = null, pin = null, oldPin = null;
 
-    private Handler loadingHandler;
+    private final Handler loadingHandler = new UIHandler(this);
+
     //private Messenger mMessenger;
     private boolean isTrackingServiceBound = false;
 
@@ -118,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
         updateUI();
         toggleBroadcastReceiver(); //set broadcast receiver for sms
         //scrollTop();
-        loadingHandler = new UIHandler();
         //mMessenger = new Messenger(loadingHandler);
         if (motionDetectorRunning) {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, false, false);
@@ -445,15 +446,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateUI() {
         ((Button) this.findViewById(R.id.running_button)).setText((running) ? getString(R.string.stop) : getString(R.string.start));
-        ((TintableBackgroundView) (Button)this.findViewById(R.id.running_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
-        ((TintableBackgroundView) (Button)this.findViewById(R.id.send_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ViewCompat.setBackgroundTintList(this.findViewById(R.id.running_button), ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
+        ViewCompat.setBackgroundTintList(this.findViewById(R.id.send_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
 
         ((Button) this.findViewById(R.id.motion_button)).setText((motionDetectorRunning) ? getString(R.string.stop) : getString(R.string.start));
-        ((TintableBackgroundView) (Button)this.findViewById(R.id.motion_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
+        ViewCompat.setBackgroundTintList(this.findViewById(R.id.motion_button), ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
 
-        ((TintableBackgroundView) (Button)this.findViewById(R.id.route_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-        ((TintableBackgroundView) (ImageButton)this.findViewById(R.id.contact_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-        ((TintableBackgroundView) (ImageButton)this.findViewById(R.id.telegram_button)).setSupportBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ViewCompat.setBackgroundTintList(this.findViewById(R.id.route_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ViewCompat.setBackgroundTintList(this.findViewById(R.id.contact_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ViewCompat.setBackgroundTintList(this.findViewById(R.id.telegram_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
     }
 
     private void toggleRunning() {
@@ -1199,7 +1200,7 @@ public class MainActivity extends AppCompatActivity {
                                 .remove("pinFailedCount")
                                 .putLong("pinVerificationMillis", System.currentTimeMillis())
                                 .commit();
-                    } else if (input != null && input.length() == pin.length()) {
+                    } else if (input.length() == pin.length()) {
                         int pinFailedCount = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getInt("pinFailedCount", 0);
                         if (pinFailedCount == 2) {
                             pinFailedCount = -1;
@@ -1294,37 +1295,44 @@ public class MainActivity extends AppCompatActivity {
         }
     };*/
 
-    private class UIHandler extends Handler {
+    private static class UIHandler extends Handler {
+
+        private final WeakReference<MainActivity> mainActivity;
+
+        public UIHandler(MainActivity activity) {
+            mainActivity = new WeakReference<MainActivity>(activity);
+        }
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == SHARE_ROUTE_MESSAGE) {
+            MainActivity activity = mainActivity.get();
+            if (activity != null && msg.what == SHARE_ROUTE_MESSAGE) {
                 int responseCode = msg.arg1;
                 if (responseCode == 200) {
-                    String showRouteUrl = RouteTrackingServiceUtils.getRouteUrl(MainActivity.this);
-                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    String showRouteUrl = RouteTrackingServiceUtils.getRouteUrl(activity);
+                    ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
                     ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
                     clipboard.setPrimaryClip(urlClip);
-                    Toast.makeText(MainActivity.this, "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(activity, "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
-                    startActivity(browserIntent);
+                    activity.startActivity(browserIntent);
                     String message = "Check your route at " + showRouteUrl;
-                    if (StringUtils.isNotEmpty(MainActivity.this.phoneNumber)) {
-                        Messenger.sendSMS(MainActivity.this, MainActivity.this.phoneNumber, message);
+                    if (StringUtils.isNotEmpty(activity.phoneNumber)) {
+                        Messenger.sendSMS(activity, activity.phoneNumber, message);
                     }
-                    if (StringUtils.isNotEmpty(MainActivity.this.email)) {
-                        String msgtitle = getString(R.string.message);
-                        String deviceId = Messenger.getDeviceId(MainActivity.this);
+                    if (StringUtils.isNotEmpty(activity.email)) {
+                        String msgtitle = activity.getString(R.string.message);
+                        String deviceId = Messenger.getDeviceId(activity);
                         if (deviceId != null) {
                             msgtitle += " installed on device " + deviceId +  " - route map link";
                         }
-                        Messenger.sendEmail(MainActivity.this, null, MainActivity.this.email, message, msgtitle, 1, new HashMap<String, String>());
+                        Messenger.sendEmail(activity, null, activity.email, message, msgtitle, 1, new HashMap<String, String>());
                     }
-                    if (StringUtils.isNotEmpty(MainActivity.this.telegramId)) {
-                        Messenger.sendTelegram(MainActivity.this, null, MainActivity.this.telegramId, message, 1, new HashMap<String, String>());
+                    if (StringUtils.isNotEmpty(activity.telegramId)) {
+                        Messenger.sendTelegram(activity, null, activity.telegramId, message, 1, new HashMap<String, String>());
                     }
                 } else {
-                    Toast.makeText(MainActivity.this, "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
+                    Toast.makeText(activity, "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
                 }
             }
         }

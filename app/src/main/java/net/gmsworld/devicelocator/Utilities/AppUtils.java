@@ -1,9 +1,7 @@
 package net.gmsworld.devicelocator.Utilities;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.BuildConfig;
@@ -25,7 +23,7 @@ public class AppUtils {
     private String aboutMessage = null, userAgentMessage = null;
     private PackageInfo pi;
 
-    private static AppUtils instance = new AppUtils();
+    private static final AppUtils instance = new AppUtils();
 
     private AppUtils() {
     }
@@ -67,7 +65,7 @@ public class AppUtils {
     private String getBuildDate(Context c) {
         String s = "recently";
         try{
-            Locale l = null;
+            Locale l;
             try {
                 l = c.getResources().getConfiguration().locale;
             } catch (Exception e) { //might cause NPE on some devices
@@ -92,9 +90,9 @@ public class AppUtils {
         return pi;
     }
 
-    private ApplicationInfo getApplicationInfo(Context c) throws PackageManager.NameNotFoundException {
-        PackageManager pm = c.getPackageManager();
-        ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), 0);
-        return ai;
-    }
+    //private ApplicationInfo getApplicationInfo(Context c) throws PackageManager.NameNotFoundException {
+    //    PackageManager pm = c.getPackageManager();
+    //    ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), 0);
+    //    return ai;
+    //}
 }

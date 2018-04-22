@@ -38,7 +38,7 @@ public class GmsSmartLocationManager extends AbstractLocationManager implements 
 
         isEnabled = true;
 
-        init(handlerName, locationHandler, context, radius, priority, resetRoute);
+        init(handlerName, locationHandler, context, radius, resetRoute);
     }
 
     public void disable(String handlerName, Context context) {
