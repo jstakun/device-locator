@@ -49,13 +49,17 @@ public class Messenger {
     private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
 
     public static void sendSMS(final Context context, final String phoneNumber, final String message) {
-        //on samsung intents can't be null. the messages are not sent if intents are null
-        ArrayList<PendingIntent> samsungFix = new ArrayList<>();
-        samsungFix.add(PendingIntent.getBroadcast(context, 0, new Intent("SMS_RECEIVED"), 0));
+        if (Permissions.haveSendSMSPermission(context)) {
+            //on samsung intents can't be null. the messages are not sent if intents are null
+            ArrayList<PendingIntent> samsungFix = new ArrayList<>();
+            samsungFix.add(PendingIntent.getBroadcast(context, 0, new Intent("SMS_RECEIVED"), 0));
 
-        SmsManager smsManager = SmsManager.getDefault();
-        ArrayList<String> parts = smsManager.divideMessage(message);
-        smsManager.sendMultipartTextMessage(phoneNumber, null, parts, samsungFix, samsungFix);
+            SmsManager smsManager = SmsManager.getDefault();
+            ArrayList<String> parts = smsManager.divideMessage(message);
+            smsManager.sendMultipartTextMessage(phoneNumber, null, parts, samsungFix, samsungFix);
+        } else {
+            Log.e(TAG, "Unable to send SMS message due to lack of SMS sending permission!");
+        }
     }
 
 

@@ -14,7 +14,6 @@ import android.util.Log;
 import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Messenger;
-import net.gmsworld.devicelocator.Utilities.Permissions;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -67,15 +66,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             String command = intent.getExtras().getString("command");
 
-            if (Permissions.haveSendSMSPermission(this)) {
-                if (StringUtils.isEmpty(command)) {
-                    initSending(intent.getExtras().getString("source"));
-                } else {
-                    Messenger.sendCommandMessage(this, intent);
-                }
-
+            if (StringUtils.isEmpty(command)) {
+                initSending(intent.getExtras().getString("source"));
             } else {
-                Log.e(TAG, "Unable to send SMS command " + command + " due to lack of SMS sending permission!");
+                Messenger.sendCommandMessage(this, intent);
             }
         } //else {
             //Log.e(TAG, "This intent requires extra parameters");
