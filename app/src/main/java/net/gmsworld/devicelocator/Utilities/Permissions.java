@@ -28,7 +28,7 @@ public class Permissions {
         permissions.add(3, Manifest.permission.READ_PHONE_STATE);
         permissions.add(4, Manifest.permission.MODIFY_AUDIO_SETTINGS);
         permissions.add(5, Manifest.permission.CALL_PHONE);
-        permissions.add(5, Manifest.permission.BIND_DEVICE_ADMIN);
+        permissions.add(6, Manifest.permission.BIND_DEVICE_ADMIN);
         //permissions.add(6, Manifest.permission.CAMERA); don't check camera permission at startup
 
         ArrayList<String> neededPermissions = new ArrayList<>();
@@ -71,6 +71,10 @@ public class Permissions {
     public static boolean haveSendSMSAndLocationPermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static boolean haveSendSMSPermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
     }
 
     public static boolean haveLocationPermission(Context context) {
