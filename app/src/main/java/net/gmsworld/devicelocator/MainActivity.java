@@ -479,7 +479,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (!this.running && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
             Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
-            Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -519,7 +519,7 @@ public class MainActivity extends AppCompatActivity {
         if (StringUtils.isNotEmpty(phoneNumber)) {
             if (!this.motionDetectorRunning && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
                 Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
-                Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
                 return;
             }
         } else {
@@ -914,6 +914,10 @@ public class MainActivity extends AppCompatActivity {
             if (motionDetectorRunning) {
                 RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
             }
+            if (!Permissions.haveSendSMSPermission(this)) {
+                Permissions.requestSendSMSAndLocationPermission(this);
+                Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+            }
         } else if (!StringUtils.equals(phoneNumber, newPhoneNumber)) {
             Toast.makeText(getApplicationContext(), "Make sure to specify valid phone number!", Toast.LENGTH_SHORT).show();
             phoneNumberInput.setText("");
@@ -964,7 +968,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (!Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
                         Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
-                        Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -1042,7 +1046,7 @@ public class MainActivity extends AppCompatActivity {
     private void launchSmsService() {
         if (!Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
             Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
-            Toast.makeText(getApplicationContext(), R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             return;
         }
 

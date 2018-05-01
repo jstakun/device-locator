@@ -53,7 +53,7 @@
     <string name="no_speed_or_altitude">No speed or altitude.</string>
     <string name="settings_kmh_or_mph_string">Speed unit settings</string>
     <string name="read_contacts_permission">Can\'t select a contact without Read Contacts permission.</string>
-    <string name="send_sms_and_location_permission">SMS and Location permission needed.</string>
+    <string name="send_sms_and_location_permission">SMS and Location permissions are needed to receive SMS notifiactions.</string>
     <string name="notification_title">Locate driver not working</string>
     <string name="notification_content">SMS and Location permissions needed.</string>
     <string name="docsLink">Check all available SMS commands &lt;a href="http://www.gms-world.net/dl">here&lt;a></string>
