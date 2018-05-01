@@ -455,6 +455,7 @@ public class MainActivity extends AppCompatActivity {
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.route_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.contact_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.telegram_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        ViewCompat.setBackgroundTintList(this.findViewById(R.id.ping_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
     }
 
     private void toggleRunning() {
@@ -1135,13 +1136,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initPingButton() {
-        Button pingButton = (Button) this.findViewById(R.id.ping_button);
+        final Button pingButton = (Button) this.findViewById(R.id.ping_button);
 
         pingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
                     Toast.makeText(MainActivity.this, "Please wait...", Toast.LENGTH_LONG).show();
+                    registerPhoneNumber((TextView)findViewById(R.id.phoneNumber));
+                    registerEmail((TextView)findViewById(R.id.email), false);
+                    registerTelegram((TextView)findViewById(R.id.telegramId));
+
                     if (StringUtils.isNotEmpty(phoneNumber)) {
                         Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
                         newIntent.putExtra("phoneNumber", phoneNumber);
