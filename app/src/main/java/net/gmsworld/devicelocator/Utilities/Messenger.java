@@ -49,16 +49,26 @@ public class Messenger {
     private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
 
     public static void sendSMS(final Context context, final String phoneNumber, final String message) {
+        String status = null;
         if (Permissions.haveSendSMSPermission(context)) {
-            //on samsung intents can't be null. the messages are not sent if intents are null
-            ArrayList<PendingIntent> samsungFix = new ArrayList<>();
-            samsungFix.add(PendingIntent.getBroadcast(context, 0, new Intent("SMS_RECEIVED"), 0));
+            try {
+                //on samsung intents can't be null. the messages are not sent if intents are null
+                ArrayList<PendingIntent> samsungFix = new ArrayList<>();
+                samsungFix.add(PendingIntent.getBroadcast(context, 0, new Intent("SMS_RECEIVED"), 0));
 
-            SmsManager smsManager = SmsManager.getDefault();
-            ArrayList<String> parts = smsManager.divideMessage(message);
-            smsManager.sendMultipartTextMessage(phoneNumber, null, parts, samsungFix, samsungFix);
+                SmsManager smsManager = SmsManager.getDefault();
+                ArrayList<String> parts = smsManager.divideMessage(message);
+                smsManager.sendMultipartTextMessage(phoneNumber, null, parts, samsungFix, samsungFix);
+                //status = "SMS message sent";
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+                status = "Device Locator is unable to send SMS message due to device error!";
+            }
         } else {
-            Log.e(TAG, "Unable to send SMS message due to lack of SMS sending permission!");
+            status = "Device Locator is unable to send SMS message due to lack of SMS sending permission!";
+        }
+        if (StringUtils.isNotEmpty(status)) {
+            Toast.makeText(context, status, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -129,7 +139,7 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            Toast.makeText(context, "Device Locator is unable to sent notification beacuse your email address is still unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Device Locator is unable to sent notification because your email address is still unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
                         //} else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                         //    PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
                         //    final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
@@ -216,7 +226,7 @@ public class Messenger {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
                             final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
                             telegramInput.setText("");
-                            Toast.makeText(context, "Device Locator is unable to sent notification beacuse your chat or channel is unverified! Please register again your Telegram chat or channel.", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Device Locator is unable to sent notification because your chat or channel is unverified! Please register again your Telegram chat or channel.", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
                             final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);

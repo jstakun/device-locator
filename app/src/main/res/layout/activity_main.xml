@@ -255,13 +255,6 @@
                                 android:layout_height="match_parent"
                                 android:gravity="left"/>
 
-                            <!--EditText
-                                android:id="@+id/radius"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:inputType="number"
-                                android:textColor="@color/gray"/-->
-
                             <SeekBar
                                 android:id="@+id/radiusBar"
                                 android:layout_width="fill_parent"
@@ -386,6 +379,24 @@
                                 android:maxLines="1"
                                 android:textColor="@color/gray"/>
                         </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp"
+                        android:paddingTop="15dp">
+
+                        <Button
+                            android:id="@+id/ping_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:backgroundTint="@color/colorPrimary"
+                            android:text="Ping Me"
+                            android:textColor="@android:color/white" />
 
                     </LinearLayout>
 

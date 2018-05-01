@@ -570,7 +570,7 @@ public class MainActivity extends AppCompatActivity {
         initContactButton();
         initTelegramButton();
         initTokenInput();
-        //initGpsRadioGroup();
+        initPingButton();
         initLocationSMSCheckbox();
 
         TextView commandLink = (TextView) findViewById(R.id.docs_link);
@@ -1125,10 +1125,38 @@ public class MainActivity extends AppCompatActivity {
                     //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
                     MainActivity.this.startActivity(intent);
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("telegramPaste",true).commit();
-                    Toast.makeText(getApplicationContext(), "In order to get your Chat ID please select Device Locator bot now.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "In order to get your Chat ID please select Device Locator bot now.", Toast.LENGTH_LONG).show();
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, appName + " not found on this device");
-                    Toast.makeText(getApplicationContext(), "This function requires installed Telegram Messenger on your device.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "This function requires installed Telegram Messenger on your device.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private void initPingButton() {
+        Button pingButton = (Button) this.findViewById(R.id.ping_button);
+
+        pingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
+                    Toast.makeText(MainActivity.this, "Please wait...", Toast.LENGTH_LONG).show();
+                    if (StringUtils.isNotEmpty(phoneNumber)) {
+                        Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
+                        newIntent.putExtra("phoneNumber", phoneNumber);
+                        newIntent.putExtra("command", Command.PING_COMMAND);
+                        MainActivity.this.startService(newIntent);
+                    }
+                    if (StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
+                        Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
+                        newIntent.putExtra("telegramId", telegramId);
+                        newIntent.putExtra("email", email);
+                        newIntent.putExtra("command", Command.PING_COMMAND);
+                        MainActivity.this.startService(newIntent);
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "Please provide notification settings above.", Toast.LENGTH_LONG).show();
                 }
             }
         });
