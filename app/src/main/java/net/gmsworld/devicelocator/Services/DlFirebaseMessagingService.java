@@ -6,7 +6,9 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import net.gmsworld.devicelocator.Utilities.Command;
+import net.gmsworld.devicelocator.Utilities.Messenger;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class DlFirebaseMessagingService extends FirebaseMessagingService {
@@ -24,6 +26,10 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 String command = message.get("command") + message.get("pin");
                 if (message.containsKey("args")) {
                     command += " " + message.get("args");
+                }
+                if (message.containsKey("correlationId")) {
+                    String correlationId = message.get("correlationId");
+                    Messenger.sendTelegram(this, null, correlationId, command, 1, new HashMap<String, String>());
                 }
                 Command.findCommandInMessage(this, command);
             } else {
