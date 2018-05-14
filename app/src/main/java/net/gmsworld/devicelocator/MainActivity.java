@@ -1366,7 +1366,7 @@ public class MainActivity extends AppCompatActivity {
                         Messenger.sendEmail(activity, null, activity.email, message, msgtitle, 1, new HashMap<String, String>());
                     }
                     if (StringUtils.isNotEmpty(activity.telegramId)) {
-                        Messenger.sendTelegram(activity, null, activity.telegramId, message, 1, new HashMap<String, String>(), true);
+                        Messenger.sendTelegram(activity, null, activity.telegramId, message, 1, new HashMap<String, String>());
                     }
                 } else {
                     Toast.makeText(activity, "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();

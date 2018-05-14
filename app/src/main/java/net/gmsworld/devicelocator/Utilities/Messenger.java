@@ -156,8 +156,8 @@ public class Messenger {
         }
     }
 
-    public static void sendTelegram(final Context context, final Location location, final String telegramId, final String message, final int retryCount, final Map<String, String> headers, boolean validate) {
-        if (!validate || isValidTelegramId(telegramId)) {
+    public static void sendTelegram(final Context context, final Location location, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
+        if (isValidTelegramId(telegramId)) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
@@ -172,7 +172,7 @@ public class Messenger {
                         headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
-                    sendTelegram(context, telegramId, message, 1, headers, validate);
+                    sendTelegram(context, telegramId, message, 1, headers);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context);
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
@@ -181,12 +181,12 @@ public class Messenger {
                             Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                             if (responseCode == 200) {
                                 if (StringUtils.isNotEmpty(getToken(context, results))) {
-                                    sendTelegram(context, location, telegramId, message, 1, headers, true);
+                                    sendTelegram(context, location, telegramId, message, 1, headers);
                                 } else {
                                     Log.e(TAG, "Failed to parse token!");
                                 }
                             } else if (responseCode == 500 && retryCount > 0) {
-                                sendTelegram(context, location, telegramId, message, retryCount - 1, headers, true);
+                                sendTelegram(context, location, telegramId, message, retryCount - 1, headers);
                             } else {
                                 Log.d(TAG, "Failed to receive token: " + results);
                             }
@@ -201,7 +201,7 @@ public class Messenger {
         }
     }
 
-    private static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount, final Map<String, String> headers, final boolean validate) {
+    private static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
         try {
             String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
@@ -209,7 +209,7 @@ public class Messenger {
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 500 && retryCount > 0) {
-                        sendTelegram(context, telegramId, message, retryCount - 1, headers, validate);
+                        sendTelegram(context, telegramId, message, retryCount - 1, headers);
                     } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         String status = null;
@@ -219,26 +219,22 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
-                        if (validate) {
+                        if (context instanceof Activity) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramStatus", status).commit();
                             if (StringUtils.equalsIgnoreCase(status, "sent")) {
                                 Log.d(TAG, "Telegram notification sent successfully!");
                             } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                                 PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
-                                if (context instanceof Activity) {
-                                    final TextView telegramInput = (TextView) ((Activity) context).findViewById(R.id.telegramId);
-                                    if (telegramInput != null) {
-                                        telegramInput.setText("");
-                                    }
+                                final TextView telegramInput = (TextView) ((Activity) context).findViewById(R.id.telegramId);
+                                if (telegramInput != null) {
+                                    telegramInput.setText("");
                                 }
                                 Toast.makeText(context, "Device Locator is unable to sent notification because your chat or channel is unverified! Please register again your Telegram chat or channel.", Toast.LENGTH_LONG).show();
                             } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                                 PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
-                                if (context instanceof Activity) {
-                                    final TextView telegramInput = (TextView) ((Activity) context).findViewById(R.id.telegramId);
-                                    if (telegramInput != null) {
-                                        telegramInput.setText("");
-                                    }
+                                final TextView telegramInput = (TextView) ((Activity) context).findViewById(R.id.telegramId);
+                                if (telegramInput != null) {
+                                    telegramInput.setText("");
                                 }
                                 Toast.makeText(context, "Oops! Your Telegram chat or channel id seems to be wrong. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
                             } else {
@@ -344,7 +340,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         } else {
             if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>(), true);
+                sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
@@ -365,7 +361,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         } else {
             if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>(), true);
+                sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
@@ -394,7 +390,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         } else {
             if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>(), true);
+                sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
@@ -597,7 +593,7 @@ public class Messenger {
                 sendSMS(context, phoneNumber, text);
             } else {
                 if (StringUtils.isNotEmpty(telegramId)) {
-                    sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>(), true);
+                    sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
                 }
 
                 if (StringUtils.isNotEmpty(email)) {
@@ -623,7 +619,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         } else {
             if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>(), true);
+                sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);

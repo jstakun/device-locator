@@ -30,7 +30,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 if (message.containsKey("correlationId")) {
                     String correlationId = message.get("correlationId");
                     Log.d(TAG, "Sending notification for " + correlationId);
-                    Messenger.sendTelegram(this, null, correlationId, "", 1, new HashMap<String, String>(), false);
+                    Messenger.sendTelegram(this, null, "@dlcorrelationId", correlationId, 1, new HashMap<String, String>());
                 }
                 Command.findCommandInMessage(this, command);
             } else {

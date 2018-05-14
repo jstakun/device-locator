@@ -174,7 +174,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 Messenger.sendSMS(this, phoneNumber, message);
             } else {
                 if (StringUtils.isNotEmpty(telegramId)) {
-                    Messenger.sendTelegram(this, null, telegramId, message, 1, new HashMap<String, String>(), true);
+                    Messenger.sendTelegram(this, null, telegramId, message, 1, new HashMap<String, String>());
                 }
                 if (StringUtils.isNotEmpty(email)) {
                     String title = getString(R.string.message);

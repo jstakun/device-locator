@@ -279,7 +279,7 @@ public class RouteTrackingService extends Service {
                                     //First send notification to telegram and if not configured to email
                                     //REMEMBER this could send a lot of messages and your email account could be overloaded
                                     if (StringUtils.isNotEmpty(service.telegramId)) {
-                                        net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(service, location, service.telegramId, message, 1, headers, true);
+                                        net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(service, location, service.telegramId, message, 1, headers);
                                     } else if (StringUtils.isNotEmpty(service.email)) {
                                         String title = service.getString(R.string.message);
                                         String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(service);
