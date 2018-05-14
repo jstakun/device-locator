@@ -29,7 +29,8 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 }
                 if (message.containsKey("correlationId")) {
                     String correlationId = message.get("correlationId");
-                    Messenger.sendTelegram(this, null, correlationId, command, 1, new HashMap<String, String>());
+                    Log.d(TAG, "Sending notification for " + correlationId);
+                    Messenger.sendTelegram(this, null, correlationId, "", 1, new HashMap<String, String>(), false);
                 }
                 Command.findCommandInMessage(this, command);
             } else {
@@ -39,7 +40,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
 
         //we are not interested in notification messages
         if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
+            Log.d(TAG, "Message notification body: " + remoteMessage.getNotification().getBody());
         }
     }
 }
