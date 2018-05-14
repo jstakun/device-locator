@@ -139,7 +139,7 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            Toast.makeText(context, "Device Locator is unable to sent notification because your email address is still unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Device Locator is unable to sent notification because your email address is unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
                         //} else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                         //    PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
                         //    final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
