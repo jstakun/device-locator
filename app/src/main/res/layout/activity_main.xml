@@ -110,7 +110,7 @@
                       android:paddingBottom="8dp"
                       android:paddingTop="15dp">
 
-                      <android.support.v7.widget.AppCompatEditText
+                      <net.gmsworld.devicelocator.Views.KeyboardEditText
                           android:id="@+id/token"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"

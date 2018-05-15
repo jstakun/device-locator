@@ -93,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int MAX_RADIUS = 1000;
 
+    public static final int PIN_MIN_LENGTH = 4;
+
     public static final String DEVICE_PIN = "token";
 
     private Boolean running = null;
@@ -192,18 +194,7 @@ public class MainActivity extends AppCompatActivity {
         registerEmail((TextView) findViewById(R.id.email), false);
         registerTelegram((TextView) findViewById(R.id.telegramId));
         registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
-
-        //update cloud platform,
-        if (oldPin != null) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
-            if (StringUtils.isNotEmpty(firebaseToken)) {
-                settings.edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).commit(); //remove token so that it will be added again after successful registration
-                if (Network.isNetworkAvailable(MainActivity.this)) {
-                    DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin, oldPin);
-                }
-            }
-        }
+        registerToken();
 
         if (pinDialog != null) {
             pinDialog.dismiss();
@@ -581,6 +572,9 @@ public class MainActivity extends AppCompatActivity {
         initRemoteControl();
     }
 
+
+    //pin input --------------------------------------------------------------------------------------------------
+
     private void initTokenInput() {
         final TextView tokenInput = (TextView) this.findViewById(R.id.token);
         tokenInput.setText(pin);
@@ -596,8 +590,8 @@ public class MainActivity extends AppCompatActivity {
                 String input = charSequence.toString();
                 try {
                     //token is 4 to 8 digits string
-                    if (input.length() >= 4) {
-                        if (!StringUtils.equals(pin, input)) {
+                    if (input.length() >= PIN_MIN_LENGTH) {
+                        if (!StringUtils.equals(pin, input) && StringUtils.isNumeric(input)) {
                             oldPin = pin;
                             pin = input;
                             saveData();
@@ -615,7 +609,59 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        tokenInput.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
+                    if (v.getText().length() >= PIN_MIN_LENGTH) {
+                        registerToken();
+                    } else {
+                        v.setText(pin);
+                    }
+                }
+                return false;
+            }
+        });
+
+        tokenInput.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                //Log.d(TAG, "Soft keyboard event " + keyCode);
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_BACK:
+                            TextView tokenInput = (TextView)v;
+                            if (tokenInput.getText().length() >= PIN_MIN_LENGTH) {
+                                registerToken();
+                            } else {
+                                tokenInput.setText(pin);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                return false;
+            }
+        });
     }
+
+    private void registerToken() {
+        if (oldPin != null) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
+            if (StringUtils.isNotEmpty(firebaseToken)) {
+                settings.edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).commit(); //remove token so that it will be added again after successful registration
+                if (Network.isNetworkAvailable(MainActivity.this)) {
+                    DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin, oldPin);
+                    oldPin = null;
+                }
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------
 
     private void initRadiusInput() {
         SeekBar radiusBar=(SeekBar)findViewById(R.id.radiusBar);
