@@ -107,6 +107,9 @@ public class Permissions {
                 .setAutoCancel(true)
                 .setDefaults(Notification.DEFAULT_ALL);
 
-        ((NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE)).notify(0, notificationBuilder.build());
+        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm != null) {
+            nm.notify(0, notificationBuilder.build());
+        }
     }
 }

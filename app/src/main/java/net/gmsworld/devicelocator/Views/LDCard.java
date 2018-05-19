@@ -32,8 +32,8 @@ public class LDCard extends CardView {
         View[] children = this.detachChildren();
         inflate(getContext(), R.layout.ldcard, this);
 
-        linearLayout = (LinearLayout) this.findViewById(R.id.linear_layout);
-        title = (TextView) this.findViewById(R.id.title);
+        linearLayout = this.findViewById(R.id.linear_layout);
+        title = this.findViewById(R.id.title);
         title.setText(attributes.getString(R.styleable.LDCard_title));
         if (title.getText().length() == 0) {
             linearLayout.removeView(title);

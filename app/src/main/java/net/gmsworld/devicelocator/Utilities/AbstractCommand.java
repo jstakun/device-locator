@@ -26,9 +26,9 @@ public abstract class AbstractCommand {
 
     protected enum Finder {STARTS, EQUALS}
 
-    private String smsCommand = null;
+    private String smsCommand;
 
-    private String smsShortCommand= null;
+    private String smsShortCommand;
 
     private final Finder finder;
 

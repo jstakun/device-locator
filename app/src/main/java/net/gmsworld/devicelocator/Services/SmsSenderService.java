@@ -64,12 +64,12 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 return;
             }
 
-            String command = intent.getExtras().getString("command");
+            String command = extras.getString("command");
 
             if (StringUtils.isEmpty(command)) {
-                initSending(intent.getExtras().getString("source"));
+                initSending(extras.getString("source"));
             } else {
-                Messenger.sendCommandMessage(this, intent);
+                Messenger.sendCommandMessage(this, extras);
             }
         } //else {
             //Log.e(TAG, "This intent requires extra parameters");

@@ -161,11 +161,11 @@ public class MainActivity extends AppCompatActivity {
         boolean telegramPaste = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("telegramPaste", false);
         if (telegramPaste) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("telegramPaste", false).commit();
-            final TextView telegramInput = (TextView) this.findViewById(R.id.telegramId);
+            final TextView telegramInput = this.findViewById(R.id.telegramId);
             //paste telegram id from clipboard
             try {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                if (clipboard.hasPrimaryClip()) {
+                if (clipboard != null && clipboard.hasPrimaryClip()) {
                     int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
                     for (int i=0;i<clipboardItemCount; i++) {
                         ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
@@ -367,13 +367,17 @@ public class MainActivity extends AppCompatActivity {
             builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
-                    devicePolicyManager.removeActiveAdmin(deviceAdmin);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putBoolean("loginTracker", false);
-                    editor.putBoolean("hiddenCamera", false);
-                    editor.commit();
-                    getSupportActionBar().invalidateOptionsMenu();
-                    Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
+                    if (devicePolicyManager != null) {
+                        devicePolicyManager.removeActiveAdmin(deviceAdmin);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putBoolean("loginTracker", false);
+                        editor.putBoolean("hiddenCamera", false);
+                        editor.commit();
+                        getSupportActionBar().invalidateOptionsMenu();
+                        Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Failed. Please retry!", Toast.LENGTH_LONG).show();
+                    }
                 }
             });
             builder.setNegativeButton(R.string.no, null);
@@ -432,7 +436,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
+        }
     }
 
     private void updateUI() {
@@ -565,7 +571,7 @@ public class MainActivity extends AppCompatActivity {
         initPingButton();
         initLocationSMSCheckbox();
 
-        TextView commandLink = (TextView) findViewById(R.id.docs_link);
+        TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
@@ -576,7 +582,7 @@ public class MainActivity extends AppCompatActivity {
     //pin input --------------------------------------------------------------------------------------------------
 
     private void initTokenInput() {
-        final TextView tokenInput = (TextView) this.findViewById(R.id.token);
+        final TextView tokenInput = this.findViewById(R.id.token);
         tokenInput.setText(pin);
 
         tokenInput.addTextChangedListener(new TextWatcher() {
@@ -664,7 +670,7 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------------------------------------------------------------------------------------
 
     private void initRadiusInput() {
-        SeekBar radiusBar=(SeekBar)findViewById(R.id.radiusBar);
+        SeekBar radiusBar= findViewById(R.id.radiusBar);
         radiusBar.setProgress(radius);
 
         ((TextView) this.findViewById(R.id.motion_radius)).setText(getString(R.string.motion_radius, radius));
@@ -703,7 +709,7 @@ public class MainActivity extends AppCompatActivity {
     //email input setup ------------------------------------------------------------------
 
     private void initEmailInput() {
-        final TextView emailInput = (TextView) this.findViewById(R.id.email);
+        final TextView emailInput = this.findViewById(R.id.email);
         emailInput.setText(email);
 
         /*emailInput.addTextChangedListener(new TextWatcher() {
@@ -733,7 +739,7 @@ public class MainActivity extends AppCompatActivity {
                     if (currentText.isEmpty()) {
                         try {
                             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                            if (clipboard.hasPrimaryClip()) {
+                            if (clipboard != null && clipboard.hasPrimaryClip()) {
                                 int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
                                 for (int i = 0; i < clipboardItemCount; i++) {
                                     ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
@@ -810,7 +816,7 @@ public class MainActivity extends AppCompatActivity {
     //telegram input setup -----------------------------------------------------------------
 
     private void initTelegramInput() {
-        final TextView telegramInput = (TextView) this.findViewById(R.id.telegramId);
+        final TextView telegramInput = this.findViewById(R.id.telegramId);
         telegramInput.setText(telegramId);
 
         /*telegramInput.addTextChangedListener(new TextWatcher() {
@@ -896,7 +902,7 @@ public class MainActivity extends AppCompatActivity {
     // phone number input setup ---------------------------------------------------------------
 
     private void initPhoneNumberInput() {
-        final TextView phoneNumberInput = (TextView) this.findViewById(R.id.phoneNumber);
+        final TextView phoneNumberInput = this.findViewById(R.id.phoneNumber);
         phoneNumberInput.setText(this.phoneNumber);
 
         /*phoneNumberInput.addTextChangedListener(new TextWatcher() {
@@ -974,7 +980,7 @@ public class MainActivity extends AppCompatActivity {
     //------------------------------------------------------------------------------------------------
 
     private void initShareRouteButton() {
-        Button shareRouteButton = (Button) this.findViewById(R.id.route_button);
+        Button shareRouteButton = this.findViewById(R.id.route_button);
 
         shareRouteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -997,7 +1003,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initSendLocationButton() {
-        Button sendLocationButton = (Button) this.findViewById(R.id.send_button);
+        Button sendLocationButton = this.findViewById(R.id.send_button);
 
         sendLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1112,7 +1118,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initRunningButton() {
-        Button runningButton = (Button) this.findViewById(R.id.running_button);
+        Button runningButton = this.findViewById(R.id.running_button);
 
         runningButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1124,7 +1130,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initMotionDetectorButton() {
-        Button runningButton = (Button) this.findViewById(R.id.motion_button);
+        Button runningButton = this.findViewById(R.id.motion_button);
 
         runningButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1136,7 +1142,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initContactButton() {
-        ImageButton contactButton = (ImageButton) this.findViewById(R.id.contact_button);
+        ImageButton contactButton = this.findViewById(R.id.contact_button);
 
         contactButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1155,7 +1161,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initTelegramButton() {
-        ImageButton telegramButton = (ImageButton) this.findViewById(R.id.telegram_button);
+        ImageButton telegramButton = this.findViewById(R.id.telegram_button);
         final String appName = "org.telegram.messenger";
 
         telegramButton.setOnClickListener(new View.OnClickListener() {
@@ -1182,7 +1188,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initPingButton() {
-        final Button pingButton = (Button) this.findViewById(R.id.ping_button);
+        final Button pingButton = this.findViewById(R.id.ping_button);
 
         pingButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1252,7 +1258,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupToolbar(int toolbarId) {
-        final Toolbar toolbar = (Toolbar) findViewById(toolbarId);
+        final Toolbar toolbar = findViewById(toolbarId);
         setSupportActionBar(toolbar);
     }
 
@@ -1263,7 +1269,7 @@ public class MainActivity extends AppCompatActivity {
             LayoutInflater li = LayoutInflater.from(this);
             View pinView = li.inflate(R.layout.verify_pin_dialog, null);
 
-            final EditText tokenInput = (EditText) pinView.findViewById(R.id.verify_pin_edit);
+            final EditText tokenInput = pinView.findViewById(R.id.verify_pin_edit);
 
             tokenInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(pin.length())});
 
@@ -1314,18 +1320,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
-            final TextView helpText = (TextView) pinView.findViewById(R.id.verify_pin_text);
+            final TextView helpText = pinView.findViewById(R.id.verify_pin_text);
             helpText.setText(Html.fromHtml(getString(R.string.pinLink)));
             helpText.setMovementMethod(new TextViewLinkHandler() {
                 @Override
                 public void onLinkClick(String url) {
                     if (StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(phoneNumber)) {
-                        Intent newIntent = new Intent();
-                        newIntent.putExtra("telegramId", telegramId);
-                        newIntent.putExtra("command", Command.PIN_COMMAND);
-                        newIntent.putExtra("phoneNumber", phoneNumber);
-                        newIntent.putExtra("email", email);
-                        Messenger.sendCommandMessage(MainActivity.this, newIntent);
+                        Bundle extras = new Bundle();
+                        extras.putString("telegramId", telegramId);
+                        extras.putString("command", Command.PIN_COMMAND);
+                        extras.putString("phoneNumber", phoneNumber);
+                        extras.putString("email", email);
+                        Messenger.sendCommandMessage(MainActivity.this, extras);
                         Toast.makeText(MainActivity.this, "Security PIN has been sent to notifiers", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(MainActivity.this, "No notifier has been set. Unable to send Security PIN.", Toast.LENGTH_SHORT).show();
@@ -1351,7 +1357,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //show keyboard
-        pinDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        if (pinDialog.getWindow() != null) {
+            pinDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
 
         pinDialog.show();
     }
@@ -1394,9 +1402,11 @@ public class MainActivity extends AppCompatActivity {
                 if (responseCode == 200) {
                     String showRouteUrl = RouteTrackingServiceUtils.getRouteUrl(activity);
                     ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
-                    clipboard.setPrimaryClip(urlClip);
-                    Toast.makeText(activity, "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
+                    if (clipboard != null) {
+                        ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
+                        clipboard.setPrimaryClip(urlClip);
+                        Toast.makeText(activity, "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
+                    }
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
                     activity.startActivity(browserIntent);
                     String message = "Check your route at " + showRouteUrl;

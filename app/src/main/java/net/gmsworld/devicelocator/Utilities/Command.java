@@ -301,15 +301,19 @@ public class Command {
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-            sendSmsNotification(context, sender, MUTE_COMMAND);
+            if (audioMode != null) {
+                audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                sendSmsNotification(context, sender, MUTE_COMMAND);
+            }
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-            sendSocialNotification(context, MUTE_COMMAND);
+            if (audioMode != null) {
+                audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                sendSocialNotification(context, MUTE_COMMAND);
+            }
         }
     }
 
@@ -322,15 +326,19 @@ public class Command {
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-            sendSmsNotification(context, sender, UNMUTE_COMMAND);
+            if (audioMode != null) {
+                audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                sendSmsNotification(context, sender, UNMUTE_COMMAND);
+            }
         }
 
         @Override
         protected void onSmsSocialCommandFound(String sender, Context context) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-            sendSocialNotification(context, UNMUTE_COMMAND);
+            if (audioMode != null) {
+                audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                sendSocialNotification(context, UNMUTE_COMMAND);
+            }
         }
     }
 
@@ -713,7 +721,7 @@ public class Command {
         private boolean lockScreenNow(Context context) {
             DevicePolicyManager deviceManger = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
             final ComponentName compName = new ComponentName(context, DeviceAdminEventReceiver.class);
-            if (deviceManger.isAdminActive(compName)) {
+            if (deviceManger != null && deviceManger.isAdminActive(compName)) {
                 try {
                     deviceManger.lockNow();
                     return true;
@@ -758,7 +766,7 @@ public class Command {
         private void playBeep(Context context) {
             try {
                 final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-                if (ringtone == null) {
+                if (ringtone == null && audioMode != null) {
                     currentMode = audioMode.getRingerMode();
                     if (currentMode != AudioManager.RINGER_MODE_NORMAL) {
                         audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
@@ -772,7 +780,7 @@ public class Command {
                     ringtone = RingtoneManager.getRingtone(context, ringtoneUri);
                     ringtone.play();
                     Log.d(TAG, "Ringtone " + ringtoneUri.toString() + " should be playing now");
-                } else {
+                } else if (audioMode != null) {
                     ringtone.stop();
                     ringtone = null;
                     Log.d(TAG, "Ringtone should stop playing now");

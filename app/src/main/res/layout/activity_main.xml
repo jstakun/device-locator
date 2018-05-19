@@ -108,7 +108,8 @@
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
                       android:paddingBottom="8dp"
-                      android:paddingTop="15dp">
+                      android:paddingTop="15dp"
+                      ldcard:passwordToggleEnabled="true">
 
                       <net.gmsworld.devicelocator.Views.KeyboardEditText
                           android:id="@+id/token"
@@ -395,7 +396,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentLeft="true"
                             android:backgroundTint="@color/colorPrimary"
-                            android:text="Ping Me"
+                            android:text="@string/test"
                             android:textColor="@android:color/white" />
 
                     </LinearLayout>

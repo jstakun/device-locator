@@ -87,9 +87,9 @@ public class RouteTrackingService extends Service {
                 Log.d(TAG, "onStartCommand(): " + command);
                 switch (command) {
                     case COMMAND_START:
-                        this.phoneNumber = intent.getExtras().getString("phoneNumber");
-                        this.email = intent.getExtras().getString("email");
-                        this.telegramId = intent.getExtras().getString("telegramId");
+                        this.phoneNumber = intent.getStringExtra("phoneNumber");
+                        this.email = intent.getStringExtra("email");
+                        this.telegramId = intent.getStringExtra("telegramId");
                         boolean resetRoute = intent.getBooleanExtra("resetRoute", false);
                         silentMode = intent.getBooleanExtra("silentMode", false);
                         int gpsAccuracy = PreferenceManager.getDefaultSharedPreferences(this).getInt("gpsAccuracy", 1);
@@ -99,15 +99,15 @@ public class RouteTrackingService extends Service {
                         stopSelf();
                         break;
                     case COMMAND_ROUTE:
-                        shareRoute(intent.getStringExtra("title"), intent.getExtras().getString("phoneNumber"), intent.getExtras().getString("telegramId"), intent.getExtras().getString("email"), false);
+                        shareRoute(intent.getStringExtra("title"), intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), false);
                         break;
                     case COMMAND_STOP_SHARE:
-                        shareRoute(intent.getStringExtra("title"), intent.getExtras().getString("phoneNumber"), intent.getExtras().getString("telegramId"), intent.getExtras().getString("email"), true);
+                        shareRoute(intent.getStringExtra("title"), intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), true);
                         break;
                     case COMMAND_CONFIGURE:
-                        this.phoneNumber = intent.getExtras().getString("phoneNumber");
-                        this.email = intent.getExtras().getString("email");
-                        this.telegramId = intent.getExtras().getString("telegramId");
+                        this.phoneNumber = intent.getStringExtra("phoneNumber");
+                        this.email = intent.getStringExtra("email");
+                        this.telegramId = intent.getStringExtra("telegramId");
                         //use smart location lib
                         GmsSmartLocationManager.getInstance().setRadius(radius);
                         break;
@@ -159,8 +159,10 @@ public class RouteTrackingService extends Service {
         }
 
         PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-        this.mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        this.mWakeLock.acquire();
+        if (pm != null) {
+            this.mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+            this.mWakeLock.acquire();
+        }
 
         //NotificationUtils.notify(this, NOTIFICATION_ID);
         startForeground(NOTIFICATION_ID, NotificationUtils.buildNotification(this, NOTIFICATION_ID));

@@ -94,58 +94,62 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888; //.RGB_565; //
                 Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                if (bitmap != null) {
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-                //final String suffix = ".png";
-                //bitmap.compress(PNG, 0, out);
+                    //final String suffix = ".png";
+                    //bitmap.compress(PNG, 0, out);
 
-                final String suffix = ".jpg";
-                bitmap.compress(JPEG, 100, out);
+                    final String suffix = ".jpg";
+                    bitmap.compress(JPEG, 100, out);
 
-                Log.d(TAG, "Image will be sent to server");
+                    Log.d(TAG, "Image will be sent to server");
 
-                //send image to server and send notification with link
+                    //send image to server and send notification with link
 
-                Map<String, String> headers = new HashMap<String, String>();
+                    Map<String, String> headers = new HashMap<String, String>();
 
-                final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
-                String uploadUrl = getString(R.string.photoUploadUrl);
-                if (StringUtils.isNotEmpty(tokenStr)) {
-                    headers.put("Authorization", "Bearer " + tokenStr);
-                    uploadUrl = getString(R.string.securePhotoUploadUrl);
-                }
-
-                headers.put("X-GMS-AppId", "2");
-                headers.put("X-GMS-Scope", "dl");
-
-                Network.uploadScreenshot(this, uploadUrl, out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
-                    @Override
-                    public void onGetFinish(String imageUrl, int responseCode, String url) {
-                        if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {
-                            //send notification with image url
-                            String email = settings.getString("email", "");
-                            String phoneNumber = settings.getString("phoneNumber", "");
-                            String telegramId = settings.getString("telegramId", "");
-
-                            Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
-                            newIntent.putExtra("email", email);
-                            newIntent.putExtra("telegramId", telegramId);
-                            newIntent.putExtra("command", Command.TAKE_PHOTO_COMMAND);
-                            newIntent.putExtra("imageUrl", imageUrl);
-                            if (StringUtils.isNotEmpty(sender)) {
-                                newIntent.putExtra("phoneNumber", sender);
-                            } else {
-                                newIntent.putExtra("phoneNumber", phoneNumber);
-                            }
-                            Files.deleteFileFromContextDir(imageFile.getName(), HiddenCaptureImageService.this, true);
-                            HiddenCaptureImageService.this.startService(newIntent);
-                        } else {
-                            Log.e(TAG, "Received error response: " + imageUrl);
-                            Log.d(TAG, "Image will be saved to local storage: " + imageFile.getAbsolutePath());
-                        }
+                    final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+                    String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+                    String uploadUrl = getString(R.string.photoUploadUrl);
+                    if (StringUtils.isNotEmpty(tokenStr)) {
+                        headers.put("Authorization", "Bearer " + tokenStr);
+                        uploadUrl = getString(R.string.securePhotoUploadUrl);
                     }
-                });
+
+                    headers.put("X-GMS-AppId", "2");
+                    headers.put("X-GMS-Scope", "dl");
+
+                    Network.uploadScreenshot(this, uploadUrl, out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
+                        @Override
+                        public void onGetFinish(String imageUrl, int responseCode, String url) {
+                            if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {
+                                //send notification with image url
+                                String email = settings.getString("email", "");
+                                String phoneNumber = settings.getString("phoneNumber", "");
+                                String telegramId = settings.getString("telegramId", "");
+
+                                Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
+                                newIntent.putExtra("email", email);
+                                newIntent.putExtra("telegramId", telegramId);
+                                newIntent.putExtra("command", Command.TAKE_PHOTO_COMMAND);
+                                newIntent.putExtra("imageUrl", imageUrl);
+                                if (StringUtils.isNotEmpty(sender)) {
+                                    newIntent.putExtra("phoneNumber", sender);
+                                } else {
+                                    newIntent.putExtra("phoneNumber", phoneNumber);
+                                }
+                                Files.deleteFileFromContextDir(imageFile.getName(), HiddenCaptureImageService.this, true);
+                                HiddenCaptureImageService.this.startService(newIntent);
+                            } else {
+                                Log.e(TAG, "Received error response: " + imageUrl);
+                                Log.d(TAG, "Image will be saved to local storage: " + imageFile.getAbsolutePath());
+                            }
+                        }
+                    });
+                } else {
+                    Log.e(TAG, "Image file is empty!");
+                }
             } else {
                 Log.w(TAG, getString(R.string.no_network_error));
             }

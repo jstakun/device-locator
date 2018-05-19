@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
@@ -225,14 +226,14 @@ public class Messenger {
                                 Log.d(TAG, "Telegram notification sent successfully!");
                             } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                                 PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
-                                final TextView telegramInput = (TextView) ((Activity) context).findViewById(R.id.telegramId);
+                                final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
                                 if (telegramInput != null) {
                                     telegramInput.setText("");
                                 }
                                 Toast.makeText(context, "Device Locator is unable to sent notification because your chat or channel is unverified! Please register again your Telegram chat or channel.", Toast.LENGTH_LONG).show();
                             } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                                 PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
-                                final TextView telegramInput = (TextView) ((Activity) context).findViewById(R.id.telegramId);
+                                final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
                                 if (telegramInput != null) {
                                     telegramInput.setText("");
                                 }
@@ -404,16 +405,18 @@ public class Messenger {
         }
     }
 
-    public static void sendCommandMessage(final Context context, final Intent intent) {
-        String text = null;
-        String phoneNumber = intent.getExtras().getString("phoneNumber");
-        String telegramId = intent.getExtras().getString("telegramId");
-        String email = intent.getExtras().getString("email");
-        String notificationNumber = intent.getExtras().getString("notificationNumber");
-        String command = intent.getExtras().getString("command");
-        String title = null;
+    public static void sendCommandMessage(final Context context, final Bundle extras) {
+        String text = null, title = null, phoneNumber = null, telegramId = null, email = null, notificationNumber = null, command = null;
         String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
         List<String> notifications = new ArrayList<String>();
+
+        if (extras != null) {
+            phoneNumber = extras.getString("phoneNumber");
+            telegramId = extras.getString("telegramId");
+            email = extras.getString("email");
+            notificationNumber = extras.getString("notificationNumber");
+            command = extras.getString("command");
+        }
 
         switch (command) {
             case Command.RESUME_COMMAND:
@@ -492,7 +495,7 @@ public class Messenger {
                 }
                 break;
             case Command.ROUTE_COMMAND:
-                int size = intent.getIntExtra("size", 0);
+                int size = extras.getInt("size", 0);
                 if (size > 1) {
                     text = "Check your route at: " + RouteTrackingServiceUtils.getRouteUrl(context);
                 } else if (size == 0) {
@@ -532,7 +535,7 @@ public class Messenger {
                 break;
             case Command.TAKE_PHOTO_COMMAND:
                 boolean hiddenCamera = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false);
-                String imageUrl = intent.getExtras().getString("imageUrl");
+                String imageUrl = extras.getString("imageUrl");
                 if (StringUtils.isEmpty(imageUrl) && hiddenCamera) {
                     text = "Photo will be taken. You should receive link soon.";
                 } else if (StringUtils.isEmpty(imageUrl) && !hiddenCamera) {
@@ -552,7 +555,7 @@ public class Messenger {
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.PING_COMMAND:
-                text = "Pong from " + getDeviceId(context);
+                text = "Hello from " + getDeviceId(context);
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.RING_COMMAND:
@@ -752,7 +755,7 @@ public class Messenger {
                                 builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
-                                        final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
+                                        final TextView telegramInput = ((Activity)context).findViewById(R.id.telegramId);
                                         telegramInput.setText(telegramId);
                                     }
                                 });
@@ -765,12 +768,12 @@ public class Messenger {
                             }
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
-                            final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
+                            final TextView telegramInput = ((Activity)context).findViewById(R.id.telegramId);
                             telegramInput.setText(telegramId);
                             Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
                         } else {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
-                            final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
+                            final TextView telegramInput = ((Activity)context).findViewById(R.id.telegramId);
                             telegramInput.setText(telegramId);
                             Toast.makeText(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
                         }
@@ -780,7 +783,7 @@ public class Messenger {
                             composeEmail(context, new String[]{"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram chat or channel " + telegramId + " to Device Locator notifications service.", false);
                         } else {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
-                            final TextView telegramInput = (TextView) ((Activity)context).findViewById(R.id.telegramId);
+                            final TextView telegramInput = ((Activity)context).findViewById(R.id.telegramId);
                             telegramInput.setText(telegramId);
                             Toast.makeText(context, "Oops! Your Telegram channel id seems to be wrong. Please register again your Telegram channel or chat id!", Toast.LENGTH_LONG).show();
                         }
@@ -824,7 +827,7 @@ public class Messenger {
                                 builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
                                         PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
-                                        final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
+                                        final TextView emailInput = ((Activity)context).findViewById(R.id.email);
                                         emailInput.setText("");
                                     }
                                 });
@@ -837,13 +840,13 @@ public class Messenger {
                             }
                         } else {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
-                            final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
+                            final TextView emailInput = ((Activity)context).findViewById(R.id.email);
                             emailInput.setText("");
                             Toast.makeText(context, "Oops! Something went wrong. Please add again your email address!", Toast.LENGTH_LONG).show();
                         }
                     } else {
                         PreferenceManager.getDefaultSharedPreferences(context).edit().putString("email", "").commit();
-                        final TextView emailInput = (TextView) ((Activity)context).findViewById(R.id.email);
+                        final TextView emailInput = ((Activity)context).findViewById(R.id.email);
                         emailInput.setText("");
                         Toast.makeText(context, "Oops! Something went wrong. Please add again your email address!", Toast.LENGTH_LONG).show();
                     }
@@ -862,7 +865,9 @@ public class Messenger {
             // get telephony imei
             try {
                 final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-                androidDeviceId = tm.getDeviceId(); //imei
+                if (tm != null) {
+                    androidDeviceId = tm.getDeviceId(); //imei
+                }
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
             }
