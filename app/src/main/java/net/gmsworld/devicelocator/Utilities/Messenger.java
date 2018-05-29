@@ -573,11 +573,7 @@ public class Messenger {
                 text = "Unable to share location. Required permissions are not granted!";
                 break;
             case Command.ABOUT_COMMAND:
-                try {
-                    text = URLEncoder.encode(AppUtils.getInstance().getAboutMessage(context), "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    Log.e(TAG, e.getMessage(), e);
-                }
+                text = AppUtils.getInstance().getAboutMessage(context);
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.LOCK_SCREEN_COMMAND:
@@ -595,6 +591,11 @@ public class Messenger {
             if (StringUtils.isNotEmpty(phoneNumber)) {
                 sendSMS(context, phoneNumber, text);
             } else {
+                try {
+                    text = URLEncoder.encode(text, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
                 if (StringUtils.isNotEmpty(telegramId)) {
                     sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
                 }
