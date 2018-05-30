@@ -198,7 +198,7 @@ public class Messenger {
                 Log.w(TAG, context.getString(R.string.no_network_error));
             }
         } else {
-            Log.e(TAG, "Invalid Telegram Id: " + telegramId);
+            Log.e(TAG, "Invalid Telegram chat or channel id: " + telegramId);
         }
     }
 
@@ -237,7 +237,7 @@ public class Messenger {
                                 if (telegramInput != null) {
                                     telegramInput.setText("");
                                 }
-                                Toast.makeText(context, "Oops! Your Telegram chat or channel id seems to be wrong. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, "Oops! Your Telegram chat or channel id seems to be wrong. Please register again your Telegram chat or channel!", Toast.LENGTH_LONG).show();
                             } else {
                                 Toast.makeText(context, "Oops! Failed to sent Telegram notification. Something went wrong on our side!", Toast.LENGTH_LONG).show();
                             }
@@ -433,7 +433,7 @@ public class Messenger {
                         notifications.add(email);
                     }
                     if (StringUtils.isNotEmpty(telegramId)) {
-                        notifications.add("Telegram chat id: " + telegramId);
+                        notifications.add(printTelegram(telegramId));
                     }
                     if (notifications.isEmpty()) {
                         text += "No notifications will be sent!";
@@ -467,7 +467,7 @@ public class Messenger {
                         notifications.add(email);
                     }
                     if (StringUtils.isNotEmpty(telegramId)) {
-                        notifications.add("Telegram chat id: " + telegramId);
+                        notifications.add(printTelegram(telegramId));
                     }
                     if (notifications.isEmpty()) {
                         text += "\nNo notifications will be sent!";
@@ -519,10 +519,10 @@ public class Messenger {
                     notifications.add(email);
                 }
                 if (StringUtils.isNotEmpty(telegramId)) {
-                    notifications.add("Telegram chat id: " + telegramId);
+                    notifications.add(printTelegram(telegramId));
                 }
                 if (notifications.isEmpty()) {
-                    text += "No notifications will be sent! Please specify valid email, phone number or Telegram chat id.";
+                    text += "No notifications will be sent! Please specify valid email, phone number or Telegram chat or channel.";
                 } else {
                     text += "Notifications will be sent to " + StringUtils.join(notifications, ',');
                 }
@@ -638,6 +638,14 @@ public class Messenger {
 
     private static String booleanToString(Context context, Boolean enabled) {
         return (enabled) ? context.getString(R.string.enabled) : context.getString(R.string.disabled);
+    }
+
+    private static String printTelegram(String telegram) {
+        if (StringUtils.startsWith(telegram, "@")) {
+            return "Telegram: " + "https://t.me/" + telegram.substring(1);
+        } else {
+            return "Telegram: " + telegram;
+        }
     }
 
     //public static double convertMPStoKMH(double speed) { return speed * 3.6; }
@@ -771,22 +779,22 @@ public class Messenger {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
                             final TextView telegramInput = ((Activity)context).findViewById(R.id.telegramId);
                             telegramInput.setText(telegramId);
-                            Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please register again your Telegram chat or channel!", Toast.LENGTH_LONG).show();
                         } else {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
                             final TextView telegramInput = ((Activity)context).findViewById(R.id.telegramId);
                             telegramInput.setText(telegramId);
-                            Toast.makeText(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel id!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", Toast.LENGTH_LONG).show();
                         }
                     } else {
                         if (telegramId.startsWith("-100") || telegramId.startsWith("@")) {
-                            Toast.makeText(context, "Please add @device_locator_bot to your channel with message sending permission and send us email with your Telegram channel id to finish registration!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Please add @device_locator_bot to your channel with message sending permission and send us email with your Telegram channel to finish registration!", Toast.LENGTH_LONG).show();
                             composeEmail(context, new String[]{"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram chat or channel " + telegramId + " to Device Locator notifications service.", false);
                         } else {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramId", "").commit();
                             final TextView telegramInput = ((Activity)context).findViewById(R.id.telegramId);
                             telegramInput.setText(telegramId);
-                            Toast.makeText(context, "Oops! Your Telegram channel id seems to be wrong. Please register again your Telegram channel or chat id!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Oops! Your Telegram channel id seems to be wrong. Please register again your Telegram chat or channel!", Toast.LENGTH_LONG).show();
                         }
                     }
                 }
