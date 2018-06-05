@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int SHARE_ROUTE_MESSAGE = 1;
 
+    public static final int UPDATE_UI_MESSAGE = 2;
+
     private static final int MIN_RADIUS = 10; //meters
 
     private static final int MAX_RADIUS = 1000;
@@ -553,6 +555,7 @@ public class MainActivity extends AppCompatActivity {
             RouteTrackingServiceUtils.stopRouteTrackingService(this, mConnection, isTrackingServiceBound, false, null, null, null, null);
             updateUI();
         }
+
     }
 
     private void toggleBroadcastReceiver() {
@@ -610,8 +613,6 @@ public class MainActivity extends AppCompatActivity {
                             pin = input;
                             saveData();
                         }
-                    } else {
-                        Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_SHORT).show();
                     }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
@@ -631,6 +632,7 @@ public class MainActivity extends AppCompatActivity {
                     if (v.getText().length() >= PIN_MIN_LENGTH) {
                         registerToken();
                     } else {
+                        Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_LONG).show();
                         v.setText(pin);
                     }
                 }
@@ -649,6 +651,7 @@ public class MainActivity extends AppCompatActivity {
                             if (tokenInput.getText().length() >= PIN_MIN_LENGTH) {
                                 registerToken();
                             } else {
+                                Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_LONG).show();
                                 tokenInput.setText(pin);
                             }
                             break;
@@ -1003,9 +1006,9 @@ public class MainActivity extends AppCompatActivity {
                             message.sendToTarget();
                         }
                     });
-                } //else {
-                //    Toast.makeText(getApplicationContext(), "No route is saved yet. Please make sure device location tracking is started and try again later.", Toast.LENGTH_LONG).show();
-                //}
+                } else {
+                    Toast.makeText(getApplicationContext(), "No route is saved yet!", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -1407,35 +1410,39 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void handleMessage(Message msg) {
             MainActivity activity = mainActivity.get();
-            if (activity != null && msg.what == SHARE_ROUTE_MESSAGE) {
-                int responseCode = msg.arg1;
-                if (responseCode == 200) {
-                    String showRouteUrl = RouteTrackingServiceUtils.getRouteUrl(activity);
-                    ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
-                    if (clipboard != null) {
-                        ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
-                        clipboard.setPrimaryClip(urlClip);
-                        Toast.makeText(activity, "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
-                    }
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
-                    activity.startActivity(browserIntent);
-                    String message = "Check your route at " + showRouteUrl;
-                    if (StringUtils.isNotEmpty(activity.phoneNumber)) {
-                        Messenger.sendSMS(activity, activity.phoneNumber, message);
-                    }
-                    if (StringUtils.isNotEmpty(activity.email)) {
-                        String msgtitle = activity.getString(R.string.message);
-                        String deviceId = Messenger.getDeviceId(activity);
-                        if (deviceId != null) {
-                            msgtitle += " installed on device " + deviceId +  " - route map link";
+            if (activity != null) {
+                if (msg.what == SHARE_ROUTE_MESSAGE) {
+                    int responseCode = msg.arg1;
+                    if (responseCode == 200) {
+                        String showRouteUrl = RouteTrackingServiceUtils.getRouteUrl(activity);
+                        ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+                        if (clipboard != null) {
+                            ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
+                            clipboard.setPrimaryClip(urlClip);
+                            Toast.makeText(activity, "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
                         }
-                        Messenger.sendEmail(activity, null, activity.email, message, msgtitle, 1, new HashMap<String, String>());
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
+                        activity.startActivity(browserIntent);
+                        String message = "Check your route at " + showRouteUrl;
+                        if (StringUtils.isNotEmpty(activity.phoneNumber)) {
+                            Messenger.sendSMS(activity, activity.phoneNumber, message);
+                        }
+                        if (StringUtils.isNotEmpty(activity.email)) {
+                            String msgtitle = activity.getString(R.string.message);
+                            String deviceId = Messenger.getDeviceId(activity);
+                            if (deviceId != null) {
+                                msgtitle += " installed on device " + deviceId + " - route map link";
+                            }
+                            Messenger.sendEmail(activity, null, activity.email, message, msgtitle, 1, new HashMap<String, String>());
+                        }
+                        if (StringUtils.isNotEmpty(activity.telegramId)) {
+                            Messenger.sendTelegram(activity, null, activity.telegramId, message, 1, new HashMap<String, String>());
+                        }
+                    } else {
+                        Toast.makeText(activity, "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
                     }
-                    if (StringUtils.isNotEmpty(activity.telegramId)) {
-                        Messenger.sendTelegram(activity, null, activity.telegramId, message, 1, new HashMap<String, String>());
-                    }
-                } else {
-                    Toast.makeText(activity, "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
+                } else if (msg.what == UPDATE_UI_MESSAGE) {
+                    activity.updateUI();
                 }
             }
         }
