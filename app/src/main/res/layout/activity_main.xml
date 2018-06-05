@@ -26,11 +26,11 @@
               android:layout_height="wrap_content"
               android:orientation="vertical">
 
-            <net.gmsworld.devicelocator.Views.LDCard
+              <net.gmsworld.devicelocator.Views.DLSwitchCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                ldcard:title="SMS control">
+                ldcard:dlSwitchName="SMS control">
 
                 <LinearLayout
                     android:id="@+id/ll_top_focus"
@@ -42,7 +42,7 @@
                     android:focusable="true"
                     android:focusableInTouchMode="true">
 
-                    <RelativeLayout
+                    <!--RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
@@ -65,38 +65,36 @@
                             android:focusableInTouchMode="true"
                             android:text=""
                             android:textColor="@android:color/white" />
-                    </RelativeLayout>
+                    </RelativeLayout-->
 
-                    <LinearLayout
+                    <!--LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:paddingBottom="8dp"
-                        android:paddingTop="15dp">
-
-                        <CheckBox
-                            android:id="@+id/settings_sms_contacts"
-                            android:text="@string/accept_sms_commands"
-                            android:textColor="@color/gray"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:checked="false"
-                            android:onClick="onLocationSMSCheckboxClicked"
-                            />
+                        android:paddingTop="8dp"-->
 
                         <TextView
                             android:id="@+id/docs_link"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="left"
-                            android:paddingTop="15dp"/>
+                            android:paddingBottom="8dp"/>
 
-                   </LinearLayout>
+                        <Switch
+                            android:id="@+id/settings_sms_contacts"
+                            android:text="@string/accept_sms_commands"
+                            android:textColor="@color/gray"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="false"
+                            android:onClick="onLocationSMSCheckboxClicked"/>
 
+                   <!--/LinearLayout-->
 
                 </LinearLayout>
 
-            </net.gmsworld.devicelocator.Views.LDCard>
+              </net.gmsworld.devicelocator.Views.DLSwitchCard>
 
               <net.gmsworld.devicelocator.Views.LDCard
                   android:layout_width="match_parent"
@@ -131,11 +129,11 @@
                       android:paddingBottom="8dp"
                       android:paddingTop="8dp">
 
-                      <CheckBox
+                      <Switch
                           android:id="@+id/settings_verify_pin"
                           android:text="@string/verify_security_pin"
                           android:textColor="@color/gray"
-                          android:layout_width="wrap_content"
+                          android:layout_width="match_parent"
                           android:layout_height="wrap_content"
                           android:checked="false"
                           android:onClick="onLocationSMSCheckboxClicked"/>
@@ -149,13 +147,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                ldcard:title="Location SMS settings">
+                ldcard:title="Location SMS messages">
 
-               <CheckBox
+               <Switch
                     android:id="@+id/settings_detected_sms"
                     android:text="@string/detected_message_summary"
                     android:textColor="@color/gray"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:onClick="onLocationSMSCheckboxClicked"
@@ -163,11 +161,11 @@
                     android:paddingTop="15dp"
                     android:paddingBottom="8dp"/>
 
-                <CheckBox
+                <Switch
                     android:id="@+id/settings_gps_sms"
                     android:text="@string/gps_message_summary"
                     android:textColor="@color/gray"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:onClick="onLocationSMSCheckboxClicked"
@@ -175,11 +173,11 @@
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"/>
 
-                <CheckBox
+                <Switch
                     android:id="@+id/settings_google_sms"
                     android:text="@string/google_message_summary"
                     android:textColor="@color/gray"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:onClick="onLocationSMSCheckboxClicked"

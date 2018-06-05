@@ -15,14 +15,9 @@
     <string name="error_permission">Application needs all the permissions to be granted because without them it can\'t function correctly.</string>
     <string name="sound_title">Sound (not yet)</string>
     <string name="sound_summary">Notification when keyword was detected.</string>
-    <string name="detected_message_title">First message</string>
-    <string name="detected_message_summary">First message: Acknowledge that location command was received and send mobile data and GPS status.</string>
-    <string name="gps_message_title">Second message</string>
-    <string name="gps_message_summary">Second message: GPS information - Accuracy, Latitude, Longitude, Speed, Altitude.</string>
-    <string name="google_message_title">Third message</string>
-    <string name="google_message_summary">Third message: Google maps link with your device current location.</string>
-    <string name="network_message_title">Forth message</string>
-    <string name="network_message_summary">Informations about current address and remaining distance to destination.</string>
+    <string name="detected_message_summary">Acknowledge that location command was received and send mobile data and GPS status.</string>
+    <string name="gps_message_summary">GPS information - Accuracy, Latitude, Longitude, Speed, Altitude.</string>
+    <string name="google_message_summary">Google maps link with your device current location.</string>
     <string name="acknowledgeMessage">Wait for a while for response. Retry if no response after a few minutes.</string>
     <string name="network">Internet:</string>
     <string name="gps">Location source:</string>

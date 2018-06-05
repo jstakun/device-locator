@@ -44,10 +44,10 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -318,15 +318,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void initLocationSMSCheckbox() {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        ((CheckBox) findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean("settings_detected_sms", true));
-        ((CheckBox) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean("settings_gps_sms", false));
-        ((CheckBox) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean("settings_google_sms", true));
-        ((CheckBox) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
-        ((CheckBox) findViewById(R.id.settings_sms_contacts)).setChecked(settings.getBoolean("settings_sms_contacts", false));
+        ((Switch)findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean("settings_detected_sms", true));
+        ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean("settings_gps_sms", false));
+        ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean("settings_google_sms", true));
+        ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
+        ((Switch) findViewById(R.id.settings_sms_contacts)).setChecked(settings.getBoolean("settings_sms_contacts", false));
     }
 
     public void onLocationSMSCheckboxClicked(View view) {
-        boolean checked = ((CheckBox) view).isChecked();
+        boolean checked = ((Switch) view).isChecked();
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
 
@@ -442,9 +442,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        ((Button) this.findViewById(R.id.running_button)).setText((running) ? getString(R.string.stop) : getString(R.string.start));
-        ViewCompat.setBackgroundTintList(this.findViewById(R.id.running_button), ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
-        ViewCompat.setBackgroundTintList(this.findViewById(R.id.send_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        //TODO testing
+        //((Button) this.findViewById(R.id.running_button)).setText((running) ? getString(R.string.stop) : getString(R.string.start));
+        //ViewCompat.setBackgroundTintList(this.findViewById(R.id.running_button), ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
+        //ViewCompat.setBackgroundTintList(this.findViewById(R.id.send_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+
+        ((Switch)this.findViewById(R.id.dlSwitchName)).setChecked(running);
 
         ((Button) this.findViewById(R.id.motion_button)).setText((motionDetectorRunning) ? getString(R.string.stop) : getString(R.string.start));
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.motion_button), ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
@@ -557,8 +560,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initApp() {
+        //TODO testing
         initRunningButton();
-        initSendLocationButton();
+        //initSendLocationButton();
         initShareRouteButton();
         initRadiusInput();
         initMotionDetectorButton();
@@ -1002,14 +1006,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void initSendLocationButton() {
+    //TODO testing
+    /*private void initSendLocationButton() {
         Button sendLocationButton = this.findViewById(R.id.send_button);
 
         sendLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /* start the contact picker */
-
                 if (phoneNumber != null && phoneNumber.length() > 0) {
                     launchService();
                 } else {
@@ -1032,7 +1035,7 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.clearFocus();
             }
         });
-    }
+    }*/
 
     private String getNumber(Intent data) {
         String number = null;
@@ -1117,10 +1120,21 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), getString(R.string.motion_confirm, radius), Toast.LENGTH_LONG).show();
     }
 
+    //TODO testing
     private void initRunningButton() {
-        Button runningButton = this.findViewById(R.id.running_button);
+        /*Button runningButton = this.findViewById(R.id.running_button);
 
         runningButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MainActivity.this.toggleRunning();
+                MainActivity.this.clearFocus();
+            }
+        });*/
+
+        Switch title = this.findViewById(R.id.dlSwitchName);
+
+        title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 MainActivity.this.toggleRunning();
