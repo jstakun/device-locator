@@ -442,17 +442,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        //TODO testing
         //((Button) this.findViewById(R.id.running_button)).setText((running) ? getString(R.string.stop) : getString(R.string.start));
         //ViewCompat.setBackgroundTintList(this.findViewById(R.id.running_button), ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
         //ViewCompat.setBackgroundTintList(this.findViewById(R.id.send_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
 
-        ((Switch)this.findViewById(R.id.dlSwitchName)).setChecked(running);
+        //((Button) this.findViewById(R.id.motion_button)).setText((motionDetectorRunning) ? getString(R.string.stop) : getString(R.string.start));
+        //ViewCompat.setBackgroundTintList(this.findViewById(R.id.motion_button), ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
 
-        ((Button) this.findViewById(R.id.motion_button)).setText((motionDetectorRunning) ? getString(R.string.stop) : getString(R.string.start));
-        ViewCompat.setBackgroundTintList(this.findViewById(R.id.motion_button), ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
+        ((Switch) this.findViewById(R.id.dlSmsSwitch)).setChecked(running);
+        ((Switch) this.findViewById(R.id.dlTrackerSwitch)).setChecked(motionDetectorRunning);
 
-        ViewCompat.setBackgroundTintList(this.findViewById(R.id.route_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        if (Files.hasRoutePoints(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
+            ViewCompat.setBackgroundTintList(this.findViewById(R.id.route_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        } else {
+            ViewCompat.setBackgroundTintList(this.findViewById(R.id.route_button), ColorStateList.valueOf(getResources().getColor(R.color.lightGray)));
+        }
+        //
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.contact_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.telegram_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.ping_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
@@ -560,7 +565,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initApp() {
-        //TODO testing
         initRunningButton();
         //initSendLocationButton();
         initShareRouteButton();
@@ -999,14 +1003,13 @@ public class MainActivity extends AppCompatActivity {
                             message.sendToTarget();
                         }
                     });
-                } else {
-                    Toast.makeText(getApplicationContext(), "No route is saved yet. Please make sure device location tracking is started and try again later.", Toast.LENGTH_LONG).show();
-                }
+                } //else {
+                //    Toast.makeText(getApplicationContext(), "No route is saved yet. Please make sure device location tracking is started and try again later.", Toast.LENGTH_LONG).show();
+                //}
             }
         });
     }
 
-    //TODO testing
     /*private void initSendLocationButton() {
         Button sendLocationButton = this.findViewById(R.id.send_button);
 
@@ -1120,19 +1123,10 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), getString(R.string.motion_confirm, radius), Toast.LENGTH_LONG).show();
     }
 
-    //TODO testing
     private void initRunningButton() {
-        /*Button runningButton = this.findViewById(R.id.running_button);
+        //Button runningButton = this.findViewById(R.id.running_button);
 
-        runningButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity.this.toggleRunning();
-                MainActivity.this.clearFocus();
-            }
-        });*/
-
-        Switch title = this.findViewById(R.id.dlSwitchName);
+        Switch title = this.findViewById(R.id.dlSmsSwitch);
 
         title.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1144,9 +1138,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initMotionDetectorButton() {
-        Button runningButton = this.findViewById(R.id.motion_button);
+        //Button runningButton = this.findViewById(R.id.motion_button);
 
-        runningButton.setOnClickListener(new View.OnClickListener() {
+        Switch title = this.findViewById(R.id.dlTrackerSwitch);
+
+        title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 MainActivity.this.toggleMotionDetectorRunning();

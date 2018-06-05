@@ -10,7 +10,7 @@ import android.widget.Switch;
 
 import net.gmsworld.devicelocator.R;
 
-public class DLSwitchCard extends CardView {
+public class DLTrackerCard extends CardView {
     private TypedArray attributes = null;
     private LinearLayout linearLayout = null;
     private Switch title = null;
@@ -21,7 +21,7 @@ public class DLSwitchCard extends CardView {
      * @param context the context
      * @param attrs   the attrs
      */
-    public DLSwitchCard(Context context, AttributeSet attrs) {
+    public DLTrackerCard(Context context, AttributeSet attrs) {
         super(context, attrs);
         attributes = getContext().obtainStyledAttributes(attrs, R.styleable.LDCard);
     }
@@ -30,11 +30,11 @@ public class DLSwitchCard extends CardView {
     protected void onFinishInflate() {
 
         View[] children = this.detachChildren();
-        inflate(getContext(), R.layout.dlswitchcard, this);
+        inflate(getContext(), R.layout.dltrackercard, this);
 
         linearLayout = this.findViewById(R.id.linear_layout);
-        title = this.findViewById(R.id.dlSwitchName);
-        title.setText(attributes.getString(R.styleable.LDCard_dlSwitchName));
+        title = this.findViewById(R.id.dlTrackerSwitch);
+        title.setText(attributes.getString(R.styleable.LDCard_dlTrackerSwitch));
         if (title.getText().length() == 0) {
             linearLayout.removeView(title);
         }

@@ -26,11 +26,11 @@
               android:layout_height="wrap_content"
               android:orientation="vertical">
 
-              <net.gmsworld.devicelocator.Views.DLSwitchCard
+              <net.gmsworld.devicelocator.Views.DLSMSControlCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                ldcard:dlSwitchName="SMS control">
+                ldcard:dlSmsSwitch="SMS control">
 
                 <LinearLayout
                     android:id="@+id/ll_top_focus"
@@ -94,7 +94,7 @@
 
                 </LinearLayout>
 
-              </net.gmsworld.devicelocator.Views.DLSwitchCard>
+              </net.gmsworld.devicelocator.Views.DLSMSControlCard>
 
               <net.gmsworld.devicelocator.Views.LDCard
                   android:layout_width="match_parent"
@@ -202,11 +202,11 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <net.gmsworld.devicelocator.Views.LDCard
+                <net.gmsworld.devicelocator.Views.DLTrackerCard
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
-                    ldcard:title="@string/device_tracker">
+                    ldcard:dlTrackerSwitch="@string/device_tracker">
 
                     <LinearLayout
                         android:id="@+id/ll_bottom_focus"
@@ -231,14 +231,14 @@
                             android:text="@string/share_route"
                             android:textColor="@android:color/white" />
 
-                            <Button
+                            <!--Button
                             android:id="@+id/motion_button"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
                             android:backgroundTint="@color/colorAccent"
                             android:text=""
-                            android:textColor="@android:color/white" />
+                            android:textColor="@android:color/white" /-->
                         </RelativeLayout>
 
                         <LinearLayout
@@ -267,7 +267,7 @@
 
                     </LinearLayout>
 
-                </net.gmsworld.devicelocator.Views.LDCard>
+                </net.gmsworld.devicelocator.Views.DLTrackerCard>
 
                 <net.gmsworld.devicelocator.Views.LDCard
                     android:layout_width="match_parent"
