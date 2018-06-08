@@ -13,7 +13,6 @@ import net.gmsworld.devicelocator.R;
 public class DLTrackerCard extends CardView {
     private TypedArray attributes = null;
     private LinearLayout linearLayout = null;
-    private Switch title = null;
 
     /**
      * Instantiates a new Ld card.
@@ -33,7 +32,7 @@ public class DLTrackerCard extends CardView {
         inflate(getContext(), R.layout.dltrackercard, this);
 
         linearLayout = this.findViewById(R.id.linear_layout);
-        title = this.findViewById(R.id.dlTrackerSwitch);
+        Switch title = this.findViewById(R.id.dlTrackerSwitch);
         title.setText(attributes.getString(R.styleable.LDCard_dlTrackerSwitch));
         if (title.getText().length() == 0) {
             linearLayout.removeView(title);

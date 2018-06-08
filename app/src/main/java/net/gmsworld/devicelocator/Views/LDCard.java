@@ -13,7 +13,6 @@ import net.gmsworld.devicelocator.R;
 public class LDCard extends CardView {
     private TypedArray attributes = null;
     private LinearLayout linearLayout = null;
-    private TextView title = null;
 
     /**
      * Instantiates a new Ld card.
@@ -33,7 +32,7 @@ public class LDCard extends CardView {
         inflate(getContext(), R.layout.ldcard, this);
 
         linearLayout = this.findViewById(R.id.linear_layout);
-        title = this.findViewById(R.id.title);
+        TextView title = this.findViewById(R.id.title);
         title.setText(attributes.getString(R.styleable.LDCard_title));
         if (title.getText().length() == 0) {
             linearLayout.removeView(title);

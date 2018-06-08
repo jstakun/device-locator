@@ -13,7 +13,6 @@ import net.gmsworld.devicelocator.R;
 public class DLSMSControlCard extends CardView {
     private TypedArray attributes = null;
     private LinearLayout linearLayout = null;
-    private Switch title = null;
 
     /**
      * Instantiates a new Ld card.
@@ -33,7 +32,7 @@ public class DLSMSControlCard extends CardView {
         inflate(getContext(), R.layout.dlswitchcard, this);
 
         linearLayout = this.findViewById(R.id.linear_layout);
-        title = this.findViewById(R.id.dlSmsSwitch);
+        Switch title = this.findViewById(R.id.dlSmsSwitch);
         title.setText(attributes.getString(R.styleable.LDCard_dlSmsSwitch));
         if (title.getText().length() == 0) {
             linearLayout.removeView(title);

@@ -121,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         restoreSavedData();
         initApp();
-        updateUI();
         toggleBroadcastReceiver(); //set broadcast receiver for sms
         //scrollTop();
         //mMessenger = new Messenger(loadingHandler);
@@ -151,6 +150,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume()");
+
+        updateUI();
 
         //show pin dialog only if not shown in last 10 minutes
         long pinVerificationMillis = PreferenceManager.getDefaultSharedPreferences(this).getLong("pinVerificationMillis", 0);
@@ -459,7 +460,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             ViewCompat.setBackgroundTintList(this.findViewById(R.id.route_button), ColorStateList.valueOf(getResources().getColor(R.color.lightGray)));
         }
-        //
+
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.contact_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.telegram_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.ping_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
