@@ -32,15 +32,15 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
         PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).commit();
         final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, "");
         if (StringUtils.isNotEmpty(pin)) {
-            sendRegistrationToServer(this, refreshedToken, pin, null);
+            sendRegistrationToServer(this, refreshedToken, null);
         } 
     }
 
-    public static void sendRegistrationToServer(final Context context, final String token, final String pin, final String oldPin) {
+    public static void sendRegistrationToServer(final Context context, final String token) {
         final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
         if (StringUtils.isNotEmpty(tokenStr)) {
-            sendRegistrationToServer(context, token, pin, oldPin, tokenStr);
+            sendRegistrationToServer(context, token, tokenStr);
         } else {
             String queryString = "scope=dl&user=" + Messenger.getDeviceId(context);
             Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
@@ -48,7 +48,7 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 200) {
-                        sendRegistrationToServer(context, token, pin, Messenger.getToken(context, results));
+                        sendRegistrationToServer(context, token, Messenger.getToken(context, results));
                     } else {
                         Log.d(TAG, "Failed to receive token: " + results);
                     }
@@ -57,14 +57,11 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
         }
     }
 
-    private static void sendRegistrationToServer(Context context, final String token, final String pin, final String oldPin, final String tokenStr) {
+    private static void sendRegistrationToServer(Context context, final String token, final String tokenStr) {
         try {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            if (StringUtils.isNumeric(pin) && !StringUtils.equalsIgnoreCase(token, "BLACKLISTED") && pin.length() >= MainActivity.PIN_MIN_LENGTH) {
-                String content = "imei=" + Messenger.getDeviceId(context) + "&pin=" + pin;
-                if (StringUtils.isNumeric(oldPin)) {
-                    content += "&oldPin=" + oldPin;
-                }
+            if (!StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
+                String content = "imei=" + Messenger.getDeviceId(context);
                 if (StringUtils.isNotBlank(token)) {
                     content += "&token=" + token;
                 }
@@ -88,7 +85,7 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
                     }
                 });
             } else {
-                Log.e(TAG, "Invalid pin: " + pin + " or token: " + token);
+                Log.e(TAG, "Invalid token: " + token);
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);

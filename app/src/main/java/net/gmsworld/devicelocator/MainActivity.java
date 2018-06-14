@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
     private boolean motionDetectorRunning = false;
-    private String phoneNumber = null, email = null, telegramId = null, pin = null, oldPin = null;
+    private String phoneNumber = null, email = null, telegramId = null, pin = null;
 
     private final Handler loadingHandler = new UIHandler(this);
 
@@ -197,7 +197,6 @@ public class MainActivity extends AppCompatActivity {
         registerEmail((TextView) findViewById(R.id.email), false);
         registerTelegram((TextView) findViewById(R.id.telegramId));
         registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
-        registerToken();
 
         if (pinDialog != null) {
             pinDialog.dismiss();
@@ -475,7 +474,7 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     public void run() {
                         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-                        DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, refreshedToken, pin, null);
+                        DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, refreshedToken);
                     }
                 }).start();
             } else if (StringUtils.isNotEmpty(firebaseToken)) {
@@ -610,7 +609,6 @@ public class MainActivity extends AppCompatActivity {
                     //token is 4 to 8 digits string
                     if (input.length() >= PIN_MIN_LENGTH) {
                         if (!StringUtils.equals(pin, input) && StringUtils.isNumeric(input)) {
-                            oldPin = pin;
                             pin = input;
                             saveData();
                         }
@@ -630,9 +628,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
-                    if (v.getText().length() >= PIN_MIN_LENGTH) {
-                        registerToken();
-                    } else {
+                    if (v.getText().length() < PIN_MIN_LENGTH) {
                         Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_LONG).show();
                         v.setText(pin);
                     }
@@ -649,9 +645,7 @@ public class MainActivity extends AppCompatActivity {
                     switch (keyCode) {
                         case KeyEvent.KEYCODE_BACK:
                             TextView tokenInput = (TextView)v;
-                            if (tokenInput.getText().length() >= PIN_MIN_LENGTH) {
-                                registerToken();
-                            } else {
+                            if (tokenInput.getText().length() < PIN_MIN_LENGTH) {
                                 Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_LONG).show();
                                 tokenInput.setText(pin);
                             }
@@ -663,20 +657,6 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-    }
-
-    private void registerToken() {
-        if (oldPin != null) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
-            if (StringUtils.isNotEmpty(firebaseToken)) {
-                settings.edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).commit(); //remove token so that it will be added again after successful registration
-                if (Network.isNetworkAvailable(MainActivity.this)) {
-                    DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, firebaseToken, pin, oldPin);
-                    oldPin = null;
-                }
-            }
-        }
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------------------
