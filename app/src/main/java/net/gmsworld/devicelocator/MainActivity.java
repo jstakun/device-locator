@@ -482,6 +482,8 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 Log.e(TAG, "Something is wrong here with either empty pin:" + StringUtils.isEmpty(pin) + " or with empty Firebase token:" + StringUtils.isEmpty(firebaseToken));
             }
+        } else {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).commit();
         }
         //
 
