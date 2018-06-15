@@ -1,12 +1,16 @@
 package net.gmsworld.devicelocator.Services;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Messenger;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,16 +27,25 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Map<String, String> message = remoteMessage.getData();
             if (message.containsKey("command") && message.containsKey("pin")) {
-                String command = message.get("command") + message.get("pin");
-                if (message.containsKey("args")) {
-                    command += " " + message.get("args");
-                }
+                String pinRead = message.get("pin");
+                String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, null);
+                boolean pinValid = StringUtils.equals(pin, pinRead);
                 if (message.containsKey("correlationId")) {
                     String correlationId = message.get("correlationId");
                     Log.d(TAG, "Sending notification for " + correlationId);
-                    Messenger.sendTelegram(this, null, "@dlcorrelationId", correlationId, 1, new HashMap<String, String>());
+                    Map<String, String> headers = new HashMap<String, String>();
+                    headers.put("X-GMS-AuthStatus", pinValid ? "ok" : "failed");
+                    Messenger.sendTelegram(this, null, "@dlcorrelationId", correlationId, 1, headers);
                 }
-                Command.findCommandInMessage(this, command);
+                if (pinValid) {
+                    String command = message.get("command") + pinRead;
+                    if (message.containsKey("args")) {
+                        command += " " + message.get("args");
+                    }
+                    Command.findCommandInMessage(this, command);
+                } else {
+                    Log.e(TAG, "Invalid pin!");
+                }
             } else {
                 Log.e(TAG, "Invalid data payload!");
             }
