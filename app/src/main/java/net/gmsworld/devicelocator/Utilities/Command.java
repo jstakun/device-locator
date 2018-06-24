@@ -130,9 +130,12 @@ public class Command {
                 silentMode = true;
             }
 
-            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, silentMode);
-
-            settings.edit().putBoolean("motionDetectorRunning", true).commit();
+            if (Permissions.haveLocationPermission(context)) {
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, silentMode);
+                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+            } else {
+                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
+            }
 
             sendSmsNotification(context, sender, START_COMMAND);
         }
@@ -145,9 +148,12 @@ public class Command {
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
 
-            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, false);
-
-            settings.edit().putBoolean("motionDetectorRunning", true).commit();
+            if (Permissions.haveLocationPermission(context)) {
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, false);
+                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+            } else {
+                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
+            }
 
             sendSocialNotification(context, START_COMMAND);
         }
@@ -167,9 +173,12 @@ public class Command {
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
 
-            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
-
-            settings.edit().putBoolean("motionDetectorRunning", true).commit();
+            if (Permissions.haveLocationPermission(context)) {
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
+                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+            } else {
+                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
+            }
 
             Intent newIntent = new Intent(context, SmsSenderService.class);
             newIntent.putExtra("phoneNumber", sender);
@@ -187,8 +196,14 @@ public class Command {
             String phoneNumber = settings.getString("phoneNumber", "");
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
-            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
-            settings.edit().putBoolean("motionDetectorRunning", true).commit();
+
+            if (Permissions.haveLocationPermission(context)) {
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
+                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+            } else {
+                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
+            }
+
             sendSocialNotification(context, RESUME_COMMAND);
         }
     }

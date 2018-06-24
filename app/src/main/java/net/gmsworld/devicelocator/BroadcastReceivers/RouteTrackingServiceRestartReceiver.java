@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
+import net.gmsworld.devicelocator.Utilities.Permissions;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
 /**
@@ -27,7 +28,11 @@ public class RouteTrackingServiceRestartReceiver extends BroadcastReceiver {
         Log.d(TAG, "RouteTrackingService will be restarted if needed...");
         restoreSavedData(context);
         if (motionDetectorRunning) {
-            RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
+            if (Permissions.haveLocationPermission(context)) {
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
+            } else {
+                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
+            }
         } else {
             Log.d(TAG, "No need to restart RouteTrackingService.");
         }

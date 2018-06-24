@@ -420,12 +420,12 @@ public class Messenger {
 
         switch (command) {
             case Command.RESUME_COMMAND:
-                text = "Device location tracking has been resumed. ";
                 title = "Device Locator resumed location tracking";
                 if (deviceId != null) {
                     title += " on device " + deviceId;
                 }
-                if (GmsSmartLocationManager.isLocationEnabled(context)) {
+                if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean("motionDetectorRunning", false)) {
+                    text = "Device location tracking has been resumed. ";
                     if (StringUtils.isNotEmpty(notificationNumber)) {
                         notifications.add(notificationNumber);
                     }
@@ -441,7 +441,7 @@ public class Messenger {
                         text += "Notifications will be sent to " + StringUtils.join(notifications, ',');
                     }
                 } else {
-                    text += "Location service is disabled! No notifications will be sent!";
+                    text = "Location service is not available. No notifications will be sent. Check permissions and device configuration!";
                 }
                 text += "\nBattery level: " + getBatteryLevel(context);
                 break;
@@ -453,13 +453,13 @@ public class Messenger {
                 }
                 break;
             case Command.START_COMMAND:
-                text = "Device location tracking is running. ";
                 title = "Device Locator started location tracking";
                 if (deviceId != null) {
                     title += " on device " + deviceId;
                 }
-                if (GmsSmartLocationManager.isLocationEnabled(context)) {
-                    text += "Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
+                if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean("motionDetectorRunning", false)) {
+                    text = "Device location tracking is running. " +
+                            "Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
                     if (StringUtils.isNotEmpty(notificationNumber)) {
                         notifications.add(notificationNumber);
                     }
@@ -475,7 +475,7 @@ public class Messenger {
                         text += "\nNotifications will be sent to " + StringUtils.join(notifications, ',');
                     }
                 } else {
-                    text += "Location service is disabled! No notifications will be sent!";
+                    text = "Location service is not available. No notifications will be sent. Check permissions and device configuration!";
                 }
                 text += "\nBattery level: " + getBatteryLevel(context);
                 break;

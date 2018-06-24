@@ -786,7 +786,6 @@ public class MainActivity extends AppCompatActivity {
         if ((!StringUtils.equals(email, newEmailAddress) || retry) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
             if (Network.isNetworkAvailable(MainActivity.this)) {
                 Log.d(TAG, "Setting new email address: " + newEmailAddress);
-                Toast.makeText(MainActivity.this, "Email verification in progress...", Toast.LENGTH_LONG).show();
                 email = newEmailAddress;
                 saveData();
                 //update route tracking service if running
@@ -795,6 +794,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (StringUtils.isNotEmpty(email)) {
+                    Toast.makeText(MainActivity.this, "Email verification in progress...", Toast.LENGTH_SHORT).show();
                     net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
                 }
             } else {
