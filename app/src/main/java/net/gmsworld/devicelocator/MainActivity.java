@@ -129,13 +129,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         boolean isTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isTrackerShown", false);
+        boolean isDeviceTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isDeviceManagerShown", false);
         setupToolbar(R.id.smsToolbar);
         if (isTrackerShown) {
             findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.smsSettings).setVisibility(View.GONE);
+            findViewById(R.id.deviceSettings).setVisibility(View.GONE);
+        } else if (isDeviceTrackerShown) {
+            findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
+            findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+            findViewById(R.id.smsSettings).setVisibility(View.GONE);
         } else {
             findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+            findViewById(R.id.deviceSettings).setVisibility(View.GONE);
         }
 
         //send email registration request once every day if still unverified
@@ -263,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.sms:
                 Log.d(TAG, "Show sms settings");
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", false).commit();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).commit();
                 findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_top_focus).requestFocus();
@@ -271,9 +279,20 @@ public class MainActivity extends AppCompatActivity {
             case R.id.tracker:
                 Log.d(TAG, "Show tracker settings");
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).commit();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).commit();
                 findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_bottom_focus).requestFocus();
+                getSupportActionBar().invalidateOptionsMenu();
+                return true;
+            case R.id.devices:
+                Log.d(TAG, "Show Device Manager settings");
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", false).commit();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", true).commit();
+                findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
+                findViewById(R.id.smsSettings).setVisibility(View.GONE);
+                findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+                findViewById(R.id.ll_top_focus).requestFocus();
                 getSupportActionBar().invalidateOptionsMenu();
                 return true;
             case R.id.loginTracker:
@@ -295,14 +314,22 @@ public class MainActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu (Menu menu) {
         //Log.d(TAG, "onPrepareOptionsMenu()");
         menu.findItem(R.id.camera).setVisible(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("loginTracker", false));
-        boolean isTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isTrackerShown", false);
 
-        if (!isTrackerShown) {
-            menu.findItem(R.id.sms).setVisible(false);
-            menu.findItem(R.id.tracker).setVisible(true);
-        } else  {
-            menu.findItem(R.id.tracker).setVisible(false);
+        boolean isTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isTrackerShown", false);
+        boolean isDeviceTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isDeviceManagerShown", false);
+
+        if (isTrackerShown) {
             menu.findItem(R.id.sms).setVisible(true);
+            menu.findItem(R.id.devices).setVisible(true);
+            menu.findItem(R.id.tracker).setVisible(false);
+        } else if (isDeviceTrackerShown) {
+            menu.findItem(R.id.tracker).setVisible(true);
+            menu.findItem(R.id.sms).setVisible(true);
+            menu.findItem(R.id.devices).setVisible(false);
+        } else {
+            menu.findItem(R.id.tracker).setVisible(true);
+            menu.findItem(R.id.devices).setVisible(true);
+            menu.findItem(R.id.sms).setVisible(false);
         }
 
         return true;
@@ -313,8 +340,10 @@ public class MainActivity extends AppCompatActivity {
         //show tracker view
         Log.d(TAG, "onNewIntent()");
         PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).commit();
         findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
         findViewById(R.id.smsSettings).setVisibility(View.GONE);
+        findViewById(R.id.deviceSettings).setVisibility(View.GONE);
         getSupportActionBar().invalidateOptionsMenu();
     }
 
@@ -583,6 +612,8 @@ public class MainActivity extends AppCompatActivity {
         initTokenInput();
         initPingButton();
         initLocationSMSCheckbox();
+        initUserLoginInput();
+        initDeviceNameInput();
 
         TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
@@ -697,7 +728,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
 
+    //user login input setup -------------------------------------------------------------
+
+    private void initUserLoginInput() {
+        final TextView userLoginInput = this.findViewById(R.id.userLogin);
+        String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
+        if (userLogin != null) {
+            userLoginInput.setText(userLogin);
+        }
+        //TODO add listeners to save userLogin to shared prefs and persist to server
+    }
+
+    //device name input setup ------------------------------------------------------------
+
+    private void initDeviceNameInput() {
+        final TextView deviceNameInput = this.findViewById(R.id.deviceName);
+        String deviceName = PreferenceManager.getDefaultSharedPreferences(this).getString("deviceName", null);
+        if (deviceName != null) {
+            deviceNameInput.setText(deviceName);
+        }
+        //TODO add listeners to save deviceName to shared prefs and persist to server
     }
 
     //email input setup ------------------------------------------------------------------

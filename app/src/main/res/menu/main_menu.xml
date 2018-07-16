@@ -11,6 +11,11 @@
         android:icon="@drawable/ic_textsms_white"
         app:showAsAction="ifRoom|withText"/>
     <item
+        android:id="@+id/devices"
+        android:title="Devices"
+        android:icon="@drawable/ic_devices_other_white_24dp"
+        app:showAsAction="ifRoom|withText"/>
+    <item
         android:id="@+id/loginTracker"
         android:title="@string/failed_login_tracker"
         android:icon="@drawable/ic_perm_identity_white"

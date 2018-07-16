@@ -65,19 +65,23 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                         .setImageRotation(CameraRotation.ROTATION_270)
                         .build();
 
-                startCamera(cameraConfig);
+                try {
+                    startCamera(cameraConfig);
 
-                new android.os.Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            takePicture();
-                        } catch (Throwable e) {
-                            Log.e(TAG, "Failed to take a picture!", e);
+                    new android.os.Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                takePicture();
+                            } catch (Throwable e) {
+                                Log.e(TAG, "Failed to take a picture!", e);
+                            }
                         }
-                    }
-                }, 1000);
-
+                    }, 1000);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    onCameraError(CameraError.ERROR_CAMERA_OPEN_FAILED);
+                }
             } else {
                 Log.e(TAG, "Draw over other apps permission is missing. Can't take a picture");
             }
@@ -165,10 +169,9 @@ public class HiddenCaptureImageService extends HiddenCameraService {
     public void onCameraError(@CameraError.CameraErrorCodes int errorCode) {
         switch (errorCode) {
             case CameraError.ERROR_CAMERA_OPEN_FAILED:
-                //Camera open failed. Probably because another application
-                //is using the camera
+                //Camera open failed. Probably because another application is using the camera
                 Log.e(TAG, "Cannot open camera.");
-                Toast.makeText(this, "Camera opening failed. There might be someting wrong with your front camera. Please try again.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Camera opening failed.", Toast.LENGTH_LONG).show();
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", false).commit();
                 break;
             case CameraError.ERROR_IMAGE_WRITE_FAILED:

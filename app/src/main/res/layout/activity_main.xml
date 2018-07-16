@@ -404,6 +404,74 @@
 
         </ScrollView>
 
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/deviceSettings"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <net.gmsworld.devicelocator.Views.LDCard
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    ldcard:title="Device Manager">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp"
+                        android:paddingTop="15dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="Device Name" />
+
+                        <net.gmsworld.devicelocator.Views.KeyboardEditText
+                            android:id="@+id/deviceName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:lines="1"
+                            android:maxLength="32"
+                            android:textColor="@color/gray"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp"
+                        android:paddingTop="15dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="User Login" />
+
+                        <net.gmsworld.devicelocator.Views.KeyboardEditText
+                            android:id="@+id/userLogin"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:lines="1"
+                            android:maxLength="64"
+                            android:textColor="@color/gray"/>
+
+                    </LinearLayout>
+
+                </net.gmsworld.devicelocator.Views.LDCard>
+
+            </LinearLayout>
+
+        </ScrollView>
     </LinearLayout>
 
 </merge>
