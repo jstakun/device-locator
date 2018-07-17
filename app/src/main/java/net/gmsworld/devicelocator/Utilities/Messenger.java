@@ -82,7 +82,7 @@ public class Messenger {
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     headers.put("X-GMS-AppId", "2");
-                    String deviceId = getDeviceId(context);
+                    String deviceId = getDeviceId(context, false);
                     if (StringUtils.isNotEmpty(deviceId)) {
                         headers.put("X-GMS-DeviceId", deviceId);
                     }
@@ -93,7 +93,7 @@ public class Messenger {
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     sendEmail(context, email, message, title, 1, headers);
                 } else {
-                    String queryString = "scope=dl&user=" + getDeviceId(context);
+                    String queryString = "scope=dl&user=" + getDeviceId(context, false);
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
@@ -120,7 +120,7 @@ public class Messenger {
 
     private static void sendEmail(final Context context, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
         try {
-            String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title + "&username=" + getDeviceId(context);
+            String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title + "&username=" + getDeviceId(context, false);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -164,7 +164,7 @@ public class Messenger {
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
-                    String deviceId = getDeviceId(context);
+                    String deviceId = getDeviceId(context, false);
                     if (StringUtils.isNotEmpty(deviceId)) {
                         headers.put("X-GMS-DeviceId", deviceId);
                     }
@@ -175,7 +175,7 @@ public class Messenger {
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     sendTelegram(context, telegramId, message, 1, headers);
                 } else {
-                    String queryString = "scope=dl&user=" + getDeviceId(context);
+                    String queryString = "scope=dl&user=" + getDeviceId(context, false);
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
@@ -204,7 +204,7 @@ public class Messenger {
 
     private static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
         try {
-            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context);
+            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context, false);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -258,7 +258,7 @@ public class Messenger {
             if (StringUtils.isNotEmpty(tokenStr)) {
                 headers.put("Authorization", "Bearer " + tokenStr);
                 headers.put("X-GMS-AppId", "2");
-                String deviceId = getDeviceId(context);
+                String deviceId = getDeviceId(context, false);
                 if (StringUtils.isNotEmpty(deviceId)) {
                     headers.put("X-GMS-DeviceId", deviceId);
                 }
@@ -269,7 +269,7 @@ public class Messenger {
                 headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                 sendRoutePoint(context, 1, headers);
             } else {
-                String queryString = "scope=dl&user=" + getDeviceId(context);
+                String queryString = "scope=dl&user=" + getDeviceId(context, false);
                 Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
@@ -295,7 +295,7 @@ public class Messenger {
 
     private static void sendRoutePoint(final Context context, final int retryCount, final Map<String, String> headers) {
         try {
-            String queryString = "type=routePoint&username=" + getDeviceId(context);
+            String queryString = "type=routePoint&username=" + getDeviceId(context, false);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -345,7 +345,7 @@ public class Messenger {
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
-                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
+                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context, true);
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - current location";
                 }
@@ -366,7 +366,7 @@ public class Messenger {
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
-                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
+                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context, true);
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - location map link";
                 }
@@ -395,7 +395,7 @@ public class Messenger {
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
-                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
+                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context, true);
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - location request";
                 }
@@ -407,7 +407,7 @@ public class Messenger {
 
     public static void sendCommandMessage(final Context context, final Bundle extras) {
         String text = null, title = null, phoneNumber = null, telegramId = null, email = null, notificationNumber = null, command = null;
-        String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context);
+        String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context, true);
         List<String> notifications = new ArrayList<String>();
 
         if (extras != null) {
@@ -555,7 +555,7 @@ public class Messenger {
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.PING_COMMAND:
-                text = "Hello from " + getDeviceId(context);
+                text = "Hello from " + getDeviceId(context, true);
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.RING_COMMAND:
@@ -615,7 +615,7 @@ public class Messenger {
     }
 
     public static void sendLoginFailedMessage(Context context, String phoneNumber, String telegramId, String email) {
-        String deviceId = getDeviceId(context);
+        String deviceId = getDeviceId(context, true);
         String text = "Failed login attempt to your device " + deviceId + "."
                 + " You should receive device location message soon."
                 + "\n" + "Battery level: " + getBatteryLevel(context);
@@ -690,7 +690,7 @@ public class Messenger {
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendEmailRegistrationRequest(context, email, tokenStr, 1);
             } else {
-                String queryString = "scope=dl&user=" + getDeviceId(context);
+                String queryString = "scope=dl&user=" + getDeviceId(context, false);
                 Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
@@ -715,7 +715,7 @@ public class Messenger {
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
             } else {
-                String queryString = "scope=dl&user=" + getDeviceId(context);
+                String queryString = "scope=dl&user=" + getDeviceId(context, false);
                 Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
@@ -738,7 +738,7 @@ public class Messenger {
         headers.put("Authorization", "Bearer " + tokenStr);
 
         try {
-            String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context);
+            String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context, false);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -809,7 +809,7 @@ public class Messenger {
         headers.put("Authorization", "Bearer " + tokenStr);
 
         try {
-            String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context);
+            String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -866,10 +866,14 @@ public class Messenger {
         }
     }
 
-    public static String getDeviceId(Context context) {
+    public static String getDeviceId(Context context, boolean useUserDeviceName) {
         String androidDeviceId = null;
 
-        if (context != null) {
+        if (useUserDeviceName) {
+            androidDeviceId = PreferenceManager.getDefaultSharedPreferences(context).getString("deviceName", null);
+        }
+
+        if (androidDeviceId == null && context != null) {
             //android.Manifest.permission.READ_PHONE_STATE required
             // get telephony imei
             try {

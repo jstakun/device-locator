@@ -204,6 +204,8 @@ public class MainActivity extends AppCompatActivity {
         registerEmail((TextView) findViewById(R.id.email), false);
         registerTelegram((TextView) findViewById(R.id.telegramId));
         registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
+        registerUserLogin((TextView) findViewById(R.id.userLogin));
+        registerDeviceName((TextView) findViewById(R.id.deviceName));
 
         if (pinDialog != null) {
             pinDialog.dismiss();
@@ -292,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
-                findViewById(R.id.ll_top_focus).requestFocus();
+                findViewById(R.id.ll_middle_focus).requestFocus();
                 getSupportActionBar().invalidateOptionsMenu();
                 return true;
             case R.id.loginTracker:
@@ -503,7 +505,7 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     public void run() {
                         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-                        DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, refreshedToken);
+                        DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, refreshedToken, null, null);
                     }
                 }).start();
             } else if (StringUtils.isNotEmpty(firebaseToken)) {
@@ -738,7 +740,50 @@ public class MainActivity extends AppCompatActivity {
         if (userLogin != null) {
             userLoginInput.setText(userLogin);
         }
-        //TODO add listeners to save userLogin to shared prefs and persist to server
+
+        userLoginInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus) {
+                    registerUserLogin(userLoginInput);
+                }
+            }
+        });
+
+        userLoginInput.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
+                    registerUserLogin(v);
+                }
+                return false;
+            }
+        });
+
+        userLoginInput.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                //Log.d(TAG, "Soft keyboard event " + keyCode);
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_BACK:
+                            registerUserLogin((TextView) v);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    private synchronized void registerUserLogin(TextView userLoginInput) {
+        String newUserLogin = userLoginInput.getText().toString();
+        String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
+        if (!StringUtils.equals(userLogin, newUserLogin)) {
+            DlFirebaseInstanceIdService.sendRegistrationToServer(this,null, newUserLogin, null);
+        }
     }
 
     //device name input setup ------------------------------------------------------------
@@ -749,7 +794,49 @@ public class MainActivity extends AppCompatActivity {
         if (deviceName != null) {
             deviceNameInput.setText(deviceName);
         }
-        //TODO add listeners to save deviceName to shared prefs and persist to server
+        deviceNameInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus) {
+                    registerDeviceName(deviceNameInput);
+                }
+            }
+        });
+
+        deviceNameInput.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
+                    registerDeviceName(v);
+                }
+                return false;
+            }
+        });
+
+        deviceNameInput.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                //Log.d(TAG, "Soft keyboard event " + keyCode);
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_BACK:
+                            registerDeviceName((TextView) v);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    private synchronized void registerDeviceName(TextView deviceNameInput) {
+        String newDeviceName = deviceNameInput.getText().toString();
+        String deviceName = PreferenceManager.getDefaultSharedPreferences(this).getString("deviceName", null);
+        if (!StringUtils.equals(deviceName, newDeviceName)) {
+            DlFirebaseInstanceIdService.sendRegistrationToServer(this,null, null, newDeviceName);
+        }
     }
 
     //email input setup ------------------------------------------------------------------
@@ -1464,7 +1551,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if (StringUtils.isNotEmpty(activity.email)) {
                             String msgtitle = activity.getString(R.string.message);
-                            String deviceId = Messenger.getDeviceId(activity);
+                            String deviceId = Messenger.getDeviceId(activity, true);
                             if (deviceId != null) {
                                 msgtitle += " installed on device " + deviceId + " - route map link";
                             }

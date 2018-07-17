@@ -83,7 +83,7 @@ public class RouteTrackingServiceUtils {
         String title = settings.getString("routeTitle", "");
 
         if (StringUtils.isEmpty(title)) {
-            title = "device_locator_route_" + Messenger.getDeviceId(context) + "_" + System.currentTimeMillis();
+            title = "device_locator_route_" + Messenger.getDeviceId(context, false) + "_" + System.currentTimeMillis();
             settings.edit().putString("routeTitle", title).commit();
         }
 

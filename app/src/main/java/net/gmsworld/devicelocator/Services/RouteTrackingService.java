@@ -284,7 +284,7 @@ public class RouteTrackingService extends Service {
                                         net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(service, location, service.telegramId, message, 1, headers);
                                     } else if (StringUtils.isNotEmpty(service.email)) {
                                         String title = service.getString(R.string.message);
-                                        String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(service);
+                                        String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(service, true);
                                         if (deviceId != null) {
                                             title += " installed on device " + deviceId + " - location change";
                                         }

@@ -32,23 +32,23 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
         PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).commit();
         final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, "");
         if (StringUtils.isNotEmpty(pin)) {
-            sendRegistrationToServer(this, refreshedToken, null);
+            sendRegistrationToServer(this, refreshedToken, null, null, null);
         } 
     }
 
-    public static void sendRegistrationToServer(final Context context, final String token) {
+    public static void sendRegistrationToServer(final Context context, final String token, final String username, final String deviceName) {
         final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
         if (StringUtils.isNotEmpty(tokenStr)) {
-            sendRegistrationToServer(context, token, tokenStr);
+            sendRegistrationToServer(context, token, username, deviceName, tokenStr);
         } else {
-            String queryString = "scope=dl&user=" + Messenger.getDeviceId(context);
+            String queryString = "scope=dl&user=" + Messenger.getDeviceId(context, false);
             Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 200) {
-                        sendRegistrationToServer(context, token, Messenger.getToken(context, results));
+                        sendRegistrationToServer(context, token, username, deviceName, Messenger.getToken(context, results));
                     } else {
                         Log.d(TAG, "Failed to receive token: " + results);
                     }
@@ -57,13 +57,24 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
         }
     }
 
-    private static void sendRegistrationToServer(Context context, final String token, final String tokenStr) {
+    private static void sendRegistrationToServer(Context context, final String token, final String username, final String deviceName, final String tokenStr) {
         try {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (!StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
-                String content = "imei=" + Messenger.getDeviceId(context);
+                String imei = Messenger.getDeviceId(context, false);
+                String content = "imei=" + imei;
+                if (StringUtils.equalsIgnoreCase(imei, "unknown")) {
+                    Log.e(TAG, "Invalid imei");
+                    return;
+                }
                 if (StringUtils.isNotBlank(token)) {
                     content += "&token=" + token;
+                }
+                if (StringUtils.isNotBlank(username)) {
+                    content += "&username=" + username;
+                }
+                if (StringUtils.isNotBlank(deviceName)) {
+                    content += "&name=" + deviceName;
                 }
                 String url = context.getString(R.string.deviceManagerUrl);
 
@@ -75,10 +86,18 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             //save firebase token only if it was successfully registered by the server
-                            if (StringUtils.isNotEmpty(token)) {
+                            if (StringUtils.isNotBlank(token)) {
                                 settings.edit().putString(FIREBASE_TOKEN, token).apply();
+                                Log.d(TAG, "Firebase token registered successfully");
                             }
-                            Log.d(TAG, "Firebase token registered successfully");
+                            if (StringUtils.isNotBlank(username)) {
+                                settings.edit().putString("userLogin", username).apply();
+                                Log.d(TAG, "User login registered successfully");
+                            }
+                            if (StringUtils.isNotBlank(deviceName)) {
+                                settings.edit().putString("deviceName", deviceName).apply();
+                                Log.d(TAG, "Device name registered successfully");
+                            }
                         } else {
                             Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
                         }

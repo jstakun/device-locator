@@ -314,7 +314,7 @@ public abstract class AbstractLocationManager {
             }
             if (size > 1) {
                 try {
-                    String deviceId = Messenger.getDeviceId(context);
+                    String deviceId = Messenger.getDeviceId(context, true);
                     String desc = "Route recorded by Device Locator on device: " + deviceId;
                     String content = routeToGeoJson(route, title, desc, deviceId);
                     String url = context.getString(R.string.routeProviderUrl);

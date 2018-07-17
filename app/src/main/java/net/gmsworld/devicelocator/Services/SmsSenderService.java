@@ -178,7 +178,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 }
                 if (StringUtils.isNotEmpty(email)) {
                     String title = getString(R.string.message);
-                    String deviceId = Messenger.getDeviceId(this);
+                    String deviceId = Messenger.getDeviceId(this, true);
                     if (deviceId != null) {
                         title += " installed on device " + deviceId +  " - current location";
                     }
