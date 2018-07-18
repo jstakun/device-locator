@@ -44,7 +44,7 @@ public class DeviceLocatorApp extends Application {
             initAcra(headers);
         } else if (Network.isNetworkAvailable(this)) {
             String queryString = "scope=dl&user=" + Messenger.getDeviceId(this, false);
-            Network.get(this, getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+            Network.get(this, getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);

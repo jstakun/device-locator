@@ -43,7 +43,7 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
             sendRegistrationToServer(context, token, username, deviceName, tokenStr);
         } else {
             String queryString = "scope=dl&user=" + Messenger.getDeviceId(context, false);
-            Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+            Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);

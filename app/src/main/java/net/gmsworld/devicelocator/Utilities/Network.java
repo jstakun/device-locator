@@ -33,8 +33,8 @@ public class Network {
         return connectivityManager != null && connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
     }
 
-    public static void get(final Context context, final String urlString, final OnGetFinishListener onGetFinishListener) {
-        new GetTask(context, urlString, onGetFinishListener).execute();
+    public static void get(final Context context, final String urlString, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+        new GetTask(context, urlString, headers, onGetFinishListener).execute();
     }
 
     public static void post(final Context context, final String urlString, final String content, final String contentType, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
@@ -253,11 +253,13 @@ public class Network {
         private final OnGetFinishListener onGetFinishListener;
         private final String urlString;
         private final Context context;
+        private final Map<String, String> headers;
         private String response;
 
-        public GetTask(final Context context, final String urlString, final OnGetFinishListener onGetFinishListener) {
+        public GetTask(final Context context, final String urlString, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
             this.context = context;
             this.urlString = urlString;
+            this.headers = headers;
             this.onGetFinishListener = onGetFinishListener;
         }
 
@@ -273,6 +275,12 @@ public class Network {
 
                 for (Map.Entry<String, String> header : getDefaultHeaders(context).entrySet()) {
                     urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                }
+
+                if (headers != null) {
+                    for (Map.Entry<String, String> header : headers.entrySet()) {
+                        urlConnection.setRequestProperty(header.getKey(), header.getValue());
+                    }
                 }
 
                 urlConnection.connect();

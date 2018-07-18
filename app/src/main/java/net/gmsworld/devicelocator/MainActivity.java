@@ -43,9 +43,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -53,6 +56,10 @@ import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
@@ -73,7 +80,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -294,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
-                findViewById(R.id.ll_middle_focus).requestFocus();
+                findViewById(R.id.deviceList).requestFocus();
                 getSupportActionBar().invalidateOptionsMenu();
                 return true;
             case R.id.loginTracker:
@@ -616,6 +627,7 @@ public class MainActivity extends AppCompatActivity {
         initLocationSMSCheckbox();
         initUserLoginInput();
         initDeviceNameInput();
+        initDeviceList();
 
         TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
@@ -1354,6 +1366,62 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void initDeviceList() {
+        final ListView deviceList = (ListView) findViewById(R.id.deviceList);
+        deviceList.setEmptyView(findViewById(R.id.deviceListEmpty));
+
+        String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
+        if (userLogin != null) {
+            //load device list and set array adapter
+            String queryString = "username=" + userLogin;
+            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+            Map<String, String> headers = new HashMap<String, String>();
+            if (StringUtils.isNotEmpty(tokenStr)) {
+                headers.put("Authorization", "Bearer " + tokenStr);
+            }
+            Network.get(this, getString(R.string.deviceManagerUrl) + "?" + queryString, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                    if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
+                        JsonElement reply = new JsonParser().parse(results);
+                        JsonArray devices = reply.getAsJsonObject().get("devices").getAsJsonArray();
+                        if (devices.size() > 0) {
+                            List<String> deviceNames = new ArrayList<String>();
+                            //String thisDeviceId = Messenger.getDeviceId(MainActivity.this, false);
+                            Iterator<JsonElement> iter = devices.iterator();
+                            while (iter.hasNext()) {
+                                JsonObject deviceObject = iter.next().getAsJsonObject();
+                                String deviceId = null;
+                                if (deviceObject.has("name")) {
+                                    deviceId = deviceObject.get("name").getAsString();
+                                    if (StringUtils.isBlank(deviceId)) {
+                                        deviceId = deviceObject.get("imei").getAsString();
+                                    }
+                                }
+                                deviceNames.add(deviceId);
+                            }
+                            final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, deviceNames);
+                            Log.d(TAG, "Found " + deviceNames.size() + " devices");
+                            deviceList.setAdapter(adapter);
+                        }
+                    }
+                }
+            });
+
+            deviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
+                    final String item = (String) parent.getItemAtPosition(position);
+                    //TODO implement logic
+                    Toast.makeText(MainActivity.this, "Command dialog for " + item + " will open soon...", Toast.LENGTH_SHORT);
+                }
+            });
+        }
+    }
+
     private void saveData() {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
@@ -1598,4 +1666,14 @@ public class MainActivity extends AppCompatActivity {
 
         abstract public void onLinkClick(String url);
     }
+
+    private class DeviceArrayAdapter extends ArrayAdapter<String> {
+
+        public DeviceArrayAdapter(Context context, int textViewResourceId, List<String> objects) {
+            super(context, textViewResourceId, objects);
+            //TODO implement adapter logic
+        }
+    }
+
+
 }

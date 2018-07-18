@@ -94,7 +94,7 @@ public class Messenger {
                     sendEmail(context, email, message, title, 1, headers);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context, false);
-                    Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+                    Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -176,7 +176,7 @@ public class Messenger {
                     sendTelegram(context, telegramId, message, 1, headers);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context, false);
-                    Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+                    Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -270,7 +270,7 @@ public class Messenger {
                 sendRoutePoint(context, 1, headers);
             } else {
                 String queryString = "scope=dl&user=" + getDeviceId(context, false);
-                Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+                Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -345,11 +345,11 @@ public class Messenger {
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
-                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context, true);
+                String deviceId = getDeviceId(context, true);
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - current location";
+                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
                 }
-                text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
                 sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
             }
         }
@@ -366,11 +366,11 @@ public class Messenger {
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
-                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context, true);
+                String deviceId = getDeviceId(context, true);
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - location map link";
+                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
                 }
-                text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
                 sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
             }
         }
@@ -395,11 +395,11 @@ public class Messenger {
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = context.getString(R.string.message);
-                String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context, true);
+                String deviceId = getDeviceId(context, true);
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - location request";
+                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
                 }
-                text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
                 sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
             }
         }
@@ -607,7 +607,7 @@ public class Messenger {
                             title += " installed on device " + deviceId;
                         }
                     }
-                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
+                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
                     sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
                 }
             }
@@ -629,8 +629,8 @@ public class Messenger {
                 String title = context.getString(R.string.message);
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - failed login";
+                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
                 }
-                text += "\n" + context.getString(R.string.deviceUrl) + "/" + deviceId;
                 sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
             }
         }
@@ -691,7 +691,7 @@ public class Messenger {
                 sendEmailRegistrationRequest(context, email, tokenStr, 1);
             } else {
                 String queryString = "scope=dl&user=" + getDeviceId(context, false);
-                Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+                Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -716,7 +716,7 @@ public class Messenger {
                 sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
             } else {
                 String queryString = "scope=dl&user=" + getDeviceId(context, false);
-                Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, new Network.OnGetFinishListener() {
+                Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -886,7 +886,7 @@ public class Messenger {
             }
 
             // get internal android device id
-            if (androidDeviceId == null || androidDeviceId.length() == 0) {
+            if (StringUtils.isEmpty(androidDeviceId)) {
                 try {
                     androidDeviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
                 } catch (Exception e) {
