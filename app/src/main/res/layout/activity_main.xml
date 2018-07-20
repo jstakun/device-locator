@@ -404,10 +404,10 @@
 
         </ScrollView>
 
-        <!--ScrollView
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            -->
+            >
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -497,10 +497,13 @@
                             android:text="No devices found! Make sure to specify the same login in Device Manager card on all your devices."/>
 
                     </LinearLayout>
+
                 </net.gmsworld.devicelocator.Views.LDCard>
+
             </LinearLayout>
 
-        <!--/ScrollView-->
+        </ScrollView>
+
     </LinearLayout>
 
 </merge>

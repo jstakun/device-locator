@@ -40,6 +40,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -48,6 +49,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -63,6 +65,7 @@ import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
+import net.gmsworld.devicelocator.Model.Device;
 import net.gmsworld.devicelocator.Services.DlFirebaseInstanceIdService;
 import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
@@ -753,6 +756,8 @@ public class MainActivity extends AppCompatActivity {
             userLoginInput.setText(userLogin);
         }
 
+        //TODO enforce user authentication
+
         userLoginInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
@@ -847,7 +852,7 @@ public class MainActivity extends AppCompatActivity {
         String newDeviceName = deviceNameInput.getText().toString();
         String deviceName = PreferenceManager.getDefaultSharedPreferences(this).getString("deviceName", null);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
-            DlFirebaseInstanceIdService.sendRegistrationToServer(this,null, null, newDeviceName);
+            DlFirebaseInstanceIdService.sendRegistrationToServer(this,null, null, newDeviceName.replace(' ', '-'));
         }
     }
 
@@ -1388,23 +1393,23 @@ public class MainActivity extends AppCompatActivity {
                         JsonElement reply = new JsonParser().parse(results);
                         JsonArray devices = reply.getAsJsonObject().get("devices").getAsJsonArray();
                         if (devices.size() > 0) {
-                            List<String> deviceNames = new ArrayList<String>();
+                            List<Device> userDevices = new ArrayList<Device>();
                             //String thisDeviceId = Messenger.getDeviceId(MainActivity.this, false);
                             Iterator<JsonElement> iter = devices.iterator();
                             while (iter.hasNext()) {
                                 JsonObject deviceObject = iter.next().getAsJsonObject();
-                                String deviceId = null;
+                                Device device = new Device();
                                 if (deviceObject.has("name")) {
-                                    deviceId = deviceObject.get("name").getAsString();
-                                    if (StringUtils.isBlank(deviceId)) {
-                                        deviceId = deviceObject.get("imei").getAsString();
-                                    }
+                                    device.name = deviceObject.get("name").getAsString();
                                 }
-                                deviceNames.add(deviceId);
+                                device.imei = deviceObject.get("imei").getAsString();
+                                device.creationDate = deviceObject.get("creationDate").getAsString();
+                                userDevices.add(device);
                             }
-                            final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, deviceNames);
-                            Log.d(TAG, "Found " + deviceNames.size() + " devices");
+                            final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, userDevices);
+                            Log.d(TAG, "Found " + userDevices.size() + " devices");
                             deviceList.setAdapter(adapter);
+                            setListViewHeightBasedOnChildren(deviceList);
                         }
                     }
                 }
@@ -1414,9 +1419,12 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
-                    final String item = (String) parent.getItemAtPosition(position);
-                    //TODO implement logic
-                    Toast.makeText(MainActivity.this, "Command dialog for " + item + " will open soon...", Toast.LENGTH_SHORT);
+                    final Device item = (Device) parent.getItemAtPosition(position);
+                    Log.d(TAG, "Command dialog for " + item + " will open now...");
+                    Intent intent = new Intent(MainActivity.this, CommandActivity.class);
+                    intent.putExtra("name", item.name);
+                    intent.putExtra("imei", item.imei);
+                    MainActivity.this.startActivity(intent);
                 }
             });
         }
@@ -1567,6 +1575,27 @@ public class MainActivity extends AppCompatActivity {
         pinDialog.show();
     }
 
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null) {
+            // pre-condition
+            return;
+        }
+
+        int totalHeight = 0;
+        for (int i = 0; i < listAdapter.getCount(); i++) {
+            View listItem = listAdapter.getView(i, null, listView);
+            listItem.measure(0, 0);
+            totalHeight += listItem.getMeasuredHeight();
+        }
+
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+        listView.requestLayout();
+    }
+
+
     //----------------------------- route tracking service -----------------------------------
 
     private final ServiceConnection mConnection = null; /*new ServiceConnection() {
@@ -1667,13 +1696,29 @@ public class MainActivity extends AppCompatActivity {
         abstract public void onLinkClick(String url);
     }
 
-    private class DeviceArrayAdapter extends ArrayAdapter<String> {
+    private class DeviceArrayAdapter extends ArrayAdapter<Device> {
 
-        public DeviceArrayAdapter(Context context, int textViewResourceId, List<String> objects) {
-            super(context, textViewResourceId, objects);
-            //TODO implement adapter logic
+        private final Context context;
+        private final List<Device> devices;
+
+        public DeviceArrayAdapter(Context context, int textViewResourceId, List<Device> devices) {
+            super(context, textViewResourceId, devices);
+            this.context = context;
+            this.devices = devices;
+        }
+
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View rowView = inflater.inflate(R.layout.device_row, parent, false);
+            TextView textView = rowView.findViewById(R.id.deviceName);
+            String name = devices.get(position).name;
+            if (name == null) {
+                name = devices.get(position).imei;
+            }
+            textView.setText(name);
+            return rowView;
         }
     }
-
-
 }

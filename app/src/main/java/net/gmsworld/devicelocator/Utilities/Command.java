@@ -141,7 +141,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
             String phoneNumber = settings.getString("phoneNumber", "");
@@ -190,7 +190,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
             String phoneNumber = settings.getString("phoneNumber", "");
@@ -233,7 +233,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
                 String title = RouteTrackingServiceUtils.getRouteId(context);
@@ -271,7 +271,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             if (!Permissions.haveLocationPermission(context)) {
                 sendSocialNotification(context, SHARE_COMMAND);
             } else {
@@ -296,7 +296,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
@@ -323,7 +323,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             if (audioMode != null) {
                 audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
@@ -348,7 +348,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             if (audioMode != null) {
                 audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
@@ -372,7 +372,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             if (sender != null && !initPhoneCall(sender, context)) {
                 sendSocialNotification(context, CALL_COMMAND);
             } else if (sender == null) {
@@ -432,7 +432,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             final int radius = Integer.parseInt(commandTokens[1]);
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String phoneNumber = settings.getString("phoneNumber", "");
@@ -457,7 +457,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
             sendSocialNotification(context, AUDIO_COMMAND);
         }
@@ -476,7 +476,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
             sendSocialNotification(context, AUDIO_OFF_COMMAND);
         }
@@ -496,7 +496,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).commit();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
             sendSocialNotification(context, GPS_HIGH_COMMAND);
@@ -517,7 +517,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).commit();
             sendSocialNotification(context, GPS_BALANCED_COMMAND);
         }
@@ -538,7 +538,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false)) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
                 context.startService(cameraIntent);
@@ -603,7 +603,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             String email = null;
             String phoneNumber = null;
             String telegramId = null;
@@ -691,7 +691,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             sendSocialNotification(context, PING_COMMAND);
         }
     }
@@ -706,7 +706,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             sendSocialNotification(context, ABOUT_COMMAND);
         }
     }
@@ -725,7 +725,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             if (lockScreenNow(context)) {
                 sendSocialNotification(context, LOCK_SCREEN_COMMAND);
             } else {
@@ -769,7 +769,7 @@ public class Command {
         }
 
         @Override
-        protected void onSmsSocialCommandFound(String sender, Context context) {
+        protected void onSocialCommandFound(String sender, Context context) {
             playBeep(context);
             if (ringtone != null) {
                 sendSocialNotification(context, RING_COMMAND);

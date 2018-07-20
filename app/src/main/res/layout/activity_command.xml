@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ldcard="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CommandActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <net.gmsworld.devicelocator.Views.LDCard
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            ldcard:title="Device Command">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:text="Command" />
+
+            <Spinner
+                android:id="@+id/deviceCommand"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="15dp"
+                android:entries="@array/device_commands"
+                android:prompt="@string/device_command_prompt"/>
+
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"
+                android:paddingTop="15dp"
+                ldcard:passwordToggleEnabled="true">
+
+                <net.gmsworld.devicelocator.Views.KeyboardEditText
+                    android:id="@+id/devicePin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Device Security PIN"
+                    android:inputType="numberPassword"
+                    android:maxLines="1"
+                    android:maxLength="8"
+                    android:lines="1"
+                    android:textColor="@color/gray"/>
+
+            </android.support.design.widget.TextInputLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingTop="15dp"
+                android:gravity="center"
+                android:text="Command Arguments" />
+
+            <EditText
+                android:id="@+id/deviceCommandArgs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                android:lines="1"
+                android:maxLength="128"
+                android:maxLines="1"
+                android:textColor="@color/gray"/>
+
+            <Button
+                android:id="@+id/sendDeviceCommand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="Send"
+                android:textColor="@android:color/white" />
+
+        </net.gmsworld.devicelocator.Views.LDCard>
+
+        </ScrollView>
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

@@ -42,7 +42,7 @@ public abstract class AbstractCommand {
 
     protected abstract void onSmsCommandFound(String sender, Context context);
 
-    protected abstract void onSmsSocialCommandFound(String sender, Context context);
+    protected abstract void onSocialCommandFound(String sender, Context context);
 
     boolean validateTokens() {
         return false;
@@ -65,7 +65,7 @@ public abstract class AbstractCommand {
                 sender = getSenderAddress(context, intent, smsShortCommand + "t");
             }
             if (sender != null) {
-                onSmsSocialCommandFound(sender, context);
+                onSocialCommandFound(sender, context);
                 return true;
             }
         }
@@ -75,10 +75,10 @@ public abstract class AbstractCommand {
     public boolean findCommand(Context context, String message) {
         if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("email", "")))) {
             if (findKeyword(context, smsCommand + "t", message)) {
-                onSmsSocialCommandFound(null, context);
+                onSocialCommandFound(null, context);
                 return true;
             } else if (findKeyword(context, smsShortCommand + "t", message)) {
-                onSmsSocialCommandFound(null, context);
+                onSocialCommandFound(null, context);
                 return true;
             }
         }

@@ -11,4 +11,9 @@
 
     <string name="kmh">KM/H</string>
     <string name="mph">MPH</string>
+
+    <string-array name="device_commands">
+        <item>Ping</item>
+        <item>Locate</item>
+    </string-array>
 </resources>
