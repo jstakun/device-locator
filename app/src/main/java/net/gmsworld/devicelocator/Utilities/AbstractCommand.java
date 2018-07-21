@@ -44,11 +44,13 @@ public abstract class AbstractCommand {
 
     protected abstract void onSocialCommandFound(String sender, Context context);
 
+    protected abstract void onAppCommandFound(String sender, Context context);
+
     boolean validateTokens() {
         return false;
     }
 
-    public boolean findCommand(Context context, Intent intent) {
+    public boolean findSmsCommand(Context context, Intent intent) {
         String sender = null;
         if (StringUtils.isNotEmpty(smsCommand)) {
             sender = getSenderAddress(context, intent, smsCommand);
@@ -72,7 +74,7 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    public boolean findCommand(Context context, String message) {
+    public boolean findSocialCommand(Context context, String message) {
         if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("email", "")))) {
             if (findKeyword(context, smsCommand + "t", message)) {
                 onSocialCommandFound(null, context);
@@ -85,11 +87,24 @@ public abstract class AbstractCommand {
         return false;
     }
 
+    public boolean findAppCommand(Context context, String message, String sender) {
+        if (StringUtils.isNotEmpty(smsCommand)) {
+            if (findKeyword(context, smsCommand + "app", message)) {
+                onAppCommandFound(sender, context);
+                return true;
+            } else if (findKeyword(context, smsShortCommand + "app", message)) {
+                onAppCommandFound(sender, context);
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean findKeyword(Context context, String keyword, String message) {
         if (finder.equals(Finder.EQUALS)) {
-            return findCommand(context, message, keyword);
+            return findSmsCommand(context, message, keyword);
         } else if (finder.equals(Finder.STARTS)) {
-            return findCommand(context, message, keyword) && validateTokens();
+            return findSmsCommand(context, message, keyword) && validateTokens();
         } else {
             return false;
         }
@@ -108,7 +123,7 @@ public abstract class AbstractCommand {
                     } else {
                         sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
                     }
-                    if (findCommand(context, sms.getMessageBody(), keyword) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()))) {
+                    if (findSmsCommand(context, sms.getMessageBody(), keyword) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()))) {
                         list.add(sms);
                     }
                 }
@@ -138,7 +153,7 @@ public abstract class AbstractCommand {
         return null;
     }
 
-    private boolean findCommand(Context context, String message, String command) {
+    private boolean findSmsCommand(Context context, String message, String command) {
         //<command><token> <args> or <command> <token> <args>
         commandTokens = message.split(" ");
         final String token = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
@@ -159,6 +174,20 @@ public abstract class AbstractCommand {
         if (StringUtils.isNotEmpty(command)) {
             newIntent.putExtra("command", command);
         }
+        context.startService(newIntent);
+    }
+
+    void sendAppNotification(final Context context, final String command, final String sender) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        //final String email = settings.getString("email", "");
+        //final String telegramId = settings.getString("telegramId", "");
+        Intent newIntent = new Intent(context, SmsSenderService.class);
+        //newIntent.putExtra("telegramId", telegramId);
+        //newIntent.putExtra("email", email);
+        if (StringUtils.isNotEmpty(command)) {
+            newIntent.putExtra("command", command);
+        }
+        newIntent.putExtra("app", sender);
         context.startService(newIntent);
     }
 

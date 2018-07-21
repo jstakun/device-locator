@@ -42,6 +42,31 @@ public class NotificationUtils {
                 .build();
     }
 
+    public static Notification buildMessageNotification(Context context, String message) {
+        //Intent notificationIntent = new Intent(context, MainActivity.class);
+        //PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        /*Notification publicNotification = new Notification.Builder(context)
+                .setContentTitle("Device Locator is on")
+                .setContentText("Click to open")
+                .setSmallIcon(R.drawable.ic_small)
+                //.setLargeIcon()
+                .setContentIntent(contentIntent)
+                .build();*/
+
+        Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);
+
+        return new Notification.Builder(context)
+                .setContentTitle("Device Locator Notification")
+                .setContentText(message)
+                .setSmallIcon(R.drawable.ic_small)
+                .setLargeIcon(icon)
+                //.setContentIntent(contentIntent)
+                //.setOngoing(true)
+                //.setPublicVersion(publicNotification) //API 21
+                .build();
+    }
+
     public static void notify(Context context, int notificationId) {
         Notification notification = buildNotification(context, notificationId);
 

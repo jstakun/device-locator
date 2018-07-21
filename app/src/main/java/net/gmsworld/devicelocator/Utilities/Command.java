@@ -1,6 +1,8 @@
 package net.gmsworld.devicelocator.Utilities;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -59,7 +61,8 @@ public class Command {
 
     //private
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
-    public final static String ABOUT_COMMAND = "aboutdl"; //ab send app version info
+    public final static String ABOUT_COMMAND = "aboutdl"; //send app version info
+    public final static String MESSAGE_COMMAND = "messagedl"; //cloud message received from other devices
 
     public final static String LOCK_SCREEN_FAILED = "lockfail"; //this is not command
 
@@ -67,18 +70,20 @@ public class Command {
 
     public static void findCommandInSms(Context context, Intent intent) {
         for (AbstractCommand c : getCommands()) {
-            if (c.findCommand(context, intent)) {
+            if (c.findSmsCommand(context, intent)) {
                 Log.d(TAG, "Found matching command");
                 return;
             }
         }
     }
 
-    public static void findCommandInMessage(Context context, String message) {
+    public static void findCommandInMessage(Context context, String message, String sender) {
         for (AbstractCommand c : getCommands()) {
-            if (c.findCommand(context, message)) {
-                Log.d(TAG, "Found matching command");
+            if (c.findSocialCommand(context, message)) {
+                Log.d(TAG, "Found matching social command");
                 return;
+            } else if (c.findAppCommand(context, message, sender)) {
+                Log.d(TAG, "Found matching app command");
             }
         }
     }
@@ -157,6 +162,24 @@ public class Command {
 
             sendSocialNotification(context, START_COMMAND);
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
+            String phoneNumber = settings.getString("phoneNumber", "");
+            String email = settings.getString("email", "");
+            String telegramId = settings.getString("telegramId", "");
+
+            if (Permissions.haveLocationPermission(context)) {
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, false);
+                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+            } else {
+                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
+            }
+
+            sendAppNotification(context, START_COMMAND, sender);
+        }
     }
 
     private static final class ResumeRouteTrackerServiceStartCommand extends AbstractCommand {
@@ -206,6 +229,24 @@ public class Command {
 
             sendSocialNotification(context, RESUME_COMMAND);
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
+            String phoneNumber = settings.getString("phoneNumber", "");
+            String email = settings.getString("email", "");
+            String telegramId = settings.getString("telegramId", "");
+
+            if (Permissions.haveLocationPermission(context)) {
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
+                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+            } else {
+                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
+            }
+
+            sendAppNotification(context, RESUME_COMMAND, sender);
+        }
     }
 
     private static final class StopRouteTrackerServiceStartCommand extends AbstractCommand {
@@ -247,6 +288,22 @@ public class Command {
             settings.edit().putBoolean("motionDetectorRunning", false).commit();
             sendSocialNotification(context, STOP_COMMAND);
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
+                String title = RouteTrackingServiceUtils.getRouteId(context);
+                String telegramId = settings.getString("telegramId", "");
+                String email = settings.getString("email", "");
+
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId);
+            } else {
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
+            }
+            settings.edit().putBoolean("motionDetectorRunning", false).commit();
+            sendAppNotification(context, STOP_COMMAND, sender);
+        }
     }
 
     private static final class ShareLocationCommand extends AbstractCommand {
@@ -278,6 +335,15 @@ public class Command {
                 sendSocialNotification(context, null); //don't set SHARE_COMMAND here!
             }
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            if (!Permissions.haveLocationPermission(context)) {
+                sendAppNotification(context, SHARE_COMMAND, sender);
+            } else {
+                sendAppNotification(context, null, sender); //don't set SHARE_COMMAND here!
+            }
+        }
     }
 
     private static final class ShareRouteCommand extends AbstractCommand {
@@ -305,6 +371,16 @@ public class Command {
             routeTracingService.putExtra("email", settings.getString("email", ""));
             context.startService(routeTracingService);
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            Intent routeTracingService = new Intent(context, RouteTrackingService.class);
+            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
+            routeTracingService.putExtra("title", RouteTrackingServiceUtils.getRouteId(context));
+            routeTracingService.putExtra("app", "app");
+            context.startService(routeTracingService);
+        }
     }
 
     private static final class MuteCommand extends AbstractCommand {
@@ -328,6 +404,15 @@ public class Command {
             if (audioMode != null) {
                 audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
                 sendSocialNotification(context, MUTE_COMMAND);
+            }
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            if (audioMode != null) {
+                audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                sendAppNotification(context, MUTE_COMMAND, sender);
             }
         }
     }
@@ -355,6 +440,15 @@ public class Command {
                 sendSocialNotification(context, UNMUTE_COMMAND);
             }
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            if (audioMode != null) {
+                audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                sendAppNotification(context, UNMUTE_COMMAND, sender);
+            }
+        }
     }
 
     private static final class StartPhoneCallCommand extends AbstractCommand {
@@ -377,6 +471,16 @@ public class Command {
                 sendSocialNotification(context, CALL_COMMAND);
             } else if (sender == null) {
                 sendSocialNotification(context, CALL_COMMAND);
+            }
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            //TODO need fix
+            if (sender != null && !initPhoneCall(sender, context)) {
+                sendAppNotification(context, CALL_COMMAND, sender);
+            } else if (sender == null) {
+                sendAppNotification(context, CALL_COMMAND, sender);
             }
         }
 
@@ -442,6 +546,18 @@ public class Command {
             settings.edit().putInt("radius", radius).commit();
             sendSocialNotification(context, RADIUS_COMMAND);
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            final int radius = Integer.parseInt(commandTokens[1]);
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            String phoneNumber = settings.getString("phoneNumber", "");
+            String email = settings.getString("email", "");
+            String telegramId = settings.getString("telegramId", "");
+            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+            settings.edit().putInt("radius", radius).commit();
+            sendAppNotification(context, RADIUS_COMMAND, sender);
+        }
     }
 
     private static final class AudioCommand extends AbstractCommand {
@@ -461,6 +577,12 @@ public class Command {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
             sendSocialNotification(context, AUDIO_COMMAND);
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
+            sendSocialNotification(context, AUDIO_COMMAND);
+        }
     }
 
     private static final class NoAudioCommand extends AbstractCommand {
@@ -477,6 +599,12 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
+            sendSocialNotification(context, AUDIO_OFF_COMMAND);
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
             sendSocialNotification(context, AUDIO_OFF_COMMAND);
         }
@@ -501,6 +629,12 @@ public class Command {
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
             sendSocialNotification(context, GPS_HIGH_COMMAND);
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).commit();
+            sendAppNotification(context, GPS_HIGH_COMMAND, sender);
+        }
     }
 
     private static final class BalancedGpsCommand extends AbstractCommand {
@@ -520,6 +654,12 @@ public class Command {
         protected void onSocialCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).commit();
             sendSocialNotification(context, GPS_BALANCED_COMMAND);
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).commit();
+            sendAppNotification(context, GPS_BALANCED_COMMAND, sender);
         }
     }
 
@@ -545,11 +685,20 @@ public class Command {
             }
             sendSocialNotification(context, TAKE_PHOTO_COMMAND);
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false)) {
+                Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+                context.startService(cameraIntent);
+            }
+            sendAppNotification(context, TAKE_PHOTO_COMMAND, sender);
+        }
     }
 
     private static final class NotifySettingsCommand extends AbstractCommand {
-        public NotifySettingsCommand() {super(NOTIFY_COMMAND, "n", Finder.STARTS);}
 
+        public NotifySettingsCommand() {super(NOTIFY_COMMAND, "n", Finder.STARTS);}
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
@@ -653,6 +802,54 @@ public class Command {
         }
 
         @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            String email = null;
+            String phoneNumber = null;
+            String telegramId = null;
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+
+            for (int i = 0; i < commandTokens.length; i++) {
+                String token = commandTokens[i];
+                if (token.startsWith("m:")) {
+                    email = token.substring(2);
+                } else if (token.startsWith("p:")) {
+                    phoneNumber = token.substring(2);
+                } else if (token.startsWith("t:")) {
+                    telegramId = token.substring(2);
+                }
+            }
+
+            if (telegramId != null || phoneNumber != null || email != null) {
+                SharedPreferences.Editor editor = settings.edit();
+                if (email != null) {
+                    editor.putString("email", email);
+                } else {
+                    email = settings.getString("email", "");
+                }
+                if (phoneNumber != null) {
+                    editor.putString("phoneNumber", phoneNumber);
+                } else {
+                    phoneNumber = settings.getString("phoneNumber", "");
+                }
+                if (telegramId != null) {
+                    editor.putString("telegramId", telegramId);
+                } else {
+                    telegramId = settings.getString("telegramId", "");
+                }
+                editor.commit();
+
+                int radius = settings.getInt("radius", 100);
+
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+
+                Intent newIntent = new Intent(context, SmsSenderService.class);
+                newIntent.putExtra("app", "app");
+                newIntent.putExtra("command", NOTIFY_COMMAND);
+                context.startService(newIntent);
+            }
+        }
+
+        @Override
         protected boolean validateTokens() {
             if (commandTokens.length > 1) {
                 for (int i = 0; i < commandTokens.length; i++) {
@@ -694,6 +891,11 @@ public class Command {
         protected void onSocialCommandFound(String sender, Context context) {
             sendSocialNotification(context, PING_COMMAND);
         }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            sendAppNotification(context, PING_COMMAND, sender);
+        }
     }
 
     private static final class AboutCommand extends AbstractCommand {
@@ -708,6 +910,11 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             sendSocialNotification(context, ABOUT_COMMAND);
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            sendAppNotification(context, ABOUT_COMMAND, sender);
         }
     }
 
@@ -730,6 +937,15 @@ public class Command {
                 sendSocialNotification(context, LOCK_SCREEN_COMMAND);
             } else {
                 sendSocialNotification(context, LOCK_SCREEN_FAILED);
+            }
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            if (lockScreenNow(context)) {
+                sendAppNotification(context, LOCK_SCREEN_COMMAND, sender);
+            } else {
+                sendAppNotification(context, LOCK_SCREEN_FAILED, sender);
             }
         }
 
@@ -778,6 +994,16 @@ public class Command {
             }
         }
 
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            playBeep(context);
+            if (ringtone != null) {
+                sendAppNotification(context, RING_COMMAND, sender);
+            } else {
+                sendAppNotification(context, RING_OFF_COMMAND, sender);
+            }
+        }
+
         private void playBeep(Context context) {
             try {
                 final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
@@ -814,4 +1040,39 @@ public class Command {
         }
     }
 
+    private static final class MessageCommand extends AbstractCommand {
+
+        public MessageCommand() { super(MESSAGE_COMMAND, "ms", Finder.STARTS); }
+
+        @Override
+        protected boolean validateTokens() {
+            return true;
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            showMessageNotification(context);
+        }
+
+        @Override
+        protected void onSocialCommandFound(String sender, Context context) {
+            showMessageNotification(context);
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            showMessageNotification(context);
+        }
+
+        private void showMessageNotification(Context context) {
+            //TODO implement notification
+            String message = StringUtils.join(commandTokens, " ", 1, commandTokens.length);
+            Log.d(TAG, "Show notification with message " + message);
+            Notification notification =  NotificationUtils.buildMessageNotification(context, message);
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                notificationManager.notify((int)System.currentTimeMillis(), notification);
+            }
+        }
+    }
 }

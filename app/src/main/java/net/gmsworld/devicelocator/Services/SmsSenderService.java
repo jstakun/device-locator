@@ -34,6 +34,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private String phoneNumber = null;
     private String telegramId = null;
     private String email = null;
+    private String app = null;
 
     private boolean keywordReceivedSms = false;
     private boolean gpsSms = false;
@@ -59,7 +60,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             this.email = extras.getString("email");
 
-            if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId) && StringUtils.isEmpty(email)) {
+            this.app = extras.getString("app");
+
+            if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId) && StringUtils.isEmpty(email) && StringUtils.isEmpty(app)) {
                 //Log.d(TAG, "Phonenumber empty, return.");
                 return;
             }
@@ -83,9 +86,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         readSettings();
 
         if (StringUtils.equals(source, DeviceAdminEventReceiver.SOURCE)) {
-            Messenger.sendLoginFailedMessage(this, phoneNumber, telegramId, email);
+            Messenger.sendLoginFailedMessage(this, phoneNumber, telegramId, email, app);
         } else if (keywordReceivedSms) {
-            Messenger.sendAcknowledgeMessage(this, phoneNumber, telegramId, email);
+            Messenger.sendAcknowledgeMessage(this, phoneNumber, telegramId, email, app);
         }
 
         if (!isRunning && SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
@@ -185,19 +188,23 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                     message += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
                     Messenger.sendEmail(this, null, email, message, title, 1, new HashMap<String, String>());
                 }
+                if (StringUtils.isNotEmpty(app)) {
+                    String[] tokens = StringUtils.split(app, "+=+");
+                    Messenger.sendCloudMessage(this, null, tokens[0], tokens[1], message, 1, new HashMap<String, String>());
+                }
             }
             isRunning = false;
             return;
         }
 
         if (gpsSms && isRunning) {
-            Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), phoneNumber, telegramId, email);
+            Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), phoneNumber, telegramId, email, app);
         } else {
             Log.d(TAG, "Location message won't be send");
         }
 
         if (googleMapsSms && isRunning) {
-            Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId, email);
+            Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId, email, app);
         } else {
             Log.d(TAG, "Google Maps link message won't be send");
         }

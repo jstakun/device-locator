@@ -73,6 +73,70 @@ public class Messenger {
         }
     }
 
+    public static void sendCloudMessage(final Context context, final Location location, final String imei, final String pin, final String message, final int retryCount, final Map<String, String> headers) {
+        if (StringUtils.isNotEmpty(imei) && StringUtils.isNotEmpty(pin) && StringUtils.isNotEmpty(message)) {
+            if (Network.isNetworkAvailable(context)) {
+                final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+                if (StringUtils.isNotEmpty(tokenStr)) {
+                    headers.put("Authorization", "Bearer " + tokenStr);
+                    headers.put("X-GMS-AppId", "2");
+                    String deviceId = getDeviceId(context, false);
+                    if (StringUtils.isNotEmpty(deviceId)) {
+                        headers.put("X-GMS-DeviceId", deviceId);
+                    }
+                    if (location != null) {
+                        headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
+                        headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
+                    }
+                    headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
+                    sendCloudMessage(context, imei, pin, message, 1, headers);
+                } else {
+                    String queryString = "scope=dl&user=" + getDeviceId(context, false);
+                    Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
+                        @Override
+                        public void onGetFinish(String results, int responseCode, String url) {
+                            Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                            if (responseCode == 200) {
+                                if (StringUtils.isNotEmpty(getToken(context, results))) {
+                                    sendCloudMessage(context, location, imei, pin, message, 1, headers);
+                                } else {
+                                    Log.e(TAG, "Failed to parse token!");
+                                }
+                            } else if (responseCode == 500 && retryCount > 0) {
+                                sendCloudMessage(context, location, imei, pin, message, retryCount - 1, headers);
+                            } else {
+                                Log.d(TAG, "Failed to receive token: " + results);
+                            }
+                        }
+                    });
+                }
+            } else {
+                Log.w(TAG, context.getString(R.string.no_network_error));
+            }
+        }
+    }
+
+    private static void sendCloudMessage(final Context context, final String imei, final String pin, final String message, final int retryCount, final Map<String, String> headers) {
+        String content = "imei=" + imei;
+        content += "&command=" + Command.MESSAGE_COMMAND + "app";
+        content += "&pin=" + pin;
+        content += "&args=" + message;
+        String url = context.getString(R.string.deviceManagerUrl);
+
+        Network.post(context, url, content, null, headers, new Network.OnGetFinishListener() {
+            @Override
+            public void onGetFinish(String results, int responseCode, String url) {
+                if (responseCode == 200) {
+                    Toast.makeText(context, "Command has been sent to the cloud!", Toast.LENGTH_SHORT).show();
+                } else if (responseCode == 500 && retryCount > 0) {
+                    sendCloudMessage(context, imei, pin, message, retryCount - 1, headers);
+                } else {
+                    Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
+                }
+            }
+        });
+    }
 
     public static void sendEmail(final Context context, final Location location, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
         if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message))) {
@@ -310,7 +374,7 @@ public class Messenger {
         }
     }
 
-    public static void sendLocationMessage(Context context, Location location, boolean fused, String phoneNumber, String telegramId, String email) {
+    public static void sendLocationMessage(Context context, Location location, boolean fused, String phoneNumber, String telegramId, String email, String app) {
         //Log.d(TAG, "sendLocationMessage()" + location.getAccuracy());
         String text = context.getString(fused ? R.string.approximate : R.string.accurate) + " location:\n";
 
@@ -352,10 +416,14 @@ public class Messenger {
                 }
                 sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
             }
+            if (StringUtils.isNotEmpty(app)) {
+                String[] tokens = StringUtils.split(app, "+=+");
+                sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
+            }
         }
     }
 
-    public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email) {
+    public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email, String app) {
         String text = "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
                 "\n" + "Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
@@ -373,10 +441,14 @@ public class Messenger {
                 }
                 sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
             }
+            if (StringUtils.isNotEmpty(app)) {
+                String[] tokens = StringUtils.split(app, "+=+");
+                Messenger.sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
+            }
         }
     }
 
-    public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId, String email) {
+    public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId, String email, String app) {
         String text;
         if (GmsSmartLocationManager.isLocationEnabled(context)) {
             text = context.getString(R.string.acknowledgeMessage) + "\n";
@@ -402,11 +474,15 @@ public class Messenger {
                 }
                 sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
             }
+            if (StringUtils.isNotEmpty(app)) {
+                String[] tokens = StringUtils.split(app, "+=+");
+                Messenger.sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
+            }
         }
     }
 
     public static void sendCommandMessage(final Context context, final Bundle extras) {
-        String text = null, title = null, phoneNumber = null, telegramId = null, email = null, notificationNumber = null, command = null;
+        String text = null, title = null, phoneNumber = null, telegramId = null, email = null, notificationNumber = null, command = null, app = null;
         String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context, true);
         List<String> notifications = new ArrayList<String>();
 
@@ -416,6 +492,7 @@ public class Messenger {
             email = extras.getString("email");
             notificationNumber = extras.getString("notificationNumber");
             command = extras.getString("command");
+            app = extras.getString("app");
         }
 
         switch (command) {
@@ -610,11 +687,16 @@ public class Messenger {
                     text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
                     sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
                 }
+
+                if (StringUtils.isNotEmpty(app)) {
+                    String[] tokens = StringUtils.split(app, "+=+");
+                    sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
+                }
             }
         }
     }
 
-    public static void sendLoginFailedMessage(Context context, String phoneNumber, String telegramId, String email) {
+    public static void sendLoginFailedMessage(Context context, String phoneNumber, String telegramId, String email, String app) {
         String deviceId = getDeviceId(context, true);
         String text = "Failed login attempt to your device " + deviceId + "."
                 + " You should receive device location message soon."
@@ -632,6 +714,10 @@ public class Messenger {
                     text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
                 }
                 sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
+            }
+            if (StringUtils.isNotEmpty(app)) {
+                String[] tokens = StringUtils.split(app, "+=+");
+                Messenger.sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
             }
         }
     }

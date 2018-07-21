@@ -19,6 +19,8 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "DlFirebaseMsgService";
 
+    //private static final int NOTIFICATION_ID = 2;
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d(TAG, "From: " + remoteMessage.getFrom());
@@ -30,19 +32,28 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 String pinRead = message.get("pin");
                 String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, null);
                 boolean pinValid = StringUtils.equals(pin, pinRead);
-                if (message.containsKey("correlationId")) {
-                    String correlationId = message.get("correlationId");
-                    Log.d(TAG, "Sending notification for " + correlationId);
-                    Map<String, String> headers = new HashMap<String, String>();
-                    headers.put("X-GMS-AuthStatus", pinValid ? "ok" : "failed");
-                    Messenger.sendTelegram(this, null, "@dlcorrelationId", correlationId, 1, headers);
+                String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
+                if (correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(message.get("command"), "message")) {
+                    //old code for Telegram
+                    //String correlationId = message.get("correlationId");
+                    //Log.d(TAG, "Sending notification for " + correlationId);
+                    //Map<String, String> headers = new HashMap<String, String>();
+                    //headers.put("X-GMS-AuthStatus", pinValid ? "ok" : "failed");
+                    //Messenger.sendTelegram(this, null, "@dlcorrelationId", correlationId, 1, headers);
+
+                    //send notification to correlationId
+                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command has been received by target device.", 1, new HashMap<String, String>());
                 }
                 if (pinValid) {
                     String command = message.get("command") + pinRead;
                     if (message.containsKey("args")) {
                         command += " " + message.get("args");
                     }
-                    Command.findCommandInMessage(this, command);
+                    String sender = null;
+                    if (correlationId != null) {
+                        sender = message.get("correlationId");
+                    }
+                    Command.findCommandInMessage(this, command, sender);
                 } else {
                     Log.e(TAG, "Invalid pin!");
                 }

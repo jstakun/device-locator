@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +28,8 @@ public class CommandActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_command);
 
+        final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(CommandActivity.this);
+
         final String name = getIntent().getStringExtra("name");
 
         final String imei = getIntent().getStringExtra("imei");
@@ -39,6 +42,11 @@ public class CommandActivity extends AppCompatActivity {
 
         final Button send = findViewById(R.id.sendDeviceCommand);
 
+        String savedPin = settings.getString(imei + "_pin", "");
+        if (savedPin.length() >= 4) {
+            pinEdit.setText(savedPin);
+        }
+
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -49,13 +57,11 @@ public class CommandActivity extends AppCompatActivity {
                     String command = spinner.getSelectedItem().toString();
                     //TODO check if command requires args and validate args
                     Toast.makeText(CommandActivity.this,"Sending command " + command + "...", Toast.LENGTH_SHORT).show();
-
-                    final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(CommandActivity.this);
                     String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
-                    String username = settings.getString("userLogin", "");
                     String content = "imei=" + imei;
-                    content += "&command=" + command + "dlt";
+                    content += "&command=" + command + "dlapp";
                     content += "&pin=" + pin;
+                    content += "&correlationId=" + Messenger.getDeviceId(CommandActivity.this, false) + "+=+" + settings.getString(MainActivity.DEVICE_PIN,"");
                     String url = getString(R.string.deviceManagerUrl);
 
                     Map<String, String> headers = new HashMap<String, String>();
@@ -71,7 +77,7 @@ public class CommandActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    //TODO offer to remember pin for this device
+                    settings.edit().putString(imei + "_pin", pin).apply();
                 }
             }
         });

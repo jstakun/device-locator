@@ -261,10 +261,10 @@ public class RouteTrackingService extends Service {
                                     settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).commit();
                                     if (StringUtils.isNotEmpty(service.phoneNumber)) {
                                         if (settings.getBoolean("settings_gps_sms", false)) {
-                                            net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(service, location, true, service.phoneNumber, null, null);
+                                            net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(service, location, true, service.phoneNumber, null, null, null);
                                         }
                                         if (settings.getBoolean("settings_google_sms", true)) {
-                                            net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(service, location, service.phoneNumber, null, null);
+                                            net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(service, location, service.phoneNumber, null, null, null);
                                         }
                                     }
                                     DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
