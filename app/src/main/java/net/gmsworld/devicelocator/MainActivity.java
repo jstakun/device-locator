@@ -1712,12 +1712,14 @@ public class MainActivity extends AppCompatActivity {
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View rowView = inflater.inflate(R.layout.device_row, parent, false);
-            TextView textView = rowView.findViewById(R.id.deviceName);
+            TextView deviceName = rowView.findViewById(R.id.deviceName);
             String name = devices.get(position).name;
             if (name == null) {
                 name = devices.get(position).imei;
             }
-            textView.setText(name);
+            deviceName.setText(name);
+            TextView deviceDesc = rowView.findViewById(R.id.deviceDesc);
+            deviceDesc.setText("Created on " + devices.get(position).creationDate.split("T")[0]);
             return rowView;
         }
     }
