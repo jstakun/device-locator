@@ -24,7 +24,7 @@ public abstract class AbstractCommand {
 
     static final String TAG = "DeviceCommand";
 
-    protected enum Finder {STARTS, EQUALS}
+    public enum Finder {STARTS, EQUALS}
 
     private String smsCommand;
 
@@ -46,7 +46,7 @@ public abstract class AbstractCommand {
 
     protected abstract void onAppCommandFound(String sender, Context context);
 
-    boolean validateTokens() {
+    public boolean validateTokens() {
         return false;
     }
 
@@ -198,5 +198,17 @@ public abstract class AbstractCommand {
             newIntent.putExtra("command", command);
         }
         context.startService(newIntent);
+    }
+
+    public String getSmsCommand() {
+        return smsCommand;
+    }
+
+    public Finder getFinder() {
+        return finder;
+    }
+
+    public void setCommandTokens(String[] commandTokens) {
+        this.commandTokens = commandTokens;
     }
 }

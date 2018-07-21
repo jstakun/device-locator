@@ -109,6 +109,16 @@ public class Command {
         return commands;
     }
 
+    public static AbstractCommand getCommandByName(String name) {
+        List<AbstractCommand> commands = getCommands();
+        for (AbstractCommand c : commands) {
+            if (StringUtils.equalsIgnoreCase(name + "dl", c.getSmsCommand())) {
+                return c;
+            }
+        }
+        return null;
+    }
+
     //---------------------------------- Commands classes --------------------------------------
 
     private static final class StartRouteTrackerServiceStartCommand extends AbstractCommand {
@@ -118,7 +128,7 @@ public class Command {
         }
 
         @Override
-        protected boolean validateTokens() {
+        public boolean validateTokens() {
             return true;
         }
 
@@ -256,7 +266,7 @@ public class Command {
         }
 
         @Override
-        protected boolean validateTokens() {
+        public boolean validateTokens() {
             return true;
         }
 
@@ -511,7 +521,7 @@ public class Command {
         }
 
         @Override
-        protected boolean validateTokens() {
+        public boolean validateTokens() {
             int radius = -1;
             if (commandTokens.length > 1) {
                 try {
@@ -850,7 +860,7 @@ public class Command {
         }
 
         @Override
-        protected boolean validateTokens() {
+        public boolean validateTokens() {
             if (commandTokens.length > 1) {
                 for (int i = 0; i < commandTokens.length; i++) {
                     String token = commandTokens[i];
@@ -1045,7 +1055,7 @@ public class Command {
         public MessageCommand() { super(MESSAGE_COMMAND, "ms", Finder.STARTS); }
 
         @Override
-        protected boolean validateTokens() {
+        public boolean validateTokens() {
             return true;
         }
 
