@@ -58,7 +58,7 @@ public class CommandActivity extends AppCompatActivity {
                 if (pin == null || pin.length() < 4) {
                     Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
                 } else if (StringUtils.isNotEmpty(name) || StringUtils.isNotEmpty(imei)) {
-                    String command = spinner.getSelectedItem().toString();
+                    final String command = spinner.getSelectedItem().toString();
                     //check if command requires args and validate args
                     boolean validArgs = true;
                     String commandArgs = args.getText().toString();
@@ -96,7 +96,7 @@ public class CommandActivity extends AppCompatActivity {
                             @Override
                             public void onGetFinish(String results, int responseCode, String url) {
                                 if (responseCode == 200) {
-                                    Toast.makeText(CommandActivity.this, "Command has been sent to the cloud!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(CommandActivity.this, command + " command has been sent!", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
                                 }

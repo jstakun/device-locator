@@ -477,21 +477,12 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            if (sender != null && !initPhoneCall(sender, context)) {
-                sendSocialNotification(context, CALL_COMMAND);
-            } else if (sender == null) {
-                sendSocialNotification(context, CALL_COMMAND);
-            }
+            sendSocialNotification(context, CALL_COMMAND);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context) {
-            //TODO need fix
-            if (sender != null && !initPhoneCall(sender, context)) {
-                sendAppNotification(context, CALL_COMMAND, sender);
-            } else if (sender == null) {
-                sendAppNotification(context, CALL_COMMAND, sender);
-            }
+            sendAppNotification(context, CALL_COMMAND, sender);
         }
 
         private boolean initPhoneCall(String sender, Context context) {
