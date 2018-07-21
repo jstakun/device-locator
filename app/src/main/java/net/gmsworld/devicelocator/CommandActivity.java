@@ -72,7 +72,7 @@ public class CommandActivity extends AppCompatActivity {
                         }
                     }
                     if (!validArgs) {
-                        Toast.makeText(CommandActivity.this,"You have provided invalid arguments for this command!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(CommandActivity.this,"You've provided invalid parameters for this command!", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(CommandActivity.this, "Sending command " + command + "...", Toast.LENGTH_SHORT).show();
                         String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
@@ -96,7 +96,7 @@ public class CommandActivity extends AppCompatActivity {
                             @Override
                             public void onGetFinish(String results, int responseCode, String url) {
                                 if (responseCode == 200) {
-                                    Toast.makeText(CommandActivity.this, command + " command has been sent!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(CommandActivity.this, "Command " + command + " has been sent!", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
                                 }

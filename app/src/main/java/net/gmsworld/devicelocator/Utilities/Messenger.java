@@ -128,7 +128,8 @@ public class Messenger {
             @Override
             public void onGetFinish(String results, int responseCode, String url) {
                 if (responseCode == 200) {
-                    Toast.makeText(context, "Command has been sent to the cloud!", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "Command has been sent!", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "Message has been sent to the cloud!");
                 } else if (responseCode == 500 && retryCount > 0) {
                     sendCloudMessage(context, imei, pin, message, retryCount - 1, headers);
                 } else {
