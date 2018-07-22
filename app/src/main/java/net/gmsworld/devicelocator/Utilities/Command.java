@@ -514,7 +514,7 @@ public class Command {
         @Override
         public boolean validateTokens() {
             int radius = -1;
-            if (commandTokens.length > 1) {
+            if (commandTokens != null && commandTokens.length > 1) {
                 try {
                     radius = Integer.parseInt(commandTokens[commandTokens.length-1]);
                 } catch (Exception e) {
@@ -852,7 +852,7 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            if (commandTokens.length > 1) {
+            if (commandTokens != null && commandTokens.length > 1) {
                 for (int i = 0; i < commandTokens.length; i++) {
                     String token = commandTokens[i];
                     if (token.startsWith("m:")) {
@@ -1066,9 +1066,8 @@ public class Command {
         }
 
         private void showMessageNotification(Context context) {
-            //TODO implement notification
             String message = StringUtils.join(commandTokens, " ", 1, commandTokens.length);
-            Log.d(TAG, "Show notification with message " + message);
+            //Log.d(TAG, "Show notification with message " + message);
             Notification notification =  NotificationUtils.buildMessageNotification(context, message);
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager != null) {

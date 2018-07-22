@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.RingtoneManager;
+import android.net.Uri;
 
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
@@ -43,24 +45,26 @@ public class NotificationUtils {
     }
 
     public static Notification buildMessageNotification(Context context, String message) {
+        //TODO for location and maps message create maps intent
+        //TODO for photo link create web browser intent
+
         //Intent notificationIntent = new Intent(context, MainActivity.class);
         //PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        /*Notification publicNotification = new Notification.Builder(context)
-                .setContentTitle("Device Locator is on")
-                .setContentText("Click to open")
-                .setSmallIcon(R.drawable.ic_small)
-                //.setLargeIcon()
-                .setContentIntent(contentIntent)
-                .build();*/
-
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);
+
+        Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
         return new Notification.Builder(context)
                 .setContentTitle("Device Locator Notification")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_small)
                 .setLargeIcon(icon)
+                .setStyle(new Notification.BigTextStyle().bigText(message))
+                .setSound(notificationUri)
+                //.setPriority(1)
+                //.setSound()
+                //.setCategory(Notification.CATEGORY_MESSAGE) //API 21
                 //.setContentIntent(contentIntent)
                 //.setOngoing(true)
                 //.setPublicVersion(publicNotification) //API 21

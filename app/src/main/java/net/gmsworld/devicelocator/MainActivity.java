@@ -225,6 +225,9 @@ public class MainActivity extends AppCompatActivity {
             pinDialog.dismiss();
             pinDialog = null;
         }
+
+        //reset pin verification time
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).apply();
     }
 
     @Override
@@ -1373,7 +1376,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void initDeviceList() {
         final ListView deviceList = (ListView) findViewById(R.id.deviceList);
-        deviceList.setEmptyView(findViewById(R.id.deviceListEmpty));
+        deviceList.setEmptyView(findViewById(R.id.deviceListLoading));
+        findViewById(R.id.deviceListEmpty).setVisibility(View.GONE);
 
         String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
         if (userLogin != null) {
@@ -1389,6 +1393,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                    deviceList.setEmptyView(findViewById(R.id.deviceListEmpty));
+                    findViewById(R.id.deviceListLoading).setVisibility(View.GONE);
                     if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         JsonArray devices = reply.getAsJsonObject().get("devices").getAsJsonArray();
@@ -1474,6 +1480,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showPinDialog() {
+        //TODO change to activity
         if (pinDialog == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
@@ -1499,7 +1506,7 @@ public class MainActivity extends AppCompatActivity {
                         PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
                                 .remove("pinFailedCount")
                                 .putLong("pinVerificationMillis", System.currentTimeMillis())
-                                .commit();
+                                .apply();
                     } else if (input.length() == pin.length()) {
                         int pinFailedCount = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getInt("pinFailedCount", 0);
                         if (pinFailedCount == 2) {
@@ -1714,12 +1721,12 @@ public class MainActivity extends AppCompatActivity {
             View rowView = inflater.inflate(R.layout.device_row, parent, false);
             TextView deviceName = rowView.findViewById(R.id.deviceName);
             String name = devices.get(position).name;
-            if (name == null) {
+            if (StringUtils.isEmpty(name)) {
                 name = devices.get(position).imei;
             }
             deviceName.setText(name);
             TextView deviceDesc = rowView.findViewById(R.id.deviceDesc);
-            deviceDesc.setText("Created on " + devices.get(position).creationDate.split("T")[0]);
+            deviceDesc.setText("Registered on " + devices.get(position).creationDate.split("T")[0]);
             return rowView;
         }
     }

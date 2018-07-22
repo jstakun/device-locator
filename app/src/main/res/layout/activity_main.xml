@@ -496,6 +496,12 @@
                             android:layout_height="fill_parent"
                             android:text="No devices found! Make sure to specify the same login in Device Manager card on all your devices."/>
 
+                        <TextView
+                            android:id="@+id/deviceListLoading"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:text="Loading devices..."/>
+
                     </LinearLayout>
 
                 </net.gmsworld.devicelocator.Views.LDCard>

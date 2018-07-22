@@ -31,9 +31,10 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
             if (message.containsKey("command") && message.containsKey("pin")) {
                 String pinRead = message.get("pin");
                 String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, null);
+                String command = message.get("command");
                 boolean pinValid = StringUtils.equals(pin, pinRead);
                 String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
-                if (correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(message.get("command"), "message")) {
+                if (correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
                     //old code for Telegram
                     //String correlationId = message.get("correlationId");
                     //Log.d(TAG, "Sending notification for " + correlationId);
@@ -42,10 +43,10 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     //Messenger.sendTelegram(this, null, "@dlcorrelationId", correlationId, 1, headers);
 
                     //send notification to correlationId
-                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command has been received by target device.", 1, new HashMap<String, String>());
+                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + command.split("dl")[0] + " has been received by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
                 }
                 if (pinValid) {
-                    String command = message.get("command") + pinRead;
+                    command += pinRead;
                     if (message.containsKey("args")) {
                         command += " " + message.get("args");
                     }

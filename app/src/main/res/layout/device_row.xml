@@ -12,7 +12,7 @@
         android:layout_height="fill_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="6dip"
+        android:layout_marginRight="6dp"
         android:contentDescription="Device Icon"
         android:src="@drawable/ic_small" />
 
@@ -23,8 +23,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_toRightOf="@id/deviceIcon"
-        android:text="Short device description"
-        android:textSize="12sp" />
+        android:textSize="16dp" />
 
     <TextView
         android:id="@+id/deviceName"
@@ -36,8 +35,7 @@
         android:layout_alignWithParentIfMissing="true"
         android:layout_toRightOf="@id/deviceIcon"
         android:gravity="center_vertical"
-        android:text="Example application"
-        android:textSize="16sp" />
+        android:textSize="20dp" />
 
 </RelativeLayout>
 
