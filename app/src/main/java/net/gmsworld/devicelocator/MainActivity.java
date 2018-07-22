@@ -802,7 +802,17 @@ public class MainActivity extends AppCompatActivity {
         String newUserLogin = userLoginInput.getText().toString();
         String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
         if (!StringUtils.equals(userLogin, newUserLogin)) {
-            DlFirebaseInstanceIdService.sendRegistrationToServer(this,null, newUserLogin, null);
+            String token = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
+            boolean isNewToken = false;
+            if (StringUtils.isEmpty(token)) {
+                token = FirebaseInstanceId.getInstance().getToken();
+                isNewToken = true;
+            }
+            if (!StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
+                DlFirebaseInstanceIdService.sendRegistrationToServer(this, isNewToken ? token : null, newUserLogin, null);
+            } else {
+                Toast.makeText(this, "You device seems to be BLACKLISTED and can't be registered!", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -855,7 +865,20 @@ public class MainActivity extends AppCompatActivity {
         String newDeviceName = deviceNameInput.getText().toString();
         String deviceName = PreferenceManager.getDefaultSharedPreferences(this).getString("deviceName", null);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
-            DlFirebaseInstanceIdService.sendRegistrationToServer(this,null, null, newDeviceName.replace(' ', '-'));
+            String token = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
+            boolean isNewToken = false;
+            if (StringUtils.isEmpty(token)) {
+                token = FirebaseInstanceId.getInstance().getToken();
+                isNewToken = true;
+            }
+            if (!StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
+                String normalizedDeviceName = newDeviceName.replace(' ', '-');
+                DlFirebaseInstanceIdService.sendRegistrationToServer(this, isNewToken ? token : null, null, normalizedDeviceName.replace(' ', '-'));
+                EditText deviceNameEdit = findViewById(R.id.deviceName);
+                deviceNameEdit.setText(normalizedDeviceName);
+            } else {
+                Toast.makeText(this, "You device seems to be BLACKLISTED and can't be registered!", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -1374,10 +1397,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void initDeviceList() {
+    public void initDeviceList() {
         final ListView deviceList = (ListView) findViewById(R.id.deviceList);
-        deviceList.setEmptyView(findViewById(R.id.deviceListLoading));
-        findViewById(R.id.deviceListEmpty).setVisibility(View.GONE);
+        final TextView deviceListEmpty = findViewById(R.id.deviceListEmpty);
+        deviceList.setEmptyView(deviceListEmpty);
 
         String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
         if (userLogin != null) {
@@ -1393,8 +1416,6 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                    deviceList.setEmptyView(findViewById(R.id.deviceListEmpty));
-                    findViewById(R.id.deviceListLoading).setVisibility(View.GONE);
                     if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         JsonArray devices = reply.getAsJsonObject().get("devices").getAsJsonArray();
@@ -1416,7 +1437,11 @@ public class MainActivity extends AppCompatActivity {
                             Log.d(TAG, "Found " + userDevices.size() + " devices");
                             deviceList.setAdapter(adapter);
                             setListViewHeightBasedOnChildren(deviceList);
+                        } else {
+                            deviceListEmpty.setText(R.string.devices_list_empty);
                         }
+                    } else {
+                        deviceListEmpty.setText(R.string.devices_list_loading_failed);
                     }
                 }
             });
@@ -1726,7 +1751,7 @@ public class MainActivity extends AppCompatActivity {
             }
             deviceName.setText(name);
             TextView deviceDesc = rowView.findViewById(R.id.deviceDesc);
-            deviceDesc.setText("Registered on " + devices.get(position).creationDate.split("T")[0]);
+            deviceDesc.setText("Last edited on " + devices.get(position).creationDate.split("T")[0]);
             return rowView;
         }
     }

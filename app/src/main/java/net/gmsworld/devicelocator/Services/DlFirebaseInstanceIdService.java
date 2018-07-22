@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
@@ -57,7 +58,7 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
         }
     }
 
-    private static void sendRegistrationToServer(Context context, final String token, final String username, final String deviceName, final String tokenStr) {
+    private static void sendRegistrationToServer(final Context context, final String token, final String username, final String deviceName, final String tokenStr) {
         try {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (!StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
@@ -88,18 +89,25 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
                             //save firebase token only if it was successfully registered by the server
                             if (StringUtils.isNotBlank(token)) {
                                 settings.edit().putString(FIREBASE_TOKEN, token).apply();
-                                Log.d(TAG, "Firebase token registered successfully");
+                                Log.d(TAG, "Firebase token is set");
                             }
                             if (StringUtils.isNotBlank(username)) {
                                 settings.edit().putString("userLogin", username).apply();
-                                Log.d(TAG, "User login registered successfully");
+                                Log.d(TAG, "User login is set");
+                                if (context instanceof MainActivity) {
+                                    ((MainActivity)context).initDeviceList();
+                                }
                             }
                             if (StringUtils.isNotBlank(deviceName)) {
                                 settings.edit().putString("deviceName", deviceName).apply();
-                                Log.d(TAG, "Device name registered successfully");
+                                Log.d(TAG, "Device name is set");
+                                if (context instanceof MainActivity) {
+                                    ((MainActivity)context).initDeviceList();
+                                }
                             }
                         } else {
                             Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
+                            Toast.makeText(context, "Device registration failed! Please restart Device Manager and try again.", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
