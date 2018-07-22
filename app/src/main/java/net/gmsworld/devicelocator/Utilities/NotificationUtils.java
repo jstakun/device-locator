@@ -46,7 +46,7 @@ public class NotificationUtils {
 
     public static Notification buildMessageNotification(Context context, String message) {
         //TODO for location and maps message create maps intent
-        //TODO for photo link create web browser intent
+        //TODO for web links like photo or route create web browser intent
 
         //Intent notificationIntent = new Intent(context, MainActivity.class);
         //PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);

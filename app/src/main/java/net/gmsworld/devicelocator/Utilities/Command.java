@@ -111,8 +111,11 @@ public class Command {
 
     public static AbstractCommand getCommandByName(String name) {
         List<AbstractCommand> commands = getCommands();
+        if (!StringUtils.endsWith("dl", name)) {
+            name = name + "dl";
+        }
         for (AbstractCommand c : commands) {
-            if (StringUtils.equalsIgnoreCase(name + "dl", c.getSmsCommand())) {
+            if (StringUtils.equalsIgnoreCase(name, c.getSmsCommand())) {
                 return c;
             }
         }
@@ -427,9 +430,9 @@ public class Command {
         }
     }
 
-    private static final class UnMuteCommand extends AbstractCommand {
+    private static final class UnmuteCommand extends AbstractCommand {
 
-        public UnMuteCommand() {
+        public UnmuteCommand() {
             super(UNMUTE_COMMAND, "um", Finder.EQUALS);
         }
 
@@ -691,6 +694,7 @@ public class Command {
         protected void onAppCommandFound(String sender, Context context) {
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false)) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
+                cameraIntent.putExtra("app", sender);
                 context.startService(cameraIntent);
             }
             sendAppNotification(context, TAKE_PHOTO_COMMAND, sender);
@@ -870,6 +874,9 @@ public class Command {
                         if (StringUtils.isNotEmpty(newTelegramId) && !NumberUtils.isCreatable(newTelegramId)) {
                             return false;
                         }
+                    } else {
+                        //invalid token
+                        return false;
                     }
                 }
                 return true;
