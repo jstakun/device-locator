@@ -1,25 +1,21 @@
 package net.gmsworld.devicelocator;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import net.gmsworld.devicelocator.Utilities.AbstractCommand;
 import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
+import net.gmsworld.devicelocator.Views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -125,34 +121,5 @@ public class CommandActivity extends AppCompatActivity {
 
         //reset pin verification time
         PreferenceManager.getDefaultSharedPreferences(this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).apply();
-    }
-
-    private class CommandArrayAdapter extends ArrayAdapter<String> {
-
-        private final Context context;
-
-        public CommandArrayAdapter(Context context, int textViewResourceId, String[] commands) {
-            super(context, textViewResourceId, commands);
-            this.context = context;
-        }
-
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            return createView(position, convertView, parent);
-        }
-
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            return createView(position, convertView, parent);
-        }
-
-        public View createView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View rowView = inflater.inflate(R.layout.command_row, parent, false);
-            TextView commandName = rowView.findViewById(R.id.commandName);
-            commandName.setText(getItem(position));
-            return rowView;
-        }
     }
 }

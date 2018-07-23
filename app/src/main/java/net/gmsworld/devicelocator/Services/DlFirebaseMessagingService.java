@@ -34,7 +34,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 String command = message.get("command");
                 boolean pinValid = StringUtils.equals(pin, pinRead);
                 String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
-                if (correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
+                if (pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
                     //old code for Telegram
                     //String correlationId = message.get("correlationId");
                     //Log.d(TAG, "Sending notification for " + correlationId);
@@ -55,8 +55,11 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         sender = message.get("correlationId");
                     }
                     Command.findCommandInMessage(this, command, sender);
+                } else if (correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
+                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + command.split("dl")[0] + " has been rejected by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
+                    Log.e(TAG, "Invalid pin received in cloud message!");
                 } else {
-                    Log.e(TAG, "Invalid pin!");
+                    Log.e(TAG, "Invalid pin received in cloud message!");
                 }
             } else {
                 Log.e(TAG, "Invalid data payload!");

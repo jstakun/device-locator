@@ -1,5 +1,7 @@
 package net.gmsworld.devicelocator;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -52,6 +54,7 @@ import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,6 +81,7 @@ import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.Permissions;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
+import net.gmsworld.devicelocator.Views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -218,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
         registerEmail((TextView) findViewById(R.id.email), false);
         registerTelegram((TextView) findViewById(R.id.telegramId));
         registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
-        registerUserLogin((TextView) findViewById(R.id.userLogin));
+        registerUserLogin((Spinner) findViewById(R.id.userAccounts));
         registerDeviceName((TextView) findViewById(R.id.deviceName));
 
         if (pinDialog != null) {
@@ -288,8 +292,8 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.sms:
                 Log.d(TAG, "Show sms settings");
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", false).commit();
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).commit();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", false).apply();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).apply();
                 findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_top_focus).requestFocus();
@@ -297,8 +301,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.tracker:
                 Log.d(TAG, "Show tracker settings");
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).commit();
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).commit();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).apply();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).apply();
                 findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_bottom_focus).requestFocus();
@@ -306,8 +310,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.devices:
                 Log.d(TAG, "Show Device Manager settings");
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", false).commit();
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", true).commit();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", false).apply();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", true).apply();
                 findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
@@ -358,8 +362,8 @@ public class MainActivity extends AppCompatActivity {
     public void onNewIntent (Intent intent) {
         //show tracker view
         Log.d(TAG, "onNewIntent()");
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).commit();
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).apply();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).apply();
         findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
         findViewById(R.id.smsSettings).setVisibility(View.GONE);
         findViewById(R.id.deviceSettings).setVisibility(View.GONE);
@@ -753,15 +757,58 @@ public class MainActivity extends AppCompatActivity {
     //user login input setup -------------------------------------------------------------
 
     private void initUserLoginInput() {
-        final TextView userLoginInput = this.findViewById(R.id.userLogin);
+        final Spinner userAccounts = this.findViewById(R.id.userAccounts);
+
+        List<String> accountNames = new ArrayList<String>();
+        accountNames.add("");
+
         String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
-        if (userLogin != null) {
-            userLoginInput.setText(userLogin);
+
+        if (Permissions.haveGetAccountsPermission(this)) {
+            Account[] accounts = AccountManager.get(this).getAccounts(); //getAccountsByType("com.google");
+            for (Account a : accounts) {
+                if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches()) {
+                   accountNames.add(a.name);
+                }
+            }
+        } else {
+            Permissions.requestGetAccountsPermission(this);
         }
 
-        //TODO enforce user authentication
+        int index = 0;
+        for (int i = 0; i < accountNames.size(); i++) {
+            if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
+                index = i;
+                break;
+            }
+        }
 
-        userLoginInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        final CommandArrayAdapter accs = new CommandArrayAdapter(this, R.layout.command_row,  accountNames);
+        userAccounts.setAdapter(accs);
+
+        if (index > 0) {
+            userAccounts.setSelection(index, true);
+        }
+
+        userAccounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                registerUserLogin(userAccounts);
+            }
+
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                return;
+            }
+        });
+
+        //--------------------------------
+
+        //final TextView userLoginInput = this.findViewById(R.id.userLogin);
+        //String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
+        //if (userLogin != null) {
+        //    userLoginInput.setText(userLogin);
+        //}
+
+        /*userLoginInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
                 if(!hasFocus) {
@@ -795,11 +842,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return false;
             }
-        });
+        });*/
     }
 
-    private synchronized void registerUserLogin(TextView userLoginInput) {
-        String newUserLogin = userLoginInput.getText().toString();
+    private synchronized void registerUserLogin(Spinner userLoginSpinner) {
+        String newUserLogin = (String)userLoginSpinner.getSelectedItem();
         String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
         if (!StringUtils.equals(userLogin, newUserLogin)) {
             String token = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
@@ -1403,7 +1450,7 @@ public class MainActivity extends AppCompatActivity {
         deviceList.setEmptyView(deviceListEmpty);
 
         String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
-        if (userLogin != null) {
+        if (StringUtils.isNotEmpty(userLogin)) {
             //load device list and set array adapter
             String queryString = "username=" + userLogin;
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
@@ -1458,6 +1505,10 @@ public class MainActivity extends AppCompatActivity {
                     MainActivity.this.startActivity(intent);
                 }
             });
+        } else {
+            final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, new ArrayList());
+            deviceList.setAdapter(adapter);
+            deviceListEmpty.setText(R.string.devices_list_empty);
         }
     }
 
@@ -1627,8 +1678,20 @@ public class MainActivity extends AppCompatActivity {
         listView.requestLayout();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS:
+                     if (Permissions.haveGetAccountsPermission(this)) {
+                         initUserLoginInput();
+                     }
+                     break;
+            default: break;
+        }
+    }
 
-    //----------------------------- route tracking service -----------------------------------
+
+        //----------------------------- route tracking service -----------------------------------
 
     private final ServiceConnection mConnection = null; /*new ServiceConnection() {
 

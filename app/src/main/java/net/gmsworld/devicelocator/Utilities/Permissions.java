@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
 import net.gmsworld.devicelocator.MainActivity;
@@ -19,6 +18,8 @@ import net.gmsworld.devicelocator.R;
 import java.util.ArrayList;
 
 public class Permissions {
+
+    public static final int PERMISSIONS_REQUEST_GET_ACCOUNTS = 1001;
 
     public static void checkAndRequestPermissionsAtStartup(Activity activity) {
         ArrayList<String> permissions = new ArrayList<String>();
@@ -29,7 +30,7 @@ public class Permissions {
         permissions.add(4, Manifest.permission.MODIFY_AUDIO_SETTINGS);
         permissions.add(5, Manifest.permission.CALL_PHONE);
         permissions.add(6, Manifest.permission.BIND_DEVICE_ADMIN);
-        //permissions.add(6, Manifest.permission.CAMERA); don't check camera permission at startup
+        permissions.add(7, Manifest.permission.GET_ACCOUNTS);
 
         ArrayList<String> neededPermissions = new ArrayList<>();
         for (int i = 0; i < permissions.size(); i++) {
@@ -53,19 +54,23 @@ public class Permissions {
     }
 
     public static void requestLocationPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 3);
     }
 
     public static void requestContactsPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, 1);//, Manifest.permission.READ_PHONE_STATE}, 2);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, 4);//, Manifest.permission.READ_PHONE_STATE}, 2);
     }
 
     public static void requestCallPhonePermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, 1);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, 5);
     }
 
     public static void requestCameraPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, 1);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, 6);
+    }
+
+    public static void requestGetAccountsPermission(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.GET_ACCOUNTS}, PERMISSIONS_REQUEST_GET_ACCOUNTS);
     }
 
     public static boolean haveSendSMSAndLocationPermission(Context context) {
@@ -85,6 +90,10 @@ public class Permissions {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
+    public static boolean haveGetAccountsPermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED;
+    }
+
     public static boolean haveReadContactsPermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED; // &&
                 //ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
@@ -98,7 +107,7 @@ public class Permissions {
         Intent resultIntent = new Intent(context, MainActivity.class);
         PendingIntent resultPendingIntent = PendingIntent.getActivity(context, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
+        Notification.Builder notificationBuilder = new Notification.Builder(context)
                 //.setSmallIcon(R.drawable.notification_icon)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentTitle(context.getString(R.string.notification_title))

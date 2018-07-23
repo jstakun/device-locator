@@ -256,7 +256,7 @@ public class RouteTrackingService extends Service {
                             if (location != null) {
                                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(service);
                                 long notificationSentMillis = settings.getLong("notificationSentMillis", 0);
-                                //sent notification olnly if not in silent mode and if last notification was at least sent 10 seconds ago
+                                //sent notification only if not in silent mode and if last notification was at least sent 10 seconds ago
                                 if (!service.silentMode && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
                                     settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).commit();
                                     if (StringUtils.isNotEmpty(service.phoneNumber)) {
@@ -293,6 +293,7 @@ public class RouteTrackingService extends Service {
                                         //send route point for online route tracking
                                         net.gmsworld.devicelocator.Utilities.Messenger.sendRoutePoint(service, location, 1, headers);
                                     }
+                                    //TODO add support for cloud notifications
                                 }
 
                                 //EXPERIMENTAL FEATURE audio transmitter

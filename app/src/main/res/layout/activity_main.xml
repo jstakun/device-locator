@@ -459,14 +459,19 @@
                             android:gravity="center"
                             android:text="Your Login" />
 
-                        <net.gmsworld.devicelocator.Views.KeyboardEditText
+                        <Spinner
+                            android:id="@+id/userAccounts"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"/>
+
+                        <!--net.gmsworld.devicelocator.Views.KeyboardEditText
                             android:id="@+id/userLogin"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:lines="1"
                             android:inputType="text"
                             android:maxLength="64"
-                            android:textColor="@color/gray"/>
+                            android:textColor="@color/gray"/-->
 
                     </LinearLayout>
 
