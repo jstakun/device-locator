@@ -31,7 +31,7 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
         // Get updated InstanceID token.
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed Firebase token: " + refreshedToken);
-        PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).apply();
         final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(PinActivity.DEVICE_PIN, "");
         if (StringUtils.isNotEmpty(pin)) {
             sendRegistrationToServer(this, refreshedToken, null, null, null);

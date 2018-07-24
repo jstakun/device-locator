@@ -91,4 +91,12 @@
     <string name="devices_list_empty">No devices found! Make sure to specify the same login in Device Manager card on all your devices.</string>
     <string name="devices_list_loading">Synchronizing devices...</string>
     <string name="devices_list_loading_failed">Device synchronization failed!</string>
+    <string name="devices">Devices</string>
+    <string name="device_name">This Device Name</string>
+    <string name="your_login">Your Login</string>
+    <string name="send_command_title">Send Command to Device</string>
+    <string name="command">Command</string>
+    <string name="device_security_pin">Device Security PIN</string>
+    <string name="command_arguments">Command Arguments</string>
+    <string name="device_icon">Device Icon</string>
 </resources>

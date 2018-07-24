@@ -13,7 +13,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
         android:layout_marginRight="6dp"
-        android:contentDescription="Device Icon"
+        android:contentDescription="@string/device_icon"
         android:src="@drawable/ic_small" />
 
     <TextView

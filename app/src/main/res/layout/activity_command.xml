@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            ldcard:title="Send Command to Device">
+            ldcard:title="@string/send_command_title">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -28,7 +28,7 @@
                 android:gravity="center"
                 android:paddingTop="15dp"
                 android:paddingBottom="8dp"
-                android:text="Command" />
+                android:text="@string/command" />
 
             <Spinner
                 android:id="@+id/deviceCommand"
@@ -49,7 +49,7 @@
                     android:id="@+id/devicePin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Device Security PIN"
+                    android:hint="@string/device_security_pin"
                     android:inputType="numberPassword"
                     android:maxLines="1"
                     android:maxLength="8"
@@ -63,7 +63,7 @@
                 android:layout_height="match_parent"
                 android:paddingTop="15dp"
                 android:gravity="center"
-                android:text="Command Arguments" />
+                android:text="@string/command_arguments" />
 
             <EditText
                 android:id="@+id/deviceCommandArgs"
@@ -81,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:backgroundTint="@color/colorPrimary"
-                android:text="Send"
+                android:text="@string/send"
                 android:textColor="@android:color/white" />
 
         </net.gmsworld.devicelocator.Views.LDCard>

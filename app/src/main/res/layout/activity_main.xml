@@ -433,7 +433,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
-                            android:text="This Device Name" />
+                            android:text="@string/device_name" />
 
                         <net.gmsworld.devicelocator.Views.KeyboardEditText
                             android:id="@+id/deviceName"
@@ -457,7 +457,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
-                            android:text="Your Login" />
+                            android:text="@string/your_login" />
 
                         <Spinner
                             android:id="@+id/userAccounts"

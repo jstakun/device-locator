@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         //paste Telegram id
         boolean telegramPaste = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("telegramPaste", false);
         if (telegramPaste) {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("telegramPaste", false).commit();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("telegramPaste", false).apply();
             final TextView telegramInput = this.findViewById(R.id.telegramId);
             //paste telegram id from clipboard
             try {
@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
                 }
                 //
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("loginTracker", true).commit();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("loginTracker", true).apply();
                 getSupportActionBar().invalidateOptionsMenu();
                 //open dialog to enable photo on failed login
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -388,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
-        editor.commit();
+        editor.apply();
     }
 
     private void onLoginTrackerItemSelected() {
@@ -404,10 +404,9 @@ public class MainActivity extends AppCompatActivity {
                     DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
                     if (devicePolicyManager != null) {
                         devicePolicyManager.removeActiveAdmin(deviceAdmin);
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putBoolean("loginTracker", false);
-                        editor.putBoolean("hiddenCamera", false);
-                        editor.commit();
+                        settings.edit().putBoolean("loginTracker", false)
+                                .putBoolean("hiddenCamera", false)
+                                .apply();
                         getSupportActionBar().invalidateOptionsMenu();
                         Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
                     } else {
@@ -452,7 +451,7 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("hiddenCamera", false).commit();
+                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("hiddenCamera", false).apply();
                     Toast.makeText(MainActivity.this, "Camera disabled", Toast.LENGTH_LONG).show();
                 }
             });
@@ -509,7 +508,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Something is wrong here with either empty pin:" + StringUtils.isEmpty(pin) + " or with empty Firebase token:" + StringUtils.isEmpty(firebaseToken));
             }
         } else {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).commit();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).apply();
         }
         //
 
@@ -1157,10 +1156,8 @@ public class MainActivity extends AppCompatActivity {
     private void initRemoteControl() {
         if (!running) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            final SharedPreferences.Editor editor = settings.edit();
             if (!settings.contains("smsDialog")) {
-                editor.putBoolean("smsDialog", true);
-                editor.commit();
+                settings.edit().putBoolean("smsDialog", true).apply();
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -1257,7 +1254,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.setPackage(appName);
                     //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
                     MainActivity.this.startActivity(intent);
-                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("telegramPaste",true).commit();
+                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("telegramPaste",true).apply();
                     Toast.makeText(MainActivity.this, "In order to get your Chat ID please select Device Locator bot now.", Toast.LENGTH_LONG).show();
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, appName + " not found on this device");
@@ -1368,15 +1365,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void saveData() {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putBoolean("running", this.running);
-        editor.putBoolean("motionDetectorRunning" , this.motionDetectorRunning);
-        editor.putInt("radius" , this.radius);
-        editor.putString("phoneNumber", phoneNumber);
-        editor.putString("email", email);
-        editor.putString("telegramId", telegramId);
-
-        editor.commit();
+        settings.edit().putBoolean("running", this.running)
+        .putBoolean("motionDetectorRunning" , this.motionDetectorRunning)
+        .putInt("radius" , this.radius)
+        .putString("phoneNumber", phoneNumber)
+        .putString("email", email)
+        .putString("telegramId", telegramId)
+        .apply();
     }
 
     private void restoreSavedData() {
@@ -1387,7 +1382,7 @@ public class MainActivity extends AppCompatActivity {
         String pin = settings.getString(DEVICE_PIN, "");
         if (StringUtils.isEmpty(pin)) {
             pin = RandomStringUtils.random(4, false, true);
-            settings.edit().putString(DEVICE_PIN, pin).commit();
+            settings.edit().putString(DEVICE_PIN, pin).apply();
         }
 
         this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
@@ -1489,7 +1484,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class DeviceArrayAdapter extends ArrayAdapter<Device> {
+    private static class DeviceArrayAdapter extends ArrayAdapter<Device> {
 
         private final Context context;
         private final List<Device> devices;
@@ -1502,18 +1497,31 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            //TODO add view holder
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            View rowView = inflater.inflate(R.layout.device_row, parent, false);
-            TextView deviceName = rowView.findViewById(R.id.deviceName);
+            ViewHolder viewHolder; // view lookup cache stored in tag
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(R.layout.device_row, parent, false);
+                viewHolder = new ViewHolder();
+                viewHolder.deviceName = convertView.findViewById(R.id.deviceName);
+                viewHolder.deviceDesc = convertView.findViewById(R.id.deviceDesc);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (ViewHolder) convertView.getTag();
+            }
+
             String name = devices.get(position).name;
             if (StringUtils.isEmpty(name)) {
                 name = devices.get(position).imei;
             }
-            deviceName.setText(name);
-            TextView deviceDesc = rowView.findViewById(R.id.deviceDesc);
-            deviceDesc.setText("Last edited on " + devices.get(position).creationDate.split("T")[0]);
-            return rowView;
+            viewHolder.deviceName.setText(name);
+            viewHolder.deviceDesc.setText("Last edited on " + devices.get(position).creationDate.split("T")[0]);
+
+            return convertView;
+        }
+
+        private static class ViewHolder {
+            TextView deviceName;
+            TextView deviceDesc;
         }
     }
 }

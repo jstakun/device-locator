@@ -35,7 +35,7 @@
                     android:hint="@string/enter_security_pin"
                     android:maxLength="8"
                     android:maxLines="1"
-                    android:paddingTop="8dp"
+                    android:paddingTop="16dp"
                     android:paddingBottom="8dp"
                     android:textColor="@color/gray"/>
 

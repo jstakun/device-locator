@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator.Views;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,22 +27,35 @@ public class CommandArrayAdapter extends ArrayAdapter<String> {
     }
 
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         return createView(position, convertView, parent);
     }
 
     @Override
-    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+    public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
         return createView(position, convertView, parent);
     }
 
     public View createView(int position, View convertView, ViewGroup parent) {
-        //TODO add view holder
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.command_row, parent, false);
-        TextView commandName = rowView.findViewById(R.id.commandName);
-        commandName.setText(getItem(position));
-        return rowView;
+        ViewHolder viewHolder; // view lookup cache stored in tag
+        if (convertView == null) {
+            // If there's no view to re-use, inflate a brand new view for row
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.command_row, parent, false);
+            viewHolder = new ViewHolder();
+            viewHolder.commandName = convertView.findViewById(R.id.commandName);
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
+
+        viewHolder.commandName.setText(getItem(position));
+        return convertView;
+    }
+
+    private static class ViewHolder {
+        TextView commandName;
     }
 }

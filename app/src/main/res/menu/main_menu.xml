@@ -12,7 +12,7 @@
         app:showAsAction="ifRoom|withText"/>
     <item
         android:id="@+id/devices"
-        android:title="Devices"
+        android:title="@string/devices"
         android:icon="@drawable/ic_devices_other_white_24dp"
         app:showAsAction="ifRoom|withText"/>
     <item

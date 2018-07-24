@@ -68,6 +68,7 @@ public class PinActivity extends AppCompatActivity {
                             .remove("pinFailedCount")
                             .putLong("pinVerificationMillis", System.currentTimeMillis())
                             .apply();
+                    finish();
                 } else if (input.length() == pin.length()) {
                     int pinFailedCount = PreferenceManager.getDefaultSharedPreferences(PinActivity.this).getInt("pinFailedCount", 0);
                     if (pinFailedCount == 2) {
@@ -89,7 +90,7 @@ public class PinActivity extends AppCompatActivity {
                     }
                     PreferenceManager.getDefaultSharedPreferences(PinActivity.this).edit()
                             .putInt("pinFailedCount", pinFailedCount+1)
-                            .commit();
+                            .apply();
                 }
             }
 
@@ -117,12 +118,6 @@ public class PinActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        finish();
     }
 
     private abstract class TextViewLinkHandler extends LinkMovementMethod {
