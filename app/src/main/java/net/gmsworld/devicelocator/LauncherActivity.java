@@ -22,7 +22,7 @@ public class LauncherActivity extends Activity {
 
         Intent showIntent;
 
-        if (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > 10 * 60 * 1000) {
+        if (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS) {
             showIntent = new Intent(this, PinActivity.class);
         } else {
             showIntent = new Intent(this, MainActivity.class);

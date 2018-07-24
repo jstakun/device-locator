@@ -737,12 +737,16 @@ public class MainActivity extends AppCompatActivity {
         List<String> accountNames = new ArrayList<String>();
         accountNames.add("");
 
-        String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
+        //add notification email to the list only if verified
+        String emailStatus = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("emailStatus", null);
+        if (!StringUtils.equalsIgnoreCase(emailStatus, "unverified") && StringUtils.isNotEmpty(email)) {
+            accountNames.add(email);
+        }
 
         if (Permissions.haveGetAccountsPermission(this)) {
             Account[] accounts = AccountManager.get(this).getAccounts(); //getAccountsByType("com.google");
             for (Account a : accounts) {
-                if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches()) {
+                if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.equalsIgnoreCase(a.name, email)) {
                    accountNames.add(a.name);
                 }
             }
@@ -751,10 +755,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         int index = 0;
-        for (int i = 0; i < accountNames.size(); i++) {
-            if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
-                index = i;
-                break;
+        if (accountNames.size() > 1) {
+            String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
+            for (int i = 0; i < accountNames.size(); i++) {
+                if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
+                    index = i;
+                    break;
+                }
             }
         }
 
@@ -1316,7 +1323,6 @@ public class MainActivity extends AppCompatActivity {
                         JsonArray devices = reply.getAsJsonObject().get("devices").getAsJsonArray();
                         if (devices.size() > 0) {
                             List<Device> userDevices = new ArrayList<Device>();
-                            //String thisDeviceId = Messenger.getDeviceId(MainActivity.this, false);
                             Iterator<JsonElement> iter = devices.iterator();
                             while (iter.hasNext()) {
                                 JsonObject deviceObject = iter.next().getAsJsonObject();

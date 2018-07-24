@@ -31,7 +31,9 @@ public class PinActivity extends AppCompatActivity {
 
     private static final String TAG = PinActivity.class.getSimpleName();
 
-    public static final int PIN_MIN_LENGTH = 4;
+    protected static final int PIN_MIN_LENGTH = 4;
+
+    protected static final int PIN_VALIDATION_MILLIS = 10 * 60 * 1000; //10 mins
 
     public static final String DEVICE_PIN = "token";
 
