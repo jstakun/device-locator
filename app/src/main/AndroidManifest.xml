@@ -35,15 +35,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
-            android:launchMode="singleTop"
-            android:windowSoftInputMode="stateAlwaysHidden">
+            android:name=".LauncherActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateAlwaysHidden"></activity>
+        <activity
+            android:name=".CommandActivity"
+            android:launchMode="singleTop"></activity>
 
         <service
             android:name=".Services.SmsSenderService"
@@ -113,7 +119,7 @@
             android:value="@integer/google_play_services_version"
             tools:replace="android:value" />
 
-        <activity android:name=".CommandActivity"></activity>
+        <activity android:name=".PinActivity"></activity>
     </application>
 
 </manifest>

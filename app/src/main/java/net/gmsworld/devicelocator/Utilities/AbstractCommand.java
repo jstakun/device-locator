@@ -9,7 +9,7 @@ import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
-import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -156,7 +156,7 @@ public abstract class AbstractCommand {
     private boolean findSmsCommand(Context context, String message, String command) {
         //<command><token> <args> or <command> <token> <args>
         commandTokens = message.split(" ");
-        final String token = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
+        final String token = PreferenceManager.getDefaultSharedPreferences(context).getString(PinActivity.DEVICE_PIN, "");
         if (commandTokens.length >= 1) {
             return (StringUtils.equalsIgnoreCase(commandTokens[0], command + token) || (StringUtils.equalsIgnoreCase(commandTokens[0], command) && StringUtils.equals(commandTokens[1], token)));
         } else {

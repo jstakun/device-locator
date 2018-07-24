@@ -24,7 +24,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
-import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
@@ -624,7 +624,7 @@ public class Messenger {
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.PIN_COMMAND:
-                final String pin = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_PIN, "");
+                final String pin = PreferenceManager.getDefaultSharedPreferences(context).getString(PinActivity.DEVICE_PIN, "");
                 if (StringUtils.isEmpty(pin)) {
                     text = "No Security PIN is set!";
                 } else {

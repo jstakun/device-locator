@@ -6,7 +6,7 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Messenger;
 
@@ -30,7 +30,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
             Map<String, String> message = remoteMessage.getData();
             if (message.containsKey("command") && message.containsKey("pin")) {
                 String pinRead = message.get("pin");
-                String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, null);
+                String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(PinActivity.DEVICE_PIN, null);
                 String command = message.get("command");
                 boolean pinValid = StringUtils.equals(pin, pinRead);
                 String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");

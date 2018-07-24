@@ -37,6 +37,7 @@ public class CommandArrayAdapter extends ArrayAdapter<String> {
     }
 
     public View createView(int position, View convertView, ViewGroup parent) {
+        //TODO add view holder
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.command_row, parent, false);
         TextView commandName = rowView.findViewById(R.id.commandName);

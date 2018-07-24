@@ -85,7 +85,7 @@ public class CommandActivity extends AppCompatActivity {
                         String content = "imei=" + imei;
                         content += "&command=" + command + "dlapp";
                         content += "&pin=" + pin;
-                        content += "&correlationId=" + Messenger.getDeviceId(CommandActivity.this, false) + "+=+" + settings.getString(MainActivity.DEVICE_PIN, "");
+                        content += "&correlationId=" + Messenger.getDeviceId(CommandActivity.this, false) + "+=+" + settings.getString(PinActivity.DEVICE_PIN, "");
                         if (needArgs && StringUtils.isNotEmpty(commandArgs)) {
                             try {
                                 content += "&args=" + URLEncoder.encode(commandArgs, "UTF-8");

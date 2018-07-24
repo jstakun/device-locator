@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ldcard="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PinActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <net.gmsworld.devicelocator.Views.LDCard
+                android:id="@+id/deviceCommandCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_marginTop="128dp"
+                ldcard:title="Device Locator Sing In">
+
+                <EditText
+                    android:id="@+id/verify_pin_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberPassword"
+                    android:lines="1"
+                    android:hint="@string/enter_security_pin"
+                    android:maxLength="8"
+                    android:maxLines="1"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:textColor="@color/gray"/>
+
+                <TextView
+                    android:id="@+id/verify_pin_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    />
+
+            </net.gmsworld.devicelocator.Views.LDCard>
+
+        </ScrollView>
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

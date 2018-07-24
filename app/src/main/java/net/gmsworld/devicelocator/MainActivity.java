@@ -9,7 +9,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -27,12 +26,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
-import android.text.InputFilter;
-import android.text.Layout;
-import android.text.Spannable;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
-import android.text.style.URLSpan;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -40,10 +35,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -93,6 +86,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static net.gmsworld.devicelocator.PinActivity.DEVICE_PIN;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -113,19 +108,14 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int MAX_RADIUS = 1000;
 
-    public static final int PIN_MIN_LENGTH = 4;
-
-    public static final String DEVICE_PIN = "token";
-
     private Boolean running = null;
 
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
     private boolean motionDetectorRunning = false;
-    private String phoneNumber = null, email = null, telegramId = null, pin = null;
+    private String phoneNumber = null, email = null, telegramId = null; //, pin = null;
 
     private final Handler loadingHandler = new UIHandler(this);
 
-    //private Messenger mMessenger;
     private boolean isTrackingServiceBound = false;
 
     private AlertDialog pinDialog;
@@ -140,10 +130,8 @@ public class MainActivity extends AppCompatActivity {
         restoreSavedData();
         initApp();
         toggleBroadcastReceiver(); //set broadcast receiver for sms
-        //scrollTop();
-        //mMessenger = new Messenger(loadingHandler);
         if (motionDetectorRunning) {
-            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, false, false);
+            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, false, false);
         }
 
         boolean isTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isTrackerShown", false);
@@ -178,13 +166,6 @@ public class MainActivity extends AppCompatActivity {
 
         updateUI();
 
-        //show pin dialog only if not shown in last 10 minutes
-        long pinVerificationMillis = PreferenceManager.getDefaultSharedPreferences(this).getLong("pinVerificationMillis", 0);
-        boolean settingsVerifyPin = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("settings_verify_pin", false);
-        if (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > 10 * 60 * 1000) {
-            showPinDialog();
-        }
-
         //paste Telegram id
         boolean telegramPaste = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("telegramPaste", false);
         if (telegramPaste) {
@@ -217,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         Log.d(TAG, "onDestroy()");
 
-        RouteTrackingServiceUtils.unbindRouteTrackingService(this, mConnection, isTrackingServiceBound);
+        RouteTrackingServiceUtils.unbindRouteTrackingService(this, null, isTrackingServiceBound);
 
         registerEmail((TextView) findViewById(R.id.email), false);
         registerTelegram((TextView) findViewById(R.id.telegramId));
@@ -496,13 +477,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        //((Button) this.findViewById(R.id.running_button)).setText((running) ? getString(R.string.stop) : getString(R.string.start));
-        //ViewCompat.setBackgroundTintList(this.findViewById(R.id.running_button), ColorStateList.valueOf(getResources().getColor((running) ? R.color.colorAccent : R.color.colorPrimary)));
-        //ViewCompat.setBackgroundTintList(this.findViewById(R.id.send_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-
-        //((Button) this.findViewById(R.id.motion_button)).setText((motionDetectorRunning) ? getString(R.string.stop) : getString(R.string.start));
-        //ViewCompat.setBackgroundTintList(this.findViewById(R.id.motion_button), ColorStateList.valueOf(getResources().getColor((motionDetectorRunning) ? R.color.colorAccent : R.color.colorPrimary)));
-
         ((Switch) this.findViewById(R.id.dlSmsSwitch)).setChecked(running);
         ((Switch) this.findViewById(R.id.dlTrackerSwitch)).setChecked(motionDetectorRunning);
 
@@ -521,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
         //enable Firebase
         if (!this.running) {
             final String firebaseToken = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
-            final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(MainActivity.DEVICE_PIN, "");
+            final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(DEVICE_PIN, "");
             if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(pin)) {
                 new Thread(new Runnable() {
                     public void run() {
@@ -606,7 +580,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             saveData();
-            RouteTrackingServiceUtils.stopRouteTrackingService(this, mConnection, isTrackingServiceBound, false, null, null, null, null);
+            RouteTrackingServiceUtils.stopRouteTrackingService(this, null, isTrackingServiceBound, false, null, null, null, null);
             updateUI();
         }
 
@@ -651,6 +625,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initTokenInput() {
         final TextView tokenInput = this.findViewById(R.id.token);
+        final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(PinActivity.DEVICE_PIN, "");
         tokenInput.setText(pin);
 
         tokenInput.addTextChangedListener(new TextWatcher() {
@@ -664,9 +639,9 @@ public class MainActivity extends AppCompatActivity {
                 String input = charSequence.toString();
                 try {
                     //token is 4 to 8 digits string
-                    if (input.length() >= PIN_MIN_LENGTH) {
+                    if (input.length() >= PinActivity.PIN_MIN_LENGTH) {
                         if (!StringUtils.equals(pin, input) && StringUtils.isNumeric(input)) {
-                            pin = input;
+                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(PinActivity.DEVICE_PIN, input).apply();
                             saveData();
                         }
                     }
@@ -685,7 +660,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
-                    if (v.getText().length() < PIN_MIN_LENGTH) {
+                    if (v.getText().length() < PinActivity.PIN_MIN_LENGTH) {
                         Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_LONG).show();
                         v.setText(pin);
                     }
@@ -702,7 +677,7 @@ public class MainActivity extends AppCompatActivity {
                     switch (keyCode) {
                         case KeyEvent.KEYCODE_BACK:
                             TextView tokenInput = (TextView)v;
-                            if (tokenInput.getText().length() < PIN_MIN_LENGTH) {
+                            if (tokenInput.getText().length() < PinActivity.PIN_MIN_LENGTH) {
                                 Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_LONG).show();
                                 tokenInput.setText(pin);
                             }
@@ -747,7 +722,7 @@ public class MainActivity extends AppCompatActivity {
                 saveData();
                 //update route tracking service if running
                 if (motionDetectorRunning) {
-                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
                 }
             }
         });
@@ -799,50 +774,6 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         });
-
-        //--------------------------------
-
-        //final TextView userLoginInput = this.findViewById(R.id.userLogin);
-        //String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
-        //if (userLogin != null) {
-        //    userLoginInput.setText(userLogin);
-        //}
-
-        /*userLoginInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(!hasFocus) {
-                    registerUserLogin(userLoginInput);
-                }
-            }
-        });
-
-        userLoginInput.setOnEditorActionListener(new EditText.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
-                    registerUserLogin(v);
-                }
-                return false;
-            }
-        });
-
-        userLoginInput.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                //Log.d(TAG, "Soft keyboard event " + keyCode);
-                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    switch (keyCode) {
-                        case KeyEvent.KEYCODE_BACK:
-                            registerUserLogin((TextView) v);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                return false;
-            }
-        });*/
     }
 
     private synchronized void registerUserLogin(Spinner userLoginSpinner) {
@@ -935,22 +866,6 @@ public class MainActivity extends AppCompatActivity {
         final TextView emailInput = this.findViewById(R.id.email);
         emailInput.setText(email);
 
-        /*emailInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                //newEmailAddress = charSequence.toString();
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });*/
-
         emailInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
@@ -1019,7 +934,7 @@ public class MainActivity extends AppCompatActivity {
                 saveData();
                 //update route tracking service if running
                 if (motionDetectorRunning) {
-                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
                 }
 
                 if (StringUtils.isNotEmpty(email)) {
@@ -1041,23 +956,6 @@ public class MainActivity extends AppCompatActivity {
     private void initTelegramInput() {
         final TextView telegramInput = this.findViewById(R.id.telegramId);
         telegramInput.setText(telegramId);
-
-        /*telegramInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                //newTelegramId = charSequence.toString();
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });*/
 
         telegramInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
@@ -1106,7 +1004,7 @@ public class MainActivity extends AppCompatActivity {
                 saveData();
                 //update route tracking service if running
                 if (motionDetectorRunning) {
-                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
                 }
 
                 if (StringUtils.isNotEmpty(telegramId)) {
@@ -1127,22 +1025,6 @@ public class MainActivity extends AppCompatActivity {
     private void initPhoneNumberInput() {
         final TextView phoneNumberInput = this.findViewById(R.id.phoneNumber);
         phoneNumberInput.setText(this.phoneNumber);
-
-        /*phoneNumberInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                //newPhoneNumber = charSequence.toString();
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-        });*/
 
         phoneNumberInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
@@ -1188,7 +1070,7 @@ public class MainActivity extends AppCompatActivity {
             phoneNumber = newPhoneNumber;
             saveData();
             if (motionDetectorRunning) {
-                RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, mConnection, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
             }
             if (!Permissions.haveSendSMSPermission(this)) {
                 Permissions.requestSendSMSAndLocationPermission(this);
@@ -1224,36 +1106,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-    /*private void initSendLocationButton() {
-        Button sendLocationButton = this.findViewById(R.id.send_button);
-
-        sendLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (phoneNumber != null && phoneNumber.length() > 0) {
-                    launchService();
-                } else {
-                    if (!Permissions.haveReadContactsPermission(MainActivity.this)) {
-                        Permissions.requestContactsPermission(MainActivity.this);
-                        Toast.makeText(getApplicationContext(), R.string.read_contacts_permission, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    if (!Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
-                        Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
-                        Toast.makeText(MainActivity.this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    Intent intent = new Intent(Intent.ACTION_PICK);
-                    intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-                    startActivityForResult(intent, SEND_LOCATION_INTENT);
-                }
-                MainActivity.this.clearFocus();
-            }
-        });
-    }*/
 
     private String getNumber(Intent data) {
         String number = null;
@@ -1334,13 +1186,11 @@ public class MainActivity extends AppCompatActivity {
     private void launchMotionDetectorService() {
         saveData();
         updateUI();
-        isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, mConnection, radius, phoneNumber, email, telegramId, true, false);
+        isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, true, false);
         Toast.makeText(getApplicationContext(), getString(R.string.motion_confirm, radius), Toast.LENGTH_LONG).show();
     }
 
     private void initRunningButton() {
-        //Button runningButton = this.findViewById(R.id.running_button);
-
         Switch title = this.findViewById(R.id.dlSmsSwitch);
 
         title.setOnClickListener(new View.OnClickListener() {
@@ -1353,8 +1203,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initMotionDetectorButton() {
-        //Button runningButton = this.findViewById(R.id.motion_button);
-
         Switch title = this.findViewById(R.id.dlTrackerSwitch);
 
         title.setOnClickListener(new View.OnClickListener() {
@@ -1516,7 +1364,6 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("running", this.running);
-        editor.putString(DEVICE_PIN, pin);
         editor.putBoolean("motionDetectorRunning" , this.motionDetectorRunning);
         editor.putInt("radius" , this.radius);
         editor.putString("phoneNumber", phoneNumber);
@@ -1531,10 +1378,10 @@ public class MainActivity extends AppCompatActivity {
 
         this.running = settings.getBoolean("running", false);
         //this.keyword = settings.getString("keyword", "");
-        this.pin = settings.getString(DEVICE_PIN, "");
-        if (StringUtils.isEmpty(this.pin)) {
-            this.pin = RandomStringUtils.random(4, false, true);
-            settings.edit().putString(DEVICE_PIN, this.pin).commit();
+        String pin = settings.getString(DEVICE_PIN, "");
+        if (StringUtils.isEmpty(pin)) {
+            pin = RandomStringUtils.random(4, false, true);
+            settings.edit().putString(DEVICE_PIN, pin).commit();
         }
 
         this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
@@ -1547,115 +1394,12 @@ public class MainActivity extends AppCompatActivity {
         this.telegramId = settings.getString("telegramId", "");
         //testing use count
         int useCount = settings.getInt("useCount", 0);
-        settings.edit().putInt("useCount", useCount+1).commit();
+        settings.edit().putInt("useCount", useCount+1).apply();
     }
 
     private void setupToolbar(int toolbarId) {
         final Toolbar toolbar = findViewById(toolbarId);
         setSupportActionBar(toolbar);
-    }
-
-    private void showPinDialog() {
-        //TODO change to activity
-        if (pinDialog == null) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-            LayoutInflater li = LayoutInflater.from(this);
-            View pinView = li.inflate(R.layout.verify_pin_dialog, null);
-
-            final EditText tokenInput = pinView.findViewById(R.id.verify_pin_edit);
-
-            tokenInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(pin.length())});
-
-            tokenInput.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    String input = charSequence.toString();
-                    if (StringUtils.equals(input, pin)) {
-                        //Log.d(TAG, "Security PIN verified!");
-                        pinDialog.dismiss();
-                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
-                                .remove("pinFailedCount")
-                                .putLong("pinVerificationMillis", System.currentTimeMillis())
-                                .apply();
-                    } else if (input.length() == pin.length()) {
-                        int pinFailedCount = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getInt("pinFailedCount", 0);
-                        if (pinFailedCount == 2) {
-                            pinFailedCount = -1;
-                            //send failed login notification
-                            Log.d(TAG, "Wrong pin has been entered to unlock the app. SENDING NOTIFICATION!");
-                            Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
-                            newIntent.putExtra("phoneNumber", phoneNumber);
-                            newIntent.putExtra("email", email);
-                            newIntent.putExtra("telegramId", telegramId);
-                            newIntent.putExtra("source", DeviceAdminEventReceiver.SOURCE);
-                            MainActivity.this.startService(newIntent);
-                            if (PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getBoolean("hiddenCamera", false)) {
-                                Intent cameraIntent = new Intent(MainActivity.this, HiddenCaptureImageService.class);
-                                MainActivity.this.startService(cameraIntent);
-                            } else {
-                                Log.d(TAG, "Camera is disable. No photo will be taken");
-                            }
-                        }
-                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
-                                .putInt("pinFailedCount", pinFailedCount+1)
-                                .commit();
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable editable) {
-
-                }
-            });
-
-            final TextView helpText = pinView.findViewById(R.id.verify_pin_text);
-            helpText.setText(Html.fromHtml(getString(R.string.pinLink)));
-            helpText.setMovementMethod(new TextViewLinkHandler() {
-                @Override
-                public void onLinkClick(String url) {
-                    if (StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(phoneNumber)) {
-                        Bundle extras = new Bundle();
-                        extras.putString("telegramId", telegramId);
-                        extras.putString("command", Command.PIN_COMMAND);
-                        extras.putString("phoneNumber", phoneNumber);
-                        extras.putString("email", email);
-                        Messenger.sendCommandMessage(MainActivity.this, extras);
-                        Toast.makeText(MainActivity.this, "Security PIN has been sent to notifiers", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, "No notifier has been set. Unable to send Security PIN.", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-
-            builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-
-            builder.setView(pinView);
-
-            //builder.setCancelable(false);
-
-            pinDialog = builder.create();
-
-            pinDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-
-                public void onCancel(DialogInterface dialog) {
-                    //Log.d(TAG, "Closing App!");
-                    MainActivity.this.finish();
-                }
-            });
-        }
-
-        //show keyboard
-        if (pinDialog.getWindow() != null) {
-            pinDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        }
-
-        pinDialog.show();
     }
 
     public static void setListViewHeightBasedOnChildren(ListView listView) {
@@ -1689,29 +1433,6 @@ public class MainActivity extends AppCompatActivity {
             default: break;
         }
     }
-
-
-        //----------------------------- route tracking service -----------------------------------
-
-    private final ServiceConnection mConnection = null; /*new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName arg0, IBinder service) {
-            try {
-                Message msg = Message.obtain(null, RouteTrackingService.COMMAND_REGISTER_CLIENT);
-                msg.replyTo = mMessenger;
-                new Messenger(service).send(msg);
-            }
-            catch (Exception e) {
-                Log.e(TAG, e.getMessage(), e);
-            }
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-        }
-    };*/
 
     private static class UIHandler extends Handler {
 
@@ -1762,35 +1483,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private abstract class TextViewLinkHandler extends LinkMovementMethod {
-
-        public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
-            if (event.getAction() != MotionEvent.ACTION_UP)
-                return super.onTouchEvent(widget, buffer, event);
-
-            int x = (int) event.getX();
-            int y = (int) event.getY();
-
-            x -= widget.getTotalPaddingLeft();
-            y -= widget.getTotalPaddingTop();
-
-            x += widget.getScrollX();
-            y += widget.getScrollY();
-
-            Layout layout = widget.getLayout();
-            int line = layout.getLineForVertical(y);
-            int off = layout.getOffsetForHorizontal(line, x);
-
-            URLSpan[] link = buffer.getSpans(off, off, URLSpan.class);
-            if (link.length != 0) {
-                onLinkClick(link[0].getURL());
-            }
-            return true;
-        }
-
-        abstract public void onLinkClick(String url);
-    }
-
     private class DeviceArrayAdapter extends ArrayAdapter<Device> {
 
         private final Context context;
@@ -1802,9 +1494,9 @@ public class MainActivity extends AppCompatActivity {
             this.devices = devices;
         }
 
-
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            //TODO add view holder
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View rowView = inflater.inflate(R.layout.device_row, parent, false);
             TextView deviceName = rowView.findViewById(R.id.deviceName);
