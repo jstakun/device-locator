@@ -385,10 +385,9 @@ public class Command {
 
         @Override
         protected void onAppCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("app", "app");
+            routeTracingService.putExtra("app", sender);
             context.startService(routeTracingService);
         }
     }

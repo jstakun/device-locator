@@ -581,7 +581,7 @@ public class Messenger {
                 if (size > 1) {
                     text = "Check your route at " + RouteTrackingServiceUtils.getRouteUrl(context);
                 } else if (size == 0) {
-                    text = "No route points has been recorder yet. Try again later.";
+                    text = "No route points has been recorded yet. Try again later.";
                 } else if (size < 0) {
                     text = "No route points has been uploaded yet. Try again later.";
                 }

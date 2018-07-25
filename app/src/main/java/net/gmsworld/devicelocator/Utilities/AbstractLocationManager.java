@@ -1,7 +1,6 @@
 package net.gmsworld.devicelocator.Utilities;
 
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -18,7 +17,6 @@ import net.gmsworld.devicelocator.Model.FeatureCollection;
 import net.gmsworld.devicelocator.Model.Geometry;
 import net.gmsworld.devicelocator.Model.Properties;
 import net.gmsworld.devicelocator.R;
-import net.gmsworld.devicelocator.Services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -247,9 +245,9 @@ public abstract class AbstractLocationManager {
         return Math.abs(altitude - avg) < MAX_REASONABLE_ALTITUDECHANGE;
     }
 
-    public void executeRouteUploadTask(Context activity, String phoneNumber, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
+    public void executeRouteUploadTask(Context activity, boolean isBackground, Network.OnGetFinishListener onGetFinishListener) {
         if (Network.isNetworkAvailable(activity)) {
-            new RouteUploadTask(activity, phoneNumber, smsNotify, onGetFinishListener).execute();
+            new RouteUploadTask(activity, isBackground, onGetFinishListener).execute();
         } else {
             Toast.makeText(activity, R.string.no_network_error, Toast.LENGTH_LONG).show();
         }
@@ -257,20 +255,18 @@ public abstract class AbstractLocationManager {
 
     static class RouteUploadTask extends AsyncTask<Void, Integer, Integer> {
         private final WeakReference<Context> callerActivity;
-        private final String phoneNumber;
         private final Network.OnGetFinishListener onGetFinishListener;
-        private final boolean smsNotify;
+        private final boolean isBackground;
 
-        RouteUploadTask(Context activity, String phoneNumber, boolean smsNotify, Network.OnGetFinishListener onGetFinishListener) {
+        RouteUploadTask(Context activity, boolean isBackground, Network.OnGetFinishListener onGetFinishListener) {
             this.callerActivity = new WeakReference<>(activity);
-            this.phoneNumber = phoneNumber;
-            this.smsNotify = smsNotify;
+            this.isBackground = isBackground;
             this.onGetFinishListener = onGetFinishListener;
         }
 
         @Override
         public void onPreExecute () {
-            if (!smsNotify) {
+            if (!isBackground) {
                 Context activity = callerActivity.get();
                 if (activity == null) {
                     return;
@@ -285,7 +281,7 @@ public abstract class AbstractLocationManager {
             if (activity == null) {
                 return -1;
             } else {
-                return uploadRouteToServer(activity, phoneNumber, smsNotify, onGetFinishListener);
+                return uploadRouteToServer(activity, onGetFinishListener);
             }
         }
 
@@ -295,20 +291,15 @@ public abstract class AbstractLocationManager {
             if (activity == null) {
                 return;
             }
-            if (routeSize <= 1 && !smsNotify) {
+            if (routeSize <= 1 && !isBackground) {
                 Toast.makeText(activity, "No route is saved yet. Please make sure device location tracking is started and try again after some time.", Toast.LENGTH_LONG).show();
             }
         }
 
-        private Integer uploadRouteToServer(final Context context, final String phoneNumber, final boolean smsNotify, Network.OnGetFinishListener onFinishListener) {
+        private Integer uploadRouteToServer(final Context context, Network.OnGetFinishListener onFinishListener) {
             List<String> route = Files.readFileByLinesFromContextDir(ROUTE_FILE, context);
             final int size = route.size();
             Log.d(TAG, "Route has " + size + " points");
-            final Intent newIntent = new Intent(context, SmsSenderService.class);
-            if (smsNotify) {
-                newIntent.putExtra("phoneNumber", phoneNumber);
-                newIntent.putExtra("command", Command.ROUTE_COMMAND);
-            }
             if (size > 1) {
                 try {
                     String deviceId = Messenger.getDeviceId(context, true);
@@ -325,17 +316,9 @@ public abstract class AbstractLocationManager {
                     Network.post(context, url, "route=" + content, null, headers, onFinishListener);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
-                    if (smsNotify) {
-                        newIntent.putExtra("size", -1);
-                        context.startService(newIntent);
-                    }
                 }
             } else {
                 Log.d(TAG, "Route must have at least 2 points. Currently it has " + size);
-                if (smsNotify) {
-                    newIntent.putExtra("size", 0);
-                    context.startService(newIntent);
-                }
             }
             return size;
         }

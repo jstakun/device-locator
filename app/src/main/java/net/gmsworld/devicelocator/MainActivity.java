@@ -1098,7 +1098,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (Files.hasRoutePoints(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
-                    GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, null, false, new Network.OnGetFinishListener() {
+                    GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: "+ responseCode + " from url " + url);

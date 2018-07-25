@@ -21,6 +21,7 @@ import net.gmsworld.devicelocator.Audio.morse.MorseSoundGenerator;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.Utilities.Command;
+import net.gmsworld.devicelocator.Utilities.Files;
 import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
@@ -99,10 +100,10 @@ public class RouteTrackingService extends Service {
                         stopSelf();
                         break;
                     case COMMAND_ROUTE:
-                        shareRoute(intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), false);
+                        shareRoute(intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), intent.getStringExtra("app"), false);
                         break;
                     case COMMAND_STOP_SHARE:
-                        shareRoute(intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), true);
+                        shareRoute(intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), intent.getStringExtra("app"), true);
                         break;
                     case COMMAND_CONFIGURE:
                         this.phoneNumber = intent.getStringExtra("phoneNumber");
@@ -189,35 +190,55 @@ public class RouteTrackingService extends Service {
         PreferenceManager.getDefaultSharedPreferences(this).edit().remove("routeTitle").apply();
     }
 
-    private void shareRoute(final String phoneNumber, final String telegramId, final String email, final boolean stopSelf) {
+    private void shareRoute(final String phoneNumber, final String telegramId, final String email, final String app, final boolean stopSelf) {
         Log.d(TAG, "shareRoute()");
-        GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, phoneNumber, true, new Network.OnGetFinishListener() {
-            @Override
-            public void onGetFinish(String results, int responseCode, String url) {
-                Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                final Intent newIntent = new Intent(RouteTrackingService.this, SmsSenderService.class);
-                if (StringUtils.isNotEmpty(phoneNumber)) {
-                    newIntent.putExtra("phoneNumber", phoneNumber);
-                } else {
-                    if (StringUtils.isNotEmpty(telegramId)) {
-                        newIntent.putExtra("telegramId", telegramId);
+        if (Files.hasRoutePoints(AbstractLocationManager.ROUTE_FILE, this, 2)) {
+            GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, true, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                    final Intent newIntent = new Intent(RouteTrackingService.this, SmsSenderService.class);
+                    if (StringUtils.isNotEmpty(phoneNumber)) {
+                        newIntent.putExtra("phoneNumber", phoneNumber);
+                    } else {
+                        if (StringUtils.isNotEmpty(telegramId)) {
+                            newIntent.putExtra("telegramId", telegramId);
+                        }
+                        if (StringUtils.isNotEmpty(email)) {
+                            newIntent.putExtra("email", email);
+                        }
                     }
-                    if (StringUtils.isNotEmpty(email)) {
-                        newIntent.putExtra("email", email);
+                    if (StringUtils.isNotEmpty(app)) {
+                        newIntent.putExtra("app", app);
+                    }
+                    newIntent.putExtra("command", Command.ROUTE_COMMAND);
+                    if (responseCode == 200) {
+                        newIntent.putExtra("size", 2); //we know only size > 1
+                    } else {
+                        newIntent.putExtra("size", -1);
+                    }
+                    RouteTrackingService.this.startService(newIntent);
+                    if (stopSelf) {
+                        RouteTrackingService.this.stopSelf();
                     }
                 }
-                newIntent.putExtra("command", Command.ROUTE_COMMAND);
-                if (responseCode == 200) {
-                    newIntent.putExtra("size", 2); //we know only size > 1
-                } else {
-                    newIntent.putExtra("size", -1);
+            });
+        } else {
+            final Intent newIntent = new Intent(RouteTrackingService.this, SmsSenderService.class);
+            if (StringUtils.isNotEmpty(phoneNumber)) {
+                newIntent.putExtra("phoneNumber", phoneNumber);
+            } else {
+                if (StringUtils.isNotEmpty(telegramId)) {
+                    newIntent.putExtra("telegramId", telegramId);
                 }
-                RouteTrackingService.this.startService(newIntent);
-                if (stopSelf) {
-                    RouteTrackingService.this.stopSelf();
+                if (StringUtils.isNotEmpty(email)) {
+                    newIntent.putExtra("email", email);
                 }
             }
-        });
+            newIntent.putExtra("command", Command.ROUTE_COMMAND);
+            newIntent.putExtra("size", 0);
+            startService(newIntent);
+        }
     }
 
     private static class IncomingHandler extends Handler {
