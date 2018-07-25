@@ -45,7 +45,7 @@ public class Command {
     public final static String ROUTE_COMMAND = "routedl"; //r share currently recorded route
     public final static String SHARE_COMMAND = "locatedl"; //l hare current location via sms
     public final static String MUTE_COMMAND = "mutedl"; //m mute phone
-    public final static String UNMUTE_COMMAND = "normaldl"; //um unmute phone
+    public final static String UNMUTE_COMMAND = "unmutedl"; //um unmute phone
     public final static String CALL_COMMAND = "calldl"; //c call to sender
     public final static String RADIUS_COMMAND = "radiusdl"; //ra change tracking radius, usage radiusdl x where is number of meters > 0
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //g set high gps accuracy

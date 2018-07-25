@@ -561,7 +561,7 @@ public class Messenger {
                 text = "Device has been muted.";
                 break;
             case Command.UNMUTE_COMMAND:
-                text = "Device has been set to normal audio settings.";
+                text = "Device has been unmuted.";
                 break;
             case Command.RADIUS_COMMAND:
                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);

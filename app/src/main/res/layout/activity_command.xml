@@ -9,7 +9,10 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:id="@+id/commandView">
 
         <ScrollView
             android:layout_width="match_parent"
@@ -38,11 +41,19 @@
                 android:entries="@array/device_commands"
                 android:prompt="@string/device_command_prompt"/>
 
+            <TextView
+                android:id="@+id/docs_link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"/>
+
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="8dp"
-                android:paddingTop="15dp"
+                android:paddingTop="16dp"
                 ldcard:passwordToggleEnabled="true">
 
                 <net.gmsworld.devicelocator.Views.KeyboardEditText

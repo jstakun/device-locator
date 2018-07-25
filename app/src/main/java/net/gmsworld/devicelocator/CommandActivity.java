@@ -4,11 +4,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import net.gmsworld.devicelocator.Utilities.AbstractCommand;
@@ -48,6 +51,12 @@ public class CommandActivity extends AppCompatActivity {
         final EditText args = (EditText) findViewById(R.id.deviceCommandArgs);
 
         final Button send = findViewById(R.id.sendDeviceCommand);
+
+        TextView commandLink = findViewById(R.id.docs_link);
+        commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
+        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
+
+        findViewById(R.id.commandView).requestFocus();
 
         String savedPin = settings.getString(imei + "_pin", "");
         if (savedPin.length() >= 4) {
