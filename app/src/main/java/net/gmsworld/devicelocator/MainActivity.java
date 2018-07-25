@@ -20,6 +20,7 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -1097,8 +1098,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (Files.hasRoutePoints(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
-                    final String title = RouteTrackingServiceUtils.getRouteId(MainActivity.this);
-                    GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, title, null, false, new Network.OnGetFinishListener() {
+                    GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, null, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
                             Log.d(TAG, "Received following response code: "+ responseCode + " from url " + url);
@@ -1424,7 +1424,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS:
                      if (Permissions.haveGetAccountsPermission(this)) {
@@ -1459,21 +1459,19 @@ public class MainActivity extends AppCompatActivity {
                         }
                         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
                         activity.startActivity(browserIntent);
-                        String message = "Check your route at " + showRouteUrl;
+                        final Intent newIntent = new Intent(activity, SmsSenderService.class);
                         if (StringUtils.isNotEmpty(activity.phoneNumber)) {
-                            Messenger.sendSMS(activity, activity.phoneNumber, message);
-                        }
-                        if (StringUtils.isNotEmpty(activity.email)) {
-                            String msgtitle = activity.getString(R.string.message);
-                            String deviceId = Messenger.getDeviceId(activity, true);
-                            if (deviceId != null) {
-                                msgtitle += " installed on device " + deviceId + " - route map link";
-                            }
-                            Messenger.sendEmail(activity, null, activity.email, message, msgtitle, 1, new HashMap<String, String>());
+                            newIntent.putExtra("phoneNumber", activity.phoneNumber);
                         }
                         if (StringUtils.isNotEmpty(activity.telegramId)) {
-                            Messenger.sendTelegram(activity, null, activity.telegramId, message, 1, new HashMap<String, String>());
+                            newIntent.putExtra("telegramId", activity.telegramId);
                         }
+                        if (StringUtils.isNotEmpty(activity.email)) {
+                            newIntent.putExtra("email", activity.email);
+                        }
+                        newIntent.putExtra("command", Command.ROUTE_COMMAND);
+                        newIntent.putExtra("size", 2); //we know only size > 1
+                        activity.startService(newIntent);
                     } else {
                         Toast.makeText(activity, "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
                     }
@@ -1495,8 +1493,9 @@ public class MainActivity extends AppCompatActivity {
             this.devices = devices;
         }
 
+        @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
             ViewHolder viewHolder; // view lookup cache stored in tag
             if (convertView == null) {
                 LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

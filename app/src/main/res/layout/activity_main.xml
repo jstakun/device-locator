@@ -147,7 +147,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                ldcard:title="Location SMS messages">
+                ldcard:title="Location messages">
 
                <Switch
                     android:id="@+id/settings_detected_sms"

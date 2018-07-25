@@ -150,7 +150,7 @@ public class Command {
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, silentMode);
-                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+                settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -168,7 +168,7 @@ public class Command {
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, false);
-                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+                settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -186,7 +186,7 @@ public class Command {
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, false);
-                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+                settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -211,7 +211,7 @@ public class Command {
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
-                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+                settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -235,7 +235,7 @@ public class Command {
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
-                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+                settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -253,7 +253,7 @@ public class Command {
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
-                settings.edit().putBoolean("motionDetectorRunning", true).commit();
+                settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -282,7 +282,7 @@ public class Command {
             } else {
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
             }
-            settings.edit().putBoolean("motionDetectorRunning", false).commit();
+            settings.edit().putBoolean("motionDetectorRunning", false).apply();
             sendSmsNotification(context, sender, STOP_COMMAND);
         }
 
@@ -298,7 +298,7 @@ public class Command {
             } else {
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
             }
-            settings.edit().putBoolean("motionDetectorRunning", false).commit();
+            settings.edit().putBoolean("motionDetectorRunning", false).apply();
             sendSocialNotification(context, STOP_COMMAND);
         }
 
@@ -314,7 +314,7 @@ public class Command {
             } else {
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
             }
-            settings.edit().putBoolean("motionDetectorRunning", false).commit();
+            settings.edit().putBoolean("motionDetectorRunning", false).apply();
             sendAppNotification(context, STOP_COMMAND, sender);
         }
     }
@@ -370,7 +370,6 @@ public class Command {
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
             routeTracingService.putExtra("phoneNumber", sender);
-            routeTracingService.putExtra("title", RouteTrackingServiceUtils.getRouteId(context));
             context.startService(routeTracingService);
         }
 
@@ -379,7 +378,6 @@ public class Command {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("title", RouteTrackingServiceUtils.getRouteId(context));
             routeTracingService.putExtra("telegramId", settings.getString("telegramId", ""));
             routeTracingService.putExtra("email", settings.getString("email", ""));
             context.startService(routeTracingService);
@@ -390,7 +388,6 @@ public class Command {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("title", RouteTrackingServiceUtils.getRouteId(context));
             routeTracingService.putExtra("app", "app");
             context.startService(routeTracingService);
         }
@@ -535,7 +532,7 @@ public class Command {
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
-            settings.edit().putInt("radius", radius).commit();
+            settings.edit().putInt("radius", radius).apply();
             sendSmsNotification(context, sender, RADIUS_COMMAND);
         }
 
@@ -547,7 +544,7 @@ public class Command {
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
-            settings.edit().putInt("radius", radius).commit();
+            settings.edit().putInt("radius", radius).apply();
             sendSocialNotification(context, RADIUS_COMMAND);
         }
 
@@ -559,7 +556,7 @@ public class Command {
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
-            settings.edit().putInt("radius", radius).commit();
+            settings.edit().putInt("radius", radius).apply();
             sendAppNotification(context, RADIUS_COMMAND, sender);
         }
     }
@@ -572,19 +569,19 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).apply();
             sendSmsNotification(context, sender, AUDIO_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).apply();
             sendSocialNotification(context, AUDIO_COMMAND);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).apply();
             sendSocialNotification(context, AUDIO_COMMAND);
         }
     }
@@ -597,19 +594,19 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).apply();
             sendSmsNotification(context, sender, AUDIO_OFF_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).apply();
             sendSocialNotification(context, AUDIO_OFF_COMMAND);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).apply();
             sendSocialNotification(context, AUDIO_OFF_COMMAND);
         }
     }
@@ -622,21 +619,21 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).apply();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
             sendSmsNotification(context, sender, GPS_HIGH_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).apply();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
             sendSocialNotification(context, GPS_HIGH_COMMAND);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).apply();
             sendAppNotification(context, GPS_HIGH_COMMAND, sender);
         }
     }
@@ -649,20 +646,20 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).apply();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_BALANCED);
             sendSmsNotification(context, sender, GPS_BALANCED_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).apply();
             sendSocialNotification(context, GPS_BALANCED_COMMAND);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).commit();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).apply();
             sendAppNotification(context, GPS_BALANCED_COMMAND, sender);
         }
     }
@@ -740,7 +737,7 @@ public class Command {
                 } else {
                     telegramId = settings.getString("telegramId", "");
                 }
-                editor.commit();
+                editor.apply();
 
                 int radius = settings.getInt("radius", 100);
 
@@ -791,7 +788,7 @@ public class Command {
                 } else {
                     telegramId = settings.getString("telegramId", "");
                 }
-                editor.commit();
+                editor.apply();
 
                 int radius = settings.getInt("radius", 100);
 
@@ -841,7 +838,7 @@ public class Command {
                 } else {
                     telegramId = settings.getString("telegramId", "");
                 }
-                editor.commit();
+                editor.apply();
 
                 int radius = settings.getInt("radius", 100);
 
@@ -1074,11 +1071,11 @@ public class Command {
 
         private void showMessageNotification(Context context) {
             String message = StringUtils.join(commandTokens, " ", 1, commandTokens.length);
-            //Log.d(TAG, "Show notification with message " + message);
-            Notification notification =  NotificationUtils.buildMessageNotification(context, message);
+            int notificationId = (int)System.currentTimeMillis();
+            Notification notification =  NotificationUtils.buildMessageNotification(context, notificationId, message);
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager != null) {
-                notificationManager.notify((int)System.currentTimeMillis(), notification);
+                notificationManager.notify(notificationId, notification);
             }
         }
     }

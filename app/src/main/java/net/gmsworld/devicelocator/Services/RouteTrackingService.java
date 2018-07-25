@@ -99,10 +99,10 @@ public class RouteTrackingService extends Service {
                         stopSelf();
                         break;
                     case COMMAND_ROUTE:
-                        shareRoute(intent.getStringExtra("title"), intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), false);
+                        shareRoute(intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), false);
                         break;
                     case COMMAND_STOP_SHARE:
-                        shareRoute(intent.getStringExtra("title"), intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), true);
+                        shareRoute(intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), true);
                         break;
                     case COMMAND_CONFIGURE:
                         this.phoneNumber = intent.getStringExtra("phoneNumber");
@@ -186,12 +186,12 @@ public class RouteTrackingService extends Service {
         //use smart location lib
         GmsSmartLocationManager.getInstance().disable(IncomingHandler.class.getName(), this);
 
-        PreferenceManager.getDefaultSharedPreferences(this).edit().remove("routeTitle").commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().remove("routeTitle").apply();
     }
 
-    private void shareRoute(final String title, final String phoneNumber, final String telegramId, final String email, final boolean stopSelf) {
+    private void shareRoute(final String phoneNumber, final String telegramId, final String email, final boolean stopSelf) {
         Log.d(TAG, "shareRoute()");
-        GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, title, phoneNumber, true, new Network.OnGetFinishListener() {
+        GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, phoneNumber, true, new Network.OnGetFinishListener() {
             @Override
             public void onGetFinish(String results, int responseCode, String url) {
                 Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
@@ -207,7 +207,6 @@ public class RouteTrackingService extends Service {
                     }
                 }
                 newIntent.putExtra("command", Command.ROUTE_COMMAND);
-                newIntent.putExtra("title", title);
                 if (responseCode == 200) {
                     newIntent.putExtra("size", 2); //we know only size > 1
                 } else {
@@ -254,11 +253,12 @@ public class RouteTrackingService extends Service {
                             Location location = (Location) msg.obj;
                             int distance = msg.arg1;
                             if (location != null) {
+                                //TODO move this to sms sender service
                                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(service);
                                 long notificationSentMillis = settings.getLong("notificationSentMillis", 0);
                                 //sent notification only if not in silent mode and if last notification was at least sent 10 seconds ago
                                 if (!service.silentMode && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
-                                    settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).commit();
+                                    settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).apply();
                                     if (StringUtils.isNotEmpty(service.phoneNumber)) {
                                         if (settings.getBoolean("settings_gps_sms", false)) {
                                             net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(service, location, true, service.phoneNumber, null, null, null);
@@ -295,6 +295,7 @@ public class RouteTrackingService extends Service {
                                     }
                                     //TODO add support for cloud notifications
                                 }
+                                //
 
                                 //EXPERIMENTAL FEATURE audio transmitter
                                 //you should plug antenna to your device audio transmitter

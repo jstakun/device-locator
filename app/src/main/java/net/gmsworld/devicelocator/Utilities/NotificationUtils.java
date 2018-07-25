@@ -44,31 +44,39 @@ public class NotificationUtils {
                 .build();
     }
 
-    public static Notification buildMessageNotification(Context context, String message) {
-        //TODO for location and maps message create maps intent
-        //TODO for web links like photo or route create web browser intent
+    public static Notification buildMessageNotification(Context context, int notificationId, String message) {
+        PendingIntent contentIntent = null;
+        String[] tokens = message.split("\\s+");
 
-        //Intent notificationIntent = new Intent(context, MainActivity.class);
-        //PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        for (int i=0;i<tokens.length;i++) {
+            if (tokens[i].startsWith("http://") || tokens[i].startsWith("https://")) {
+                Uri webpage = Uri.parse(tokens[i]);
+                Intent notificationIntent = new Intent(Intent.ACTION_VIEW, webpage);
+                contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
+        }
 
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);
 
         Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        return new Notification.Builder(context)
+        Notification.Builder nb = new Notification.Builder(context)
                 .setContentTitle("Device Locator Notification")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_small)
                 .setLargeIcon(icon)
                 .setStyle(new Notification.BigTextStyle().bigText(message))
-                .setSound(notificationUri)
+                .setSound(notificationUri);
                 //.setPriority(1)
-                //.setSound()
                 //.setCategory(Notification.CATEGORY_MESSAGE) //API 21
-                //.setContentIntent(contentIntent)
-                //.setOngoing(true)
+                //.setOngoing(false)
                 //.setPublicVersion(publicNotification) //API 21
-                .build();
+
+        if (contentIntent != null) {
+            nb.setContentIntent(contentIntent);
+        }
+
+        return nb.build();
     }
 
     public static void notify(Context context, int notificationId) {

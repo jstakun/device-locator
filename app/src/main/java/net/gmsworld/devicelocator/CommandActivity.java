@@ -41,7 +41,6 @@ public class CommandActivity extends AppCompatActivity {
 
         final String imei = getIntent().getStringExtra("imei");
 
-        //TODO use user friendly command names
         final Spinner spinner = (Spinner) findViewById(R.id.deviceCommand);
         final CommandArrayAdapter commands = new CommandArrayAdapter(this, R.layout.command_row,  getResources().getStringArray(R.array.device_commands));
         spinner.setAdapter(commands);

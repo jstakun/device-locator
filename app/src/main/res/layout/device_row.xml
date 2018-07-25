@@ -23,7 +23,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_toRightOf="@id/deviceIcon"
-        android:textSize="16dp" />
+        android:textSize="12sp" />
 
     <TextView
         android:id="@+id/deviceName"
@@ -35,7 +35,7 @@
         android:layout_alignWithParentIfMissing="true"
         android:layout_toRightOf="@id/deviceIcon"
         android:gravity="center_vertical"
-        android:textSize="20dp" />
+        android:textSize="16sp" />
 
 </RelativeLayout>
 

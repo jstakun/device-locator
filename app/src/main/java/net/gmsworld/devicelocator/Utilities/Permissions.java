@@ -99,9 +99,15 @@ public class Permissions {
                 //ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
     }
 
+    public static boolean haveReadPhoneStatePermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
+    }
+
     public static boolean haveCallPhonePermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED; // &&
     }
+
+
 
     public static void setPermissionNotification(Context context) {
         Intent resultIntent = new Intent(context, MainActivity.class);

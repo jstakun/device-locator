@@ -164,7 +164,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
             }
         } else {
             Toast.makeText(this, "Camera enabled", Toast.LENGTH_LONG).show();
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).commit();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).apply();
         }
 
         stopSelf();
@@ -177,7 +177,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                 //Camera open failed. Probably because another application is using the camera
                 Log.e(TAG, "Cannot open camera.");
                 Toast.makeText(this, "Camera opening failed.", Toast.LENGTH_LONG).show();
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", false).commit();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", false).apply();
                 break;
             case CameraError.ERROR_IMAGE_WRITE_FAILED:
                 //Image write failed. Please check if you have provided WRITE_EXTERNAL_STORAGE permission

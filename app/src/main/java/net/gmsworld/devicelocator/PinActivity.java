@@ -14,7 +14,9 @@ import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.URLSpan;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,7 +25,6 @@ import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.Command;
-import net.gmsworld.devicelocator.Utilities.Messenger;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -100,21 +101,32 @@ public class PinActivity extends AppCompatActivity {
             }
         });
 
+        tokenInput.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    Toast.makeText(PinActivity.this, "No valid pin entered", Toast.LENGTH_SHORT).show();
+                    tokenInput.setText("");
+                }
+                return false;
+            }
+        });
+
         final TextView helpText = findViewById(R.id.verify_pin_text);
         helpText.setText(Html.fromHtml(getString(R.string.pinLink)));
         helpText.setMovementMethod(new TextViewLinkHandler() {
             @Override
             public void onLinkClick(String url) {
                 if (StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(phoneNumber)) {
-                    Bundle extras = new Bundle();
-                    extras.putString("telegramId", telegramId);
-                    extras.putString("command", Command.PIN_COMMAND);
-                    extras.putString("phoneNumber", phoneNumber);
-                    extras.putString("email", email);
-                    Messenger.sendCommandMessage(PinActivity.this, extras);
+                    Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
+                    newIntent.putExtra("telegramId", telegramId);
+                    newIntent.putExtra("email", email);
+                    newIntent.putExtra("command", Command.PIN_COMMAND);
+                    newIntent.putExtra("phoneNumber", phoneNumber);
+                    startService(newIntent);
                     Toast.makeText(PinActivity.this, "Security PIN has been sent to notifiers", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(PinActivity.this, "No notifier has been set. Unable to send Security PIN.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PinActivity.this, "Notifiers hasn't been set. Unable to send Security PIN.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
