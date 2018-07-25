@@ -20,7 +20,7 @@ public class RouteTrackingServiceUtils {
 
     private static final String TAG = RouteTrackingServiceUtils.class.getSimpleName();
 
-    public static boolean startRouteTrackingService(Context context, ServiceConnection mConnection, int radius, String phoneNumber, String email, String telegramId, boolean resetRoute, boolean silentMode) {
+    public static boolean startRouteTrackingService(Context context, ServiceConnection mConnection, int radius, String phoneNumber, String email, String telegramId, String app, boolean resetRoute, boolean silentMode) {
         Intent routeTracingService = new Intent(context, RouteTrackingService.class);
         routeTracingService.putExtra("radius", radius);
         routeTracingService.putExtra("phoneNumber", phoneNumber);
@@ -28,12 +28,13 @@ public class RouteTrackingServiceUtils {
         routeTracingService.putExtra("telegramId", telegramId);
         routeTracingService.putExtra("resetRoute", resetRoute);
         routeTracingService.putExtra("silentMode", silentMode);
+        routeTracingService.putExtra("app", app);
         routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_START);
         context.startService(routeTracingService);
         return mConnection != null && context.bindService(routeTracingService, mConnection, Context.BIND_AUTO_CREATE);
     }
 
-    public static void stopRouteTrackingService(Context context, ServiceConnection mConnection, boolean isBound, boolean shareRoute, String title, String phoneNumber, String email, String telegramId) {
+    public static void stopRouteTrackingService(Context context, ServiceConnection mConnection, boolean isBound, boolean shareRoute, String title, String phoneNumber, String email, String telegramId, String app) {
         Intent routeTracingService = new Intent(context, RouteTrackingService.class);
         if (!shareRoute) {
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_STOP);
@@ -43,18 +44,20 @@ public class RouteTrackingServiceUtils {
             routeTracingService.putExtra("email", email);
             routeTracingService.putExtra("telegramId", telegramId);
             routeTracingService.putExtra("title", title);
+            routeTracingService.putExtra("app", app);
         }
         unbindRouteTrackingService(context, mConnection, isBound);
         context.startService(routeTracingService);
    }
 
-    public static void resetRouteTrackingService(Context context, ServiceConnection mConnection, boolean isBound, int radius, String phoneNumber, String email, String telegramId) {
+    public static void resetRouteTrackingService(Context context, ServiceConnection mConnection, boolean isBound, int radius, String phoneNumber, String email, String telegramId, String app) {
         Intent routeTracingService = new Intent(context, RouteTrackingService.class);
         routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_CONFIGURE);
         routeTracingService.putExtra("radius", radius);
         routeTracingService.putExtra("phoneNumber", phoneNumber);
         routeTracingService.putExtra("email", email);
         routeTracingService.putExtra("telegramId", telegramId);
+        routeTracingService.putExtra("app", app);
         context.startService(routeTracingService);
     }
 

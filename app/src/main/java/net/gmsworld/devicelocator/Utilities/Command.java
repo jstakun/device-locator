@@ -149,7 +149,7 @@ public class Command {
             }
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, silentMode);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, true, silentMode);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
@@ -167,7 +167,7 @@ public class Command {
             String telegramId = settings.getString("telegramId", "");
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, false);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, true, false);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
@@ -185,7 +185,7 @@ public class Command {
             String telegramId = settings.getString("telegramId", "");
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, true, false);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId,  sender,true, false);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
@@ -210,7 +210,7 @@ public class Command {
             String telegramId = settings.getString("telegramId", "");
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId,  null,false, false);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
@@ -234,7 +234,7 @@ public class Command {
             String telegramId = settings.getString("telegramId", "");
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, false, false);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
@@ -252,7 +252,7 @@ public class Command {
             String telegramId = settings.getString("telegramId", "");
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, false, false);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, sender,false, false);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
@@ -278,9 +278,9 @@ public class Command {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
                 String title = RouteTrackingServiceUtils.getRouteId(context);
-                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, null, null);
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, null, null, null);
             } else {
-                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null, null);
             }
             settings.edit().putBoolean("motionDetectorRunning", false).apply();
             sendSmsNotification(context, sender, STOP_COMMAND);
@@ -294,9 +294,9 @@ public class Command {
                 String telegramId = settings.getString("telegramId", "");
                 String email = settings.getString("email", "");
 
-                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId);
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId, null);
             } else {
-                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null, null);
             }
             settings.edit().putBoolean("motionDetectorRunning", false).apply();
             sendSocialNotification(context, STOP_COMMAND);
@@ -310,9 +310,9 @@ public class Command {
                 String telegramId = settings.getString("telegramId", "");
                 String email = settings.getString("email", "");
 
-                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId);
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId, sender);
             } else {
-                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null);
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null, sender);
             }
             settings.edit().putBoolean("motionDetectorRunning", false).apply();
             sendAppNotification(context, STOP_COMMAND, sender);
@@ -530,7 +530,7 @@ public class Command {
             String phoneNumber = settings.getString("phoneNumber", "");
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
-            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
             settings.edit().putInt("radius", radius).apply();
             sendSmsNotification(context, sender, RADIUS_COMMAND);
         }
@@ -542,7 +542,7 @@ public class Command {
             String phoneNumber = settings.getString("phoneNumber", "");
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
-            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
             settings.edit().putInt("radius", radius).apply();
             sendSocialNotification(context, RADIUS_COMMAND);
         }
@@ -554,7 +554,7 @@ public class Command {
             String phoneNumber = settings.getString("phoneNumber", "");
             String email = settings.getString("email", "");
             String telegramId = settings.getString("telegramId", "");
-            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, sender);
             settings.edit().putInt("radius", radius).apply();
             sendAppNotification(context, RADIUS_COMMAND, sender);
         }
@@ -740,7 +740,7 @@ public class Command {
 
                 int radius = settings.getInt("radius", 100);
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
 
                 Intent newIntent = new Intent(context, SmsSenderService.class);
                 newIntent.putExtra("phoneNumber", sender);
@@ -791,7 +791,7 @@ public class Command {
 
                 int radius = settings.getInt("radius", 100);
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
 
                 Intent newIntent = new Intent(context, SmsSenderService.class);
                 newIntent.putExtra("notificationNumber", phoneNumber);
@@ -841,7 +841,7 @@ public class Command {
 
                 int radius = settings.getInt("radius", 100);
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId);
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, sender);
 
                 Intent newIntent = new Intent(context, SmsSenderService.class);
                 newIntent.putExtra("app", "app");

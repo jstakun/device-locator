@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
         initApp();
         toggleBroadcastReceiver(); //set broadcast receiver for sms
         if (motionDetectorRunning) {
-            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, false, false);
+            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,false, false);
         }
 
         boolean isTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isTrackerShown", false);
@@ -580,7 +580,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             saveData();
-            RouteTrackingServiceUtils.stopRouteTrackingService(this, null, isTrackingServiceBound, false, null, null, null, null);
+            RouteTrackingServiceUtils.stopRouteTrackingService(this, null, isTrackingServiceBound, false, null, null, null, null, null);
             updateUI();
         }
 
@@ -722,7 +722,7 @@ public class MainActivity extends AppCompatActivity {
                 saveData();
                 //update route tracking service if running
                 if (motionDetectorRunning) {
-                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId, null);
                 }
             }
         });
@@ -941,7 +941,7 @@ public class MainActivity extends AppCompatActivity {
                 saveData();
                 //update route tracking service if running
                 if (motionDetectorRunning) {
-                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId, null);
                 }
 
                 if (StringUtils.isNotEmpty(email)) {
@@ -1011,7 +1011,7 @@ public class MainActivity extends AppCompatActivity {
                 saveData();
                 //update route tracking service if running
                 if (motionDetectorRunning) {
-                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                    RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId, null);
                 }
 
                 if (StringUtils.isNotEmpty(telegramId)) {
@@ -1077,7 +1077,7 @@ public class MainActivity extends AppCompatActivity {
             phoneNumber = newPhoneNumber;
             saveData();
             if (motionDetectorRunning) {
-                RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId);
+                RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId, null);
             }
             if (!Permissions.haveSendSMSPermission(this)) {
                 Permissions.requestSendSMSAndLocationPermission(this);
@@ -1190,7 +1190,7 @@ public class MainActivity extends AppCompatActivity {
     private void launchMotionDetectorService() {
         saveData();
         updateUI();
-        isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, true, false);
+        isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,true, false);
         Toast.makeText(getApplicationContext(), getString(R.string.motion_confirm, radius), Toast.LENGTH_LONG).show();
     }
 

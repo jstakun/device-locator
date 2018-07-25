@@ -58,7 +58,7 @@ public class RouteTrackingService extends Service {
     private final Handler incomingHandler = new IncomingHandler(this);
     private final Messenger mMessenger = new Messenger(incomingHandler);
     private Messenger mClient;
-    private String phoneNumber, email, telegramId;
+    private String phoneNumber, email, telegramId, app;
     private boolean silentMode = false;
 
     @Override
@@ -91,6 +91,7 @@ public class RouteTrackingService extends Service {
                         this.phoneNumber = intent.getStringExtra("phoneNumber");
                         this.email = intent.getStringExtra("email");
                         this.telegramId = intent.getStringExtra("telegramId");
+                        this.app = intent.getStringExtra("app");
                         boolean resetRoute = intent.getBooleanExtra("resetRoute", false);
                         silentMode = intent.getBooleanExtra("silentMode", false);
                         int gpsAccuracy = PreferenceManager.getDefaultSharedPreferences(this).getInt("gpsAccuracy", 1);
@@ -314,7 +315,11 @@ public class RouteTrackingService extends Service {
                                         //send route point for online route tracking
                                         net.gmsworld.devicelocator.Utilities.Messenger.sendRoutePoint(service, location, 1, headers);
                                     }
-                                    //TODO add support for cloud notifications
+                                    //send notification to cloud if tracking has been initiated with cloud message
+                                    if (StringUtils.isNotEmpty(service.app)) {
+                                        String[] tokens = StringUtils.split(service.app, "+=+");
+                                        net.gmsworld.devicelocator.Utilities.Messenger.sendCloudMessage(service, location, tokens[0], tokens[1], message, 1, headers);
+                                    }
                                 }
                                 //
 
