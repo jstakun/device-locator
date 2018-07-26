@@ -1,12 +1,10 @@
 package net.gmsworld.devicelocator;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -19,7 +17,7 @@ import net.gmsworld.devicelocator.Utilities.AbstractCommand;
 import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
-import net.gmsworld.devicelocator.Utilities.SCUtils;
+import net.gmsworld.devicelocator.Utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.Views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.StringUtils;
@@ -38,8 +36,6 @@ public class CommandActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_command);
-
-        final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(CommandActivity.this);
 
         final String name = getIntent().getStringExtra("name");
 
@@ -61,14 +57,9 @@ public class CommandActivity extends AppCompatActivity {
 
         findViewById(R.id.commandView).requestFocus();
 
-        String savedPin = settings.getString(PIN_PREFIX + imei, "");
-        if (StringUtils.isNotEmpty(savedPin)) {
-            try {
-                savedPin = new String(SCUtils.decrypt(Base64.decode(savedPin, Base64.NO_PADDING), this));
-            } catch (Exception e) {
-                Log.d(TAG, e.getMessage(), e);
-            }
-        }
+        final PreferencesUtils prefs = new PreferencesUtils(this);
+
+        String savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
         if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
             pinEdit.setText(savedPin);
         }
@@ -101,11 +92,11 @@ public class CommandActivity extends AppCompatActivity {
                         Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(CommandActivity.this, "Sending command " + command + " to device " + (StringUtils.isNotEmpty(name) ? name : imei) + "...", Toast.LENGTH_SHORT).show();
-                        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
+                        String tokenStr = prefs.getString(DeviceLocatorApp.GMS_TOKEN);
                         String content = "imei=" + imei;
                         content += "&command=" + command + "dlapp";
                         content += "&pin=" + pin;
-                        content += "&correlationId=" + Messenger.getDeviceId(CommandActivity.this, false) + "+=+" + settings.getString(PinActivity.DEVICE_PIN, "");
+                        content += "&correlationId=" + Messenger.getDeviceId(CommandActivity.this, false) + "+=+" + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
                         if (needArgs && StringUtils.isNotEmpty(commandArgs)) {
                             try {
                                 content += "&args=" + URLEncoder.encode(commandArgs, "UTF-8");
@@ -128,12 +119,7 @@ public class CommandActivity extends AppCompatActivity {
                                 }
                             }
                         });
-                        try {
-                            byte[] encPin = SCUtils.encrypt(pin.getBytes(), CommandActivity.this);
-                            settings.edit().putString(PIN_PREFIX + imei, Base64.encodeToString(encPin, Base64.NO_PADDING)).apply();
-                        } catch (Exception e) {
-                            Log.d(TAG, e.getMessage(), e);
-                        }
+                        prefs.setEncryptedString(PIN_PREFIX + imei, pin);
                     }
                 }
             }

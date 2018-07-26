@@ -523,7 +523,7 @@ public class Messenger {
         String text = null, title = null, phoneNumber = null, telegramId = null, email = null, notificationNumber = null, command = null, app = null;
         String deviceId = getDeviceId(context, true);
         List<String> notifications = new ArrayList<String>();
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        PreferencesUtils settings = new PreferencesUtils(context);
 
         if (extras != null) {
             phoneNumber = extras.getString("phoneNumber");
@@ -542,14 +542,14 @@ public class Messenger {
                 }
                 if (GmsSmartLocationManager.isLocationEnabled(context) && settings.getBoolean("motionDetectorRunning", false)) {
                     text = "Device location tracking has been resumed. ";
-                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""))) {
-                        notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""));
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
+                        notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER));
                     }
-                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""))) {
-                        notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""));
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL))) {
+                        notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL));
                     }
-                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL, ""))) {
-                        notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL, "")));
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL))) {
+                        notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL)));
                     }
                     if (notifications.isEmpty()) {
                         text += "No notifications will be sent!";
@@ -576,14 +576,14 @@ public class Messenger {
                 if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean("motionDetectorRunning", false)) {
                     text = "Device location tracking is running. " +
                             "Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
-                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""))) {
-                        notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""));
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
+                        notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER));
                     }
-                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""))) {
-                        notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""));
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL))) {
+                        notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL));
                     }
-                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL, ""))) {
-                        notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL, "")));
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL))) {
+                        notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL)));
                     }
                     if (notifications.isEmpty()) {
                         text += "\nNo notifications will be sent!";
@@ -602,7 +602,7 @@ public class Messenger {
                 text = "Device has been unmuted.";
                 break;
             case Command.RADIUS_COMMAND:
-                int radius = settings.getInt("radius", -1);
+                int radius = settings.getInt("radius");
                 if (radius > 0) {
                     text = "Device location tracking radius has been changed to " + radius + " meters.";
                 } else {
@@ -634,14 +634,14 @@ public class Messenger {
                 break;
             case Command.NOTIFY_COMMAND:
                 text = "";
-                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""))) {
-                    notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""));
+                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
+                    notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER));
                 }
-                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""))) {
-                    notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""));
+                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL))) {
+                    notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL));
                 }
-                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL, ""))) {
-                    notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL, "")));
+                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL))) {
+                    notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL)));
                 }
                 if (notifications.isEmpty()) {
                     text += "No notifications will be sent! Please specify valid email, phone number or Telegram chat or channel.";
@@ -671,7 +671,7 @@ public class Messenger {
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.PIN_COMMAND:
-                final String pin = settings.getString(PinActivity.DEVICE_PIN, "");
+                final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
                 if (StringUtils.isEmpty(pin)) {
                     text = "No Security PIN is set!";
                 } else {

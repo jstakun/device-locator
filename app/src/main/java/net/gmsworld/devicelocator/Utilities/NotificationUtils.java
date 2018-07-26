@@ -23,21 +23,16 @@ public class NotificationUtils {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        /*Notification publicNotification = new Notification.Builder(context)
-                .setContentTitle("Device Locator is on")
-                .setContentText("Click to open")
-                .setSmallIcon(R.drawable.ic_small)
-                //.setLargeIcon()
-                .setContentIntent(contentIntent)
-                .build();*/
-
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);
 
+        final String message = "Device Locator is tracking location of your device. Click to open Device Locator";
+
         return new Notification.Builder(context)
-                .setContentTitle("Device Locator is tracking location of your device")
-                .setContentText("Click to open Device Locator")
+                .setContentTitle("Device Locator")
+                .setContentText(message)
                 .setSmallIcon(R.drawable.ic_location_on_white)
                 .setLargeIcon(icon)
+                .setStyle(new Notification.BigTextStyle().bigText(message))
                 .setContentIntent(contentIntent)
                 .setOngoing(true)
                 //.setPublicVersion(publicNotification) //API 21
@@ -53,6 +48,7 @@ public class NotificationUtils {
                 Uri webpage = Uri.parse(tokens[i]);
                 Intent notificationIntent = new Intent(Intent.ACTION_VIEW, webpage);
                 contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                break;
             }
         }
 

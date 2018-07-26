@@ -1,6 +1,5 @@
 package net.gmsworld.devicelocator.Services;
 
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -9,6 +8,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Messenger;
+import net.gmsworld.devicelocator.Utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,19 +29,12 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Map<String, String> message = remoteMessage.getData();
             if (message.containsKey("command") && message.containsKey("pin")) {
-                String pinRead = message.get("pin");
-                String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(PinActivity.DEVICE_PIN, null);
+                final String pinRead = message.get("pin");
+                final String pin = new PreferencesUtils(this).getEncryptedString(PinActivity.DEVICE_PIN);
                 String command = message.get("command");
-                boolean pinValid = StringUtils.equals(pin, pinRead);
-                String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
+                final boolean pinValid = StringUtils.equals(pin, pinRead);
+                final String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
                 if (pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
-                    //old code for Telegram
-                    //String correlationId = message.get("correlationId");
-                    //Log.d(TAG, "Sending notification for " + correlationId);
-                    //Map<String, String> headers = new HashMap<String, String>();
-                    //headers.put("X-GMS-AuthStatus", pinValid ? "ok" : "failed");
-                    //Messenger.sendTelegram(this, null, "@dlcorrelationId", correlationId, 1, headers);
-
                     //send notification to correlationId
                     Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + command.split("dl")[0] + " has been received by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
                 }

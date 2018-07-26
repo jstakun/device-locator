@@ -2,9 +2,9 @@ package net.gmsworld.devicelocator;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
+
+import net.gmsworld.devicelocator.Utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,10 +14,10 @@ public class LauncherActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        PreferencesUtils settings = new PreferencesUtils(this);
 
-        final String pin = settings.getString(PinActivity.DEVICE_PIN, "");
-        final long pinVerificationMillis = settings.getLong("pinVerificationMillis", 0);
+        final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
+        final long pinVerificationMillis = settings.getLong("pinVerificationMillis");
         final boolean settingsVerifyPin = settings.getBoolean("settings_verify_pin", false);
 
         Intent showIntent;

@@ -74,6 +74,7 @@ import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.Permissions;
+import net.gmsworld.devicelocator.Utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 import net.gmsworld.devicelocator.Views.CommandArrayAdapter;
 
@@ -123,7 +124,9 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean motionDetectorRunning = false;
 
-    private String phoneNumber = null, email = null, telegramId = null; //, pin = null;
+    private String phoneNumber = null, email = null, telegramId = null;
+
+    private PreferencesUtils settings;
 
     private final Handler loadingHandler = new UIHandler(this);
 
@@ -137,6 +140,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate()");
         Permissions.checkAndRequestPermissionsAtStartup(this); //check marshmallow permissions
 
+        settings = new PreferencesUtils(this);
+
         setContentView(R.layout.activity_main);
         restoreSavedData();
         initApp();
@@ -145,8 +150,8 @@ public class MainActivity extends AppCompatActivity {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,false, false);
         }
 
-        boolean isTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isTrackerShown", false);
-        boolean isDeviceTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isDeviceManagerShown", false);
+        boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
+        boolean isDeviceTrackerShown = settings.getBoolean("isDeviceManagerShown", false);
         setupToolbar(R.id.smsToolbar);
         if (isTrackerShown) {
             findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
@@ -163,8 +168,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //send email registration request once every day if still unverified
-        String emailStatus = PreferenceManager.getDefaultSharedPreferences(this).getString("emailStatus", null);
-        long emailRegistrationMillis = PreferenceManager.getDefaultSharedPreferences(this).getLong("emailRegistrationMillis", System.currentTimeMillis());
+        String emailStatus = settings.getString("emailStatus");
+        long emailRegistrationMillis = settings.getLong("emailRegistrationMillis", System.currentTimeMillis());
         if (StringUtils.equalsIgnoreCase(emailStatus, "unverified") && StringUtils.isNotEmpty(email) && (System.currentTimeMillis() - emailRegistrationMillis) > 1000 * 60 * 60 * 24 ) {
             registerEmail((TextView)findViewById(R.id.email), true);
         }
@@ -178,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         updateUI();
 
         //paste Telegram id
-        boolean telegramPaste = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("telegramPaste", false);
+        boolean telegramPaste = settings.getBoolean("telegramPaste", false);
         if (telegramPaste) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("telegramPaste", false).apply();
             final TextView telegramInput = this.findViewById(R.id.telegramId);
@@ -284,8 +289,9 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.sms:
                 Log.d(TAG, "Show sms settings");
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", false).apply();
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).apply();
+                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                        .putBoolean("isTrackerShown", false)
+                        .putBoolean("isDeviceManagerShown", false).apply();
                 findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_sms_focus).requestFocus();
@@ -293,8 +299,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.tracker:
                 Log.d(TAG, "Show tracker settings");
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).apply();
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).apply();
+                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                        .putBoolean("isTrackerShown", true)
+                        .putBoolean("isDeviceManagerShown", false).apply();
                 findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_tracker_focus).requestFocus();
@@ -302,8 +309,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.devices:
                 Log.d(TAG, "Show Device Manager settings");
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", false).apply();
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", true).apply();
+                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                        .putBoolean("isTrackerShown", false)
+                        .putBoolean("isDeviceManagerShown", true).apply();
                 findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
@@ -314,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
                 onLoginTrackerItemSelected();
                 return true;
             case R.id.camera:
-                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("loginTracker", false)) {
+                if (settings.getBoolean("loginTracker", false)) {
                     onCameraItemSelected();
                 } else {
                     Toast.makeText(this, "First please enable failed login notification service!", Toast.LENGTH_LONG).show();
@@ -328,10 +336,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu (Menu menu) {
         //Log.d(TAG, "onPrepareOptionsMenu()");
-        menu.findItem(R.id.camera).setVisible(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("loginTracker", false));
+        menu.findItem(R.id.camera).setVisible(settings.getBoolean("loginTracker", false));
 
-        boolean isTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isTrackerShown", false);
-        boolean isDeviceTrackerShown = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("isDeviceManagerShown", false);
+        final boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
+        final boolean isDeviceTrackerShown = settings.getBoolean("isDeviceManagerShown", false);
 
         if (isTrackerShown) {
             menu.findItem(R.id.sms).setVisible(true);
@@ -354,8 +362,9 @@ public class MainActivity extends AppCompatActivity {
     public void onNewIntent (Intent intent) {
         //show tracker view
         Log.d(TAG, "onNewIntent()");
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isTrackerShown", true).apply();
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).apply();
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putBoolean("isTrackerShown", true)
+                .putBoolean("isDeviceManagerShown", false).apply();
         findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
         findViewById(R.id.smsSettings).setVisibility(View.GONE);
         findViewById(R.id.deviceSettings).setVisibility(View.GONE);
@@ -363,7 +372,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initLocationSMSCheckbox() {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         ((Switch)findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean("settings_detected_sms", true));
         ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean("settings_gps_sms", false));
         ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean("settings_google_sms", true));
@@ -403,7 +411,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onLoginTrackerItemSelected() {
-        final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         boolean loginTracker = settings.getBoolean("loginTracker", false);
         final ComponentName deviceAdmin = new ComponentName(this, DeviceAdminEventReceiver.class);
 
@@ -415,9 +422,9 @@ public class MainActivity extends AppCompatActivity {
                     DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
                     if (devicePolicyManager != null) {
                         devicePolicyManager.removeActiveAdmin(deviceAdmin);
-                        settings.edit().putBoolean("loginTracker", false)
-                                .putBoolean("hiddenCamera", false)
-                                .apply();
+                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
+                                .putBoolean("loginTracker", false)
+                                .putBoolean("hiddenCamera", false).apply();
                         getSupportActionBar().invalidateOptionsMenu();
                         Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
                     } else {
@@ -504,8 +511,8 @@ public class MainActivity extends AppCompatActivity {
     private void toggleRunning() {
         //enable Firebase
         if (!this.running) {
-            final String firebaseToken = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
-            final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(PinActivity.DEVICE_PIN, "");
+            final String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
+            final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
             if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(pin)) {
                 new Thread(new Runnable() {
                     public void run() {
@@ -635,7 +642,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initTokenInput() {
         final TextView tokenInput = this.findViewById(R.id.token);
-        final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(PinActivity.DEVICE_PIN, "");
+        final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
         tokenInput.setText(pin);
 
         tokenInput.addTextChangedListener(new TextWatcher() {
@@ -651,7 +658,7 @@ public class MainActivity extends AppCompatActivity {
                     //token is 4 to 8 digits string
                     if (input.length() >= PinActivity.PIN_MIN_LENGTH) {
                         if (!StringUtils.equals(pin, input) && StringUtils.isNumeric(input)) {
-                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(PinActivity.DEVICE_PIN, input).apply();
+                            settings.setEncryptedString(PinActivity.DEVICE_PIN, input);
                             saveData();
                         }
                     }
@@ -748,7 +755,7 @@ public class MainActivity extends AppCompatActivity {
         accountNames.add("");
 
         //add notification email to the list only if verified
-        String emailStatus = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("emailStatus", null);
+        String emailStatus = settings.getString("emailStatus");
         if (!StringUtils.equalsIgnoreCase(emailStatus, "unverified") && StringUtils.isNotEmpty(email)) {
             accountNames.add(email);
         }
@@ -766,7 +773,7 @@ public class MainActivity extends AppCompatActivity {
 
         int index = 0;
         if (accountNames.size() > 1) {
-            String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString(USER_LOGIN, null);
+            String userLogin = settings.getString(USER_LOGIN);
             for (int i = 0; i < accountNames.size(); i++) {
                 if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
                     index = i;
@@ -794,9 +801,9 @@ public class MainActivity extends AppCompatActivity {
 
     private synchronized void registerUserLogin(Spinner userLoginSpinner) {
         String newUserLogin = (String)userLoginSpinner.getSelectedItem();
-        String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString(USER_LOGIN, null);
+        String userLogin = settings.getString(USER_LOGIN);
         if (!StringUtils.equals(userLogin, newUserLogin)) {
-            String token = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
+            String token = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
             boolean isNewToken = false;
             if (StringUtils.isEmpty(token)) {
                 token = FirebaseInstanceId.getInstance().getToken();
@@ -814,8 +821,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void initDeviceNameInput() {
         final TextView deviceNameInput = this.findViewById(R.id.deviceName);
-        String deviceName = PreferenceManager.getDefaultSharedPreferences(this).getString(DEVICE_NAME, null);
-        if (deviceName != null) {
+        String deviceName = settings.getString(DEVICE_NAME);
+        if (StringUtils.isNotEmpty(deviceName)) {
             deviceNameInput.setText(deviceName);
         }
         deviceNameInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -857,9 +864,9 @@ public class MainActivity extends AppCompatActivity {
 
     private synchronized void registerDeviceName(TextView deviceNameInput) {
         String newDeviceName = deviceNameInput.getText().toString();
-        String deviceName = PreferenceManager.getDefaultSharedPreferences(this).getString(DEVICE_NAME, null);
+        String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
-            String token = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
+            String token = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
             boolean isNewToken = false;
             if (StringUtils.isEmpty(token)) {
                 token = FirebaseInstanceId.getInstance().getToken();
@@ -1164,9 +1171,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void initRemoteControl() {
         if (!running) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            if (!settings.contains("smsDialog")) {
-                settings.edit().putBoolean("smsDialog", true).apply();
+            if (!PreferenceManager.getDefaultSharedPreferences(this).contains("smsDialog")) {
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("smsDialog", true).apply();
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -1310,12 +1316,11 @@ public class MainActivity extends AppCompatActivity {
         final TextView deviceListEmpty = findViewById(R.id.deviceListEmpty);
         deviceList.setEmptyView(deviceListEmpty);
 
-        String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString(USER_LOGIN, null);
+        String userLogin = settings.getString(USER_LOGIN);
         if (StringUtils.isNotEmpty(userLogin)) {
             //load device list and set array adapter
             String queryString = "username=" + userLogin;
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<String, String>();
             if (StringUtils.isNotEmpty(tokenStr)) {
                 headers.put("Authorization", "Bearer " + tokenStr);
@@ -1373,25 +1378,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveData() {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        settings.edit().putBoolean("running", this.running)
-        .putBoolean("motionDetectorRunning" , this.motionDetectorRunning)
-        .putInt("radius" , this.radius)
-        .putString(NOTIFICATION_PHONE_NUMBER, phoneNumber)
-        .putString(NOTIFICATION_EMAIL, email)
-        .putString(NOTIFICATION_SOCIAL, telegramId)
-        .apply();
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putBoolean("running", this.running)
+                .putBoolean("motionDetectorRunning" , this.motionDetectorRunning)
+                .putInt("radius" , this.radius)
+                .putString(NOTIFICATION_PHONE_NUMBER, phoneNumber)
+                .putString(NOTIFICATION_EMAIL, email)
+                .putString(NOTIFICATION_SOCIAL, telegramId)
+                .apply();
     }
 
     private void restoreSavedData() {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-
         this.running = settings.getBoolean("running", false);
         //this.keyword = settings.getString("keyword", "");
-        String pin = settings.getString(PinActivity.DEVICE_PIN, "");
+        String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
         if (StringUtils.isEmpty(pin)) {
             pin = RandomStringUtils.random(PinActivity.PIN_MIN_LENGTH, false, true);
-            settings.edit().putString(PinActivity.DEVICE_PIN, pin).apply();
+            settings.setEncryptedString(PinActivity.DEVICE_PIN, pin);
         }
 
         this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
@@ -1399,12 +1402,12 @@ public class MainActivity extends AppCompatActivity {
         if (this.radius > MAX_RADIUS) {
             this.radius = MAX_RADIUS;
         }
-        this.phoneNumber = settings.getString(NOTIFICATION_PHONE_NUMBER, "");
-        this.email = settings.getString(NOTIFICATION_EMAIL, "");
-        this.telegramId = settings.getString(NOTIFICATION_SOCIAL, "");
+        this.phoneNumber = settings.getString(NOTIFICATION_PHONE_NUMBER);
+        this.email = settings.getString(NOTIFICATION_EMAIL);
+        this.telegramId = settings.getString(NOTIFICATION_SOCIAL);
         //testing use count
         int useCount = settings.getInt("useCount", 0);
-        settings.edit().putInt("useCount", useCount+1).apply();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putInt("useCount", useCount+1).apply();
     }
 
     private void setupToolbar(int toolbarId) {

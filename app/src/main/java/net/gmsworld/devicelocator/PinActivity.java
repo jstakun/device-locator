@@ -1,7 +1,6 @@
 package net.gmsworld.devicelocator;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -25,6 +24,7 @@ import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 import net.gmsworld.devicelocator.Utilities.Command;
+import net.gmsworld.devicelocator.Utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,12 +45,12 @@ public class PinActivity extends AppCompatActivity {
 
         final EditText tokenInput = findViewById(R.id.verify_pin_edit);
 
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        final PreferencesUtils settings = new PreferencesUtils(this);
 
-        final String pin = settings.getString(DEVICE_PIN, "");
-        final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-        final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-        final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+        final String pin = settings.getEncryptedString(DEVICE_PIN);
+        final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
+        final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
+        final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
 
         tokenInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(pin.length())});
 
@@ -71,7 +71,7 @@ public class PinActivity extends AppCompatActivity {
                             .apply();
                     finish();
                 } else if (input.length() == pin.length()) {
-                    int pinFailedCount = PreferenceManager.getDefaultSharedPreferences(PinActivity.this).getInt("pinFailedCount", 0);
+                    int pinFailedCount = settings.getInt("pinFailedCount");
                     if (pinFailedCount == 2) {
                         pinFailedCount = -1;
                         //send failed login notification
@@ -82,7 +82,7 @@ public class PinActivity extends AppCompatActivity {
                         newIntent.putExtra("telegramId", telegramId);
                         newIntent.putExtra("source", DeviceAdminEventReceiver.SOURCE);
                         startService(newIntent);
-                        if (PreferenceManager.getDefaultSharedPreferences(PinActivity.this).getBoolean("hiddenCamera", false)) {
+                        if (settings.getBoolean("hiddenCamera", false)) {
                             Intent cameraIntent = new Intent(PinActivity.this, HiddenCaptureImageService.class);
                             PinActivity.this.startService(cameraIntent);
                         } else {

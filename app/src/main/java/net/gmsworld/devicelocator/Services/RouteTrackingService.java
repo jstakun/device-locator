@@ -45,7 +45,8 @@ public class RouteTrackingService extends Service {
     public static final int COMMAND_SHOW_ROUTE = 50;
     public static final int DEFAULT_RADIUS = 100;
 
-    public static final int NOTIFICATION_ID = 1001;
+    private static final int NOTIFICATION_ID = 1001;
+    public static final int NOTIFICATION_ROUTE_ID = 1002;
 
     private static final String TAG = RouteTrackingService.class.getSimpleName();
     private int radius = DEFAULT_RADIUS;
@@ -161,7 +162,6 @@ public class RouteTrackingService extends Service {
             this.mWakeLock.acquire();
         }
 
-        //NotificationUtils.notify(this, NOTIFICATION_ID);
         startForeground(NOTIFICATION_ID, NotificationUtils.buildTrackerNotification(this, NOTIFICATION_ID));
 
         //use smart location lib

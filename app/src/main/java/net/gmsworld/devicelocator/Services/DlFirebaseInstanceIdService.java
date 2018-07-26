@@ -15,6 +15,7 @@ import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Messenger;
 import net.gmsworld.devicelocator.Utilities.Network;
+import net.gmsworld.devicelocator.Utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,7 +33,7 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed Firebase token: " + refreshedToken);
         PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).apply();
-        final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(PinActivity.DEVICE_PIN, "");
+        final String pin = new PreferencesUtils(this).getEncryptedString(PinActivity.DEVICE_PIN);
         if (StringUtils.isNotEmpty(pin)) {
             sendRegistrationToServer(this, refreshedToken, null, null, null);
         } 
