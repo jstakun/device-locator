@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
@@ -37,9 +38,9 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
         super.onPasswordFailed(context, intent);
         Log.d(TAG, "Wrong password has been entered to unlock this device. SENDING NOTIFICATION!");
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String email = settings.getString("email", "");
-        String phoneNumber = settings.getString("phoneNumber", "");
-        String telegramId = settings.getString("telegramId", "");
+        String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+        String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+        String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
         Intent newIntent = new Intent(context, SmsSenderService.class);
         newIntent.putExtra("phoneNumber", phoneNumber);

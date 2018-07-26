@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
 
@@ -61,7 +62,7 @@ public abstract class AbstractCommand {
         if (sender != null) {
             onSmsCommandFound(sender, context);
             return true;
-        } else if (StringUtils.isNotEmpty(smsCommand) &&  (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("email", "")))) {
+        } else if (StringUtils.isNotEmpty(smsCommand) &&  (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_SOCIAL, "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_EMAIL, "")))) {
             sender = getSenderAddress(context, intent, smsCommand + "t");
             if (sender == null && StringUtils.isNotEmpty(smsShortCommand)) {
                 sender = getSenderAddress(context, intent, smsShortCommand + "t");
@@ -75,7 +76,7 @@ public abstract class AbstractCommand {
     }
 
     public boolean findSocialCommand(Context context, String message) {
-        if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("telegramId", "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString("email", "")))) {
+        if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_SOCIAL, "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_EMAIL, "")))) {
             if (findKeyword(context, smsCommand + "t", message)) {
                 onSocialCommandFound(null, context);
                 return true;
@@ -166,8 +167,8 @@ public abstract class AbstractCommand {
 
     void sendSocialNotification(final Context context, final String command) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        final String email = settings.getString("email", "");
-        final String telegramId = settings.getString("telegramId", "");
+        final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+        final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
         Intent newIntent = new Intent(context, SmsSenderService.class);
         newIntent.putExtra("telegramId", telegramId);
         newIntent.putExtra("email", email);
@@ -179,11 +180,7 @@ public abstract class AbstractCommand {
 
     void sendAppNotification(final Context context, final String command, final String sender) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        //final String email = settings.getString("email", "");
-        //final String telegramId = settings.getString("telegramId", "");
         Intent newIntent = new Intent(context, SmsSenderService.class);
-        //newIntent.putExtra("telegramId", telegramId);
-        //newIntent.putExtra("email", email);
         if (StringUtils.isNotEmpty(command)) {
             newIntent.putExtra("command", command);
         }

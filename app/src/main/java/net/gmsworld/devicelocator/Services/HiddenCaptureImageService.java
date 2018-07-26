@@ -24,6 +24,7 @@ import com.androidhiddencamera.config.CameraResolution;
 import com.androidhiddencamera.config.CameraRotation;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Files;
@@ -130,9 +131,9 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                         public void onGetFinish(String imageUrl, int responseCode, String url) {
                             if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {
                                 //send notification with image url
-                                String email = settings.getString("email", "");
-                                String phoneNumber = settings.getString("phoneNumber", "");
-                                String telegramId = settings.getString("telegramId", "");
+                                String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+                                String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+                                String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
                                 Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
                                 newIntent.putExtra("command", Command.TAKE_PHOTO_COMMAND);

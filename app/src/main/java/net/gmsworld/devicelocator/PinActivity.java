@@ -48,9 +48,9 @@ public class PinActivity extends AppCompatActivity {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         final String pin = settings.getString(DEVICE_PIN, "");
-        final String phoneNumber = settings.getString("phoneNumber", "");
-        final String email = settings.getString("email", "");
-        final String telegramId = settings.getString("telegramId", "");
+        final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+        final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+        final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
         tokenInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(pin.length())});
 

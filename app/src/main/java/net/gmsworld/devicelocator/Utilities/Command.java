@@ -19,6 +19,7 @@ import android.util.Log;
 import android.util.Patterns;
 
 import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
@@ -139,9 +140,9 @@ public class Command {
         protected void onSmsCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
+            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
             boolean silentMode = false;
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("silent") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
@@ -162,9 +163,9 @@ public class Command {
         protected void onSocialCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
+            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, true, false);
@@ -180,9 +181,9 @@ public class Command {
         protected void onAppCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
+            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId,  sender,true, false);
@@ -205,9 +206,9 @@ public class Command {
         protected void onSmsCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
+            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId,  null,false, false);
@@ -229,9 +230,9 @@ public class Command {
         protected void onSocialCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
+            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, false, false);
@@ -247,9 +248,9 @@ public class Command {
         protected void onAppCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
+            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, sender,false, false);
@@ -291,8 +292,8 @@ public class Command {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
                 String title = RouteTrackingServiceUtils.getRouteId(context);
-                String telegramId = settings.getString("telegramId", "");
-                String email = settings.getString("email", "");
+                String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+                String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
 
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId, null);
             } else {
@@ -307,8 +308,8 @@ public class Command {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
                 String title = RouteTrackingServiceUtils.getRouteId(context);
-                String telegramId = settings.getString("telegramId", "");
-                String email = settings.getString("email", "");
+                String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+                String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
 
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId, sender);
             } else {
@@ -378,8 +379,8 @@ public class Command {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("telegramId", settings.getString("telegramId", ""));
-            routeTracingService.putExtra("email", settings.getString("email", ""));
+            routeTracingService.putExtra("telegramId", settings.getString(MainActivity.NOTIFICATION_SOCIAL, ""));
+            routeTracingService.putExtra("email", settings.getString(MainActivity.NOTIFICATION_EMAIL, ""));
             context.startService(routeTracingService);
         }
 
@@ -527,9 +528,9 @@ public class Command {
         protected void onSmsCommandFound(String sender, Context context) {
             final int radius = Integer.parseInt(commandTokens[commandTokens.length-1]);
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
+            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
             settings.edit().putInt("radius", radius).apply();
             sendSmsNotification(context, sender, RADIUS_COMMAND);
@@ -539,9 +540,9 @@ public class Command {
         protected void onSocialCommandFound(String sender, Context context) {
             final int radius = Integer.parseInt(commandTokens[1]);
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
+            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
             settings.edit().putInt("radius", radius).apply();
             sendSocialNotification(context, RADIUS_COMMAND);
@@ -551,9 +552,9 @@ public class Command {
         protected void onAppCommandFound(String sender, Context context) {
             final int radius = Integer.parseInt(commandTokens[1]);
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String phoneNumber = settings.getString("phoneNumber", "");
-            String email = settings.getString("email", "");
-            String telegramId = settings.getString("telegramId", "");
+            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, sender);
             settings.edit().putInt("radius", radius).apply();
             sendAppNotification(context, RADIUS_COMMAND, sender);
@@ -722,19 +723,19 @@ public class Command {
             if (telegramId != null || phoneNumber != null || email != null) {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
-                    editor.putString("email", email);
+                    editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
                 } else {
-                    email = settings.getString("email", "");
+                    email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
                 if (phoneNumber != null) {
-                    editor.putString("phoneNumber", phoneNumber);
+                    editor.putString(MainActivity.NOTIFICATION_PHONE_NUMBER, phoneNumber);
                 } else {
-                    phoneNumber = settings.getString("phoneNumber", "");
+                    phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
                 }
                 if (telegramId != null) {
-                    editor.putString("telegramId", telegramId);
+                    editor.putString(MainActivity.NOTIFICATION_SOCIAL, telegramId);
                 } else {
-                    telegramId = settings.getString("telegramId", "");
+                    telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 }
                 editor.apply();
 
@@ -773,19 +774,19 @@ public class Command {
             if (telegramId != null || phoneNumber != null || email != null) {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
-                    editor.putString("email", email);
+                    editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
                 } else {
-                    email = settings.getString("email", "");
+                    email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
                 if (phoneNumber != null) {
-                    editor.putString("phoneNumber", phoneNumber);
+                    editor.putString(MainActivity.NOTIFICATION_PHONE_NUMBER, phoneNumber);
                 } else {
-                    phoneNumber = settings.getString("phoneNumber", "");
+                    phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
                 }
                 if (telegramId != null) {
-                    editor.putString("telegramId", telegramId);
+                    editor.putString(MainActivity.NOTIFICATION_SOCIAL, telegramId);
                 } else {
-                    telegramId = settings.getString("telegramId", "");
+                    telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 }
                 editor.apply();
 
@@ -823,19 +824,19 @@ public class Command {
             if (telegramId != null || phoneNumber != null || email != null) {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
-                    editor.putString("email", email);
+                    editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
                 } else {
-                    email = settings.getString("email", "");
+                    email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
                 if (phoneNumber != null) {
-                    editor.putString("phoneNumber", phoneNumber);
+                    editor.putString(MainActivity.NOTIFICATION_PHONE_NUMBER, phoneNumber);
                 } else {
-                    phoneNumber = settings.getString("phoneNumber", "");
+                    phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
                 }
                 if (telegramId != null) {
-                    editor.putString("telegramId", telegramId);
+                    editor.putString(MainActivity.NOTIFICATION_SOCIAL, telegramId);
                 } else {
-                    telegramId = settings.getString("telegramId", "");
+                    telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 }
                 editor.apply();
 

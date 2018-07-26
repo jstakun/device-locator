@@ -87,8 +87,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static net.gmsworld.devicelocator.PinActivity.DEVICE_PIN;
-
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -109,10 +107,22 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int MAX_RADIUS = 1000;
 
+    public static final String USER_LOGIN = "userLogin";
+
+    public static final String DEVICE_NAME = "deviceName";
+
+    public static final String NOTIFICATION_EMAIL = "email";
+
+    public static final String NOTIFICATION_PHONE_NUMBER = "phoneNumber";
+
+    public static final String NOTIFICATION_SOCIAL = "telegramId";
+
     private Boolean running = null;
 
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
+
     private boolean motionDetectorRunning = false;
+
     private String phoneNumber = null, email = null, telegramId = null; //, pin = null;
 
     private final Handler loadingHandler = new UIHandler(this);
@@ -495,7 +505,7 @@ public class MainActivity extends AppCompatActivity {
         //enable Firebase
         if (!this.running) {
             final String firebaseToken = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
-            final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(DEVICE_PIN, "");
+            final String pin = PreferenceManager.getDefaultSharedPreferences(this).getString(PinActivity.DEVICE_PIN, "");
             if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(pin)) {
                 new Thread(new Runnable() {
                     public void run() {
@@ -756,7 +766,7 @@ public class MainActivity extends AppCompatActivity {
 
         int index = 0;
         if (accountNames.size() > 1) {
-            String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
+            String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString(USER_LOGIN, null);
             for (int i = 0; i < accountNames.size(); i++) {
                 if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
                     index = i;
@@ -784,7 +794,7 @@ public class MainActivity extends AppCompatActivity {
 
     private synchronized void registerUserLogin(Spinner userLoginSpinner) {
         String newUserLogin = (String)userLoginSpinner.getSelectedItem();
-        String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
+        String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString(USER_LOGIN, null);
         if (!StringUtils.equals(userLogin, newUserLogin)) {
             String token = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
             boolean isNewToken = false;
@@ -804,7 +814,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initDeviceNameInput() {
         final TextView deviceNameInput = this.findViewById(R.id.deviceName);
-        String deviceName = PreferenceManager.getDefaultSharedPreferences(this).getString("deviceName", null);
+        String deviceName = PreferenceManager.getDefaultSharedPreferences(this).getString(DEVICE_NAME, null);
         if (deviceName != null) {
             deviceNameInput.setText(deviceName);
         }
@@ -847,7 +857,7 @@ public class MainActivity extends AppCompatActivity {
 
     private synchronized void registerDeviceName(TextView deviceNameInput) {
         String newDeviceName = deviceNameInput.getText().toString();
-        String deviceName = PreferenceManager.getDefaultSharedPreferences(this).getString("deviceName", null);
+        String deviceName = PreferenceManager.getDefaultSharedPreferences(this).getString(DEVICE_NAME, null);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
             String token = PreferenceManager.getDefaultSharedPreferences(this).getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN, "");
             boolean isNewToken = false;
@@ -1300,7 +1310,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView deviceListEmpty = findViewById(R.id.deviceListEmpty);
         deviceList.setEmptyView(deviceListEmpty);
 
-        String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString("userLogin", null);
+        String userLogin = PreferenceManager.getDefaultSharedPreferences(this).getString(USER_LOGIN, null);
         if (StringUtils.isNotEmpty(userLogin)) {
             //load device list and set array adapter
             String queryString = "username=" + userLogin;
@@ -1367,9 +1377,9 @@ public class MainActivity extends AppCompatActivity {
         settings.edit().putBoolean("running", this.running)
         .putBoolean("motionDetectorRunning" , this.motionDetectorRunning)
         .putInt("radius" , this.radius)
-        .putString("phoneNumber", phoneNumber)
-        .putString("email", email)
-        .putString("telegramId", telegramId)
+        .putString(NOTIFICATION_PHONE_NUMBER, phoneNumber)
+        .putString(NOTIFICATION_EMAIL, email)
+        .putString(NOTIFICATION_SOCIAL, telegramId)
         .apply();
     }
 
@@ -1378,10 +1388,10 @@ public class MainActivity extends AppCompatActivity {
 
         this.running = settings.getBoolean("running", false);
         //this.keyword = settings.getString("keyword", "");
-        String pin = settings.getString(DEVICE_PIN, "");
+        String pin = settings.getString(PinActivity.DEVICE_PIN, "");
         if (StringUtils.isEmpty(pin)) {
-            pin = RandomStringUtils.random(4, false, true);
-            settings.edit().putString(DEVICE_PIN, pin).apply();
+            pin = RandomStringUtils.random(PinActivity.PIN_MIN_LENGTH, false, true);
+            settings.edit().putString(PinActivity.DEVICE_PIN, pin).apply();
         }
 
         this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
@@ -1389,9 +1399,9 @@ public class MainActivity extends AppCompatActivity {
         if (this.radius > MAX_RADIUS) {
             this.radius = MAX_RADIUS;
         }
-        this.phoneNumber = settings.getString("phoneNumber", "");
-        this.email = settings.getString("email", "");
-        this.telegramId = settings.getString("telegramId", "");
+        this.phoneNumber = settings.getString(NOTIFICATION_PHONE_NUMBER, "");
+        this.email = settings.getString(NOTIFICATION_EMAIL, "");
+        this.telegramId = settings.getString(NOTIFICATION_SOCIAL, "");
         //testing use count
         int useCount = settings.getInt("useCount", 0);
         settings.edit().putInt("useCount", useCount+1).apply();

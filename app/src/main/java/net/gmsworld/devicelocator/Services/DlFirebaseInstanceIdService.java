@@ -93,14 +93,14 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
                                 Log.d(TAG, "Firebase token is set");
                             }
                             if (username != null) {
-                                settings.edit().putString("userLogin", username).apply();
+                                settings.edit().putString(MainActivity.USER_LOGIN, username).apply();
                                 Log.d(TAG, "User login is set");
                                 if (context instanceof MainActivity) {
                                     ((MainActivity)context).initDeviceList();
                                 }
                             }
                             if (deviceName != null) {
-                                settings.edit().putString("deviceName", deviceName).apply();
+                                settings.edit().putString(MainActivity.DEVICE_NAME, deviceName).apply();
                                 Log.d(TAG, "Device name is set");
                                 if (context instanceof MainActivity) {
                                     ((MainActivity)context).initDeviceList();

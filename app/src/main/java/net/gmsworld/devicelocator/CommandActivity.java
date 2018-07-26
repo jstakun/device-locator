@@ -30,6 +30,8 @@ public class CommandActivity extends AppCompatActivity {
 
     private static final String TAG = CommandActivity.class.getSimpleName();
 
+    private static final String PIN_PREFIX = "_pin";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,8 +59,8 @@ public class CommandActivity extends AppCompatActivity {
 
         findViewById(R.id.commandView).requestFocus();
 
-        String savedPin = settings.getString(imei + "_pin", "");
-        if (savedPin.length() >= 4) {
+        String savedPin = settings.getString(imei + PIN_PREFIX, "");
+        if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH) {
             pinEdit.setText(savedPin);
         }
 
@@ -66,7 +68,7 @@ public class CommandActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 final String pin = pinEdit.getText().toString();
-                if (pin.length() < 4) {
+                if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
                     Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
                 } else if (StringUtils.isNotEmpty(name) || StringUtils.isNotEmpty(imei)) {
                     final String command = spinner.getSelectedItem().toString();
@@ -117,7 +119,7 @@ public class CommandActivity extends AppCompatActivity {
                                 }
                             }
                         });
-                        settings.edit().putString(imei + "_pin", pin).apply();
+                        settings.edit().putString(imei + PIN_PREFIX, pin).apply();
                     }
                 }
             }

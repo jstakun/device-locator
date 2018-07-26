@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Utilities.Permissions;
 import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
@@ -42,8 +43,8 @@ public class RouteTrackingServiceRestartReceiver extends BroadcastReceiver {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
         this.radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-        this.phoneNumber = settings.getString("phoneNumber", "");
-        this.email = settings.getString("email", "");
-        this.telegramId = settings.getString("telegramId", "");
+        this.phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+        this.email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+        this.telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
     }
 }
