@@ -19,7 +19,7 @@ import net.gmsworld.devicelocator.R;
 
 public class NotificationUtils {
 
-    public static Notification buildNotification(Context context, int notificationId) {
+    public static Notification buildTrackerNotification(Context context, int notificationId) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -36,7 +36,7 @@ public class NotificationUtils {
         return new Notification.Builder(context)
                 .setContentTitle("Device Locator is tracking location of your device")
                 .setContentText("Click to open Device Locator")
-                .setSmallIcon(R.drawable.ic_small)
+                .setSmallIcon(R.drawable.ic_location_on_white)
                 .setLargeIcon(icon)
                 .setContentIntent(contentIntent)
                 .setOngoing(true)
@@ -63,7 +63,7 @@ public class NotificationUtils {
         Notification.Builder nb = new Notification.Builder(context)
                 .setContentTitle("Device Locator Notification")
                 .setContentText(message)
-                .setSmallIcon(R.drawable.ic_small)
+                .setSmallIcon(R.drawable.ic_devices_other_white_24dp)
                 .setLargeIcon(icon)
                 .setStyle(new Notification.BigTextStyle().bigText(message))
                 .setSound(notificationUri);
@@ -80,7 +80,7 @@ public class NotificationUtils {
     }
 
     public static void notify(Context context, int notificationId) {
-        Notification notification = buildNotification(context, notificationId);
+        Notification notification = buildTrackerNotification(context, notificationId);
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 

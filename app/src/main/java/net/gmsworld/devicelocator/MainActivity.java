@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int SHARE_ROUTE_MESSAGE = 1;
 
-    public static final int UPDATE_UI_MESSAGE = 2;
+    private static final int UPDATE_UI_MESSAGE = 2;
 
     private static final int MIN_RADIUS = 10; //meters
 
@@ -278,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).apply();
                 findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
-                findViewById(R.id.ll_top_focus).requestFocus();
+                findViewById(R.id.ll_sms_focus).requestFocus();
                 getSupportActionBar().invalidateOptionsMenu();
                 return true;
             case R.id.tracker:
@@ -287,7 +287,7 @@ public class MainActivity extends AppCompatActivity {
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("isDeviceManagerShown", false).apply();
                 findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
-                findViewById(R.id.ll_bottom_focus).requestFocus();
+                findViewById(R.id.ll_tracker_focus).requestFocus();
                 getSupportActionBar().invalidateOptionsMenu();
                 return true;
             case R.id.devices:
@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
-                findViewById(R.id.deviceList).requestFocus();
+                findViewById(R.id.ll_device_focus).requestFocus();
                 getSupportActionBar().invalidateOptionsMenu();
                 return true;
             case R.id.loginTracker:
@@ -778,7 +778,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onNothingSelected(AdapterView<?> adapterView) {
-                return;
             }
         });
     }
@@ -1297,7 +1296,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initDeviceList() {
-        final ListView deviceList = (ListView) findViewById(R.id.deviceList);
+        final ListView deviceList = findViewById(R.id.deviceList);
         final TextView deviceListEmpty = findViewById(R.id.deviceListEmpty);
         deviceList.setEmptyView(deviceListEmpty);
 
@@ -1403,7 +1402,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
-    public static void setListViewHeightBasedOnChildren(ListView listView) {
+    private static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {
             // pre-condition
@@ -1439,7 +1438,7 @@ public class MainActivity extends AppCompatActivity {
 
         private final WeakReference<MainActivity> mainActivity;
 
-        public UIHandler(MainActivity activity) {
+        UIHandler(MainActivity activity) {
             mainActivity = new WeakReference<MainActivity>(activity);
         }
 
@@ -1487,7 +1486,7 @@ public class MainActivity extends AppCompatActivity {
         private final Context context;
         private final List<Device> devices;
 
-        public DeviceArrayAdapter(Context context, int textViewResourceId, List<Device> devices) {
+        DeviceArrayAdapter(Context context, int textViewResourceId, List<Device> devices) {
             super(context, textViewResourceId, devices);
             this.context = context;
             this.devices = devices;

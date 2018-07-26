@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -57,14 +58,14 @@ public class Network {
         private final String contentType;
         private String response;
         private final Map<String, String> headers;
-        private final Context context;
+        private final WeakReference<Context> context;
 
-        public PostTask(final Context context, final String urlString, final String content, final String contentType, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+        PostTask(final Context context, final String urlString, final String content, final String contentType, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
             this.urlString = urlString;
             this.content = content;
             this.contentType = contentType;
             this.headers = headers;
-            this.context = context;
+            this.context = new WeakReference<Context>(context);
             this.onGetFinishListener = onGetFinishListener;
         }
 
@@ -79,7 +80,7 @@ public class Network {
                 urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
                 urlConnection.setReadTimeout(SOCKET_TIMEOUT);
 
-                for (Map.Entry<String, String> header : getDefaultHeaders(context).entrySet()) {
+                for (Map.Entry<String, String> header : getDefaultHeaders(context.get()).entrySet()) {
                     urlConnection.setRequestProperty(header.getKey(), header.getValue());
                 }
 
@@ -144,10 +145,10 @@ public class Network {
         private String response;
         private final Map<String, String> headers;
         private final byte[] file;
-        private final Context context;
+        private final WeakReference<Context> context;
 
-        public UploadImageTask(final Context context, final String urlString, final byte[] file, final String filename, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
-            this.context = context;
+        UploadImageTask(final Context context, final String urlString, final byte[] file, final String filename, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+            this.context = new WeakReference<Context>(context);
             this.urlString = urlString;
             this.filename = filename;
             this.file = file;
@@ -171,7 +172,7 @@ public class Network {
                 conn.setConnectTimeout(SOCKET_TIMEOUT);
                 conn.setReadTimeout(SOCKET_TIMEOUT);
 
-                for (Map.Entry<String, String> header : getDefaultHeaders(context).entrySet()) {
+                for (Map.Entry<String, String> header : getDefaultHeaders(context.get()).entrySet()) {
                     conn.setRequestProperty(header.getKey(), header.getValue());
                 }
 
@@ -243,7 +244,9 @@ public class Network {
             defaultHeaders = new HashMap<String, String>();
             defaultHeaders.put("X-GMS-AppId", "2");
             defaultHeaders.put("X-GMS-Scope", "dl");
-            defaultHeaders.put("User-Agent", AppUtils.getInstance().getUserAgent(context));
+            if (context != null) {
+                defaultHeaders.put("User-Agent", AppUtils.getInstance().getUserAgent(context));
+            }
         }
         return defaultHeaders;
     }
@@ -252,12 +255,12 @@ public class Network {
 
         private final OnGetFinishListener onGetFinishListener;
         private final String urlString;
-        private final Context context;
+        private final WeakReference<Context> context;
         private final Map<String, String> headers;
         private String response;
 
-        public GetTask(final Context context, final String urlString, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
-            this.context = context;
+        GetTask(final Context context, final String urlString, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
+            this.context = new WeakReference<Context>(context);
             this.urlString = urlString;
             this.headers = headers;
             this.onGetFinishListener = onGetFinishListener;
@@ -273,7 +276,7 @@ public class Network {
                 urlConnection.setConnectTimeout(SOCKET_TIMEOUT);
                 urlConnection.setReadTimeout(SOCKET_TIMEOUT);
 
-                for (Map.Entry<String, String> header : getDefaultHeaders(context).entrySet()) {
+                for (Map.Entry<String, String> header : getDefaultHeaders(context.get()).entrySet()) {
                     urlConnection.setRequestProperty(header.getKey(), header.getValue());
                 }
 

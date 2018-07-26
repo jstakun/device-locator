@@ -39,17 +39,17 @@
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="stateAlwaysHidden"></activity>
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name=".CommandActivity"
-            android:launchMode="singleTop"></activity>
+            android:launchMode="singleTop" />
 
         <service
             android:name=".Services.SmsSenderService"
@@ -119,7 +119,7 @@
             android:value="@integer/google_play_services_version"
             tools:replace="android:value" />
 
-        <activity android:name=".PinActivity"></activity>
+        <activity android:name=".PinActivity" />
     </application>
 
 </manifest>

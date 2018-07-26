@@ -77,7 +77,7 @@
     <string name="disable_photo_prompt">&lt;font color="#808080">Disable taking photos?&lt;/font></string>
     <string name="enable_sms_command_prompt">&lt;font color="#808080">Do you want to enable now SMS commands on your device?&lt;/font></string>
     <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and check list of available commands below or on SMS control card.&lt;/font></string>
-    <string name="pin_lenght_error">Security PIN must have at least 4 digits! Reverting to previous value...</string>
+    <string name="pin_lenght_error">Security PIN must have at least 4 digits! Reverting to previous value…</string>
     <string name="enter_security_pin">Enter Security PIN</string>
     <string name="accept_sms_commands">Accept SMS commands sent only from my contacts</string>
     <string name="Info.about">%1$s (R)\nVersion: %2$s-%3$d built on %4$s\nCopyright © 2010–%5$s GMS World\n%6$s</string>
@@ -89,7 +89,7 @@
     <!-- Command Activity -->
     <string name="device_command_prompt">Select command</string>
     <string name="devices_list_empty">No devices found! Make sure to specify the same login in Device Manager card on all your devices.</string>
-    <string name="devices_list_loading">Synchronizing devices...</string>
+    <string name="devices_list_loading">Synchronizing devices…</string>
     <string name="devices_list_loading_failed">Device synchronization failed!</string>
     <string name="devices">Devices</string>
     <string name="device_name">This Device Name</string>

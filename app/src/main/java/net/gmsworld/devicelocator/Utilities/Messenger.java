@@ -316,7 +316,7 @@ public class Messenger {
 
     }
 
-    public static void sendRoutePoint(final Context context, final Location location, final int retryCount, final Map<String, String> headers) {
+    private static void sendRoutePoint(final Context context, final Location location, final int retryCount, final Map<String, String> headers) {
         if (Network.isNetworkAvailable(context)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
@@ -429,23 +429,22 @@ public class Messenger {
                 "\n" + "Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
-        } else {
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(telegramId)) {
+            sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(email)) {
+            String title = context.getString(R.string.message);
+            String deviceId = getDeviceId(context, true);
+            if (deviceId != null) {
+                title += " installed on device " + deviceId + " - location map link";
+                text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
             }
-            if (StringUtils.isNotEmpty(email)) {
-                String title = context.getString(R.string.message);
-                String deviceId = getDeviceId(context, true);
-                if (deviceId != null) {
-                    title += " installed on device " + deviceId + " - location map link";
-                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-                }
-                sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
-            }
-            if (StringUtils.isNotEmpty(app)) {
-                String[] tokens = StringUtils.split(app, "+=+");
-                Messenger.sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
-            }
+            sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(app)) {
+            String[] tokens = StringUtils.split(app, "+=+");
+            Messenger.sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
         }
     }
 
@@ -462,23 +461,65 @@ public class Messenger {
 
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
+        }
+        if (StringUtils.isNotEmpty(telegramId)) {
+            sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(email)) {
+            String title = context.getString(R.string.message);
+            String deviceId = getDeviceId(context, true);
+            if (deviceId != null) {
+                title += " installed on device " + deviceId + " - location request";
+                text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
+            }
+            sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(app)) {
+            String[] tokens = StringUtils.split(app, "+=+");
+            sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
+        }
+    }
+
+    public static void sendRouteMessage(Context context, Location location, int distance, String phoneNumber, String telegramId, String email, String app) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        if (StringUtils.isNotEmpty(phoneNumber)) {
+            if (settings.getBoolean("settings_gps_sms", false)) {
+                sendLocationMessage(context, location, true, phoneNumber, null, null, null);
+            }
+            if (settings.getBoolean("settings_google_sms", true)) {
+                sendGoogleMapsMessage(context, location, phoneNumber, null, null, null);
+            }
+        }
+        DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
+        String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
+                " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m.";
+        if (location.hasSpeed() && location.getSpeed() > 0f) {
+            message += " and speed " + net.gmsworld.devicelocator.Utilities.Messenger.getSpeed(context, location.getSpeed());
+        }
+        message += "\n" + "Battery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(context) +
+                "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
+
+        final Map<String, String> headers = new HashMap<String, String>();
+        headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
+        //First send notification to telegram and if not configured to email
+        //REMEMBER this could send a lot of messages and your email account could be overloaded
+        if (StringUtils.isNotEmpty(telegramId)) {
+            sendTelegram(context, location, telegramId, message, 1, headers);
+        } else if (StringUtils.isNotEmpty(email)) {
+            String title = context.getString(R.string.message);
+            String deviceId = getDeviceId(context, true);
+            if (deviceId != null) {
+                title += " installed on device " + deviceId + " - location change";
+            }
+            sendEmail(context, location, email, message, title, 1, headers);
         } else {
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
-            }
-            if (StringUtils.isNotEmpty(email)) {
-                String title = context.getString(R.string.message);
-                String deviceId = getDeviceId(context, true);
-                if (deviceId != null) {
-                    title += " installed on device " + deviceId + " - location request";
-                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-                }
-                sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
-            }
-            if (StringUtils.isNotEmpty(app)) {
-                String[] tokens = StringUtils.split(app, "+=+");
-                Messenger.sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
-            }
+            //send route point for online route tracking
+            sendRoutePoint(context, location, 1, headers);
+        }
+        //send notification to cloud if tracking has been initiated with cloud message
+        if (StringUtils.isNotEmpty(app)) {
+            String[] tokens = StringUtils.split(app, "+=+");
+            sendCloudMessage(context, location, tokens[0], tokens[1], message, 1, headers);
         }
     }
 
@@ -577,7 +618,10 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - route map link";
                 }
-                int size = extras.getInt("size", 0);
+                int size = 0;
+                if (extras != null) {
+                    size = extras.getInt("size", 0);
+                }
                 if (size > 1) {
                     text = "Check your route at " + RouteTrackingServiceUtils.getRouteUrl(context);
                 } else if (size == 0) {
@@ -617,7 +661,10 @@ public class Messenger {
                 break;
             case Command.TAKE_PHOTO_COMMAND:
                 boolean hiddenCamera = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false);
-                String imageUrl = extras.getString("imageUrl");
+                String imageUrl = null;
+                if (extras != null) {
+                    extras.getString("imageUrl");
+                }
                 if (StringUtils.isEmpty(imageUrl) && hiddenCamera) {
                     text = "Photo will be taken. You should receive link soon.";
                 } else if (StringUtils.isEmpty(imageUrl) && !hiddenCamera) {
@@ -743,7 +790,7 @@ public class Messenger {
 
     //public static double convertMPStoMPH(double speed) { return speed * 2.23694; }
 
-    public static String getSpeed(Context context, float speed) {
+    private static String getSpeed(Context context, float speed) {
         Locale l;
         try {
             l = context.getResources().getConfiguration().locale;

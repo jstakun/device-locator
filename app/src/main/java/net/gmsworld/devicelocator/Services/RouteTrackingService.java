@@ -18,21 +18,16 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.Audio.morse.MorseSoundGenerator;
-import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Files;
 import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.Utilities.Network;
 import net.gmsworld.devicelocator.Utilities.NotificationUtils;
-import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.ref.WeakReference;
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 public class RouteTrackingService extends Service {
 
@@ -167,7 +162,7 @@ public class RouteTrackingService extends Service {
         }
 
         //NotificationUtils.notify(this, NOTIFICATION_ID);
-        startForeground(NOTIFICATION_ID, NotificationUtils.buildNotification(this, NOTIFICATION_ID));
+        startForeground(NOTIFICATION_ID, NotificationUtils.buildTrackerNotification(this, NOTIFICATION_ID));
 
         //use smart location lib
         GmsSmartLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
@@ -248,7 +243,7 @@ public class RouteTrackingService extends Service {
 
         private final WeakReference<RouteTrackingService> routeTrackingService;
 
-        public IncomingHandler(RouteTrackingService service) {
+        IncomingHandler(RouteTrackingService service) {
             routeTrackingService = new WeakReference<RouteTrackingService>(service);
         }
 
@@ -275,53 +270,13 @@ public class RouteTrackingService extends Service {
                             Location location = (Location) msg.obj;
                             int distance = msg.arg1;
                             if (location != null) {
-                                //TODO move this to sms sender service
                                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(service);
                                 long notificationSentMillis = settings.getLong("notificationSentMillis", 0);
                                 //sent notification only if not in silent mode and if last notification was at least sent 10 seconds ago
                                 if (!service.silentMode && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
                                     settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).apply();
-                                    if (StringUtils.isNotEmpty(service.phoneNumber)) {
-                                        if (settings.getBoolean("settings_gps_sms", false)) {
-                                            net.gmsworld.devicelocator.Utilities.Messenger.sendLocationMessage(service, location, true, service.phoneNumber, null, null, null);
-                                        }
-                                        if (settings.getBoolean("settings_google_sms", true)) {
-                                            net.gmsworld.devicelocator.Utilities.Messenger.sendGoogleMapsMessage(service, location, service.phoneNumber, null, null, null);
-                                        }
-                                    }
-                                    DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
-                                    String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
-                                            " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m.";
-                                    if (location.hasSpeed() && location.getSpeed() > 0f) {
-                                        message += " and speed " + net.gmsworld.devicelocator.Utilities.Messenger.getSpeed(service, location.getSpeed());
-                                    }
-                                    message += "\n" + "Battery level: " + net.gmsworld.devicelocator.Utilities.Messenger.getBatteryLevel(service) +
-                                            "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
-
-                                    final Map<String, String> headers = new HashMap<String, String>();
-                                    headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(service));
-                                    //First send notification to telegram and if not configured to email
-                                    //REMEMBER this could send a lot of messages and your email account could be overloaded
-                                    if (StringUtils.isNotEmpty(service.telegramId)) {
-                                        net.gmsworld.devicelocator.Utilities.Messenger.sendTelegram(service, location, service.telegramId, message, 1, headers);
-                                    } else if (StringUtils.isNotEmpty(service.email)) {
-                                        String title = service.getString(R.string.message);
-                                        String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(service, true);
-                                        if (deviceId != null) {
-                                            title += " installed on device " + deviceId + " - location change";
-                                        }
-                                        net.gmsworld.devicelocator.Utilities.Messenger.sendEmail(service, location, service.email, message, title, 1, headers);
-                                    } else {
-                                        //send route point for online route tracking
-                                        net.gmsworld.devicelocator.Utilities.Messenger.sendRoutePoint(service, location, 1, headers);
-                                    }
-                                    //send notification to cloud if tracking has been initiated with cloud message
-                                    if (StringUtils.isNotEmpty(service.app)) {
-                                        String[] tokens = StringUtils.split(service.app, "+=+");
-                                        net.gmsworld.devicelocator.Utilities.Messenger.sendCloudMessage(service, location, tokens[0], tokens[1], message, 1, headers);
-                                    }
+                                    net.gmsworld.devicelocator.Utilities.Messenger.sendRouteMessage(service, location, distance, service.phoneNumber, service.telegramId, service.email, service.app);
                                 }
-                                //
 
                                 //EXPERIMENTAL FEATURE audio transmitter
                                 //you should plug antenna to your device audio transmitter

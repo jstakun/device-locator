@@ -7,8 +7,8 @@ android {
         applicationId "net.gmsworld.devicelocator"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 18
-        versionName "0.3"
+        versionCode 19
+        versionName "0.4"
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
     }
     buildTypes {
@@ -38,6 +38,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-messaging:15.0.2'
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'org.apache.commons:commons-lang3:3.7'
+    implementation 'com.madgag.spongycastle:core:1.58.0.0'
     //don't upgrade to 4.9.2
     implementation 'ch.acra:acra:4.9.1'
     implementation 'commons-io:commons-io:2.6'

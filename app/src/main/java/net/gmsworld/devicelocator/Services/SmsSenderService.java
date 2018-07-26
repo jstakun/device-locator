@@ -172,26 +172,25 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
         if (bestLocation == null) {
             String message = getString(R.string.error_getting_location) +
-                             "\n" + "Battery level: " + Messenger.getBatteryLevel(this);
+                    "\n" + "Battery level: " + Messenger.getBatteryLevel(this);
             if (StringUtils.isNotEmpty(phoneNumber)) {
                 Messenger.sendSMS(this, phoneNumber, message);
-            } else {
-                if (StringUtils.isNotEmpty(telegramId)) {
-                    Messenger.sendTelegram(this, null, telegramId, message, 1, new HashMap<String, String>());
+            }
+            if (StringUtils.isNotEmpty(telegramId)) {
+                Messenger.sendTelegram(this, null, telegramId, message, 1, new HashMap<String, String>());
+            }
+            if (StringUtils.isNotEmpty(email)) {
+                String title = getString(R.string.message);
+                String deviceId = Messenger.getDeviceId(this, true);
+                if (deviceId != null) {
+                    title += " installed on device " + deviceId + " - current location";
                 }
-                if (StringUtils.isNotEmpty(email)) {
-                    String title = getString(R.string.message);
-                    String deviceId = Messenger.getDeviceId(this, true);
-                    if (deviceId != null) {
-                        title += " installed on device " + deviceId +  " - current location";
-                    }
-                    message += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
-                    Messenger.sendEmail(this, null, email, message, title, 1, new HashMap<String, String>());
-                }
-                if (StringUtils.isNotEmpty(app)) {
-                    String[] tokens = StringUtils.split(app, "+=+");
-                    Messenger.sendCloudMessage(this, null, tokens[0], tokens[1], message, 1, new HashMap<String, String>());
-                }
+                message += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
+                Messenger.sendEmail(this, null, email, message, title, 1, new HashMap<String, String>());
+            }
+            if (StringUtils.isNotEmpty(app)) {
+                String[] tokens = StringUtils.split(app, "+=+");
+                Messenger.sendCloudMessage(this, null, tokens[0], tokens[1], message, 1, new HashMap<String, String>());
             }
             isRunning = false;
             return;

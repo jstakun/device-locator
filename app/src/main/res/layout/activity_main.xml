@@ -33,7 +33,7 @@
                 ldcard:dlSmsSwitch="SMS control">
 
                 <LinearLayout
-                    android:id="@+id/ll_top_focus"
+                    android:id="@+id/ll_sms_focus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -209,7 +209,7 @@
                     ldcard:dlTrackerSwitch="@string/device_tracker">
 
                     <LinearLayout
-                        android:id="@+id/ll_bottom_focus"
+                        android:id="@+id/ll_tracker_focus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -423,11 +423,14 @@
                     ldcard:title="Device Manager">
 
                     <LinearLayout
+                        android:id="@+id/ll_device_focus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:paddingBottom="8dp"
-                        android:paddingTop="15dp">
+                        android:paddingTop="15dp"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true">
 
                         <TextView
                             android:layout_width="wrap_content"

@@ -41,13 +41,13 @@ public class CommandActivity extends AppCompatActivity {
 
         final String imei = getIntent().getStringExtra("imei");
 
-        final Spinner spinner = (Spinner) findViewById(R.id.deviceCommand);
+        final Spinner spinner = findViewById(R.id.deviceCommand);
         final CommandArrayAdapter commands = new CommandArrayAdapter(this, R.layout.command_row,  getResources().getStringArray(R.array.device_commands));
         spinner.setAdapter(commands);
 
-        final EditText pinEdit = (EditText) findViewById(R.id.devicePin);
+        final EditText pinEdit = findViewById(R.id.devicePin);
 
-        final EditText args = (EditText) findViewById(R.id.deviceCommandArgs);
+        final EditText args = findViewById(R.id.deviceCommandArgs);
 
         final Button send = findViewById(R.id.sendDeviceCommand);
 
@@ -65,8 +65,8 @@ public class CommandActivity extends AppCompatActivity {
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String pin = pinEdit.getText().toString();
-                if (pin == null || pin.length() < 4) {
+                final String pin = pinEdit.getText().toString();
+                if (pin.length() < 4) {
                     Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
                 } else if (StringUtils.isNotEmpty(name) || StringUtils.isNotEmpty(imei)) {
                     final String command = spinner.getSelectedItem().toString();

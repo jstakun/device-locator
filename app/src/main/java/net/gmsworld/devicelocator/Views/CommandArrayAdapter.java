@@ -38,7 +38,7 @@ public class CommandArrayAdapter extends ArrayAdapter<String> {
         return createView(position, convertView, parent);
     }
 
-    public View createView(int position, View convertView, ViewGroup parent) {
+    private View createView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder; // view lookup cache stored in tag
         if (convertView == null) {
             // If there's no view to re-use, inflate a brand new view for row
