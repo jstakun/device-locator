@@ -40,7 +40,7 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
 
     public static void sendRegistrationToServer(final Context context, final String token, final String username, final String deviceName) {
         final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
         if (StringUtils.isNotEmpty(tokenStr)) {
             sendRegistrationToServer(context, token, username, deviceName, tokenStr);
         } else {

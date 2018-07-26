@@ -50,6 +50,8 @@ public class Messenger {
 
     private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
 
+    public static final String ROUTE_MESSAGE_PREFIX = "New location: ";
+
     public static void sendSMS(final Context context, final String phoneNumber, final String message) {
         String status = null;
         if (Permissions.haveSendSMSPermission(context)) {
@@ -78,7 +80,7 @@ public class Messenger {
         if (StringUtils.isNotEmpty(imei) && StringUtils.isNotEmpty(pin) && StringUtils.isNotEmpty(message)) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     headers.put("X-GMS-AppId", "2");
@@ -144,7 +146,7 @@ public class Messenger {
         if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message))) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     headers.put("X-GMS-AppId", "2");
@@ -221,7 +223,7 @@ public class Messenger {
         if (isValidTelegramId(telegramId)) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     String deviceId = getDeviceId(context, false);
@@ -314,7 +316,7 @@ public class Messenger {
     private static void sendRoutePoint(final Context context, final Location location, final int retryCount, final Map<String, String> headers) {
         if (Network.isNetworkAvailable(context)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
                 headers.put("Authorization", "Bearer " + tokenStr);
                 headers.put("X-GMS-AppId", "2");
@@ -485,8 +487,7 @@ public class Messenger {
                 sendGoogleMapsMessage(context, location, phoneNumber, null, null, null);
             }
         }
-        DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
-        String message = "New location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
+        String message = ROUTE_MESSAGE_PREFIX + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
                 " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m.";
         if (location.hasSpeed() && location.getSpeed() > 0f) {
             message += " and speed " + net.gmsworld.devicelocator.Utilities.Messenger.getSpeed(context, location.getSpeed());
@@ -520,14 +521,15 @@ public class Messenger {
 
     public static void sendCommandMessage(final Context context, final Bundle extras) {
         String text = null, title = null, phoneNumber = null, telegramId = null, email = null, notificationNumber = null, command = null, app = null;
-        String deviceId = net.gmsworld.devicelocator.Utilities.Messenger.getDeviceId(context, true);
+        String deviceId = getDeviceId(context, true);
         List<String> notifications = new ArrayList<String>();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
         if (extras != null) {
             phoneNumber = extras.getString("phoneNumber");
             telegramId = extras.getString("telegramId");
             email = extras.getString("email");
-            notificationNumber = extras.getString("notificationNumber");
+            //notificationNumber = extras.getString("notificationNumber");
             command = extras.getString("command");
             app = extras.getString("app");
         }
@@ -538,16 +540,16 @@ public class Messenger {
                 if (deviceId != null) {
                     title += " on device " + deviceId;
                 }
-                if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean("motionDetectorRunning", false)) {
+                if (GmsSmartLocationManager.isLocationEnabled(context) && settings.getBoolean("motionDetectorRunning", false)) {
                     text = "Device location tracking has been resumed. ";
-                    if (StringUtils.isNotEmpty(notificationNumber)) {
-                        notifications.add(notificationNumber);
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""))) {
+                        notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""));
                     }
-                    if (StringUtils.isNotEmpty(email)) {
-                        notifications.add(email);
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""))) {
+                        notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""));
                     }
-                    if (StringUtils.isNotEmpty(telegramId)) {
-                        notifications.add(printTelegram(telegramId));
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL, ""))) {
+                        notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL, "")));
                     }
                     if (notifications.isEmpty()) {
                         text += "No notifications will be sent!";
@@ -574,14 +576,14 @@ public class Messenger {
                 if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean("motionDetectorRunning", false)) {
                     text = "Device location tracking is running. " +
                             "Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
-                    if (StringUtils.isNotEmpty(notificationNumber)) {
-                        notifications.add(notificationNumber);
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""))) {
+                        notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""));
                     }
-                    if (StringUtils.isNotEmpty(email)) {
-                        notifications.add(email);
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""))) {
+                        notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""));
                     }
-                    if (StringUtils.isNotEmpty(telegramId)) {
-                        notifications.add(printTelegram(telegramId));
+                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL, ""))) {
+                        notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL, "")));
                     }
                     if (notifications.isEmpty()) {
                         text += "\nNo notifications will be sent!";
@@ -600,7 +602,6 @@ public class Messenger {
                 text = "Device has been unmuted.";
                 break;
             case Command.RADIUS_COMMAND:
-                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 int radius = settings.getInt("radius", -1);
                 if (radius > 0) {
                     text = "Device location tracking radius has been changed to " + radius + " meters.";
@@ -633,14 +634,14 @@ public class Messenger {
                 break;
             case Command.NOTIFY_COMMAND:
                 text = "";
-                if (StringUtils.isNotEmpty(notificationNumber)) {
-                    notifications.add(notificationNumber);
+                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""))) {
+                    notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, ""));
                 }
-                if (StringUtils.isNotEmpty(email)) {
-                    notifications.add(email);
+                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""))) {
+                    notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL, ""));
                 }
-                if (StringUtils.isNotEmpty(telegramId)) {
-                    notifications.add(printTelegram(telegramId));
+                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL, ""))) {
+                    notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL, "")));
                 }
                 if (notifications.isEmpty()) {
                     text += "No notifications will be sent! Please specify valid email, phone number or Telegram chat or channel.";
@@ -655,7 +656,7 @@ public class Messenger {
                 text = "Audio transmitter has been stopped.";
                 break;
             case Command.TAKE_PHOTO_COMMAND:
-                boolean hiddenCamera = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false);
+                boolean hiddenCamera = settings.getBoolean("hiddenCamera", false);
                 String imageUrl = null;
                 if (extras != null) {
                     extras.getString("imageUrl");
@@ -670,7 +671,7 @@ public class Messenger {
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.PIN_COMMAND:
-                final String pin = PreferenceManager.getDefaultSharedPreferences(context).getString(PinActivity.DEVICE_PIN, "");
+                final String pin = settings.getString(PinActivity.DEVICE_PIN, "");
                 if (StringUtils.isEmpty(pin)) {
                     text = "No Security PIN is set!";
                 } else {
@@ -723,7 +724,6 @@ public class Messenger {
                 if (StringUtils.isNotEmpty(telegramId)) {
                     sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
                 }
-
                 if (StringUtils.isNotEmpty(email)) {
                     if (title == null) {
                         title = context.getString(R.string.message);
@@ -734,7 +734,6 @@ public class Messenger {
                     text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
                     sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
                 }
-
                 if (StringUtils.isNotEmpty(app)) {
                     String[] tokens = StringUtils.split(app, "+=+");
                     sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
@@ -819,7 +818,7 @@ public class Messenger {
     public static void sendEmailRegistrationRequest(final Context context, final String email, final int retryCount) {
         if (StringUtils.isNotEmpty(email)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendEmailRegistrationRequest(context, email, tokenStr, 1);
             } else {
@@ -844,7 +843,7 @@ public class Messenger {
     public static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final int retryCount) {
         if (isValidTelegramId(telegramId)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendTelegramRegistrationRequest(context, telegramId, tokenStr, 1);
             } else {
@@ -1054,14 +1053,14 @@ public class Messenger {
         JsonElement reply = new JsonParser().parse(response);
         String tokenStr = null;
         if (reply != null) {
-            JsonElement t = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN_KEY);
+            JsonElement t = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN);
             if (t != null) {
                 tokenStr = t.getAsString();
             }
         }
         //Log.d(TAG, "Received following token: " + tokenStr);
         if (StringUtils.isNotEmpty(tokenStr)) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DeviceLocatorApp.GMS_TOKEN_KEY, tokenStr).apply();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DeviceLocatorApp.GMS_TOKEN, tokenStr).apply();
         }
         return tokenStr;
     }

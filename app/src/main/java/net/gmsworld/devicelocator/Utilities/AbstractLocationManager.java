@@ -307,7 +307,7 @@ public abstract class AbstractLocationManager {
                     String content = routeToGeoJson(route, desc, deviceId);
                     String url = context.getString(R.string.routeProviderUrl);
                     final Map<String, String> headers = new HashMap<String, String>();
-                    String tokenStr = PreferenceManager.getDefaultSharedPreferences(context).getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+                    String tokenStr = PreferenceManager.getDefaultSharedPreferences(context).getString(DeviceLocatorApp.GMS_TOKEN, "");
                     if (StringUtils.isNotEmpty(tokenStr)) {
                         url = context.getString(R.string.secureRouteProviderUrl);
                         headers.put("Authorization", "Bearer " + tokenStr);

@@ -45,7 +45,7 @@ public class RouteTrackingService extends Service {
     public static final int COMMAND_SHOW_ROUTE = 50;
     public static final int DEFAULT_RADIUS = 100;
 
-    private static final int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = 1001;
 
     private static final String TAG = RouteTrackingService.class.getSimpleName();
     private int radius = DEFAULT_RADIUS;

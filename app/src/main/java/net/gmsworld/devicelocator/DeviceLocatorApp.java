@@ -28,7 +28,7 @@ import java.util.Map;
 //        socketTimeout = 30000)
 public class DeviceLocatorApp extends Application {
 
-    public static final String GMS_TOKEN_KEY = "gmsToken";
+    public static final String GMS_TOKEN = "gmsToken";
     private static final String TAG = DeviceLocatorApp.class.getSimpleName();
 
     @Override
@@ -36,7 +36,7 @@ public class DeviceLocatorApp extends Application {
         super.onCreate();
         final Map<String, String> headers = new HashMap<String, String>();
         final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        String tokenStr = settings.getString(GMS_TOKEN_KEY, "");
+        String tokenStr = settings.getString(GMS_TOKEN, "");
         if (StringUtils.isNotEmpty(tokenStr)) {
             headers.put("Authorization", "Bearer " + tokenStr);
             headers.put("X-GMS-AppId", "2");

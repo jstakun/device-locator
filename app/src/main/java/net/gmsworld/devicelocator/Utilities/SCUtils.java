@@ -37,7 +37,7 @@ public final class SCUtils {
         return result;
     }
 
-    protected static byte[] decrypt(byte[] cipher, Context context) throws Exception {
+    public static byte[] decrypt(byte[] cipher, Context context) throws Exception {
         DESedeEngine des = new DESedeEngine();
         CBCBlockCipher des_CBC = new CBCBlockCipher(des);
         PaddedBufferedBlockCipher cipherAES = new PaddedBufferedBlockCipher(des_CBC);
@@ -47,7 +47,7 @@ public final class SCUtils {
         return cipherData(cipherAES, cipher);
     }
 
-    protected static byte[] encrypt(byte[] plain, Context context) throws Exception {
+    public static byte[] encrypt(byte[] plain, Context context) throws Exception {
         DESedeEngine des = new DESedeEngine();
         CBCBlockCipher des_CBC = new CBCBlockCipher(des);
         PaddedBufferedBlockCipher cipherAES = new PaddedBufferedBlockCipher(des_CBC);
@@ -74,7 +74,7 @@ public final class SCUtils {
     private static CipherParameters getCipherParameters(Context context) {
         if (cipherParameters == null) {
             PKCS12ParametersGenerator pGen = new PKCS12ParametersGenerator(new SHA1Digest());
-            String salt = Messenger.getDeviceId(context, false);
+            String salt = context.getString(R.string.scSalt);
             char[] password = context.getString(R.string.scPassword).toCharArray();
             pGen.init(PBEParametersGenerator.PKCS12PasswordToBytes(password), Hex.decode(salt), 128);
             cipherParameters = pGen.generateDerivedParameters(192, 64);

@@ -1315,7 +1315,7 @@ public class MainActivity extends AppCompatActivity {
             //load device list and set array adapter
             String queryString = "username=" + userLogin;
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN_KEY, "");
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
             Map<String, String> headers = new HashMap<String, String>();
             if (StringUtils.isNotEmpty(tokenStr)) {
                 headers.put("Authorization", "Bearer " + tokenStr);

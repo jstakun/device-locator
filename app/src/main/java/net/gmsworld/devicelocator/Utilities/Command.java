@@ -1072,6 +1072,9 @@ public class Command {
         private void showMessageNotification(Context context) {
             String message = StringUtils.join(commandTokens, " ", 1, commandTokens.length);
             int notificationId = (int)System.currentTimeMillis();
+            if (StringUtils.startsWithIgnoreCase(message, Messenger.ROUTE_MESSAGE_PREFIX)) {
+                notificationId = RouteTrackingService.NOTIFICATION_ID;
+            }
             Notification notification =  NotificationUtils.buildMessageNotification(context, notificationId, message);
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager != null) {
