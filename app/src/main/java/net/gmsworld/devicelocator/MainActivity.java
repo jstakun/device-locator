@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 //
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("loginTracker", true).apply();
-                getSupportActionBar().invalidateOptionsMenu();
+                supportInvalidateOptionsMenu();
                 //open dialog to enable photo on failed login
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
@@ -295,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_sms_focus).requestFocus();
-                getSupportActionBar().invalidateOptionsMenu();
+                supportInvalidateOptionsMenu();
                 return true;
             case R.id.tracker:
                 Log.d(TAG, "Show tracker settings");
@@ -305,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_tracker_focus).requestFocus();
-                getSupportActionBar().invalidateOptionsMenu();
+                supportInvalidateOptionsMenu();
                 return true;
             case R.id.devices:
                 Log.d(TAG, "Show Device Manager settings");
@@ -316,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_device_focus).requestFocus();
-                getSupportActionBar().invalidateOptionsMenu();
+                supportInvalidateOptionsMenu();
                 return true;
             case R.id.loginTracker:
                 onLoginTrackerItemSelected();
@@ -368,7 +368,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
         findViewById(R.id.smsSettings).setVisibility(View.GONE);
         findViewById(R.id.deviceSettings).setVisibility(View.GONE);
-        getSupportActionBar().invalidateOptionsMenu();
+        supportInvalidateOptionsMenu();
     }
 
     private void initLocationSMSCheckbox() {
@@ -425,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
                         PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
                                 .putBoolean("loginTracker", false)
                                 .putBoolean("hiddenCamera", false).apply();
-                        getSupportActionBar().invalidateOptionsMenu();
+                        supportInvalidateOptionsMenu();
                         Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(MainActivity.this, "Failed. Please retry!", Toast.LENGTH_LONG).show();

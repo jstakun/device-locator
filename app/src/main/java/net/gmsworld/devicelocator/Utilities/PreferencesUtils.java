@@ -26,7 +26,8 @@ public class PreferencesUtils {
             try {
                 value = new String(SCUtils.decrypt(Base64.decode(value, Base64.NO_PADDING), context));
             } catch (Exception e) {
-                Log.d(TAG, e.getMessage(), e);
+                //Log.d(TAG, e.getMessage(), e);
+                Log.w(TAG, key + " is unencrypted!");
             }
         }
         return value;
@@ -38,7 +39,7 @@ public class PreferencesUtils {
                 byte[] encValue = SCUtils.encrypt(value.getBytes(), context);
                 sharedPreferences.edit().putString(key, Base64.encodeToString(encValue, Base64.NO_PADDING)).apply();
             } catch (Exception e) {
-                Log.d(TAG, e.getMessage(), e);
+                Log.e(TAG, "Unable to encrypt " + key, e);
             }
         }
     }

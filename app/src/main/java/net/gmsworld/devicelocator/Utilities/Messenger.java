@@ -1,5 +1,6 @@
 package net.gmsworld.devicelocator.Utilities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -208,7 +209,8 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            Toast.makeText(context, "Device Locator is unable to sent notification because your email address is unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show(); } else {
+                            Toast.makeText(context, "Device Locator is unable to sent notification because your email address is unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
+                        } else {
                             Toast.makeText(context, "Oops! Failed to sent email notification. Something went wrong on our side!", Toast.LENGTH_LONG).show();
                         }
                     }
@@ -998,6 +1000,7 @@ public class Messenger {
         }
     }
 
+    @SuppressLint("MissingPermission")
     public static String getDeviceId(Context context, boolean useUserDeviceName) {
         String androidDeviceId = null;
 
@@ -1006,8 +1009,7 @@ public class Messenger {
         }
 
         if (androidDeviceId == null && context != null) {
-            //android.Manifest.permission.READ_PHONE_STATE required
-            // get telephony imei
+            //get telephony imei android.Manifest.permission.READ_PHONE_STATE required
             if (Permissions.haveReadPhoneStatePermission(context)) {
                 try {
                     final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
