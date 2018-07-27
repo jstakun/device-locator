@@ -104,18 +104,19 @@ public class CommandActivity extends AppCompatActivity {
                                 Log.e(TAG, e.getMessage(), e);
                             }
                         }
-                        String url = getString(R.string.deviceManagerUrl);
 
                         Map<String, String> headers = new HashMap<String, String>();
                         headers.put("Authorization", "Bearer " + tokenStr);
 
-                        Network.post(CommandActivity.this, url, content, null, headers, new Network.OnGetFinishListener() {
+                        Network.post(CommandActivity.this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                             @Override
                             public void onGetFinish(String results, int responseCode, String url) {
                                 if (responseCode == 200) {
-                                    Toast.makeText(CommandActivity.this, "Command " + command + " has been sent to device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(CommandActivity.this, "Command " + command + " has been sent to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
+                                    Toast.makeText(CommandActivity.this, "Failed to send command " + command + " to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!", Toast.LENGTH_SHORT).show();
+
                                 }
                             }
                         });

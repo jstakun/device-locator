@@ -132,8 +132,6 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isTrackingServiceBound = false;
 
-    private AlertDialog pinDialog;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -221,11 +219,6 @@ public class MainActivity extends AppCompatActivity {
         registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
         registerUserLogin((Spinner) findViewById(R.id.userAccounts));
         registerDeviceName((TextView) findViewById(R.id.deviceName));
-
-        if (pinDialog != null) {
-            pinDialog.dismiss();
-            pinDialog = null;
-        }
 
         //reset pin verification time
         PreferenceManager.getDefaultSharedPreferences(this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).apply();
@@ -369,6 +362,21 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.smsSettings).setVisibility(View.GONE);
         findViewById(R.id.deviceSettings).setVisibility(View.GONE);
         supportInvalidateOptionsMenu();
+    }
+
+    private void showRemoveDeviceDialog(final String imei) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setMessage("Remove device " + imei + " from the list?");
+        alertDialogBuilder.setPositiveButton("yes",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface arg0, int arg1) {
+                                deleteDevice(imei);
+                            }
+                        });
+        alertDialogBuilder.setNegativeButton("No", null);
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
     }
 
     private void initLocationSMSCheckbox() {
@@ -614,7 +622,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void initApp() {
         initRunningButton();
-        //initSendLocationButton();
         initShareRouteButton();
         initRadiusInput();
         initMotionDetectorButton();
@@ -635,6 +642,8 @@ public class MainActivity extends AppCompatActivity {
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
         initRemoteControl();
+
+
     }
 
 
@@ -804,13 +813,11 @@ public class MainActivity extends AppCompatActivity {
         String userLogin = settings.getString(USER_LOGIN);
         if (!StringUtils.equals(userLogin, newUserLogin)) {
             String token = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
-            boolean isNewToken = false;
             if (StringUtils.isEmpty(token)) {
                 token = FirebaseInstanceId.getInstance().getToken();
-                isNewToken = true;
             }
             if (!StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
-                DlFirebaseInstanceIdService.sendRegistrationToServer(this, isNewToken ? token : null, newUserLogin, null);
+                DlFirebaseInstanceIdService.sendRegistrationToServer(this, token, newUserLogin, settings.getString(DEVICE_NAME));
             } else {
                 Toast.makeText(this, "You device seems to be BLACKLISTED and can't be registered!", Toast.LENGTH_LONG).show();
             }
@@ -867,16 +874,17 @@ public class MainActivity extends AppCompatActivity {
         String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
             String token = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
-            boolean isNewToken = false;
             if (StringUtils.isEmpty(token)) {
                 token = FirebaseInstanceId.getInstance().getToken();
-                isNewToken = true;
             }
             if (!StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
                 String normalizedDeviceName = newDeviceName.replace(' ', '-');
-                DlFirebaseInstanceIdService.sendRegistrationToServer(this, isNewToken ? token : null, null, normalizedDeviceName.replace(' ', '-'));
-                EditText deviceNameEdit = findViewById(R.id.deviceName);
-                deviceNameEdit.setText(normalizedDeviceName);
+                DlFirebaseInstanceIdService.sendRegistrationToServer(this, token, settings.getString(USER_LOGIN), normalizedDeviceName);
+                if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
+                    EditText deviceNameEdit = findViewById(R.id.deviceName);
+                    deviceNameEdit.setText(normalizedDeviceName);
+                    PreferenceManager.getDefaultSharedPreferences(this).edit().putString(DEVICE_NAME, normalizedDeviceName).apply();
+                }
             } else {
                 Toast.makeText(this, "You device seems to be BLACKLISTED and can't be registered!", Toast.LENGTH_LONG).show();
             }
@@ -1337,13 +1345,15 @@ public class MainActivity extends AppCompatActivity {
                             Iterator<JsonElement> iter = devices.iterator();
                             while (iter.hasNext()) {
                                 JsonObject deviceObject = iter.next().getAsJsonObject();
-                                Device device = new Device();
-                                if (deviceObject.has("name")) {
-                                    device.name = deviceObject.get("name").getAsString();
+                                if (StringUtils.isNotEmpty(deviceObject.get("token").getAsString())) {
+                                    Device device = new Device();
+                                    if (deviceObject.has("name")) {
+                                        device.name = deviceObject.get("name").getAsString();
+                                    }
+                                    device.imei = deviceObject.get("imei").getAsString();
+                                    device.creationDate = deviceObject.get("creationDate").getAsString();
+                                    userDevices.add(device);
                                 }
-                                device.imei = deviceObject.get("imei").getAsString();
-                                device.creationDate = deviceObject.get("creationDate").getAsString();
-                                userDevices.add(device);
                             }
                             final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, userDevices);
                             Log.d(TAG, "Found " + userDevices.size() + " devices");
@@ -1363,7 +1373,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
                     final Device item = (Device) parent.getItemAtPosition(position);
-                    Log.d(TAG, "Command dialog for " + item + " will open now...");
+                    //Log.d(TAG, "Command dialog for " + item + " will open now...");
                     Intent intent = new Intent(MainActivity.this, CommandActivity.class);
                     intent.putExtra("name", item.name);
                     intent.putExtra("imei", item.imei);
@@ -1375,6 +1385,27 @@ public class MainActivity extends AppCompatActivity {
             deviceList.setAdapter(adapter);
             deviceListEmpty.setText(R.string.devices_list_empty);
         }
+    }
+
+    private void deleteDevice(final String imei) {
+        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+        String content = "imei=" + imei + "&action=delete";
+
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put("Authorization", "Bearer " + tokenStr);
+
+        Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
+            @Override
+            public void onGetFinish(String results, int responseCode, String url) {
+                if (responseCode == 200) {
+                    Toast.makeText(MainActivity.this, "Device has been removed!", Toast.LENGTH_SHORT).show();
+                    initDeviceList();
+                } else {
+                    Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
+                    Toast.makeText(MainActivity.this, "Failed to remove device!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void saveData() {
@@ -1494,7 +1525,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private static class DeviceArrayAdapter extends ArrayAdapter<Device> {
+    private class DeviceArrayAdapter extends ArrayAdapter<Device> {
 
         private final Context context;
         private final List<Device> devices;
@@ -1507,7 +1538,7 @@ public class MainActivity extends AppCompatActivity {
 
         @NonNull
         @Override
-        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+        public View getView(final int position, View convertView, @NonNull ViewGroup parent) {
             ViewHolder viewHolder; // view lookup cache stored in tag
             if (convertView == null) {
                 LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -1515,6 +1546,7 @@ public class MainActivity extends AppCompatActivity {
                 viewHolder = new ViewHolder();
                 viewHolder.deviceName = convertView.findViewById(R.id.deviceName);
                 viewHolder.deviceDesc = convertView.findViewById(R.id.deviceDesc);
+                viewHolder.deviceRemove = convertView.findViewById(R.id.deviceRemove);
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
@@ -1527,12 +1559,39 @@ public class MainActivity extends AppCompatActivity {
             viewHolder.deviceName.setText(name);
             viewHolder.deviceDesc.setText("Last edited on " + devices.get(position).creationDate.split("T")[0]);
 
+            viewHolder.deviceName.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent intent = new Intent(MainActivity.this, CommandActivity.class);
+                    intent.putExtra("name", devices.get(position).name);
+                    intent.putExtra("imei", devices.get(position).imei);
+                    MainActivity.this.startActivity(intent);
+
+                }
+            });
+
+            viewHolder.deviceDesc.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent intent = new Intent(MainActivity.this, CommandActivity.class);
+                    intent.putExtra("name", devices.get(position).name);
+                    intent.putExtra("imei", devices.get(position).imei);
+                    MainActivity.this.startActivity(intent);
+
+                }
+            });
+
+            viewHolder.deviceRemove.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    showRemoveDeviceDialog(devices.get(position).imei);
+                }
+            });
+
             return convertView;
         }
 
-        private static class ViewHolder {
+        private class ViewHolder {
             TextView deviceName;
             TextView deviceDesc;
+            ImageButton deviceRemove;
         }
     }
 }
