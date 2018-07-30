@@ -25,7 +25,7 @@ public abstract class AbstractCommand {
 
     static final String TAG = "DeviceCommand";
 
-    public enum Finder {STARTS, EQUALS}
+    protected enum Finder {STARTS, EQUALS}
 
     private String smsCommand;
 
@@ -49,6 +49,10 @@ public abstract class AbstractCommand {
 
     public boolean validateTokens() {
         return false;
+    }
+
+    public boolean hasParmeters() {
+        return finder.equals(Finder.STARTS);
     }
 
     public boolean findSmsCommand(Context context, Intent intent) {

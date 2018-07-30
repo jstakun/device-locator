@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.text.InputType;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -51,6 +53,26 @@ public class CommandActivity extends AppCompatActivity {
 
         final Button send = findViewById(R.id.sendDeviceCommand);
 
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                final String command = spinner.getSelectedItem().toString();
+                AbstractCommand c = Command.getCommandByName(command);
+                if (c != null && !c.hasParmeters()) {
+                    args.setHint(R.string.params_no_hint);
+                    args.setInputType(InputType.TYPE_NULL);
+                } else {
+                    args.setHint(R.string.params_yes_hint);
+                    args.setInputType(InputType.TYPE_CLASS_TEXT);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+
+            }
+        });
+
         TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
@@ -81,7 +103,7 @@ public class CommandActivity extends AppCompatActivity {
                             c.setCommandTokens(StringUtils.split(command + " " + commandArgs, " "));
                         }
 
-                        if (c.getFinder().equals(AbstractCommand.Finder.STARTS)) {
+                        if (c.hasParmeters()) {
                             needArgs = true;
                             if (!c.validateTokens()) {
                                 validArgs = false;

@@ -80,10 +80,11 @@
                 android:id="@+id/deviceCommandArgs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="text"
+                android:inputType="none"
                 android:lines="1"
                 android:maxLength="128"
                 android:maxLines="1"
+                android:hint="@string/params_no_hint"
                 android:textColor="@color/gray"/>
 
             <Button
