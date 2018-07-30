@@ -1547,6 +1547,7 @@ public class MainActivity extends AppCompatActivity {
                 viewHolder.deviceName = convertView.findViewById(R.id.deviceName);
                 viewHolder.deviceDesc = convertView.findViewById(R.id.deviceDesc);
                 viewHolder.deviceRemove = convertView.findViewById(R.id.deviceRemove);
+                ViewCompat.setBackgroundTintList(viewHolder.deviceRemove, ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();

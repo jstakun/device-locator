@@ -99,6 +99,6 @@
     <string name="device_security_pin">Device Security PIN</string>
     <string name="command_arguments">Command parameters</string>
     <string name="device_icon">Device Icon</string>
-    <string name="params_no_hint">No parameters needed</string>
-    <string name="params_yes_hint">Enter parameters</string>
+    <string name="params_no_hint">No parameters required</string>
+    <string name="params_yes_hint">Enter parameter(s)</string>
 </resources>
