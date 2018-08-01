@@ -424,7 +424,9 @@ public class Messenger {
     }
 
     public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email, String app) {
-        String text = "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
+        String deviceId = getDeviceId(context, true);
+        String text = "Device " + deviceId + " location:" +
+                "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
                 "\n" + "Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
@@ -434,7 +436,6 @@ public class Messenger {
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message);
-            String deviceId = getDeviceId(context, true);
             if (deviceId != null) {
                 title += " installed on device " + deviceId + " - location map link";
                 text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
@@ -449,12 +450,13 @@ public class Messenger {
 
     public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId, String email, String app) {
         String text;
+        String deviceId = getDeviceId(context, true);
         if (GmsSmartLocationManager.isLocationEnabled(context)) {
-            text = context.getString(R.string.acknowledgeMessage) + "\n";
+            text = context.getString(R.string.acknowledgeMessage, deviceId) + "\n";
             text += context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context)) + "\n";
             text += context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context) + "\n";
         } else {
-            text = "Location service is disabled! Unable to send location. Please enable location service and send the command again.\n";
+            text = "Location service is disabled on device " + deviceId + "! Unable to send location. Please enable location service and send the command again.\n";
         }
         text += "Battery level: " + getBatteryLevel(context);
 
@@ -466,7 +468,6 @@ public class Messenger {
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message);
-            String deviceId = getDeviceId(context, true);
             if (deviceId != null) {
                 title += " installed on device " + deviceId + " - location request";
                 text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);

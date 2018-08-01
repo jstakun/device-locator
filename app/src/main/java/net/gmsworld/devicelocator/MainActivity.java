@@ -789,6 +789,20 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
             }
+        } else {
+            //show dialog with info What to do if no account is created
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    startActivity(new Intent(Settings.ACTION_SYNC_SETTINGS));
+                }
+            });
+            builder.setNegativeButton(R.string.no, null);
+            builder.setMessage("It seems you've no email accounts registered on this device and there no verified notification email set in Notification settings card." +
+                    " Do you want to register new email account now?");
+            builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
 
         final CommandArrayAdapter accs = new CommandArrayAdapter(this, R.layout.command_row,  accountNames);

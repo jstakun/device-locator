@@ -171,7 +171,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         SmartLocation.with(this).location().stop();
 
         if (bestLocation == null) {
-            String message = getString(R.string.error_getting_location) +
+            String deviceId = Messenger.getDeviceId(this, true);
+            String message = getString(R.string.error_getting_location, deviceId) +
                     "\n" + "Battery level: " + Messenger.getBatteryLevel(this);
             if (StringUtils.isNotEmpty(phoneNumber)) {
                 Messenger.sendSMS(this, phoneNumber, message);
@@ -181,7 +182,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             }
             if (StringUtils.isNotEmpty(email)) {
                 String title = getString(R.string.message);
-                String deviceId = Messenger.getDeviceId(this, true);
                 if (deviceId != null) {
                     title += " installed on device " + deviceId + " - current location";
                 }
