@@ -26,6 +26,7 @@
         <item>Mute</item>
         <item>Unmute</item>
         <item>Notify</item>
+        <item>About</item>
         <item>Gpshigh</item>
         <item>Gpsbalance</item>
     </string-array>

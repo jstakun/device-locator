@@ -17,6 +17,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import net.gmsworld.devicelocator.Model.Device;
 import net.gmsworld.devicelocator.Utilities.AbstractCommand;
 import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Messenger;
@@ -27,7 +28,9 @@ import net.gmsworld.devicelocator.Views.CommandArrayAdapter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CommandActivity extends AppCompatActivity {
@@ -36,30 +39,72 @@ public class CommandActivity extends AppCompatActivity {
 
     private static final String PIN_PREFIX = "pin_";
 
+    private String name, imei;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_command);
 
-        final String name = getIntent().getStringExtra("name");
+        final PreferencesUtils prefs = new PreferencesUtils(this);
 
-        final String imei = getIntent().getStringExtra("imei");
+        name = getIntent().getStringExtra("name");
 
-        final Spinner spinner = findViewById(R.id.deviceCommand);
+        imei = getIntent().getStringExtra("imei");
+
+        final List<Device> devices = getIntent().getParcelableArrayListExtra("devices");
+
+        final Spinner commandSpinner = findViewById(R.id.deviceCommand);
         final CommandArrayAdapter commands = new CommandArrayAdapter(this, R.layout.command_row,  getResources().getStringArray(R.array.device_commands));
-        spinner.setAdapter(commands);
+        commandSpinner.setAdapter(commands);
+
+        List<String> deviceNames = new ArrayList<>();
+        for(int i=0;i<devices.size();i++) {
+            deviceNames.add(StringUtils.isNotEmpty(devices.get(i).name) ? devices.get(i).name : devices.get(i).imei);
+        }
+
+        final Spinner deviceSpinner = findViewById(R.id.deviceList);
+        final CommandArrayAdapter devicesAdapter = new CommandArrayAdapter(this, R.layout.command_row,  deviceNames);
+        deviceSpinner.setAdapter(devicesAdapter);
+
+        for (int i = 0; i < devices.size(); i++) {
+            if (StringUtils.equalsIgnoreCase(name, devices.get(i).name) || StringUtils.equalsIgnoreCase(imei, devices.get(i).imei)) {
+                deviceSpinner.setSelection(i);
+                break;
+            }
+        }
 
         final EditText pinEdit = findViewById(R.id.devicePin);
+
+        deviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                name = devices.get(position).name;
+                imei = devices.get(position).imei;
+                String savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
+                if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
+                    pinEdit.setText(savedPin);
+                } else {
+                    pinEdit.setText("");
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
 
         final EditText args = findViewById(R.id.deviceCommandArgs);
 
         final Button send = findViewById(R.id.sendDeviceCommand);
         ViewCompat.setBackgroundTintList(send, ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        commandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                final String command = spinner.getSelectedItem().toString();
+                final String command = commandSpinner.getSelectedItem().toString();
                 AbstractCommand c = Command.getCommandByName(command);
                 if (c != null && !c.hasParmeters()) {
                     args.setHint(R.string.params_no_hint);
@@ -82,8 +127,6 @@ public class CommandActivity extends AppCompatActivity {
 
         findViewById(R.id.commandView).requestFocus();
 
-        final PreferencesUtils prefs = new PreferencesUtils(this);
-
         String savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
         if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
             pinEdit.setText(savedPin);
@@ -96,7 +139,7 @@ public class CommandActivity extends AppCompatActivity {
                 if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
                     Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
                 } else if (StringUtils.isNotEmpty(name) || StringUtils.isNotEmpty(imei)) {
-                    final String command = spinner.getSelectedItem().toString();
+                    final String command = commandSpinner.getSelectedItem().toString();
                     //check if command requires args and validate args
                     boolean validArgs = true, needArgs = false;
                     String commandArgs = args.getText().toString();

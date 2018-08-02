@@ -29,15 +29,29 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:paddingTop="15dp"
-                android:paddingBottom="8dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="4dp"
+                android:text="@string/devices" />
+
+            <Spinner
+                android:id="@+id/deviceList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
                 android:text="@string/command" />
 
             <Spinner
                 android:id="@+id/deviceCommand"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="15dp"
+                android:paddingBottom="8dp"
                 android:entries="@array/device_commands"
                 android:prompt="@string/device_command_prompt"/>
 
@@ -53,7 +67,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingBottom="8dp"
-                android:paddingTop="16dp"
+                android:paddingTop="8dp"
                 ldcard:passwordToggleEnabled="true">
 
                 <net.gmsworld.devicelocator.Views.KeyboardEditText
@@ -72,7 +86,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:paddingTop="15dp"
+                android:paddingTop="4dp"
                 android:gravity="center"
                 android:text="@string/command_arguments" />
 
@@ -87,11 +101,14 @@
                 android:hint="@string/params_no_hint"
                 android:textColor="@color/gray"/>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="16dp"/>
+
             <Button
                 android:id="@+id/sendDeviceCommand"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
                 android:backgroundTint="@color/colorPrimary"
                 android:text="@string/send"
                 android:textColor="@android:color/white" />

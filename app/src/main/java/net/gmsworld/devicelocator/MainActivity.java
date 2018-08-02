@@ -364,14 +364,14 @@ public class MainActivity extends AppCompatActivity {
         supportInvalidateOptionsMenu();
     }
 
-    private void showRemoveDeviceDialog(final String imei) {
+    private void showRemoveDeviceDialog(final Device device) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setMessage("Remove device " + imei + " from the list?");
+        alertDialogBuilder.setMessage("Remove device " + (StringUtils.isNotEmpty(device.name) ? device.name : device.imei) + " from the list?");
         alertDialogBuilder.setPositiveButton("yes",
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface arg0, int arg1) {
-                                deleteDevice(imei);
+                                deleteDevice(device.imei);
                             }
                         });
         alertDialogBuilder.setNegativeButton("No", null);
@@ -809,7 +809,7 @@ public class MainActivity extends AppCompatActivity {
         userAccounts.setAdapter(accs);
 
         if (index > 0) {
-            userAccounts.setSelection(index, true);
+            userAccounts.setSelection(index);
         }
 
         userAccounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -1355,7 +1355,7 @@ public class MainActivity extends AppCompatActivity {
                         JsonElement reply = new JsonParser().parse(results);
                         JsonArray devices = reply.getAsJsonObject().get("devices").getAsJsonArray();
                         if (devices.size() > 0) {
-                            List<Device> userDevices = new ArrayList<Device>();
+                            ArrayList<Device> userDevices = new ArrayList<>();
                             Iterator<JsonElement> iter = devices.iterator();
                             while (iter.hasNext()) {
                                 JsonObject deviceObject = iter.next().getAsJsonObject();
@@ -1379,19 +1379,6 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         deviceListEmpty.setText(R.string.devices_list_loading_failed);
                     }
-                }
-            });
-
-            deviceList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-                @Override
-                public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
-                    final Device item = (Device) parent.getItemAtPosition(position);
-                    //Log.d(TAG, "Command dialog for " + item + " will open now...");
-                    Intent intent = new Intent(MainActivity.this, CommandActivity.class);
-                    intent.putExtra("name", item.name);
-                    intent.putExtra("imei", item.imei);
-                    MainActivity.this.startActivity(intent);
                 }
             });
         } else {
@@ -1541,12 +1528,10 @@ public class MainActivity extends AppCompatActivity {
 
     private class DeviceArrayAdapter extends ArrayAdapter<Device> {
 
-        private final Context context;
-        private final List<Device> devices;
+        private final ArrayList<Device> devices;
 
-        DeviceArrayAdapter(Context context, int textViewResourceId, List<Device> devices) {
+        DeviceArrayAdapter(Context context, int textViewResourceId, ArrayList<Device> devices) {
             super(context, textViewResourceId, devices);
-            this.context = context;
             this.devices = devices;
         }
 
@@ -1555,7 +1540,7 @@ public class MainActivity extends AppCompatActivity {
         public View getView(final int position, View convertView, @NonNull ViewGroup parent) {
             ViewHolder viewHolder; // view lookup cache stored in tag
             if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                LayoutInflater inflater = (LayoutInflater) MainActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(R.layout.device_row, parent, false);
                 viewHolder = new ViewHolder();
                 viewHolder.deviceName = convertView.findViewById(R.id.deviceName);
@@ -1576,31 +1561,31 @@ public class MainActivity extends AppCompatActivity {
 
             viewHolder.deviceName.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    Intent intent = new Intent(MainActivity.this, CommandActivity.class);
-                    intent.putExtra("name", devices.get(position).name);
-                    intent.putExtra("imei", devices.get(position).imei);
-                    MainActivity.this.startActivity(intent);
-
+                    showCommandActivity(devices.get(position));
                 }
             });
 
             viewHolder.deviceDesc.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    Intent intent = new Intent(MainActivity.this, CommandActivity.class);
-                    intent.putExtra("name", devices.get(position).name);
-                    intent.putExtra("imei", devices.get(position).imei);
-                    MainActivity.this.startActivity(intent);
-
+                    showCommandActivity(devices.get(position));
                 }
             });
 
             viewHolder.deviceRemove.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    showRemoveDeviceDialog(devices.get(position).imei);
+                    showRemoveDeviceDialog(devices.get(position));
                 }
             });
 
             return convertView;
+        }
+
+        private void showCommandActivity(Device device) {
+            Intent intent = new Intent(MainActivity.this, CommandActivity.class);
+            intent.putExtra("name", device.name);
+            intent.putExtra("imei", device.imei);
+            intent.putParcelableArrayListExtra("devices", devices);
+            MainActivity.this.startActivity(intent);
         }
 
         private class ViewHolder {
