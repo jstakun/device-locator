@@ -50,7 +50,9 @@
         <activity
             android:name=".CommandActivity"
             android:launchMode="singleTop" />
-
+        <activity
+            android:name=".PinActivity"
+            android:launchMode="singleTop" />
         <service
             android:name=".Services.SmsSenderService"
             android:exported="false" />
@@ -119,7 +121,6 @@
             android:value="@integer/google_play_services_version"
             tools:replace="android:value" />
 
-        <activity android:name=".PinActivity" />
     </application>
 
 </manifest>

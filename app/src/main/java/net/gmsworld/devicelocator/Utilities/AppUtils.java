@@ -42,7 +42,7 @@ public class AppUtils {
                 versionCode = getPackageInfo(c).versionCode;
             }
 
-            aboutMessage = c.getString(R.string.Info_about, c.getString(R.string.app_name), versionName, versionCode, getBuildDate(c), Calendar.getInstance().get(Calendar.YEAR), c.getString(R.string.serverUrl));
+            aboutMessage = c.getString(R.string.Info_about, c.getString(R.string.app_name), versionName, versionCode, getBuildDate(c), Calendar.getInstance().get(Calendar.YEAR), c.getString(R.string.serverUrl), Messenger.getDeviceId(c, true));
         }
         return aboutMessage;
     }
