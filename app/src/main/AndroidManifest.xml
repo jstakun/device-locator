@@ -51,8 +51,7 @@
             android:name=".CommandActivity"
             android:launchMode="singleTop" />
         <activity
-            android:name=".PinActivity"
-            android:launchMode="singleTop" />
+            android:name=".PinActivity"/>
         <service
             android:name=".Services.SmsSenderService"
             android:exported="false" />

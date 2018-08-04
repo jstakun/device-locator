@@ -72,6 +72,7 @@ public class PinActivity extends AppCompatActivity {
                     finish();
                 } else if (input.length() == pin.length()) {
                     int pinFailedCount = settings.getInt("pinFailedCount");
+                    Toast.makeText(PinActivity.this,"Invalid pin!", Toast.LENGTH_SHORT).show();
                     if (pinFailedCount == 2) {
                         pinFailedCount = -1;
                         //send failed login notification
