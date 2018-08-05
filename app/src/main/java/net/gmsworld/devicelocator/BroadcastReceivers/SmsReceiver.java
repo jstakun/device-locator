@@ -12,12 +12,18 @@ import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
 import android.util.Log;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import net.gmsworld.devicelocator.Utilities.Command;
 import net.gmsworld.devicelocator.Utilities.Permissions;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class SmsReceiver extends BroadcastReceiver {
 
     private static final String TAG = SmsReceiver.class.getSimpleName();
+
+    private FirebaseAnalytics firebaseAnalytics;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -48,7 +54,13 @@ public class SmsReceiver extends BroadcastReceiver {
         }
 
         if (proceed) {
-            Command.findCommandInSms(context, intent);
+            String command = Command.findCommandInSms(context, intent);
+            if (StringUtils.isNotEmpty(command)) {
+                firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+                Bundle bundle = new Bundle();
+                bundle.putString("command", command);
+                firebaseAnalytics.logEvent("sms_command_received", bundle);
+            }
         }
     }
 

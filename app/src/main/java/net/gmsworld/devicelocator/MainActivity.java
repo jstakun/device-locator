@@ -54,6 +54,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -132,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isTrackingServiceBound = false;
 
+    private FirebaseAnalytics firebaseAnalytics;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,9 +144,10 @@ public class MainActivity extends AppCompatActivity {
         settings = new PreferencesUtils(this);
 
         setContentView(R.layout.activity_main);
+
         restoreSavedData();
         initApp();
-        toggleBroadcastReceiver(); //set broadcast receiver for sms
+        toggleBroadcastReceiver(); //set sms broadcast receiver
         if (motionDetectorRunning) {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,false, false);
         }
@@ -164,6 +168,8 @@ public class MainActivity extends AppCompatActivity {
             findViewById(R.id.trackerSettings).setVisibility(View.GONE);
             findViewById(R.id.deviceSettings).setVisibility(View.GONE);
         }
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         //send email registration request once every day if still unverified
         String emailStatus = settings.getString("emailStatus");
@@ -553,6 +559,10 @@ public class MainActivity extends AppCompatActivity {
         updateUI();
         toggleBroadcastReceiver();
 
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("running", this.running);
+        firebaseAnalytics.logEvent("sms_control", bundle);
+
         //check if location settings are enabled
         if (!GmsSmartLocationManager.isLocationEnabled(this)) {
             startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
@@ -564,8 +574,7 @@ public class MainActivity extends AppCompatActivity {
             builder.setPositiveButton("OK", null);
             builder.setNegativeButton("Commands",  new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW,
-                            Uri.parse(getString(R.string.commandsUrl)));
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.commandsUrl)));
                     startActivity(intent);
                 }
             });
@@ -592,6 +601,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         this.motionDetectorRunning = !this.motionDetectorRunning;
+
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("running", this.motionDetectorRunning);
+        firebaseAnalytics.logEvent("device_tracker", bundle);
+
         toogleLocationDetector();
     }
 
@@ -826,6 +840,9 @@ public class MainActivity extends AppCompatActivity {
         String newUserLogin = (String)userLoginSpinner.getSelectedItem();
         String userLogin = settings.getString(USER_LOGIN);
         if (!StringUtils.equals(userLogin, newUserLogin)) {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("running", StringUtils.isNotEmpty(newUserLogin));
+            firebaseAnalytics.logEvent("device_manager", bundle);
             String token = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
             if (StringUtils.isEmpty(token)) {
                 token = FirebaseInstanceId.getInstance().getToken();

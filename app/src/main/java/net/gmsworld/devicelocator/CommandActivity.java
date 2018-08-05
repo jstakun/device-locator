@@ -17,6 +17,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import net.gmsworld.devicelocator.Model.Device;
 import net.gmsworld.devicelocator.Utilities.AbstractCommand;
 import net.gmsworld.devicelocator.Utilities.Command;
@@ -38,6 +40,8 @@ public class CommandActivity extends AppCompatActivity {
     private static final String TAG = CommandActivity.class.getSimpleName();
 
     private static final String PIN_PREFIX = "pin_";
+
+    private FirebaseAnalytics firebaseAnalytics;
 
     private String name, imei;
 
@@ -94,7 +98,6 @@ public class CommandActivity extends AppCompatActivity {
 
             }
         });
-
 
         final EditText args = findViewById(R.id.deviceCommandArgs);
 
@@ -181,6 +184,9 @@ public class CommandActivity extends AppCompatActivity {
                             public void onGetFinish(String results, int responseCode, String url) {
                                 if (responseCode == 200) {
                                     Toast.makeText(CommandActivity.this, "Command " + command + " has been sent. You'll receive notification when this message will be delivered to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!", Toast.LENGTH_SHORT).show();
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("command", command);
+                                    firebaseAnalytics.logEvent("cloud_command_sent", bundle);
                                 } else {
                                     Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
                                     Toast.makeText(CommandActivity.this, "Failed to send command " + command + " to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!", Toast.LENGTH_SHORT).show();
@@ -193,6 +199,8 @@ public class CommandActivity extends AppCompatActivity {
                 }
             }
         });
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
     }
 
     @Override

@@ -69,24 +69,27 @@ public class Command {
 
     private static List<AbstractCommand> commands = null;
 
-    public static void findCommandInSms(Context context, Intent intent) {
+    public static String findCommandInSms(Context context, Intent intent) {
         for (AbstractCommand c : getCommands()) {
             if (c.findSmsCommand(context, intent)) {
                 Log.d(TAG, "Found matching command");
-                return;
+                return c.getSmsCommand();
             }
         }
+        return null;
     }
 
-    public static void findCommandInMessage(Context context, String message, String sender) {
+    public static String findCommandInMessage(Context context, String message, String sender) {
         for (AbstractCommand c : getCommands()) {
             if (c.findSocialCommand(context, message)) {
                 Log.d(TAG, "Found matching social command");
-                return;
+                return c.getSmsCommand();
             } else if (c.findAppCommand(context, message, sender)) {
                 Log.d(TAG, "Found matching app command");
+                return c.getSmsCommand();
             }
         }
+        return null;
     }
 
     private static List<AbstractCommand> getCommands() {

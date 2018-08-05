@@ -1,7 +1,9 @@
 package net.gmsworld.devicelocator.Services;
 
+import android.os.Bundle;
 import android.util.Log;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -19,7 +21,15 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "DlFirebaseMsgService";
 
+    private FirebaseAnalytics firebaseAnalytics;
     //private static final int NOTIFICATION_ID = 2;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+    }
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -54,6 +64,9 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 } else {
                     Log.e(TAG, "Invalid pin received in cloud message!");
                 }
+                Bundle bundle = new Bundle();
+                bundle.putString("command", command);
+                firebaseAnalytics.logEvent("cloud_command_received", bundle);
             } else {
                 Log.e(TAG, "Invalid data payload!");
             }
