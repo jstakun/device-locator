@@ -79,12 +79,11 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
                 if (StringUtils.isNotBlank(deviceName)) {
                     content += "&name=" + deviceName;
                 }
-                String url = context.getString(R.string.deviceManagerUrl);
 
                 Map<String, String> headers = new HashMap<String, String>();
                 headers.put("Authorization", "Bearer " + tokenStr);
 
-                Network.post(context, url, content, null, headers, new Network.OnGetFinishListener() {
+                Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
@@ -108,7 +107,6 @@ public class DlFirebaseInstanceIdService extends FirebaseInstanceIdService {
                                 }
                             }
                         } else {
-                            Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
                             Toast.makeText(context, "Device registration failed! Please restart Device Manager and try again.", Toast.LENGTH_LONG).show();
                         }
                     }

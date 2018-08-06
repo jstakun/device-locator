@@ -188,9 +188,7 @@ public class CommandActivity extends AppCompatActivity {
                                     bundle.putString("command", command);
                                     firebaseAnalytics.logEvent("cloud_command_sent", bundle);
                                 } else {
-                                    Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
                                     Toast.makeText(CommandActivity.this, "Failed to send command " + command + " to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!", Toast.LENGTH_SHORT).show();
-
                                 }
                             }
                         });

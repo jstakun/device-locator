@@ -3,7 +3,10 @@ package net.gmsworld.devicelocator.Utilities;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
+
+import net.gmsworld.devicelocator.DeviceLocatorApp;
 
 import org.apache.commons.io.IOUtils;
 
@@ -48,6 +51,21 @@ public class Network {
 
     public interface OnGetFinishListener {
         void onGetFinish(String result, int responseCode, String url);
+    }
+
+    private static void handleHttpStatus(String response, int responseCode, String urlString, Context context) {
+        if (responseCode == 401) {
+            if (context != null) {
+                Log.d(TAG, "GMS Token is invalid will be deleted from device!");
+                PreferenceManager.getDefaultSharedPreferences(context).edit().remove(DeviceLocatorApp.GMS_TOKEN).apply();
+            } else {
+                Log.e(TAG, "GMS Token is invalid but can't be deleted from device!");
+            }
+        } else if (responseCode >= 400) {
+            Log.e(TAG, "Received following error response " + responseCode + ": " + response + " from " + urlString);
+        } else {
+            Log.d(TAG, "Received following response " + responseCode + ": " + response + " from " + urlString);
+        }
     }
 
     static class PostTask extends AsyncTask<Void, Integer, Integer> {
@@ -133,7 +151,10 @@ public class Network {
 
         @Override
         public void onPostExecute(Integer responseCode) {
-            onGetFinishListener.onGetFinish(response, responseCode, urlString);
+            if (onGetFinishListener != null) {
+                onGetFinishListener.onGetFinish(response, responseCode, urlString);
+                handleHttpStatus(response, responseCode, urlString, context.get());
+            }
         }
     }
 
@@ -235,7 +256,10 @@ public class Network {
 
         @Override
         public void onPostExecute(Integer responseCode) {
-            onGetFinishListener.onGetFinish(response, responseCode, urlString);
+            if (onGetFinishListener != null) {
+                onGetFinishListener.onGetFinish(response, responseCode, urlString);
+                handleHttpStatus(response, responseCode, urlString, context.get());
+            }
         }
     }
 
@@ -310,7 +334,10 @@ public class Network {
 
         @Override
         public void onPostExecute(Integer responseCode) {
-            onGetFinishListener.onGetFinish(response, responseCode, urlString);
+            if (onGetFinishListener != null) {
+                onGetFinishListener.onGetFinish(response, responseCode, urlString);
+                handleHttpStatus(response, responseCode, urlString, context.get());
+            }
         }
     }
 }

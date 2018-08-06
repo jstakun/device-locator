@@ -47,7 +47,6 @@ public class DeviceLocatorApp extends Application {
             Network.get(this, getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 200) {
                         headers.put("Authorization", "Bearer " + Messenger.getToken(DeviceLocatorApp.this, results));
                         headers.put("X-GMS-AppId", "2");

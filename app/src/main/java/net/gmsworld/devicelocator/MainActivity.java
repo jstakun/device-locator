@@ -1367,7 +1367,6 @@ public class MainActivity extends AppCompatActivity {
             Network.get(this, getString(R.string.deviceManagerUrl) + "?" + queryString, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         JsonArray devices = reply.getAsJsonObject().get("devices").getAsJsonArray();
@@ -1419,7 +1418,6 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Device has been removed!", Toast.LENGTH_SHORT).show();
                     initDeviceList();
                 } else {
-                    Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
                     Toast.makeText(MainActivity.this, "Failed to remove device!", Toast.LENGTH_SHORT).show();
                 }
             }

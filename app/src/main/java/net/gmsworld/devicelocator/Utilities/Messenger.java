@@ -126,9 +126,8 @@ public class Messenger {
         content += "&command=" + Command.MESSAGE_COMMAND + "app";
         content += "&pin=" + pin;
         content += "&args=" + message;
-        String url = context.getString(R.string.deviceManagerUrl);
 
-        Network.post(context, url, content, null, headers, new Network.OnGetFinishListener() {
+        Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
             @Override
             public void onGetFinish(String results, int responseCode, String url) {
                 if (responseCode == 200) {
@@ -136,8 +135,6 @@ public class Messenger {
                     Log.d(TAG, "Message has been sent to the cloud!");
                 } else if (responseCode == 500 && retryCount > 0) {
                     sendCloudMessage(context, imei, pin, message, retryCount - 1, headers);
-                } else {
-                    Log.d(TAG, "Received following response " + responseCode + ": " + results + " from " + url);
                 }
             }
         });
@@ -243,7 +240,6 @@ public class Messenger {
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
-                            Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                             if (responseCode == 200) {
                                 if (StringUtils.isNotEmpty(getToken(context, results))) {
                                     sendTelegram(context, location, telegramId, message, 1, headers);
@@ -337,7 +333,6 @@ public class Messenger {
                 Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
-                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                         if (responseCode == 200) {
                             if (StringUtils.isNotEmpty(getToken(context, results))) {
                                 sendRoutePoint(context, location, 1, headers);
@@ -363,7 +358,6 @@ public class Messenger {
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 500 && retryCount > 0) {
                         sendRoutePoint(context, retryCount - 1, headers);
                     }
