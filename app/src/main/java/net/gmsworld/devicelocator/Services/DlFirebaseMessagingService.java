@@ -42,11 +42,12 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 final String pinRead = message.get("pin");
                 final String pin = new PreferencesUtils(this).getEncryptedString(PinActivity.DEVICE_PIN);
                 String command = message.get("command");
+                final String commandName = command.split("dl")[0];
                 final boolean pinValid = StringUtils.equals(pin, pinRead);
                 final String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
                 if (pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
                     //send notification to correlationId
-                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + command.split("dl")[0] + " has been received by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
+                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been received by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
                 }
                 if (pinValid) {
                     command += pinRead;
@@ -59,14 +60,14 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     }
                     Command.findCommandInMessage(this, command, sender);
                 } else if (correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
-                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + command.split("dl")[0] + " has been rejected by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
+                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
                     Log.e(TAG, "Invalid pin received in cloud message!");
                 } else {
                     Log.e(TAG, "Invalid pin received in cloud message!");
                 }
                 Bundle bundle = new Bundle();
-                bundle.putString("command", command);
-                firebaseAnalytics.logEvent("cloud_command_received", bundle);
+                //bundle.putString("command", commandName);
+                firebaseAnalytics.logEvent("cloud_command_received_" + commandName.toLowerCase(), bundle);
             } else {
                 Log.e(TAG, "Invalid data payload!");
             }

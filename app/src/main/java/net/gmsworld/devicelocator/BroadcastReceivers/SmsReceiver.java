@@ -58,8 +58,8 @@ public class SmsReceiver extends BroadcastReceiver {
             if (StringUtils.isNotEmpty(command)) {
                 firebaseAnalytics = FirebaseAnalytics.getInstance(context);
                 Bundle bundle = new Bundle();
-                bundle.putString("command", command);
-                firebaseAnalytics.logEvent("sms_command_received", bundle);
+                //bundle.putString("command", command);
+                firebaseAnalytics.logEvent("sms_command_received_" + command.toLowerCase(), bundle);
             }
         }
     }

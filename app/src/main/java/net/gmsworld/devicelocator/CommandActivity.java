@@ -185,8 +185,8 @@ public class CommandActivity extends AppCompatActivity {
                                 if (responseCode == 200) {
                                     Toast.makeText(CommandActivity.this, "Command " + command + " has been sent. You'll receive notification when this message will be delivered to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!", Toast.LENGTH_SHORT).show();
                                     Bundle bundle = new Bundle();
-                                    bundle.putString("command", command);
-                                    firebaseAnalytics.logEvent("cloud_command_sent", bundle);
+                                    //bundle.putString("command", command);
+                                    firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), bundle);
                                 } else {
                                     Toast.makeText(CommandActivity.this, "Failed to send command " + command + " to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!", Toast.LENGTH_SHORT).show();
                                 }
