@@ -545,7 +545,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (!this.running && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
             Permissions.requestSendSMSAndLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_SMS_CONTROL);
-            Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -588,13 +587,11 @@ public class MainActivity extends AppCompatActivity {
         if (StringUtils.isNotEmpty(phoneNumber)) {
             if (!this.motionDetectorRunning && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
                 Permissions.requestSendSMSAndLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL);
-                Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
                 return;
             }
         } else {
             if (!this.motionDetectorRunning && !Permissions.haveLocationPermission(MainActivity.this)) {
                 Permissions.requestLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL);
-                Toast.makeText(getApplicationContext(), "Location permission is required", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -611,7 +608,7 @@ public class MainActivity extends AppCompatActivity {
     private void toogleLocationDetector() {
         if (this.motionDetectorRunning) {
             launchMotionDetectorService();
-            //check if location settings are enabled
+            //check if location service is enabled
             if (!GmsSmartLocationManager.isLocationEnabled(this)) {
                 Toast.makeText(getApplicationContext(), "Please enable location services in order to receive device location updates!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
@@ -1236,13 +1233,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initMotionDetectorButton() {
-        Switch title = this.findViewById(R.id.dlTrackerSwitch);
+        final Switch title = this.findViewById(R.id.dlTrackerSwitch);
 
         title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.this.toggleMotionDetectorRunning();
-                MainActivity.this.clearFocus();
+                if (StringUtils.isEmpty(email) && StringUtils.isEmpty(phoneNumber) && StringUtils.isEmpty(telegramId)) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.motion_confirm_empty, radius), Toast.LENGTH_LONG).show();
+                    title.setChecked(false);
+                } else {
+                    MainActivity.this.toggleMotionDetectorRunning();
+                    MainActivity.this.clearFocus();
+                }
             }
         });
     }
@@ -1483,17 +1485,23 @@ public class MainActivity extends AppCompatActivity {
             case Permissions.PERMISSIONS_REQUEST_SMS_CONTROL:
                     if (Permissions.haveSendSMSAndLocationPermission(this)) {
                         toggleRunning();
+                    } else  {
+                        Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
                     }
                     break;
             case Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL:
                     if (Permissions.haveSendSMSAndLocationPermission(this)) {
                         toggleMotionDetectorRunning();
+                    } else {
+                        Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
                     }
                     break;
             case Permissions.PERMISSIONS_REQUEST_SMS_CONTACTS:
                     if (Permissions.haveReadContactsPermission(this)) {
                         PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("settings_sms_contacts", true).apply();
                         ((Switch)findViewById(R.id.settings_sms_contacts)).setChecked(true);
+                    } else {
+                        Toast.makeText(this, "Access to your device contacts is required to use this function!", Toast.LENGTH_SHORT).show();
                     }
             default: break;
         }
