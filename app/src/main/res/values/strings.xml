@@ -88,7 +88,7 @@
 
     <!-- Command Activity -->
     <string name="device_command_prompt">Select command</string>
-    <string name="devices_list_empty">No devices found! Make sure to specify the same login in Device Manager card on all your devices.</string>
+    <string name="devices_list_empty">No devices found! Make sure to specify same login on Device Manager card above and on all your devices.</string>
     <string name="devices_list_loading">Synchronizing devices…</string>
     <string name="devices_list_loading_failed">Device synchronization failed!</string>
     <string name="devices">Devices</string>

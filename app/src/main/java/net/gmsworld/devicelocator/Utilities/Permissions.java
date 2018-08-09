@@ -21,6 +21,12 @@ public class Permissions {
 
     public static final int PERMISSIONS_REQUEST_GET_ACCOUNTS = 1001;
 
+    public static final int PERMISSIONS_REQUEST_SMS_CONTROL = 1002;
+
+    public static final int PERMISSIONS_REQUEST_TRACKER_CONTROL = 1003;
+
+    public static final int PERMISSIONS_REQUEST_SMS_CONTACTS = 1004;
+
     public static void checkAndRequestPermissionsAtStartup(Activity activity) {
         ArrayList<String> permissions = new ArrayList<String>();
         permissions.add(0, Manifest.permission.SEND_SMS);
@@ -49,16 +55,16 @@ public class Permissions {
         ActivityCompat.requestPermissions(activity, arr, 1);
     }
 
-    public static void requestSendSMSAndLocationPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, 2);
+    public static void requestSendSMSAndLocationPermission(Activity activity, int requestCode) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
     }
 
-    public static void requestLocationPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 3);
+    public static void requestLocationPermission(Activity activity, int requestCode) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
     }
 
-    public static void requestContactsPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, 4);//, Manifest.permission.READ_PHONE_STATE}, 2);
+    public static void requestContactsPermission(Activity activity, int requestCode) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, requestCode);
     }
 
     public static void requestCallPhonePermission(Activity activity) {
@@ -95,8 +101,7 @@ public class Permissions {
     }
 
     public static boolean haveReadContactsPermission(Context context) {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED; // &&
-                //ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED;
     }
 
     public static boolean haveReadPhoneStatePermission(Context context) {
@@ -104,9 +109,8 @@ public class Permissions {
     }
 
     public static boolean haveCallPhonePermission(Context context) {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED; // &&
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
     }
-
 
 
     public static void setPermissionNotification(Context context) {

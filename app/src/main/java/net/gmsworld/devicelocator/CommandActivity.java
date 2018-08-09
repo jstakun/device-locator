@@ -130,7 +130,13 @@ public class CommandActivity extends AppCompatActivity {
 
         findViewById(R.id.commandView).requestFocus();
 
-        String savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
+        String savedPin = "";
+        if (StringUtils.equals(imei, Messenger.getDeviceId(this, false))) {
+            //TODO this pin is not set
+            savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+        } else {
+            savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
+        }
         if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
             pinEdit.setText(savedPin);
         }

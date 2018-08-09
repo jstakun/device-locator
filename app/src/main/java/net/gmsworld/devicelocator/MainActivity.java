@@ -55,7 +55,6 @@ import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -64,7 +63,7 @@ import com.google.gson.JsonParser;
 import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
 import net.gmsworld.devicelocator.Model.Device;
-import net.gmsworld.devicelocator.Services.DlFirebaseInstanceIdService;
+import net.gmsworld.devicelocator.Services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.Services.RouteTrackingService;
 import net.gmsworld.devicelocator.Services.SmsSenderService;
@@ -139,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate()");
-        Permissions.checkAndRequestPermissionsAtStartup(this); //check marshmallow permissions
 
         settings = new PreferencesUtils(this);
 
@@ -316,6 +314,7 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_device_focus).requestFocus();
                 supportInvalidateOptionsMenu();
+                initUserLoginInput();
                 return true;
             case R.id.loginTracker:
                 onLoginTrackerItemSelected();
@@ -410,11 +409,14 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.settings_verify_pin:
                 editor.putBoolean("settings_verify_pin", checked);
+                //TODO show dialog to remember pin and check if any notifications are set
                 break;
             case R.id.settings_sms_contacts:
-                editor.putBoolean("settings_sms_contacts", checked);
                 if (checked && !Permissions.haveReadContactsPermission(this)) {
-                    Permissions.requestContactsPermission(this);
+                    Permissions.requestContactsPermission(this, Permissions.PERMISSIONS_REQUEST_SMS_CONTACTS);
+                    ((Switch) view).setChecked(false);
+                } else {
+                    editor.putBoolean("settings_sms_contacts", checked);
                 }
                 break;
             default:
@@ -525,13 +527,13 @@ public class MainActivity extends AppCompatActivity {
     private void toggleRunning() {
         //enable Firebase
         if (!this.running) {
-            final String firebaseToken = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
+            final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
             final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
             if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(pin)) {
                 new Thread(new Runnable() {
                     public void run() {
-                        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-                        DlFirebaseInstanceIdService.sendRegistrationToServer(MainActivity.this, refreshedToken, null, null);
+                        String refreshedToken = DlFirebaseMessagingService.getToken();
+                        DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, refreshedToken, null, null);
                     }
                 }).start();
             } else if (StringUtils.isNotEmpty(firebaseToken)) {
@@ -540,12 +542,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Something is wrong here with either empty pin:" + StringUtils.isEmpty(pin) + " or with empty Firebase token:" + StringUtils.isEmpty(firebaseToken));
             }
         } else {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseInstanceIdService.FIREBASE_TOKEN).apply();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseMessagingService.FIREBASE_TOKEN).apply();
         }
         //
 
         if (!this.running && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
-            Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
+            Permissions.requestSendSMSAndLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_SMS_CONTROL);
             Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -588,14 +590,14 @@ public class MainActivity extends AppCompatActivity {
     private void toggleMotionDetectorRunning() {
         if (StringUtils.isNotEmpty(phoneNumber)) {
             if (!this.motionDetectorRunning && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
-                Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
+                Permissions.requestSendSMSAndLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL);
                 Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
                 return;
             }
         } else {
             if (!this.motionDetectorRunning && !Permissions.haveLocationPermission(MainActivity.this)) {
-                Permissions.requestLocationPermission(MainActivity.this);
-                Toast.makeText(getApplicationContext(), "Location permission is needed", Toast.LENGTH_SHORT).show();
+                Permissions.requestLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL);
+                Toast.makeText(getApplicationContext(), "Location permission is required", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -656,8 +658,6 @@ public class MainActivity extends AppCompatActivity {
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
         initRemoteControl();
-
-
     }
 
 
@@ -790,50 +790,39 @@ public class MainActivity extends AppCompatActivity {
                    accountNames.add(a.name);
                 }
             }
-        } else {
-            Permissions.requestGetAccountsPermission(this);
-        }
 
-        int index = 0;
-        if (accountNames.size() > 1) {
-            String userLogin = settings.getString(USER_LOGIN);
-            for (int i = 0; i < accountNames.size(); i++) {
-                if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
-                    index = i;
-                    break;
+            int index = 0;
+            if (accountNames.size() > 1) {
+                String userLogin = settings.getString(USER_LOGIN);
+                for (int i = 0; i < accountNames.size(); i++) {
+                    if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
+                        index = i;
+                        break;
+                    }
                 }
+            } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE) {
+                //show dialog with info What to do if no account is created
+                showLoginDialog();
             }
-        } else {
-            //show dialog with info What to do if no account is created
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    startActivity(new Intent(Settings.ACTION_SYNC_SETTINGS));
+
+            final CommandArrayAdapter accs = new CommandArrayAdapter(this, R.layout.command_row,  accountNames);
+            userAccounts.setAdapter(accs);
+
+            if (index > 0) {
+                userAccounts.setSelection(index);
+            }
+
+            userAccounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    registerUserLogin(userAccounts);
+                }
+
+                public void onNothingSelected(AdapterView<?> adapterView) {
                 }
             });
-            builder.setNegativeButton(R.string.no, null);
-            builder.setMessage("It seems you've no email accounts registered on this device and there no verified notification email set in Notification settings card." +
-                    " Do you want to register new email account now?");
-            builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-            AlertDialog dialog = builder.create();
-            dialog.show();
+        } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE) {
+            Permissions.requestGetAccountsPermission(this);
         }
-
-        final CommandArrayAdapter accs = new CommandArrayAdapter(this, R.layout.command_row,  accountNames);
-        userAccounts.setAdapter(accs);
-
-        if (index > 0) {
-            userAccounts.setSelection(index);
-        }
-
-        userAccounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                registerUserLogin(userAccounts);
-            }
-
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
-        });
     }
 
     private synchronized void registerUserLogin(Spinner userLoginSpinner) {
@@ -843,13 +832,11 @@ public class MainActivity extends AppCompatActivity {
             Bundle bundle = new Bundle();
             bundle.putBoolean("running", StringUtils.isNotEmpty(newUserLogin));
             firebaseAnalytics.logEvent("device_manager", bundle);
-            String token = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
+            String token = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
             if (StringUtils.isEmpty(token)) {
-                token = FirebaseInstanceId.getInstance().getToken();
+                token = DlFirebaseMessagingService.getToken();
             }
-            if (!StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
-                DlFirebaseInstanceIdService.sendRegistrationToServer(this, token, newUserLogin, settings.getString(DEVICE_NAME));
-            } else {
+            if (!DlFirebaseMessagingService.sendRegistrationToServer(this, token, newUserLogin, settings.getString(DEVICE_NAME))) {
                 Toast.makeText(this, "You device seems to be BLACKLISTED and can't be registered!", Toast.LENGTH_LONG).show();
             }
         }
@@ -904,13 +891,12 @@ public class MainActivity extends AppCompatActivity {
         String newDeviceName = deviceNameInput.getText().toString();
         String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
-            String token = settings.getString(DlFirebaseInstanceIdService.FIREBASE_TOKEN);
+            String token = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
             if (StringUtils.isEmpty(token)) {
-                token = FirebaseInstanceId.getInstance().getToken();
+                token = DlFirebaseMessagingService.getToken();
             }
-            if (!StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
-                String normalizedDeviceName = newDeviceName.replace(' ', '-');
-                DlFirebaseInstanceIdService.sendRegistrationToServer(this, token, settings.getString(USER_LOGIN), normalizedDeviceName);
+            String normalizedDeviceName = newDeviceName.replace(' ', '-');
+            if (DlFirebaseMessagingService.sendRegistrationToServer(this, token, settings.getString(USER_LOGIN), normalizedDeviceName)) {
                 if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
                     EditText deviceNameEdit = findViewById(R.id.deviceName);
                     deviceNameEdit.setText(normalizedDeviceName);
@@ -1135,7 +1121,7 @@ public class MainActivity extends AppCompatActivity {
                 RouteTrackingServiceUtils.resetRouteTrackingService(MainActivity.this, null, isTrackingServiceBound, radius, phoneNumber, email, telegramId, null);
             }
             if (!Permissions.haveSendSMSPermission(this)) {
-                Permissions.requestSendSMSAndLocationPermission(this);
+                Permissions.requestSendSMSAndLocationPermission(this, 0);
                 Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             }
         } else if (!StringUtils.equals(phoneNumber, newPhoneNumber)) {
@@ -1229,7 +1215,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void launchSmsService() {
         if (!Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
-            Permissions.requestSendSMSAndLocationPermission(MainActivity.this);
+            Permissions.requestSendSMSAndLocationPermission(MainActivity.this, 0);
             Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1279,7 +1265,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!Permissions.haveReadContactsPermission(MainActivity.this)) {
-                    Permissions.requestContactsPermission(MainActivity.this);
+                    Permissions.requestContactsPermission(MainActivity.this, 0);
                     Toast.makeText(getApplicationContext(), R.string.read_contacts_permission, Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -1462,6 +1448,21 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
+    private void showLoginDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                startActivity(new Intent(Settings.ACTION_SYNC_SETTINGS));
+            }
+        });
+        builder.setNegativeButton(R.string.no, null);
+        builder.setMessage("It seems you've no email accounts registered on this device and there is no verified notification email set in Notification settings card." +
+                " Do you want to register new email account now?");
+        builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
     private static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {
@@ -1490,6 +1491,21 @@ public class MainActivity extends AppCompatActivity {
                          initUserLoginInput();
                      }
                      break;
+            case Permissions.PERMISSIONS_REQUEST_SMS_CONTROL:
+                    if (Permissions.haveSendSMSAndLocationPermission(this)) {
+                        toggleRunning();
+                    }
+                    break;
+            case Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL:
+                    if (Permissions.haveSendSMSAndLocationPermission(this)) {
+                        toggleMotionDetectorRunning();
+                    }
+                    break;
+            case Permissions.PERMISSIONS_REQUEST_SMS_CONTACTS:
+                    if (Permissions.haveReadContactsPermission(this)) {
+                        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("settings_sms_contacts", true).apply();
+                        ((Switch)findViewById(R.id.settings_sms_contacts)).setChecked(true);
+                    }
             default: break;
         }
     }

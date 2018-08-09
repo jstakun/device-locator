@@ -823,7 +823,6 @@ public class Messenger {
                 Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
-                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                         if (responseCode == 200) {
                             sendEmailRegistrationRequest(context, email, getToken(context, results), 1);
                         } else if (responseCode == 500 && retryCount > 0) {
@@ -848,7 +847,6 @@ public class Messenger {
                 Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
-                        Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                         if (responseCode == 200) {
                             sendTelegramRegistrationRequest(context, telegramId, getToken(context, results), 1);
                         } else if (responseCode == 500 && retryCount > 0) {
@@ -871,7 +869,6 @@ public class Messenger {
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode != 200 && retryCount > 0) {
                         sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
                     } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
