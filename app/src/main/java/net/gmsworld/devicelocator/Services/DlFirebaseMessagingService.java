@@ -4,11 +4,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -100,19 +104,19 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    public static boolean sendRegistrationToServer(final Context context, final String token, final String username, final String deviceName) {
-        if (StringUtils.isNotEmpty(token) && !StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
+    private static boolean sendRegistrationToServer(final Context context, final String firebaseToken, final String username, final String deviceName) {
+        if (StringUtils.isNotEmpty(firebaseToken) && !StringUtils.equalsIgnoreCase(firebaseToken, "BLACKLISTED")) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
-                sendRegistrationToServer(context, token, username, deviceName, tokenStr);
+                sendRegistrationToServer(context, firebaseToken, username, deviceName, tokenStr);
             } else {
                 String queryString = "scope=dl&user=" + Messenger.getDeviceId(context, false);
                 Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
-                            sendRegistrationToServer(context, token, username, deviceName, Messenger.getToken(context, results));
+                            sendRegistrationToServer(context, firebaseToken, username, deviceName, Messenger.getToken(context, results));
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
@@ -121,23 +125,23 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
             }
             return true;
         } else {
-            Log.e(TAG, "This device can't be registered with token: " + token);
+            Log.e(TAG, "This device can't be registered with token: " + firebaseToken);
             return false;
         }
     }
 
-    private static void sendRegistrationToServer(final Context context, final String token, final String username, final String deviceName, final String tokenStr) {
+    private static void sendRegistrationToServer(final Context context, final String firebaseToken, final String username, final String deviceName, final String gmsTokenStr) {
         try {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            if (!StringUtils.equalsIgnoreCase(token, "BLACKLISTED")) {
+            if (!StringUtils.equalsIgnoreCase(firebaseToken, "BLACKLISTED")) {
                 String imei = Messenger.getDeviceId(context, false);
                 String content = "imei=" + imei;
                 if (StringUtils.equalsIgnoreCase(imei, "unknown")) {
                     Log.e(TAG, "Invalid imei");
                     return;
                 }
-                if (StringUtils.isNotBlank(token)) {
-                    content += "&token=" + token;
+                if (StringUtils.isNotBlank(firebaseToken)) {
+                    content += "&token=" + firebaseToken;
                 }
                 if (StringUtils.isNotBlank(username)) {
                     content += "&username=" + username;
@@ -147,15 +151,15 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 }
 
                 Map<String, String> headers = new HashMap<String, String>();
-                headers.put("Authorization", "Bearer " + tokenStr);
+                headers.put("Authorization", "Bearer " + gmsTokenStr);
 
                 Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             //save firebase token only if it was successfully registered by the server
-                            if (StringUtils.isNotBlank(token)) {
-                                settings.edit().putString(FIREBASE_TOKEN, token).apply();
+                            if (StringUtils.isNotBlank(firebaseToken)) {
+                                settings.edit().putString(FIREBASE_TOKEN, firebaseToken).apply();
                                 Log.d(TAG, "Firebase token is set");
                             }
                             if (username != null) {
@@ -178,18 +182,38 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     }
                 });
             } else {
-                Log.e(TAG, "Invalid token: " + token);
+                Log.e(TAG, "Invalid token: " + firebaseToken);
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
         }
     }
 
-    public static String getToken() {
-        return FirebaseInstanceId.getInstance().getToken();
-        //TODO handle task
-       //Task<InstanceIdResult> result = FirebaseInstanceId.getInstance().getInstanceId();
-       //return result.getResult().getToken();
+    public static boolean sendRegistrationToServer(final Context context, final String username, final String deviceName) {
+        final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        String firebaseToken = settings.getString(FIREBASE_TOKEN, "");
+        if (StringUtils.isEmpty(firebaseToken)) {
+            Task<InstanceIdResult> result = FirebaseInstanceId.getInstance().getInstanceId();
+
+            result.addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                @Override
+                public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                    if (task.isSuccessful()) {
+                        // Task completed successfully
+                        InstanceIdResult result = task.getResult();
+                        sendRegistrationToServer(context, result.getToken(), username, deviceName);
+                    } else {
+                        // Task failed with an exception
+                        Exception exception = task.getException();
+                        Log.e(TAG, exception.getMessage(), exception);
+                    }
+                }
+            });
+
+            return true;
+        } else {
+            return sendRegistrationToServer(context, firebaseToken, username, deviceName);
+        }
     }
 }
 

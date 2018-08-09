@@ -85,7 +85,12 @@ public class CommandActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 name = devices.get(position).name;
                 imei = devices.get(position).imei;
-                String savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
+                String savedPin = "";
+                if (StringUtils.equals(imei, Messenger.getDeviceId(CommandActivity.this, false))) {
+                    savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+                } else {
+                    savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
+                }
                 if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
                     pinEdit.setText(savedPin);
                 } else {
@@ -132,13 +137,14 @@ public class CommandActivity extends AppCompatActivity {
 
         String savedPin = "";
         if (StringUtils.equals(imei, Messenger.getDeviceId(this, false))) {
-            //TODO this pin is not set
             savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
         } else {
             savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
         }
         if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
             pinEdit.setText(savedPin);
+        } else {
+            pinEdit.setText("");
         }
 
         send.setOnClickListener(new View.OnClickListener() {

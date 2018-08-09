@@ -409,7 +409,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.settings_verify_pin:
                 editor.putBoolean("settings_verify_pin", checked);
-                //TODO show dialog to remember pin and check if any notifications are set
+                if (StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(phoneNumber)) {
+                    Toast.makeText(this, "Please remember your Security PIN and set Notification settings in order to be able to recover forgotten Security PIN.", Toast.LENGTH_LONG).show();
+                }
                 break;
             case R.id.settings_sms_contacts:
                 if (checked && !Permissions.haveReadContactsPermission(this)) {
@@ -530,12 +532,7 @@ public class MainActivity extends AppCompatActivity {
             final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
             final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
             if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(pin)) {
-                new Thread(new Runnable() {
-                    public void run() {
-                        String refreshedToken = DlFirebaseMessagingService.getToken();
-                        DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, refreshedToken, null, null);
-                    }
-                }).start();
+                DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, null, null);
             } else if (StringUtils.isNotEmpty(firebaseToken)) {
                 Log.d(TAG, "Firebase token already set");
             } else {
@@ -832,11 +829,7 @@ public class MainActivity extends AppCompatActivity {
             Bundle bundle = new Bundle();
             bundle.putBoolean("running", StringUtils.isNotEmpty(newUserLogin));
             firebaseAnalytics.logEvent("device_manager", bundle);
-            String token = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
-            if (StringUtils.isEmpty(token)) {
-                token = DlFirebaseMessagingService.getToken();
-            }
-            if (!DlFirebaseMessagingService.sendRegistrationToServer(this, token, newUserLogin, settings.getString(DEVICE_NAME))) {
+            if (!DlFirebaseMessagingService.sendRegistrationToServer(this, newUserLogin, settings.getString(DEVICE_NAME))) {
                 Toast.makeText(this, "You device seems to be BLACKLISTED and can't be registered!", Toast.LENGTH_LONG).show();
             }
         }
@@ -891,12 +884,8 @@ public class MainActivity extends AppCompatActivity {
         String newDeviceName = deviceNameInput.getText().toString();
         String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
-            String token = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
-            if (StringUtils.isEmpty(token)) {
-                token = DlFirebaseMessagingService.getToken();
-            }
             String normalizedDeviceName = newDeviceName.replace(' ', '-');
-            if (DlFirebaseMessagingService.sendRegistrationToServer(this, token, settings.getString(USER_LOGIN), normalizedDeviceName)) {
+            if (DlFirebaseMessagingService.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName)) {
                 if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
                     EditText deviceNameEdit = findViewById(R.id.deviceName);
                     deviceNameEdit.setText(normalizedDeviceName);

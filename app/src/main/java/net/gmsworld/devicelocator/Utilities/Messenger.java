@@ -100,7 +100,6 @@ public class Messenger {
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
-                            Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                             if (responseCode == 200) {
                                 if (StringUtils.isNotEmpty(getToken(context, results))) {
                                     sendCloudMessage(context, location, imei, pin, message, 1, headers);
@@ -163,7 +162,6 @@ public class Messenger {
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
-                            Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                             if (responseCode == 200) {
                                 if (StringUtils.isNotEmpty(getToken(context, results))) {
                                     sendEmail(context, location, email, message, title, 1, headers);
