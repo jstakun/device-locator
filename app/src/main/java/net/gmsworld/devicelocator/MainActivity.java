@@ -409,7 +409,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.settings_verify_pin:
                 editor.putBoolean("settings_verify_pin", checked);
-                if (StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(phoneNumber)) {
+                if (checked && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email) && StringUtils.isNotEmpty(phoneNumber)) {
                     Toast.makeText(this, "Please remember your Security PIN and set Notification settings in order to be able to recover forgotten Security PIN.", Toast.LENGTH_LONG).show();
                 }
                 break;
