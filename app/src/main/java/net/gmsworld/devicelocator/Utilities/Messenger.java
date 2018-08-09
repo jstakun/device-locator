@@ -654,7 +654,7 @@ public class Messenger {
                 boolean hiddenCamera = settings.getBoolean("hiddenCamera", false);
                 String imageUrl = null;
                 if (extras != null) {
-                    extras.getString("imageUrl");
+                    imageUrl = extras.getString("imageUrl");
                 }
                 if (StringUtils.isEmpty(imageUrl) && hiddenCamera) {
                     text = "Front camera photo will be taken on device " + deviceId + ". You should receive link soon.";
