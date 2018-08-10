@@ -549,7 +549,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (!this.running && !Permissions.haveCallPhonePermission(MainActivity.this)) {
-            Permissions.requestCallPhonePermission(MainActivity.this);
+            Permissions.requestCallPhonePermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_CALL);
         }
 
         this.running = !this.running;
@@ -1503,6 +1503,12 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(this, "Access to your device contacts is required to use this function!", Toast.LENGTH_SHORT).show();
                     }
+                    break;
+                    case Permissions.PERMISSIONS_REQUEST_CALL:
+                        if (!Permissions.haveCallPhonePermission(this)) {
+                            Toast.makeText(this, "Call command won't work without this permission!", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
             default: break;
         }
     }

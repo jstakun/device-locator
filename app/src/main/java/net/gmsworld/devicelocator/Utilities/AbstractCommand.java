@@ -51,7 +51,7 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    public boolean hasParmeters() {
+    public boolean hasParameters() {
         return finder.equals(Finder.STARTS);
     }
 

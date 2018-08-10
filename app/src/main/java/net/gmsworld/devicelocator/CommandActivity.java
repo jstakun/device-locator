@@ -114,7 +114,7 @@ public class CommandActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 final String command = commandSpinner.getSelectedItem().toString();
                 AbstractCommand c = Command.getCommandByName(command);
-                if (c != null && !c.hasParmeters()) {
+                if (c != null && !c.hasParameters()) {
                     args.setHint(R.string.params_no_hint);
                     args.setInputType(InputType.TYPE_NULL);
                 } else {
@@ -164,7 +164,7 @@ public class CommandActivity extends AppCompatActivity {
                             c.setCommandTokens(StringUtils.split(command + " " + commandArgs, " "));
                         }
 
-                        if (c.hasParmeters()) {
+                        if (c.hasParameters()) {
                             needArgs = true;
                             if (!c.validateTokens()) {
                                 validArgs = false;

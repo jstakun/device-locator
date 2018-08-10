@@ -27,6 +27,8 @@ public class Permissions {
 
     public static final int PERMISSIONS_REQUEST_SMS_CONTACTS = 1004;
 
+    public static final int PERMISSIONS_REQUEST_CALL = 1005;
+
     public static void checkAndRequestPermissionsAtStartup(Activity activity) {
         ArrayList<String> permissions = new ArrayList<String>();
         permissions.add(0, Manifest.permission.SEND_SMS);
@@ -67,8 +69,8 @@ public class Permissions {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, requestCode);
     }
 
-    public static void requestCallPhonePermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, 5);
+    public static void requestCallPhonePermission(Activity activity, int requestCode) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, requestCode);
     }
 
     public static void requestCameraPermission(Activity activity) {

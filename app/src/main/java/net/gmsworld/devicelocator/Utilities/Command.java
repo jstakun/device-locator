@@ -59,10 +59,10 @@ public class Command {
     public final static String RING_COMMAND = "ringdl"; //rn play ringtone
     public final static String RING_OFF_COMMAND = "ringoffdl"; //rn stop playing ringtone
     public final static String LOCK_SCREEN_COMMAND = "lockdl"; //ls lock screen now
+    public final static String ABOUT_COMMAND = "aboutdl"; //send app version info
 
     //private
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
-    public final static String ABOUT_COMMAND = "aboutdl"; //send app version info
     public final static String MESSAGE_COMMAND = "messagedl"; //cloud message received from other devices
 
     public final static String LOCK_SCREEN_FAILED = "lockfail"; //this is not command
