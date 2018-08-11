@@ -46,12 +46,15 @@
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="stateAlwaysHidden" />
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:exported="false" />
         <activity
             android:name=".CommandActivity"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop"
+            android:exported="false" />
         <activity
-            android:name=".PinActivity"/>
+            android:name=".PinActivity"
+            android:exported="false" />
         <service
             android:name=".Services.SmsSenderService"
             android:exported="false" />

@@ -63,18 +63,22 @@ public class CommandActivity extends AppCompatActivity {
         commandSpinner.setAdapter(commands);
 
         List<String> deviceNames = new ArrayList<>();
-        for(int i=0;i<devices.size();i++) {
-            deviceNames.add(StringUtils.isNotEmpty(devices.get(i).name) ? devices.get(i).name : devices.get(i).imei);
+        if (devices != null) {
+            for (int i = 0; i < devices.size(); i++) {
+                deviceNames.add(StringUtils.isNotEmpty(devices.get(i).name) ? devices.get(i).name : devices.get(i).imei);
+            }
         }
 
         final Spinner deviceSpinner = findViewById(R.id.deviceList);
         final CommandArrayAdapter devicesAdapter = new CommandArrayAdapter(this, R.layout.command_row,  deviceNames);
         deviceSpinner.setAdapter(devicesAdapter);
 
-        for (int i = 0; i < devices.size(); i++) {
-            if (StringUtils.equalsIgnoreCase(name, devices.get(i).name) || StringUtils.equalsIgnoreCase(imei, devices.get(i).imei)) {
-                deviceSpinner.setSelection(i);
-                break;
+        if (devices != null) {
+            for (int i = 0; i < devices.size(); i++) {
+                if (StringUtils.equalsIgnoreCase(name, devices.get(i).name) || StringUtils.equalsIgnoreCase(imei, devices.get(i).imei)) {
+                    deviceSpinner.setSelection(i);
+                    break;
+                }
             }
         }
 
