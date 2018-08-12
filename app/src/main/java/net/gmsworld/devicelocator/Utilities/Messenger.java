@@ -614,7 +614,7 @@ public class Messenger {
                     size = extras.getInt("size", 0);
                 }
                 if (size > 1) {
-                    text = "Check your from device " + deviceId + " route at " + RouteTrackingServiceUtils.getRouteUrl(context);
+                    text = "Check your route from device " + deviceId + " at " + RouteTrackingServiceUtils.getRouteUrl(context);
                 } else if (size == 0) {
                     text = "No route points has been recorded on device " + deviceId + ". Try again later.";
                 } else if (size < 0) {
