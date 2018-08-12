@@ -1347,8 +1347,10 @@ public class MainActivity extends AppCompatActivity {
                     if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         JsonArray devices = reply.getAsJsonObject().get("devices").getAsJsonArray();
+                        boolean thisDeviceOnList = false;
                         if (devices.size() > 0) {
                             ArrayList<Device> userDevices = new ArrayList<>();
+                            final String imei = Messenger.getDeviceId(MainActivity.this, false);
                             Iterator<JsonElement> iter = devices.iterator();
                             while (iter.hasNext()) {
                                 JsonObject deviceObject = iter.next().getAsJsonObject();
@@ -1359,15 +1361,27 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                     device.imei = deviceObject.get("imei").getAsString();
                                     device.creationDate = deviceObject.get("creationDate").getAsString();
+                                    if (StringUtils.equals(device.imei, imei)) {
+                                        thisDeviceOnList = true;
+                                    }
                                     userDevices.add(device);
                                 }
                             }
-                            final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, userDevices);
-                            Log.d(TAG, "Found " + userDevices.size() + " devices");
-                            deviceList.setAdapter(adapter);
-                            setListViewHeightBasedOnChildren(deviceList);
+                            if (thisDeviceOnList) {
+                                final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, userDevices);
+                                Log.d(TAG, "Found " + userDevices.size() + " devices");
+                                deviceList.setAdapter(adapter);
+                                setListViewHeightBasedOnChildren(deviceList);
+                            } else {
+                                deviceListEmpty.setText(R.string.devices_list_empty);
+                            }
                         } else {
                             deviceListEmpty.setText(R.string.devices_list_empty);
+                        }
+                        if (!thisDeviceOnList) {
+                            //this device has been removed from other device
+                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(USER_LOGIN, "").apply();
+                            initUserLoginInput();
                         }
                     } else {
                         deviceListEmpty.setText(R.string.devices_list_loading_failed);
@@ -1393,6 +1407,11 @@ public class MainActivity extends AppCompatActivity {
             public void onGetFinish(String results, int responseCode, String url) {
                 if (responseCode == 200) {
                     Toast.makeText(MainActivity.this, "Device has been removed!", Toast.LENGTH_SHORT).show();
+                    //current device has been removed
+                    if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
+                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(USER_LOGIN, "").apply();
+                        initUserLoginInput();
+                    }
                     initDeviceList();
                 } else {
                     Toast.makeText(MainActivity.this, "Failed to remove device!", Toast.LENGTH_SHORT).show();
