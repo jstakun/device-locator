@@ -778,8 +778,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (Permissions.haveGetAccountsPermission(this)) {
-            Account[] accounts = AccountManager.get(this).getAccounts(); //getAccountsByType("com.google");
-            for (Account a : accounts) {
+            Account[] dlAccounts = AccountManager.get(this).getAccountsByType(getString(R.string.account_type));
+            for (Account a : dlAccounts) {
+                accountNames.add(a.name);
+            }
+            Account[] allAccounts = AccountManager.get(this).getAccounts();
+            for (Account a : allAccounts) {
                 if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.equalsIgnoreCase(a.name, email)) {
                    accountNames.add(a.name);
                 }

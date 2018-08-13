@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,12 +22,26 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
+import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.SCUtils;
+
+import org.apache.commons.lang3.StringUtils;
+import org.spongycastle.util.encoders.Base64;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity  {
 
     private UserLoginTask mAuthTask = null;
+
+    private static final String TAG = LoginActivity.class.getSimpleName();
 
     // UI references.
     private TextView mEmailView;
@@ -53,7 +68,7 @@ public class LoginActivity extends AppCompatActivity  {
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -183,27 +198,40 @@ public class LoginActivity extends AppCompatActivity  {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: 1. attempt authentication against a network service.
-
-
-            // TODO: 2. register the new account here and encrypt password
-            //createAccount(String email, String password, String authToken);
+            Map<String, String> headers = new HashMap<>();
+            final String user_password = mEmail + ":" + mPassword;
+            final String encodedAuthorization = Base64.toBase64String(user_password.getBytes());
+            headers.put("Authorization", "Basic " + encodedAuthorization);
+            Network.get(LoginActivity.this, getString(R.string.serverUrl) + "s/authenticate?scope=dl", headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    if (responseCode == 200) {
+                        JsonElement reply = new JsonParser().parse(results);
+                        String gmsToken = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN).getAsString();
+                        if (StringUtils.isNotEmpty(gmsToken)) {
+                            try {
+                                String pwd = android.util.Base64.encodeToString(SCUtils.encrypt(mPassword.getBytes(), LoginActivity.this), android.util.Base64.NO_PADDING);
+                                createAccount(mEmail, pwd, gmsToken);
+                                Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_LONG).show();
+                                mAuthTask = null;
+                                finish();
+                            } catch (Exception e) {
+                                Log.e(TAG, "Unable to encrypt password", e);
+                                Toast.makeText(LoginActivity.this, "Internal error. Click SIGN-IN button again.", Toast.LENGTH_LONG).show();
+                            }
+                            showProgress(false);
+                        } else {
+                            Log.e(TAG, "Oops! Something went wrong. Token has been empty!");
+                            Toast.makeText(LoginActivity.this, "Internal error. Click SIGN-IN button again.", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                    }
+                }
+            });
 
             return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_LONG).show();
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
         }
 
         @Override
@@ -212,8 +240,8 @@ public class LoginActivity extends AppCompatActivity  {
             showProgress(false);
         }
 
-        private void createAccount(String email, String password, String authToken) {
-            Account account = new Account(email, getString(R.string.account_type));
+        private void createAccount(String login, String password, String authToken) {
+            Account account = new Account(login, getString(R.string.account_type));
             AccountManager am = AccountManager.get(LoginActivity.this);
             am.addAccountExplicitly(account, password, null);
             am.setAuthToken(account, "full_access", authToken);
