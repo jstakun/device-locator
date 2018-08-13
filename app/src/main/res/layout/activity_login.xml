@@ -50,13 +50,16 @@
                     android:hint="@string/login"
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
-                    android:singleLine="true" />
+                    android:maxLength="24"
+                    android:singleLine="true"
+                    android:textColor="@color/gray" />
 
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                ldcard:passwordToggleEnabled="true">
 
                 <net.gmsworld.devicelocator.views.KeyboardEditText
                     android:id="@+id/password"
@@ -66,8 +69,10 @@
                     android:imeActionLabel="@string/title_activity_login"
                     android:imeOptions="actionUnspecified"
                     android:inputType="textPassword"
+                    android:maxLength="24"
                     android:maxLines="1"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:textColor="@color/gray"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -78,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/title_activity_login"
-                android:textStyle="bold" />
+                android:textColor="@android:color/white" />
 
             <TextView
                 android:id="@+id/register"

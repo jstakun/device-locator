@@ -5,9 +5,11 @@ import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.TextUtils;
@@ -75,6 +77,8 @@ public class LoginActivity extends AppCompatActivity  {
                 attemptLogin();
             }
         });
+
+        ViewCompat.setBackgroundTintList(mEmailSignInButton, ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
@@ -205,6 +209,7 @@ public class LoginActivity extends AppCompatActivity  {
             Network.get(LoginActivity.this, getString(R.string.serverUrl) + "s/authenticate?scope=dl", headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
+                    showProgress(false);
                     if (responseCode == 200) {
                         JsonElement reply = new JsonParser().parse(results);
                         String gmsToken = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN).getAsString();
@@ -219,7 +224,6 @@ public class LoginActivity extends AppCompatActivity  {
                                 Log.e(TAG, "Unable to encrypt password", e);
                                 Toast.makeText(LoginActivity.this, "Internal error. Click SIGN-IN button again.", Toast.LENGTH_LONG).show();
                             }
-                            showProgress(false);
                         } else {
                             Log.e(TAG, "Oops! Something went wrong. Token has been empty!");
                             Toast.makeText(LoginActivity.this, "Internal error. Click SIGN-IN button again.", Toast.LENGTH_LONG).show();
