@@ -8,10 +8,22 @@ import android.accounts.NetworkErrorException;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
+import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.LoginActivity;
+import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.SCUtils;
 
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GMSWorldAuthenticator extends AbstractAccountAuthenticator {
 
@@ -64,10 +76,19 @@ public class GMSWorldAuthenticator extends AbstractAccountAuthenticator {
         String authToken = am.peekAuthToken(account, authTokenType);
 
         if (StringUtils.isEmpty(authToken)) {
-            // TODO get token and decrypt password
-            //authToken = HTTPNetwork.login(account.name, am.getPassword(account));
+            try {
+                String password = new String(SCUtils.decrypt(Base64.decode(am.getPassword(account), Base64.NO_PADDING), context));
+                Map<String, String> headers = new HashMap<>();
+                final String user_password = account.name + ":" + password;
+                final String encodedAuthorization = org.spongycastle.util.encoders.Base64.toBase64String(user_password.getBytes());
+                headers.put("Authorization", "Basic " + encodedAuthorization);
+                String jsonResponse = Network.get(context, context.getString(R.string.serverUrl) + "s/authenticate?scope=dl", headers);
+                JsonElement reply = new JsonParser().parse(jsonResponse);
+                authToken = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN).getAsString();
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
         }
-
 
         if (StringUtils.isNotEmpty(authToken)) {
             final Bundle result = new Bundle();
@@ -81,13 +102,15 @@ public class GMSWorldAuthenticator extends AbstractAccountAuthenticator {
 
         // If we get here, then we couldn't access the user's password - so we
         // need to re-prompt them for their credentials. We do that by creating
+
         final Intent intent = new Intent(context, LoginActivity.class);
         intent.putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response);
-        //intent.putExtra("YOUR ACCOUNT TYPE", account.type);
-        //intent.putExtra("full_access", authTokenType);
+        intent.putExtra("accountType", account.type);
+        intent.putExtra("authTokenType", authTokenType);
 
         Bundle retBundle = new Bundle();
         retBundle.putParcelable(AccountManager.KEY_INTENT, intent);
+
         return retBundle;
     }
 
