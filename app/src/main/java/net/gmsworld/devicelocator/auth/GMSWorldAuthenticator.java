@@ -64,8 +64,7 @@ public class GMSWorldAuthenticator extends AbstractAccountAuthenticator {
         String authToken = am.peekAuthToken(account, authTokenType);
 
         if (StringUtils.isEmpty(authToken)) {
-            // TODO get token
-            // TODO decrypt password
+            // TODO get token and decrypt password
             //authToken = HTTPNetwork.login(account.name, am.getPassword(account));
         }
 

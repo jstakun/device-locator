@@ -9,7 +9,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -17,6 +19,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * A login screen that offers login via email/password.
@@ -36,9 +39,9 @@ public class LoginActivity extends AppCompatActivity  {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         // Set up the login form.
-        mEmailView = (TextView) findViewById(R.id.email);
+        mEmailView = findViewById(R.id.email);
 
-        mPasswordView = (EditText) findViewById(R.id.password);
+        mPasswordView = findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
@@ -60,6 +63,10 @@ public class LoginActivity extends AppCompatActivity  {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        TextView register = findViewById(R.id.register);
+        register.setText(Html.fromHtml(getString(R.string.registerLink)));
+        register.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     /**
@@ -115,13 +122,13 @@ public class LoginActivity extends AppCompatActivity  {
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
+        String regex = "^[a-zA-Z0-9_-]{4,24}$";
+        return (email.matches(regex));
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+        String regex = "^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9_-]{6,24}$";
+        return (password.matches(regex));
     }
 
     /**
@@ -176,11 +183,10 @@ public class LoginActivity extends AppCompatActivity  {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+            // TODO: 1. attempt authentication against a network service.
 
 
-            // TODO: register the new account here.
-            // TODO: encrypt password
+            // TODO: 2. register the new account here and encrypt password
             //createAccount(String email, String password, String authToken);
 
             return true;
@@ -192,7 +198,7 @@ public class LoginActivity extends AppCompatActivity  {
             showProgress(false);
 
             if (success) {
-                //TODO show toast
+                Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_LONG).show();
                 finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
