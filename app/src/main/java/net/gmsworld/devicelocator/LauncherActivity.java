@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import net.gmsworld.devicelocator.Utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 

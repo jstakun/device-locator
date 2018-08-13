@@ -26,7 +26,7 @@
               android:layout_height="wrap_content"
               android:orientation="vertical">
 
-              <net.gmsworld.devicelocator.Views.DLSMSControlCard
+              <net.gmsworld.devicelocator.views.DLSMSControlCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
@@ -94,9 +94,9 @@
 
                 </LinearLayout>
 
-              </net.gmsworld.devicelocator.Views.DLSMSControlCard>
+              </net.gmsworld.devicelocator.views.DLSMSControlCard>
 
-              <net.gmsworld.devicelocator.Views.LDCard
+              <net.gmsworld.devicelocator.views.LDCard
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_margin="8dp"
@@ -109,7 +109,7 @@
                       android:paddingTop="15dp"
                       ldcard:passwordToggleEnabled="true">
 
-                      <net.gmsworld.devicelocator.Views.KeyboardEditText
+                      <net.gmsworld.devicelocator.views.KeyboardEditText
                           android:id="@+id/token"
                           android:layout_width="match_parent"
                           android:layout_height="wrap_content"
@@ -141,9 +141,9 @@
                   </LinearLayout>
 
 
-              </net.gmsworld.devicelocator.Views.LDCard>
+              </net.gmsworld.devicelocator.views.LDCard>
 
-              <net.gmsworld.devicelocator.Views.LDCard
+              <net.gmsworld.devicelocator.views.LDCard
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
@@ -185,7 +185,7 @@
                     android:paddingTop="15dp"
                     android:paddingBottom="8dp"/>
 
-            </net.gmsworld.devicelocator.Views.LDCard>
+            </net.gmsworld.devicelocator.views.LDCard>
 
           </LinearLayout>
 
@@ -202,7 +202,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <net.gmsworld.devicelocator.Views.DLTrackerCard
+                <net.gmsworld.devicelocator.views.DLTrackerCard
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
@@ -267,9 +267,9 @@
 
                     </LinearLayout>
 
-                </net.gmsworld.devicelocator.Views.DLTrackerCard>
+                </net.gmsworld.devicelocator.views.DLTrackerCard>
 
-                <net.gmsworld.devicelocator.Views.LDCard
+                <net.gmsworld.devicelocator.views.LDCard
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
@@ -331,7 +331,7 @@
                             android:gravity="center"
                             android:text="@string/email_address" />
 
-                        <net.gmsworld.devicelocator.Views.KeyboardEditText
+                        <net.gmsworld.devicelocator.views.KeyboardEditText
                             android:id="@+id/email"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -368,7 +368,7 @@
                                 android:textColor="@android:color/white"
                                 android:src="@drawable/ic_contact_mail_white"/>
 
-                            <net.gmsworld.devicelocator.Views.KeyboardEditText
+                            <net.gmsworld.devicelocator.views.KeyboardEditText
                                 android:id="@+id/telegramId"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
@@ -398,7 +398,7 @@
 
                     </LinearLayout>
 
-                </net.gmsworld.devicelocator.Views.LDCard>
+                </net.gmsworld.devicelocator.views.LDCard>
 
             </LinearLayout>
 
@@ -416,7 +416,7 @@
                 android:id="@+id/deviceSettings"
                 android:visibility="gone">
 
-                <net.gmsworld.devicelocator.Views.LDCard
+                <net.gmsworld.devicelocator.views.LDCard
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
@@ -438,7 +438,7 @@
                             android:gravity="center"
                             android:text="@string/device_name" />
 
-                        <net.gmsworld.devicelocator.Views.KeyboardEditText
+                        <net.gmsworld.devicelocator.views.KeyboardEditText
                             android:id="@+id/deviceName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -478,9 +478,9 @@
 
                     </LinearLayout>
 
-                </net.gmsworld.devicelocator.Views.LDCard>
+                </net.gmsworld.devicelocator.views.LDCard>
 
-                <net.gmsworld.devicelocator.Views.LDCard
+                <net.gmsworld.devicelocator.views.LDCard
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
@@ -506,7 +506,7 @@
 
                     </LinearLayout>
 
-                </net.gmsworld.devicelocator.Views.LDCard>
+                </net.gmsworld.devicelocator.views.LDCard>
 
             </LinearLayout>
 

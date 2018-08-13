@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Device Locator</string>
+    <string name="account_type">net.gmsworld</string>
     <string name="app_name_html">&lt;font color="#808080">Device Locator&lt;/font></string>
     <string name="message">Message from Device Locator</string>
     <string name="current_state_card_title">Setup</string>
@@ -102,4 +103,13 @@
     <string name="device_icon">Device Icon</string>
     <string name="params_no_hint">No parameters required</string>
     <string name="params_yes_hint">Enter parameter(s)</string>
+    <string name="title_activity_login">Sign in</string>
+
+    <!-- Login Activity -->
+    <string name="error_invalid_email">This login is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="login">Login</string>
+    <string name="password">Password</string>
 </resources>

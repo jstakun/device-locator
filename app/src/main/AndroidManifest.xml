@@ -18,13 +18,19 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+
     <uses-feature
         android:name="android.hardware.camera.autofocus"
         android:required="false" />
+
+    <uses-permission android:name="android.permission.READ_PROFILE" />
 
     <application
         android:name=".DeviceLocatorApp"
@@ -34,41 +40,55 @@
         android:resizeableActivity="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".LauncherActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleTop"
-            android:windowSoftInputMode="stateAlwaysHidden"
+            android:configChanges="orientation|screenSize"
             android:exported="false"
-            android:configChanges="orientation|screenSize" />
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+
         <activity
             android:name=".CommandActivity"
-            android:launchMode="singleTop"
+            android:configChanges="orientation|screenSize"
             android:exported="false"
-            android:configChanges="orientation|screenSize" />
+            android:launchMode="singleTop" />
+
         <activity
             android:name=".PinActivity"
-            android:exported="false"
-            android:configChanges="orientation|screenSize" />
-        <service
-            android:name=".Services.SmsSenderService"
+            android:configChanges="orientation|screenSize"
             android:exported="false" />
+
+        <activity
+            android:name=".LoginActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/title_activity_login" />
+
         <service
-            android:name=".Services.RouteTrackingService"
+            android:name=".services.SmsSenderService"
             android:exported="false" />
+
         <service
-            android:name=".Services.HiddenCaptureImageService"
+            android:name=".services.RouteTrackingService"
             android:exported="false" />
+
         <service
-            android:name=".Services.DlFirebaseMessagingService"
+            android:name=".services.HiddenCaptureImageService"
+            android:exported="false" />
+
+        <service
+            android:name=".services.DlFirebaseMessagingService"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -76,8 +96,16 @@
             </intent-filter>
         </service>
 
+        <service android:name=".services.GMSWorldAuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
         <receiver
-            android:name=".BroadcastReceivers.SmsReceiver"
+            android:name=".broadcastreceivers.SmsReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BROADCAST_SMS">
@@ -85,8 +113,9 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+
         <receiver
-            android:name=".BroadcastReceivers.RouteTrackingServiceRestartReceiver"
+            android:name=".broadcastreceivers.RouteTrackingServiceRestartReceiver"
             android:enabled="true"
             android:exported="false"
             android:label="RestartRouteTrackingServiceWhenStopped">
@@ -99,8 +128,9 @@
             </intent-filter
             -->
         </receiver>
+
         <receiver
-            android:name=".BroadcastReceivers.DeviceAdminEventReceiver"
+            android:name=".broadcastreceivers.DeviceAdminEventReceiver"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <intent-filter>
 

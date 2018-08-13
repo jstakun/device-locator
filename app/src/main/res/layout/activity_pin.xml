@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <net.gmsworld.devicelocator.Views.LDCard
+            <net.gmsworld.devicelocator.views.LDCard
                 android:id="@+id/deviceCommandCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
                     android:paddingBottom="8dp"
                     />
 
-            </net.gmsworld.devicelocator.Views.LDCard>
+            </net.gmsworld.devicelocator.views.LDCard>
 
         </ScrollView>
     </LinearLayout>

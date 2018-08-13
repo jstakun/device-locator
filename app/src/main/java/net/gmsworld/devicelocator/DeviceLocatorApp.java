@@ -5,8 +5,8 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import net.gmsworld.devicelocator.Utilities.Messenger;
-import net.gmsworld.devicelocator.Utilities.Network;
+import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.Network;
 
 import org.acra.ACRA;
 import org.acra.ReportingInteractionMode;

@@ -19,13 +19,13 @@ import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
-import net.gmsworld.devicelocator.Model.Device;
-import net.gmsworld.devicelocator.Utilities.AbstractCommand;
-import net.gmsworld.devicelocator.Utilities.Command;
-import net.gmsworld.devicelocator.Utilities.Messenger;
-import net.gmsworld.devicelocator.Utilities.Network;
-import net.gmsworld.devicelocator.Utilities.PreferencesUtils;
-import net.gmsworld.devicelocator.Views.CommandArrayAdapter;
+import net.gmsworld.devicelocator.model.Device;
+import net.gmsworld.devicelocator.utilities.AbstractCommand;
+import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 

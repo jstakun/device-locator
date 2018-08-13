@@ -20,11 +20,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
-import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
-import net.gmsworld.devicelocator.Services.SmsSenderService;
-import net.gmsworld.devicelocator.Utilities.Command;
-import net.gmsworld.devicelocator.Utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
+import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
+import net.gmsworld.devicelocator.services.SmsSenderService;
+import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 

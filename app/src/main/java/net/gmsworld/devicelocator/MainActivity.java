@@ -60,23 +60,23 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.gmsworld.devicelocator.BroadcastReceivers.DeviceAdminEventReceiver;
-import net.gmsworld.devicelocator.BroadcastReceivers.SmsReceiver;
-import net.gmsworld.devicelocator.Model.Device;
-import net.gmsworld.devicelocator.Services.DlFirebaseMessagingService;
-import net.gmsworld.devicelocator.Services.HiddenCaptureImageService;
-import net.gmsworld.devicelocator.Services.RouteTrackingService;
-import net.gmsworld.devicelocator.Services.SmsSenderService;
-import net.gmsworld.devicelocator.Utilities.AbstractLocationManager;
-import net.gmsworld.devicelocator.Utilities.Command;
-import net.gmsworld.devicelocator.Utilities.Files;
-import net.gmsworld.devicelocator.Utilities.GmsSmartLocationManager;
-import net.gmsworld.devicelocator.Utilities.Messenger;
-import net.gmsworld.devicelocator.Utilities.Network;
-import net.gmsworld.devicelocator.Utilities.Permissions;
-import net.gmsworld.devicelocator.Utilities.PreferencesUtils;
-import net.gmsworld.devicelocator.Utilities.RouteTrackingServiceUtils;
-import net.gmsworld.devicelocator.Views.CommandArrayAdapter;
+import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
+import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
+import net.gmsworld.devicelocator.model.Device;
+import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
+import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
+import net.gmsworld.devicelocator.services.RouteTrackingService;
+import net.gmsworld.devicelocator.services.SmsSenderService;
+import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
+import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.Files;
+import net.gmsworld.devicelocator.utilities.GmsSmartLocationManager;
+import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.Permissions;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.RouteTrackingServiceUtils;
+import net.gmsworld.devicelocator.views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -973,7 +973,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (StringUtils.isNotEmpty(email)) {
                     Toast.makeText(MainActivity.this, "Email verification in progress...", Toast.LENGTH_SHORT).show();
-                    net.gmsworld.devicelocator.Utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
+                    net.gmsworld.devicelocator.utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
                 }
             } else {
                 Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
@@ -1042,7 +1042,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (StringUtils.isNotEmpty(telegramId)) {
-                    net.gmsworld.devicelocator.Utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
+                    net.gmsworld.devicelocator.utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
                 }
             } else {
                 Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
