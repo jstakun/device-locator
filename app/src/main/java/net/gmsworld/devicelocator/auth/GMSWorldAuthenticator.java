@@ -37,11 +37,6 @@ public class GMSWorldAuthenticator extends AbstractAccountAuthenticator {
     }
 
     @Override
-    public Bundle editProperties(AccountAuthenticatorResponse accountAuthenticatorResponse, String s) {
-        return null;
-    }
-
-    @Override
     public Bundle addAccount(AccountAuthenticatorResponse response, String accountType, String authTokenType, String[] requiredFeatures, Bundle options) throws NetworkErrorException {
         final Intent intent = new Intent(context, LoginActivity.class);
 
@@ -121,6 +116,11 @@ public class GMSWorldAuthenticator extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle updateCredentials(AccountAuthenticatorResponse accountAuthenticatorResponse, Account account, String s, Bundle bundle) throws NetworkErrorException {
+        return null;
+    }
+
+    @Override
+    public Bundle editProperties(AccountAuthenticatorResponse accountAuthenticatorResponse, String s) {
         return null;
     }
 
