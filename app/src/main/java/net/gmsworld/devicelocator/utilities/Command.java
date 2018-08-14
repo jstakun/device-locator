@@ -56,6 +56,7 @@ public class Command {
     public final static String AUDIO_OFF_COMMAND = "noaudiodl"; //na disable audio transmitter
     public final static String TAKE_PHOTO_COMMAND = "photodl"; //p if all permissions set take photo and send link
     public final static String PING_COMMAND = "pingdl"; //pg send ping to test connectivity
+    public final static String HELLO_COMMAND = "hellodl"; //hl send ping to test connectivity
     public final static String RING_COMMAND = "ringdl"; //rn play ringtone
     public final static String RING_OFF_COMMAND = "ringoffdl"; //rn stop playing ringtone
     public final static String LOCK_SCREEN_COMMAND = "lockdl"; //ls lock screen now
@@ -903,6 +904,26 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context) {
             sendAppNotification(context, PING_COMMAND, sender);
+        }
+    }
+
+    private static final class HelloCommand extends AbstractCommand {
+
+        public HelloCommand() { super(HELLO_COMMAND, "hl", Finder.EQUALS); }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            sendSmsNotification(context, sender, HELLO_COMMAND);
+        }
+
+        @Override
+        protected void onSocialCommandFound(String sender, Context context) {
+            sendSocialNotification(context, HELLO_COMMAND);
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context) {
+            sendAppNotification(context, HELLO_COMMAND, sender);
         }
     }
 

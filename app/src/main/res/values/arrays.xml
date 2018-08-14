@@ -14,7 +14,7 @@
 
     <string-array name="device_commands">
         <item>Locate</item>
-        <item>Ping</item>
+        <item>Hello</item>
         <item>Ring</item>
         <item>Photo</item>
         <item>Lock</item>
