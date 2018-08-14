@@ -112,5 +112,5 @@
     <string name="error_field_required">This field is required</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
-    <string name="registerLink">Click to register &lt;a href="https://www.gms-world.net/m/register.jsp">here&lt;a></string>
+    <string name="registerLink">In order to register click &lt;a href="https://www.gms-world.net/m/register.jsp">here&lt;a></string>
 </resources>
