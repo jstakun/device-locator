@@ -60,10 +60,11 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 final boolean pinValid = StringUtils.equals(pin, pinRead);
                 final String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
                 if (pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
-                    //send notification to correlationId
+                    //send confirmation to correlationId
                     Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been received by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
                 }
                 if (pinValid) {
+                    //search for command
                     command += pinRead;
                     if (message.containsKey("args")) {
                         command += " " + message.get("args");
@@ -74,13 +75,13 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     }
                     String foundCommand = Command.findCommandInMessage(this, command, sender);
                     if (foundCommand == null) {
-                        Log.d(TAG, "Invalid command " + command + " found !");
+                        Log.d(TAG, "Invalid command " + commandName + " found!");
                     }
-                } else if (correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
+                } else if (!pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
                     Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
-                    Log.e(TAG, "Invalid pin received in cloud message!");
+                    Log.e(TAG, "Invalid pin found in cloud message!");
                 } else {
-                    Log.e(TAG, "Invalid pin received in cloud message!");
+                    Log.e(TAG, "Invalid pin found in cloud message!");
                 }
                 Bundle bundle = new Bundle();
                 //bundle.putString("command", commandName);

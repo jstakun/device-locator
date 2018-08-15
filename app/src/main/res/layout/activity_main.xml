@@ -61,6 +61,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         android:checked="false"
                         android:onClick="onLocationSMSCheckboxClicked"/>
 
@@ -72,6 +73,7 @@
                         android:layout_height="wrap_content"
                         android:checked="true"
                         android:paddingTop="15dp"
+                        android:paddingBottom="8dp"
                         android:onClick="onLocationSMSCheckboxClicked"/>
 
                 </LinearLayout>
@@ -150,7 +152,7 @@
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:onClick="onLocationSMSCheckboxClicked"
-                    android:paddingTop="8dp"
+                    android:paddingTop="15dp"
                     android:paddingBottom="8dp"/>
 
                 <Switch

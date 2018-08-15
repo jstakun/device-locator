@@ -90,13 +90,15 @@
         <service
             android:name=".services.DlFirebaseMessagingService"
             android:enabled="true"
-            android:exported="false">
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
-        <service android:name=".services.GMSWorldAuthenticatorService">
+        <service android:name=".services.GMSWorldAuthenticatorService"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
