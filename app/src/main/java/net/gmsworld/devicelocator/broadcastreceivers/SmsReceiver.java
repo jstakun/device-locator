@@ -23,8 +23,6 @@ public class SmsReceiver extends BroadcastReceiver {
 
     private static final String TAG = SmsReceiver.class.getSimpleName();
 
-    private FirebaseAnalytics firebaseAnalytics;
-
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -56,10 +54,9 @@ public class SmsReceiver extends BroadcastReceiver {
         if (proceed) {
             String command = Command.findCommandInSms(context, intent);
             if (StringUtils.isNotEmpty(command)) {
-                firebaseAnalytics = FirebaseAnalytics.getInstance(context);
                 Bundle bundle = new Bundle();
                 //bundle.putString("command", command);
-                firebaseAnalytics.logEvent("sms_command_received_" + command.toLowerCase(), bundle);
+                FirebaseAnalytics.getInstance(context).logEvent("sms_command_received_" + command.toLowerCase(), bundle);
             }
         }
     }
@@ -85,6 +82,4 @@ public class SmsReceiver extends BroadcastReceiver {
             return false;
         }
     }
-
-
 }

@@ -89,7 +89,7 @@ public class CommandActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 name = devices.get(position).name;
                 imei = devices.get(position).imei;
-                String savedPin = "";
+                String savedPin;
                 if (StringUtils.equals(imei, Messenger.getDeviceId(CommandActivity.this, false))) {
                     savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
                 } else {
@@ -139,7 +139,7 @@ public class CommandActivity extends AppCompatActivity {
 
         findViewById(R.id.commandView).requestFocus();
 
-        String savedPin = "";
+        String savedPin;
         if (StringUtils.equals(imei, Messenger.getDeviceId(this, false))) {
             savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
         } else {

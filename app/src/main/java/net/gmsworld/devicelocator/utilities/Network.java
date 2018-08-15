@@ -7,8 +7,10 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
+import net.gmsworld.devicelocator.R;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -96,8 +98,12 @@ public class Network {
     private static void handleHttpStatus(String response, int responseCode, String urlString, Context context) {
         if (responseCode == 401) {
             if (context != null) {
-                Log.d(TAG, "GMS Token is invalid will be deleted from device!");
-                PreferenceManager.getDefaultSharedPreferences(context).edit().remove(DeviceLocatorApp.GMS_TOKEN).apply();
+                if (!StringUtils.startsWith(urlString, context.getString(R.string.authnUrl))) {
+                    Log.d(TAG, "GMS Token is invalid and will be deleted from device!");
+                    PreferenceManager.getDefaultSharedPreferences(context).edit().remove(DeviceLocatorApp.GMS_TOKEN).apply();
+                } else {
+                    Log.d(TAG, "GMS World User authentication failed!");
+                }
             } else {
                 Log.e(TAG, "GMS Token is invalid but can't be deleted from device!");
             }

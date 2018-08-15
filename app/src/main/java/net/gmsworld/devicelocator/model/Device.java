@@ -12,7 +12,7 @@ public class Device implements Parcelable{
 
     }
 
-    protected Device(Parcel in) {
+    private Device(Parcel in) {
         imei = in.readString();
         name = in.readString();
         creationDate = in.readString();

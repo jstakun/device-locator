@@ -282,6 +282,7 @@
                                 android:lines="1"
                                 android:maxLength="20"
                                 android:maxLines="1"
+                                android:hint="@string/phone_number"
                                 android:textColor="@color/gray"/>
 
                         </LinearLayout>

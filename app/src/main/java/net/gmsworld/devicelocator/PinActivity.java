@@ -32,9 +32,9 @@ public class PinActivity extends AppCompatActivity {
 
     private static final String TAG = PinActivity.class.getSimpleName();
 
-    protected static final int PIN_MIN_LENGTH = 4;
+    static final int PIN_MIN_LENGTH = 4;
 
-    protected static final int PIN_VALIDATION_MILLIS = 10 * 60 * 1000; //10 mins
+    static final int PIN_VALIDATION_MILLIS = 10 * 60 * 1000; //10 mins
 
     public static final String DEVICE_PIN = "token";
 
@@ -159,6 +159,6 @@ public class PinActivity extends AppCompatActivity {
             return true;
         }
 
-        abstract public void onLinkClick(String url);
+        protected abstract void onLinkClick(String url);
     }
 }

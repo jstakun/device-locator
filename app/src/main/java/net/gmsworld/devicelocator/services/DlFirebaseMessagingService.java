@@ -72,7 +72,10 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     if (correlationId != null) {
                         sender = message.get("correlationId");
                     }
-                    Command.findCommandInMessage(this, command, sender);
+                    String foundCommand = Command.findCommandInMessage(this, command, sender);
+                    if (foundCommand == null) {
+                        Log.d(TAG, "Invalid command " + command + " found !");
+                    }
                 } else if (correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
                     Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
                     Log.e(TAG, "Invalid pin received in cloud message!");

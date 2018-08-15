@@ -12,4 +12,6 @@
     <string name="commandsUrl">http://www.gms-world.net/dl</string>
     <string name="deviceUrl">https://www.gms-world.net/showDevice</string>
     <string name="serverUrl">https://www.gms-world.net/</string>
+    <string name="authnUrl">https://www.gms-world.net/s/authenticate</string>
+
 </resources>

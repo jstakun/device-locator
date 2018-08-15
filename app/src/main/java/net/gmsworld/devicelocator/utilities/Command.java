@@ -83,10 +83,10 @@ public class Command {
     public static String findCommandInMessage(Context context, String message, String sender) {
         for (AbstractCommand c : getCommands()) {
             if (c.findSocialCommand(context, message)) {
-                Log.d(TAG, "Found matching social command");
+                Log.d(TAG, "Found matching social command " + message);
                 return c.getSmsCommand();
             } else if (c.findAppCommand(context, message, sender)) {
-                Log.d(TAG, "Found matching app command");
+                Log.d(TAG, "Found matching cloud command " + message);
                 return c.getSmsCommand();
             }
         }

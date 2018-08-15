@@ -238,7 +238,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
                 return context.getString(R.string.location_battery_saving);
             case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
-                return context.getString(R.string.locateion_sensors_only);
+                return context.getString(R.string.location_sensors_only);
             case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
                 return context.getString(R.string.location_high_accuracy);
             default:

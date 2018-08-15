@@ -702,7 +702,7 @@ public class MainActivity extends AppCompatActivity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
                     if (v.getText().length() < PinActivity.PIN_MIN_LENGTH) {
-                        Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, R.string.pin_length_error, Toast.LENGTH_LONG).show();
                         v.setText(pin);
                     }
                 }
@@ -719,7 +719,7 @@ public class MainActivity extends AppCompatActivity {
                         case KeyEvent.KEYCODE_BACK:
                             TextView tokenInput = (TextView)v;
                             if (tokenInput.getText().length() < PinActivity.PIN_MIN_LENGTH) {
-                                Toast.makeText(MainActivity.this, R.string.pin_lenght_error, Toast.LENGTH_LONG).show();
+                                Toast.makeText(MainActivity.this, R.string.pin_length_error, Toast.LENGTH_LONG).show();
                                 tokenInput.setText(pin);
                             }
                             break;
@@ -1400,8 +1400,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
-            final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, new ArrayList());
-            deviceList.setAdapter(adapter);
+            //final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, new ArrayList<Device>());
+            //deviceList.setAdapter(adapter);
             deviceListEmpty.setText(R.string.devices_list_empty);
         }
     }
@@ -1621,7 +1621,7 @@ public class MainActivity extends AppCompatActivity {
                 name = devices.get(position).imei;
             }
             viewHolder.deviceName.setText(name);
-            viewHolder.deviceDesc.setText("Last edited on " + devices.get(position).creationDate.split("T")[0]);
+            viewHolder.deviceDesc.setText(getString(R.string.last_edited_on, devices.get(position).creationDate.split("T")[0]));
 
             viewHolder.deviceName.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {

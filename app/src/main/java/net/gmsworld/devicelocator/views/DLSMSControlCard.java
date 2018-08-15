@@ -11,7 +11,7 @@ import android.widget.Switch;
 import net.gmsworld.devicelocator.R;
 
 public class DLSMSControlCard extends CardView {
-    private TypedArray attributes = null;
+    private TypedArray attributes;
     private LinearLayout linearLayout = null;
 
     /**
