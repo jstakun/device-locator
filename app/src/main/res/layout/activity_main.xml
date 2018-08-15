@@ -31,10 +31,11 @@
               android:orientation="vertical">
 
               <net.gmsworld.devicelocator.views.DLSMSControlCard
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                ldcard:dlSmsSwitch="SMS control">
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layout_marginTop="8dp"
+                  android:layout_margin="8dp"
+                  ldcard:dlSmsSwitch="SMS control">
 
                 <LinearLayout
                     android:id="@+id/ll_sms_focus"
@@ -46,55 +47,32 @@
                     android:focusable="true"
                     android:focusableInTouchMode="true">
 
-                    <!--RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/docs_link"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="left"
+                        android:paddingBottom="8dp"/>
 
-                        <Button
-                            android:id="@+id/send_button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentLeft="true"
-                            android:backgroundTint="@color/colorPrimary"
-                            android:text="@string/send_button"
-                            android:textColor="@android:color/white" />
-
-                        <Button
-                            android:id="@+id/running_button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:backgroundTint="@color/colorAccent"
-                            android:focusable="true"
-                            android:focusableInTouchMode="true"
-                            android:text=""
-                            android:textColor="@android:color/white" />
-                    </RelativeLayout-->
-
-                    <!--LinearLayout
+                    <Switch
+                        android:id="@+id/settings_sms_contacts"
+                        android:text="@string/accept_sms_commands"
+                        android:textColor="@color/gray"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingBottom="8dp"
-                        android:paddingTop="8dp"-->
+                        android:paddingTop="8dp"
+                        android:checked="false"
+                        android:onClick="onLocationSMSCheckboxClicked"/>
 
-                        <TextView
-                            android:id="@+id/docs_link"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="left"
-                            android:paddingBottom="8dp"/>
-
-                        <Switch
-                            android:id="@+id/settings_sms_contacts"
-                            android:text="@string/accept_sms_commands"
-                            android:textColor="@color/gray"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:checked="false"
-                            android:onClick="onLocationSMSCheckboxClicked"/>
-
-                   <!--/LinearLayout-->
+                    <Switch
+                        android:id="@+id/settings_sms_without_pin"
+                        android:text="@string/accept_sms_without_pin"
+                        android:textColor="@color/gray"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:paddingTop="15dp"
+                        android:onClick="onLocationSMSCheckboxClicked"/>
 
                 </LinearLayout>
 
@@ -161,7 +139,6 @@
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:onClick="onLocationSMSCheckboxClicked"
-                    android:paddingLeft="8dp"
                     android:paddingTop="15dp"
                     android:paddingBottom="8dp"/>
 
@@ -173,7 +150,6 @@
                     android:layout_height="wrap_content"
                     android:checked="false"
                     android:onClick="onLocationSMSCheckboxClicked"
-                    android:paddingLeft="8dp"
                     android:paddingTop="8dp"
                     android:paddingBottom="8dp"/>
 
@@ -185,7 +161,6 @@
                     android:layout_height="wrap_content"
                     android:checked="true"
                     android:onClick="onLocationSMSCheckboxClicked"
-                    android:paddingLeft="8dp"
                     android:paddingTop="15dp"
                     android:paddingBottom="8dp"/>
 
@@ -209,6 +184,7 @@
                 <net.gmsworld.devicelocator.views.DLTrackerCard
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:layout_margin="8dp"
                     ldcard:dlTrackerSwitch="@string/device_tracker">
 
@@ -235,14 +211,6 @@
                             android:text="@string/share_route"
                             android:textColor="@android:color/white" />
 
-                            <!--Button
-                            android:id="@+id/motion_button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:backgroundTint="@color/colorAccent"
-                            android:text=""
-                            android:textColor="@android:color/white" /-->
                         </RelativeLayout>
 
                         <LinearLayout
@@ -276,9 +244,7 @@
                 <net.gmsworld.devicelocator.views.LDCard
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginRight="8dp"
+                    android:layout_margin="8dp"
                     ldcard:title="@string/settings_card_title">
 
                     <LinearLayout
@@ -423,6 +389,7 @@
                 <net.gmsworld.devicelocator.views.LDCard
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
                     android:layout_margin="8dp"
                     ldcard:title="Device Manager">
 
@@ -470,15 +437,6 @@
                             android:id="@+id/userAccounts"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"/>
-
-                        <!--net.gmsworld.devicelocator.Views.KeyboardEditText
-                            android:id="@+id/userLogin"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:lines="1"
-                            android:inputType="text"
-                            android:maxLength="64"
-                            android:textColor="@color/gray"/-->
 
                     </LinearLayout>
 

@@ -390,6 +390,7 @@ public class MainActivity extends AppCompatActivity {
         ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean("settings_google_sms", true));
         ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
         ((Switch) findViewById(R.id.settings_sms_contacts)).setChecked(settings.getBoolean("settings_sms_contacts", false));
+        ((Switch) findViewById(R.id.settings_sms_without_pin)).setChecked(settings.getBoolean("settings_sms_without_pin", true));
     }
 
     public void onLocationSMSCheckboxClicked(View view) {
@@ -419,6 +420,12 @@ public class MainActivity extends AppCompatActivity {
                     ((Switch) view).setChecked(false);
                 } else {
                     editor.putBoolean("settings_sms_contacts", checked);
+                }
+                break;
+            case R.id.settings_sms_without_pin:
+                editor.putBoolean("settings_sms_without_pin", checked);
+                if (!checked) {
+                    Toast.makeText(this, "Be careful. From now on Security PIN is not required when sending SMS command!", Toast.LENGTH_LONG).show();
                 }
                 break;
             default:

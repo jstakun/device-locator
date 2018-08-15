@@ -81,7 +81,8 @@
     <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and check list of available commands below or on SMS control card.&lt;/font></string>
     <string name="pin_lenght_error">Security PIN must have at least 4 digits! Reverting to previous value…</string>
     <string name="enter_security_pin">Enter Security PIN</string>
-    <string name="accept_sms_commands">Accept SMS commands sent only from my contacts</string>
+    <string name="accept_sms_commands">Only accept SMS commands sent from my contacts</string>
+    <string name="accept_sms_without_pin">Only accept SMS commands with Security PIN</string>
     <string name="Info.about">%1$s (R)\nVersion: %2$s-%3$d built on %4$s\nCopyright © 2010–%5$s GMS World\n%6$s installed on %7$s</string>
     <string name="admin_grant_explanation">Please grant this permissions to enable failed login notification service and lock screen command in Device Locator.</string>
     <string name="test">Test</string>

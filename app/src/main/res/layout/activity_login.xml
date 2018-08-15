@@ -30,6 +30,7 @@
             android:id="@+id/deviceCommandCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:layout_margin="8dp"
             ldcard:title="@string/app_name">
 

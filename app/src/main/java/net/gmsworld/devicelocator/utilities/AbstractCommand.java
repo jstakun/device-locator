@@ -163,12 +163,16 @@ public abstract class AbstractCommand {
         final PreferencesUtils prefs = new PreferencesUtils(context);
         boolean foundCommand = false;
         commandTokens = message.split(" ");
-        //TODO find command without pin if allowed by user
+        boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
         if (commandTokens.length >= 1) {
             final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
             foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command + pin);
             if (commandTokens.length >= 2) {
-                foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command) && StringUtils.equals(commandTokens[1], pin);
+                foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command) && (!isPinRequired || StringUtils.equals(commandTokens[1], pin));
+            } else if (!isPinRequired) {
+                foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command);
+            } else if (isPinRequired && StringUtils.equalsIgnoreCase(commandTokens[0], command)) {
+                Log.w(TAG, "Command " + commandTokens[0] + " without Security PIN has been received!");
             }
         }
         return foundCommand;
