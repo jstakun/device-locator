@@ -43,7 +43,7 @@ public abstract class AbstractLocationManager {
 
     private static final int MAX_REASONABLE_SPEED = 90; //324 kilometer per hour or 201 mile per hour
     private static final int MAX_REASONABLE_ALTITUDECHANGE = 200; //meters
-    private static final int MAX_REASONABLE_ACCURACY = 50; //meters
+    public static final int MAX_REASONABLE_ACCURACY = 50; //meters
 
     private static final Vector<Location> mWeakLocations = new Vector<Location>(3);
     private static final Queue<Double> mAltitudes = new LinkedList<Double>();

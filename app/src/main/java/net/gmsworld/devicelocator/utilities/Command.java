@@ -73,7 +73,7 @@ public class Command {
     public static String findCommandInSms(Context context, Intent intent) {
         for (AbstractCommand c : getCommands()) {
             if (c.findSmsCommand(context, intent)) {
-                Log.d(TAG, "Found matching command");
+                Log.d(TAG, "Found matching sms command");
                 return c.getSmsCommand();
             }
         }

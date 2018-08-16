@@ -741,6 +741,30 @@ public class Messenger {
         }
     }
 
+    public static void sendLocationErrorMessage(Context context, String phoneNumber, String telegramId, String email, String app) {
+        String deviceId = getDeviceId(context, true);
+        String message = context.getString(R.string.error_getting_location, deviceId) +
+                "\n" + "Battery level: " + getBatteryLevel(context);
+        if (StringUtils.isNotEmpty(phoneNumber)) {
+            sendSMS(context, phoneNumber, message);
+        }
+        if (StringUtils.isNotEmpty(telegramId)) {
+            sendTelegram(context, null, telegramId, message, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(email)) {
+            String title = context.getString(R.string.message);
+            if (deviceId != null) {
+                title += " installed on device " + deviceId + " - current location";
+            }
+            message += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
+            sendEmail(context, null, email, message, title, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(app)) {
+            String[] tokens = StringUtils.split(app, "+=+");
+            sendCloudMessage(context, null, tokens[0], tokens[1], message, 1, new HashMap<String, String>());
+        }
+    }
+
     public static void sendLoginFailedMessage(Context context, String phoneNumber, String telegramId, String email, String app) {
         String deviceId = getDeviceId(context, true);
         String text = "Failed login attempt to your device " + deviceId + "."

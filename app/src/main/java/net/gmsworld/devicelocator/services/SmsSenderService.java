@@ -7,17 +7,17 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
+import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.Messenger;
 
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
@@ -27,7 +27,7 @@ import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWith
 public class SmsSenderService extends IntentService implements OnLocationUpdatedListener {
     private final static String TAG = SmsSenderService.class.getSimpleName();
 
-    private final static int LOCATION_REQUEST_MAX_WAIT_TIME = 120;
+    private final static int LOCATION_REQUEST_MAX_WAIT_TIME = 120; //seconds
 
     private static boolean isRunning = false;
 
@@ -42,6 +42,15 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
     private Location bestLocation = null;
     private long startTime = 0;
+
+    private Handler handler = new Handler();
+
+    private Runnable task = new Runnable() {
+        @Override
+        public void run () {
+            disableUpdates();
+        }
+    };
 
     public SmsSenderService() {
         super("SmsSenderService");
@@ -97,12 +106,17 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             //set bestLocation to null and start time
             startTime = System.currentTimeMillis() / 1000;
+
             bestLocation = null;
 
             SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
                     .config(LocationParams.NAVIGATION)
                     .start(this);
+
+            handler.postDelayed(task, LOCATION_REQUEST_MAX_WAIT_TIME * 1000);
+
         } else {
+
             Log.e(TAG, "No GPS providers are available!");
         }
     }
@@ -117,11 +131,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
         long currentTime = System.currentTimeMillis() / 1000;
 
-        //Log.d(TAG, "Start time: " + startTime + ", Current time: " + currentTime);
-        //Log.d(TAG, "Difference: " + (currentTime - startTime));
-
         if (currentTime - startTime < LOCATION_REQUEST_MAX_WAIT_TIME) {
-            //Log.d(TAG, "NOT EXPIRED YET. CHECK");
 
             //check if location is older than 10 minutes
             if ((System.currentTimeMillis() - location.getTime()) > 10 * 60 * 1000) {
@@ -135,17 +145,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             //still null? check again
             if (bestLocation == null) {
-                //Log.d(TAG, "BEST LOCATION STILL NULL, CHECK MORE");
                 return;
             }
-
-            //Log.d(TAG, bestLocation.toString());
-            //Log.d(TAG, location.toString());
-
-            //Log.d(TAG, "HAS ALTITUDE:" + location.hasAltitude());
-            //Log.d(TAG, "HAS SPEED: " + location.hasSpeed());
-            //Log.d(TAG, "LOCATION PROVIDER: " + location.getProvider());
-
 
             if (!bestLocation.getProvider().equals(LocationManager.GPS_PROVIDER) || bestLocation.getProvider().equals(location.getProvider())) {
                 //Log.d(TAG, "NOT GPS OR BOTH GPS!");
@@ -161,54 +162,41 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             //    return;
             //}
 
-            if (bestLocation.getAccuracy() > 100) {
-                //Log.d(TAG, "Accuracy more than 100, check again.");
+            if (bestLocation.getAccuracy() > AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
+                //Log.d(TAG, "Accuracy more than 50, check again.");
                 return;
             }
         }
 
-        //stop the location updates
-        SmartLocation.with(this).location().stop();
+        handler.removeCallbacks(task);
 
-        if (bestLocation == null) {
-            String deviceId = Messenger.getDeviceId(this, true);
-            String message = getString(R.string.error_getting_location, deviceId) +
-                    "\n" + "Battery level: " + Messenger.getBatteryLevel(this);
-            if (StringUtils.isNotEmpty(phoneNumber)) {
-                Messenger.sendSMS(this, phoneNumber, message);
-            }
-            if (StringUtils.isNotEmpty(telegramId)) {
-                Messenger.sendTelegram(this, null, telegramId, message, 1, new HashMap<String, String>());
-            }
-            if (StringUtils.isNotEmpty(email)) {
-                String title = getString(R.string.message);
-                if (deviceId != null) {
-                    title += " installed on device " + deviceId + " - current location";
+        disableUpdates();
+    }
+
+    private synchronized void disableUpdates() {
+        //stop the location updates
+        if (isRunning) {
+            Log.d(TAG, "Disabling location updates...");
+
+            SmartLocation.with(this).location().stop();
+
+            if (bestLocation == null) {
+                Messenger.sendLocationErrorMessage(this, phoneNumber, telegramId, email, app);
+            } else {
+                if (gpsSms && isRunning) {
+                    Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), phoneNumber, telegramId, email, app);
+                } else {
+                    Log.d(TAG, "Location message won't be send");
                 }
-                message += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
-                Messenger.sendEmail(this, null, email, message, title, 1, new HashMap<String, String>());
-            }
-            if (StringUtils.isNotEmpty(app)) {
-                String[] tokens = StringUtils.split(app, "+=+");
-                Messenger.sendCloudMessage(this, null, tokens[0], tokens[1], message, 1, new HashMap<String, String>());
+
+                if (googleMapsSms && isRunning) {
+                    Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId, email, app);
+                } else {
+                    Log.d(TAG, "Google Maps link message won't be send");
+                }
             }
             isRunning = false;
-            return;
         }
-
-        if (gpsSms && isRunning) {
-            Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), phoneNumber, telegramId, email, app);
-        } else {
-            Log.d(TAG, "Location message won't be send");
-        }
-
-        if (googleMapsSms && isRunning) {
-            Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId, email, app);
-        } else {
-            Log.d(TAG, "Google Maps link message won't be send");
-        }
-
-        isRunning = false;
     }
 
     private void readSettings() {
@@ -225,10 +213,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             return -1;
         }
     }
-
-    //public static boolean isLocationEnabled(Context context) {
-    //    return getLocationMode(context) != Settings.Secure.LOCATION_MODE_OFF;
-    //}
 
     public static String locationToString(Context context) {
         int mode = getLocationMode(context);
