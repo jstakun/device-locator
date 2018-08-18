@@ -24,6 +24,7 @@ import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
+import net.gmsworld.devicelocator.utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -183,7 +184,7 @@ public class RouteTrackingService extends Service {
         //use smart location lib
         GmsSmartLocationManager.getInstance().disable(IncomingHandler.class.getName(), this);
 
-        PreferenceManager.getDefaultSharedPreferences(this).edit().remove("routeTitle").apply();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().remove(RouteTrackingServiceUtils.ROUTE_TITLE).apply();
     }
 
     private void shareRoute(final String phoneNumber, final String telegramId, final String email, final String app, final boolean stopSelf) {

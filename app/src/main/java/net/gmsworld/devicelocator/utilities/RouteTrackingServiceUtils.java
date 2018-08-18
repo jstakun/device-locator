@@ -20,6 +20,8 @@ public class RouteTrackingServiceUtils {
 
     private static final String TAG = RouteTrackingServiceUtils.class.getSimpleName();
 
+    public static final String ROUTE_TITLE = "routeTitle";
+
     public static boolean startRouteTrackingService(Context context, ServiceConnection mConnection, int radius, String phoneNumber, String email, String telegramId, String app, boolean resetRoute, boolean silentMode) {
         Intent routeTracingService = new Intent(context, RouteTrackingService.class);
         routeTracingService.putExtra("radius", radius);
@@ -83,11 +85,11 @@ public class RouteTrackingServiceUtils {
 
     public static String getRouteId(Context context) {
         final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String title = settings.getString("routeTitle", "");
+        String title = settings.getString(ROUTE_TITLE, "");
 
         if (StringUtils.isEmpty(title)) {
             title = "device_locator_route_" + Messenger.getDeviceId(context, false) + "_" + System.currentTimeMillis();
-            settings.edit().putString("routeTitle", title).apply();
+            settings.edit().putString(ROUTE_TITLE, title).apply();
         }
 
         return title;

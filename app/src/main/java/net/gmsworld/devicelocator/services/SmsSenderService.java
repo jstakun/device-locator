@@ -109,15 +109,27 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             bestLocation = null;
 
-            SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
-                    .config(LocationParams.NAVIGATION)
-                    .start(this);
+            try {
+                //TODO for testing enabled logging
+                //SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
+                //        .config(LocationParams.NAVIGATION)
+                //        .start(this);
+
+                SmartLocation smartLocation = new SmartLocation.Builder(this).logging(true).build();
+                smartLocation.location(new LocationGooglePlayServicesWithFallbackProvider(this))
+                        .config(LocationParams.NAVIGATION)
+                        .start(this);
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
 
             handler.postDelayed(task, LOCATION_REQUEST_MAX_WAIT_TIME * 1000);
 
         } else {
 
             Log.e(TAG, "No GPS providers are available!");
+
+            Messenger.sendLocationErrorMessage(this, phoneNumber, telegramId, email, app);
         }
     }
 
