@@ -110,15 +110,14 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             bestLocation = null;
 
             try {
-                //TODO for testing enabled logging
-                //SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
-                //        .config(LocationParams.NAVIGATION)
-                //        .start(this);
-
-                SmartLocation smartLocation = new SmartLocation.Builder(this).logging(true).build();
-                smartLocation.location(new LocationGooglePlayServicesWithFallbackProvider(this))
+                SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
                         .config(LocationParams.NAVIGATION)
                         .start(this);
+
+                //SmartLocation smartLocation = new SmartLocation.Builder(this).logging(true).build();
+                //smartLocation.location(new LocationGooglePlayServicesWithFallbackProvider(this))
+                //        .config(LocationParams.NAVIGATION)
+                //        .start(this);
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
             }
