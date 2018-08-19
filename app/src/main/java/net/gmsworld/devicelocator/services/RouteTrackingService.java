@@ -151,6 +151,8 @@ public class RouteTrackingService extends Service {
     private synchronized void startTracking(int priority, boolean resetRoute) {
         Log.d(TAG, "startTracking() in silent mode " + silentMode);
 
+        PreferenceManager.getDefaultSharedPreferences(this).edit().remove(RouteTrackingServiceUtils.ROUTE_TITLE).apply();
+
         if (this.mWakeLock != null)
         {
             this.mWakeLock.release();
@@ -183,8 +185,6 @@ public class RouteTrackingService extends Service {
 
         //use smart location lib
         GmsSmartLocationManager.getInstance().disable(IncomingHandler.class.getName(), this);
-
-        PreferenceManager.getDefaultSharedPreferences(this).edit().remove(RouteTrackingServiceUtils.ROUTE_TITLE).apply();
     }
 
     private void shareRoute(final String phoneNumber, final String telegramId, final String email, final String app, final boolean stopSelf) {

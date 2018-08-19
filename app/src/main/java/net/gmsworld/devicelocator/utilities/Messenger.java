@@ -436,7 +436,7 @@ public class Messenger {
         }
         if (StringUtils.isNotEmpty(app)) {
             String[] tokens = StringUtils.split(app, "+=+");
-            Messenger.sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
+            sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
         }
     }
 
@@ -485,9 +485,9 @@ public class Messenger {
         String message = ROUTE_MESSAGE_PREFIX + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
                 " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m.";
         if (location.hasSpeed() && location.getSpeed() > 0f) {
-            message += " and speed " + net.gmsworld.devicelocator.utilities.Messenger.getSpeed(context, location.getSpeed());
+            message += " and speed " + getSpeed(context, location.getSpeed());
         }
-        message += "\n" + "Battery level: " + net.gmsworld.devicelocator.utilities.Messenger.getBatteryLevel(context) +
+        message += "\n" + "Battery level: " + getBatteryLevel(context) +
                 "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
         final Map<String, String> headers = new HashMap<String, String>();
@@ -786,7 +786,7 @@ public class Messenger {
             }
             if (StringUtils.isNotEmpty(app)) {
                 String[] tokens = StringUtils.split(app, "+=+");
-                Messenger.sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
+                sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
             }
         }
     }
