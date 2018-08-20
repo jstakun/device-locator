@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -1105,5 +1106,14 @@ public class Messenger {
             }
         }
         return false;
+    }
+
+    public static String getDeviceName() {
+        String manufacturer = StringUtils.capitalize(Build.MANUFACTURER);
+        String model = StringUtils.capitalize(Build.MODEL);
+        if (model.startsWith(manufacturer)) {
+            return model;
+        }
+        return StringUtils.replaceAll(manufacturer + " " + model, " ", "-");
     }
 }

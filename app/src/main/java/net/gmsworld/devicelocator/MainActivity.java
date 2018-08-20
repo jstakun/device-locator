@@ -847,10 +847,16 @@ public class MainActivity extends AppCompatActivity {
 
     private void initDeviceNameInput() {
         final TextView deviceNameInput = this.findViewById(R.id.deviceName);
-        String deviceName = settings.getString(DEVICE_NAME);
-        if (StringUtils.isNotEmpty(deviceName)) {
-            deviceNameInput.setText(deviceName);
+        //Log.d(TAG, "Device name: " + Messenger.getDeviceName());
+        if (settings.contains(DEVICE_NAME)) {
+            String deviceName = settings.getString(DEVICE_NAME);
+            if (StringUtils.isNotEmpty(deviceName)) {
+                deviceNameInput.setText(deviceName);
+            }
+        } else {
+            deviceNameInput.setText(Messenger.getDeviceName());
         }
+
         deviceNameInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {

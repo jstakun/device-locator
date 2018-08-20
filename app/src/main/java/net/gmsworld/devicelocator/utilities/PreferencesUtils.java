@@ -67,4 +67,8 @@ public class PreferencesUtils {
     public Boolean getBoolean(String key, Boolean defaultValue) {
         return sharedPreferences.getBoolean(key, defaultValue);
     }
+
+    public boolean contains(String key) {
+        return sharedPreferences.contains(key);
+    }
 }
