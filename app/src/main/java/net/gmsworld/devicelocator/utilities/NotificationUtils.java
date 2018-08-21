@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
 
@@ -39,16 +40,23 @@ public class NotificationUtils {
                 .build();
     }
 
-    public static Notification buildMessageNotification(Context context, int notificationId, String message) {
+    public static Notification buildMessageNotification(Context context, int notificationId, String message, Location location) {
         PendingIntent contentIntent = null;
-        String[] tokens = message.split("\\s+");
-
-        for (int i=0;i<tokens.length;i++) {
-            if (tokens[i].startsWith("http://") || tokens[i].startsWith("https://")) {
-                Uri webpage = Uri.parse(tokens[i]);
-                Intent notificationIntent = new Intent(Intent.ACTION_VIEW, webpage);
-                contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                break;
+        //TODO add distance from current location to message
+        if (location != null) {
+            Uri gmmIntentUri = Uri.parse("geo:" + location.getLatitude() + "," + location.getLongitude());
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            mapIntent.setPackage("com.google.android.apps.maps");
+            contentIntent = PendingIntent.getActivity(context, notificationId, mapIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
+            String[] tokens = message.split("\\s+");
+            for (int i = 0; i < tokens.length; i++) {
+                if (tokens[i].startsWith("http://") || tokens[i].startsWith("https://")) {
+                    Uri webpage = Uri.parse(tokens[i]);
+                    Intent notificationIntent = new Intent(Intent.ACTION_VIEW, webpage);
+                    contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    break;
+                }
             }
         }
 

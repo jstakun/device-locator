@@ -377,7 +377,9 @@ public class Messenger {
         text += context.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
 
         long diff = System.currentTimeMillis() - location.getTime();
-        if (diff < 1000) {
+        if (diff <= 0) {
+            text += "Taken now" + "\n";
+        } else if (diff < 1000) {
             text += "Taken " + diff + " milliseconds ago" + "\n";
         } else if (diff < 60000) {
             text += "Taken " + (diff / 1000) + " seconds ago" + "\n";
@@ -411,7 +413,7 @@ public class Messenger {
             }
             if (StringUtils.isNotEmpty(app)) {
                 String[] tokens = StringUtils.split(app, "+=+");
-                sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
+                sendCloudMessage(context, location, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
             }
         }
     }
@@ -437,7 +439,7 @@ public class Messenger {
         }
         if (StringUtils.isNotEmpty(app)) {
             String[] tokens = StringUtils.split(app, "+=+");
-            sendCloudMessage(context, null, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
+            sendCloudMessage(context, location, tokens[0], tokens[1], text, 1, new HashMap<String, String>());
         }
     }
 

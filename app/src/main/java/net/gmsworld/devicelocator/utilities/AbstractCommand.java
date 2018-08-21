@@ -3,6 +3,7 @@ package net.gmsworld.devicelocator.utilities;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -45,7 +46,7 @@ public abstract class AbstractCommand {
 
     protected abstract void onSocialCommandFound(String sender, Context context);
 
-    protected abstract void onAppCommandFound(String sender, Context context);
+    protected abstract void onAppCommandFound(String sender, Context context, Location location);
 
     public boolean validateTokens() {
         return false;
@@ -92,13 +93,13 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    public boolean findAppCommand(Context context, String message, String sender) {
+    public boolean findAppCommand(Context context, String message, String sender, Location location) {
         if (StringUtils.isNotEmpty(smsCommand)) {
             if (findKeyword(context, smsCommand + "app", message)) {
-                onAppCommandFound(sender, context);
+                onAppCommandFound(sender, context, location);
                 return true;
             } else if (findKeyword(context, smsShortCommand + "app", message)) {
-                onAppCommandFound(sender, context);
+                onAppCommandFound(sender, context, location);
                 return true;
             }
         }

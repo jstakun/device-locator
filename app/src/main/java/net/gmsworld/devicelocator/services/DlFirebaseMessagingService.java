@@ -2,6 +2,7 @@ package net.gmsworld.devicelocator.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -56,6 +57,23 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 final String pinRead = message.get("pin");
                 final String pin = new PreferencesUtils(this).getEncryptedString(PinActivity.DEVICE_PIN);
                 String command = message.get("command");
+                Location l =  null;
+                if (message.containsKey("flex")) {
+                    String flex = message.get("flex");
+                    Log.d(TAG, "Found flex string: " + flex);
+                    try {
+                        if (StringUtils.startsWith(flex, "geo:")) {
+                            String[] tokens = StringUtils.split(flex.substring(4), ",");
+                            if (tokens.length == 2) {
+                                l = new Location("");
+                                l.setLatitude(Location.convert(tokens[0]));
+                                l.setLongitude(Location.convert(tokens[1]));
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getMessage(), e);
+                    }
+                }
                 final String commandName = command.split("dl")[0];
                 final boolean pinValid = StringUtils.equals(pin, pinRead);
                 final String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
@@ -73,7 +91,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     if (correlationId != null) {
                         sender = message.get("correlationId");
                     }
-                    String foundCommand = Command.findCommandInMessage(this, command, sender);
+                    String foundCommand = Command.findCommandInMessage(this, command, sender, l);
                     if (foundCommand == null) {
                         Log.d(TAG, "Invalid command " + commandName + " found!");
                     }

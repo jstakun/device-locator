@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -80,12 +81,12 @@ public class Command {
         return null;
     }
 
-    public static String findCommandInMessage(Context context, String message, String sender) {
+    public static String findCommandInMessage(Context context, String message, String sender, Location location) {
         for (AbstractCommand c : getCommands()) {
             if (c.findSocialCommand(context, message)) {
                 Log.d(TAG, "Found matching social command");
                 return c.getSmsCommand();
-            } else if (c.findAppCommand(context, message, sender)) {
+            } else if (c.findAppCommand(context, message, sender, location)) {
                 Log.d(TAG, "Found matching cloud command");
                 return c.getSmsCommand();
             }
@@ -183,7 +184,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
             String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
@@ -250,7 +251,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
             String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
@@ -309,7 +310,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
                 String title = RouteTrackingServiceUtils.getRouteId(context);
@@ -356,7 +357,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             if (!Permissions.haveLocationPermission(context)) {
                 sendAppNotification(context, SHARE_COMMAND, sender);
             } else {
@@ -390,7 +391,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
             routeTracingService.putExtra("app", sender);
@@ -423,7 +424,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             if (audioMode != null) {
                 audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
@@ -457,7 +458,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             if (audioMode != null) {
                 audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
@@ -486,7 +487,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             sendAppNotification(context, CALL_COMMAND, sender);
         }
 
@@ -554,7 +555,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             final int radius = Integer.parseInt(commandTokens[1]);
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
@@ -585,7 +586,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).apply();
             sendSocialNotification(context, AUDIO_COMMAND);
         }
@@ -610,7 +611,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).apply();
             sendSocialNotification(context, AUDIO_OFF_COMMAND);
         }
@@ -637,7 +638,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).apply();
             sendAppNotification(context, GPS_HIGH_COMMAND, sender);
         }
@@ -663,7 +664,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).apply();
             sendAppNotification(context, GPS_BALANCED_COMMAND, sender);
         }
@@ -693,7 +694,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false)) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
                 cameraIntent.putExtra("app", sender);
@@ -809,7 +810,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             String email = null;
             String phoneNumber = null;
             String telegramId = null;
@@ -903,7 +904,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             sendAppNotification(context, PING_COMMAND, sender);
         }
     }
@@ -923,7 +924,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             sendAppNotification(context, HELLO_COMMAND, sender);
         }
     }
@@ -943,7 +944,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             sendAppNotification(context, ABOUT_COMMAND, sender);
         }
     }
@@ -971,7 +972,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             if (lockScreenNow(context)) {
                 sendAppNotification(context, LOCK_SCREEN_COMMAND, sender);
             } else {
@@ -1025,7 +1026,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
+        protected void onAppCommandFound(String sender, Context context, Location location) {
             playBeep(context);
             if (ringtone != null) {
                 sendAppNotification(context, RING_COMMAND, sender);
@@ -1081,26 +1082,28 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            showMessageNotification(context);
+            //message is received only from the cloud
+            Log.e(TAG, "This method shouldn't be called!");
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            showMessageNotification(context);
+            //message is received only from the cloud
+            Log.e(TAG, "This method shouldn't be called!");
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context) {
-            showMessageNotification(context);
+        protected void onAppCommandFound(String sender, Context context, Location location) {
+            showMessageNotification(context, location);
         }
 
-        private void showMessageNotification(Context context) {
+        private void showMessageNotification(Context context, Location location) {
             String message = StringUtils.join(commandTokens, " ", 1, commandTokens.length);
             int notificationId = (int)System.currentTimeMillis();
             if (StringUtils.startsWithIgnoreCase(message, Messenger.ROUTE_MESSAGE_PREFIX)) {
                 notificationId = RouteTrackingService.NOTIFICATION_ROUTE_ID;
             }
-            Notification notification =  NotificationUtils.buildMessageNotification(context, notificationId, message);
+            Notification notification =  NotificationUtils.buildMessageNotification(context, notificationId, message, location);
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager != null) {
                 notificationManager.notify(notificationId, notification);
