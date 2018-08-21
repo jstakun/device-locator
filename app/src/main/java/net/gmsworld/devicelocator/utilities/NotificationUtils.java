@@ -14,11 +14,18 @@ import android.net.Uri;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 
+import java.text.DecimalFormat;
+
+import io.nlopez.smartlocation.SmartLocation;
+import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
+
 /**
  * Created by jstakun on 6/1/17.
  */
 
 public class NotificationUtils {
+
+    private static final DecimalFormat distanceFormat = new DecimalFormat("#.##");
 
     public static Notification buildTrackerNotification(Context context, int notificationId) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
@@ -42,12 +49,24 @@ public class NotificationUtils {
 
     public static Notification buildMessageNotification(Context context, int notificationId, String message, Location location) {
         PendingIntent contentIntent = null;
-        //TODO add distance from current location to message
+
         if (location != null) {
             Uri gmmIntentUri = Uri.parse("geo:" + location.getLatitude() + "," + location.getLongitude());
             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
             mapIntent.setPackage("com.google.android.apps.maps");
             contentIntent = PendingIntent.getActivity(context, notificationId, mapIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
+            if (lastLocation != null) {
+                float distance = location.distanceTo(lastLocation); //in meters
+                if (distance < 1) {
+                    message += "\n" + distanceFormat.format(distance) + " m away";
+                } else if (distance < 1000) {
+                    message += "\n" + (int)distance + " m away";
+                } else {
+                    message += "\n" + distanceFormat.format(distance/1000f) + " km away";
+                }
+            }
         } else {
             String[] tokens = message.split("\\s+");
             for (int i = 0; i < tokens.length; i++) {

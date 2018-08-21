@@ -32,11 +32,13 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -125,7 +127,12 @@ public class Messenger {
         String content = "imei=" + imei;
         content += "&command=" + Command.MESSAGE_COMMAND + "app";
         content += "&pin=" + pin;
-        content += "&args=" + message;
+        try {
+            content += "&args=" + URLEncoder.encode(message, "UTF-8");
+        }
+        catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
 
         Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
             @Override
@@ -376,16 +383,8 @@ public class Messenger {
         text += context.getString(R.string.longitude) + " " + latAndLongFormat.format(location.getLongitude()) + "\n";
         text += context.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
 
-        long diff = System.currentTimeMillis() - location.getTime();
-        if (diff <= 0) {
-            text += "Taken now" + "\n";
-        } else if (diff < 1000) {
-            text += "Taken " + diff + " milliseconds ago" + "\n";
-        } else if (diff < 60000) {
-            text += "Taken " + (diff / 1000) + " seconds ago" + "\n";
-        } else {
-            text += "Taken " + (diff / 60000) + " minutes ago" + "\n";
-        }
+        PrettyTime p = new PrettyTime();
+        text += "Taken " + p.format(new Date(location.getTime())) + "\n";
 
         text += "Battery level: " + getBatteryLevel(context);
 

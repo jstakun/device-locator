@@ -43,6 +43,7 @@ dependencies {
     //don't upgrade to 4.9.2
     implementation 'ch.acra:acra:4.9.1'
     implementation 'commons-io:commons-io:2.6'
+    implementation 'org.ocpsoft.prettytime:prettytime:4.0.1.Final'
 }
 
 apply plugin: 'com.google.gms.google-services'
