@@ -216,10 +216,6 @@ public abstract class AbstractCommand {
         return smsCommand;
     }
 
-    public Finder getFinder() {
-        return finder;
-    }
-
     public void setCommandTokens(String[] commandTokens) {
         this.commandTokens = commandTokens;
     }

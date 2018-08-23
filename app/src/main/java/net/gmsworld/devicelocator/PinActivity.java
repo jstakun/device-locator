@@ -34,7 +34,7 @@ public class PinActivity extends AppCompatActivity {
 
     static final int PIN_MIN_LENGTH = 4;
 
-    static final int PIN_VALIDATION_MILLIS = 10 * 60 * 1000; //10 mins
+    static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
 
     public static final String DEVICE_PIN = "token";
 

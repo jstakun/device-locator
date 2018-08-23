@@ -906,7 +906,7 @@ public class MainActivity extends AppCompatActivity {
                     PreferenceManager.getDefaultSharedPreferences(this).edit().putString(DEVICE_NAME, normalizedDeviceName).apply();
                 }
             } else {
-                Toast.makeText(this, "You device seems to be BLACKLISTED and can't be registered!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
             }
         }
     }
