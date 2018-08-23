@@ -58,13 +58,9 @@ public class NotificationUtils {
 
             Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
             if (lastLocation != null) {
-                float distance = location.distanceTo(lastLocation); //in meters
-                if (distance < 1) {
-                    message += "\n" + distanceFormat.format(distance) + " m away";
-                } else if (distance < 1000) {
-                    message += "\n" + (int)distance + " m away";
-                } else {
-                    message += "\n" + distanceFormat.format(distance/1000f) + " km away";
+                int distance = (int)location.distanceTo(lastLocation); //in meters
+                if (distance > 0) {
+                    message += "\n" + DistanceFormatter.format(distance) + " away";
                 }
             }
         } else {
