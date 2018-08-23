@@ -22,6 +22,7 @@
         <item>Stop</item>
         <item>Resume</item>
         <item>Route</item>
+        <item>Config</item>
         <item>Radius</item>
         <item>Mute</item>
         <item>Unmute</item>

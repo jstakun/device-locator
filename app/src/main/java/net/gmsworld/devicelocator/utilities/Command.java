@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.lang.reflect.Constructor;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -1100,15 +1101,26 @@ public class Command {
         }
 
         private void showMessageNotification(Context context, Location location) {
-            String message = StringUtils.join(commandTokens, " ", 1, commandTokens.length);
-            int notificationId = (int)System.currentTimeMillis();
-            if (StringUtils.startsWithIgnoreCase(message, Messenger.ROUTE_MESSAGE_PREFIX)) {
-                notificationId = RouteTrackingService.NOTIFICATION_ROUTE_ID;
+            String message = null;
+            try {
+                if (commandTokens.length > 2) {
+                    message = URLDecoder.decode(StringUtils.join(commandTokens, " ", 1, commandTokens.length), "UTF-8");
+                } else if (commandTokens.length == 2) {
+                    message = URLDecoder.decode(commandTokens[1], "UTF-8");
+                }
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
             }
-            Notification notification =  NotificationUtils.buildMessageNotification(context, notificationId, message, location);
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (notificationManager != null) {
-                notificationManager.notify(notificationId, notification);
+            if (StringUtils.isNotEmpty(message)) {
+                int notificationId = (int) System.currentTimeMillis();
+                if (StringUtils.startsWithIgnoreCase(message, Messenger.ROUTE_MESSAGE_PREFIX)) {
+                    notificationId = RouteTrackingService.NOTIFICATION_ROUTE_ID;
+                }
+                Notification notification = NotificationUtils.buildMessageNotification(context, notificationId, message, location);
+                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                if (notificationManager != null) {
+                    notificationManager.notify(notificationId, notification);
+                }
             }
         }
     }
@@ -1131,21 +1143,22 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location) {
             applyConfigChange(context);
-            sendAppNotification(context, sender, CONFIG_COMMAND);
+            sendAppNotification(context, CONFIG_COMMAND, sender);
         }
 
         @Override
         public boolean validateTokens() {
             if (commandTokens != null && commandTokens.length > 1) {
-                for (int i = 0; i < commandTokens.length; i++) {
+                for (int i = 1; i < commandTokens.length; i++) {
                     String token = commandTokens[i];
-                    if (!StringUtils.equalsAnyIgnoreCase(token, "lm:on", "lm:off", "gpsm:on", "gpsm:off", "mapm:on", "mapm:off", "gpsb:on", "gpsb:off", "gpsh:on", "gpsh:off", "nt:on") || !token.startsWith("dn:")) {
+                    if (!StringUtils.equalsAnyIgnoreCase(token, "lm:on", "lm:off", "gpsm:on", "gpsm:off", "mapm:on", "mapm:off", "gpsb:on", "gpsb:off", "gpsh:on", "gpsh:off", "nt:on") && !token.startsWith("dn:")) {
                         //location message on/off
                         //Gps message on/off
                         //Google maps link message on/off
                         //Gpsbalance/Gpshigh on/off
                         //Notification test on
                         //Device name
+                        Log.d(TAG, "Invalid config param: " + token);
                         return false;
                     }
                 }
