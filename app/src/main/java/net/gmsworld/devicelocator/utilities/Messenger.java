@@ -477,10 +477,10 @@ public class Messenger {
     public static void sendRouteMessage(Context context, Location location, int distance, String phoneNumber, String telegramId, String email, String app) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
-            if (settings.getBoolean("settings_gps_sms", false)) {
+            if (settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false)) {
                 sendLocationMessage(context, location, true, phoneNumber, null, null, null);
             }
-            if (settings.getBoolean("settings_google_sms", true)) {
+            if (settings.getBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, true)) {
                 sendGoogleMapsMessage(context, location, phoneNumber, null, null, null);
             }
         }
@@ -708,6 +708,9 @@ public class Messenger {
                 break;
             case Command.LOCK_SCREEN_FAILED:
                 text = "Screen lock failed on device " + deviceId + " due to insufficient privileges!";
+                break;
+            case Command.CONFIG_COMMAND:
+                text = "Configuration change on device " + deviceId + " has been applied.";
                 break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);

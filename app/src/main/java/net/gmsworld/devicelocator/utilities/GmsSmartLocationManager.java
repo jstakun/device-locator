@@ -28,9 +28,9 @@ public class GmsSmartLocationManager extends AbstractLocationManager implements 
 
     //
 
-    public void enable(String handlerName, Handler locationHandler, Context context, int radius, int priority, boolean resetRoute) {
+    public void enable(String handlerName, Handler locationHandler, Context context, int radius, int gpsAccuracy, boolean resetRoute) {
 
-        LocationParams config = (priority <= 0) ? LocationParams.BEST_EFFORT : LocationParams.NAVIGATION;
+        LocationParams config = (gpsAccuracy <= 0) ? LocationParams.BEST_EFFORT : LocationParams.NAVIGATION;
 
         SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context))
                 .config(config)

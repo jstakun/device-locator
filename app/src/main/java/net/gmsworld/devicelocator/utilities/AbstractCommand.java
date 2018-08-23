@@ -195,7 +195,6 @@ public abstract class AbstractCommand {
     }
 
     void sendAppNotification(final Context context, final String command, final String sender) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         Intent newIntent = new Intent(context, SmsSenderService.class);
         if (StringUtils.isNotEmpty(command)) {
             newIntent.putExtra("command", command);

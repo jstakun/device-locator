@@ -29,6 +29,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
     private final static int LOCATION_REQUEST_MAX_WAIT_TIME = 120; //seconds
 
+    public static final String SEND_ACKNOWLEDGE_MESSAGE = "settings_detected_sms";
+    public static final String SEND_LOCATION_MESSAGE = "settings_gps_sms";
+    public static final String SEND_MAP_LINK_MESSAGE = "settings_google_sms";
+
     private static boolean isRunning = false;
 
     private String phoneNumber = null;
@@ -212,9 +216,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
     private void readSettings() {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        keywordReceivedSms = settings.getBoolean("settings_detected_sms", true);
-        gpsSms = settings.getBoolean("settings_gps_sms", false);
-        googleMapsSms = settings.getBoolean("settings_google_sms", true);
+        keywordReceivedSms = settings.getBoolean(SEND_ACKNOWLEDGE_MESSAGE, true);
+        gpsSms = settings.getBoolean(SEND_LOCATION_MESSAGE, false);
+        googleMapsSms = settings.getBoolean(SEND_MAP_LINK_MESSAGE, true);
     }
 
     private static int getLocationMode(Context context) {

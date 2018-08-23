@@ -385,9 +385,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initLocationSMSCheckbox() {
-        ((Switch)findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean("settings_detected_sms", true));
-        ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean("settings_gps_sms", false));
-        ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean("settings_google_sms", true));
+        ((Switch)findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_ACKNOWLEDGE_MESSAGE, true));
+        ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false));
+        ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, true));
         ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
         ((Switch) findViewById(R.id.settings_sms_contacts)).setChecked(settings.getBoolean("settings_sms_contacts", false));
         ((Switch) findViewById(R.id.settings_sms_without_pin)).setChecked(settings.getBoolean("settings_sms_without_pin", true));
@@ -400,13 +400,13 @@ public class MainActivity extends AppCompatActivity {
 
         switch (view.getId()) {
             case R.id.settings_detected_sms:
-                editor.putBoolean("settings_detected_sms", checked);
+                editor.putBoolean(SmsSenderService.SEND_ACKNOWLEDGE_MESSAGE, checked);
                 break;
             case R.id.settings_gps_sms:
-                editor.putBoolean("settings_gps_sms", checked);
+                editor.putBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, checked);
                 break;
             case R.id.settings_google_sms:
-                editor.putBoolean("settings_google_sms", checked);
+                editor.putBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, checked);
                 break;
             case R.id.settings_verify_pin:
                 editor.putBoolean("settings_verify_pin", checked);
@@ -1327,14 +1327,14 @@ public class MainActivity extends AppCompatActivity {
                     if (StringUtils.isNotEmpty(phoneNumber)) {
                         Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
                         newIntent.putExtra("phoneNumber", phoneNumber);
-                        newIntent.putExtra("command", Command.PING_COMMAND);
+                        newIntent.putExtra("command", Command.HELLO_COMMAND);
                         MainActivity.this.startService(newIntent);
                     }
                     if (StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
                         Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
                         newIntent.putExtra("telegramId", telegramId);
                         newIntent.putExtra("email", email);
-                        newIntent.putExtra("command", Command.PING_COMMAND);
+                        newIntent.putExtra("command", Command.HELLO_COMMAND);
                         MainActivity.this.startService(newIntent);
                     }
                 } else {

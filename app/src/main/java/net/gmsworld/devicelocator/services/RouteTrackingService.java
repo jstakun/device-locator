@@ -52,6 +52,8 @@ public class RouteTrackingService extends Service {
     private static final String TAG = RouteTrackingService.class.getSimpleName();
     private int radius = DEFAULT_RADIUS;
 
+    public static final String GPS_ACCURACY = "gpsAccuracy"; //1>= high 0<= balanced
+
     private final Handler incomingHandler = new IncomingHandler(this);
     private final Messenger mMessenger = new Messenger(incomingHandler);
     private Messenger mClient;
@@ -91,7 +93,7 @@ public class RouteTrackingService extends Service {
                         this.app = intent.getStringExtra("app");
                         boolean resetRoute = intent.getBooleanExtra("resetRoute", false);
                         silentMode = intent.getBooleanExtra("silentMode", false);
-                        int gpsAccuracy = PreferenceManager.getDefaultSharedPreferences(this).getInt("gpsAccuracy", 1);
+                        int gpsAccuracy = PreferenceManager.getDefaultSharedPreferences(this).getInt(GPS_ACCURACY, 1);
                         startTracking(gpsAccuracy, resetRoute);
                         break;
                     case COMMAND_STOP:
@@ -148,7 +150,7 @@ public class RouteTrackingService extends Service {
         sendBroadcast(broadcastIntent);
     }
 
-    private synchronized void startTracking(int priority, boolean resetRoute) {
+    private synchronized void startTracking(int gpsAccuracy, boolean resetRoute) {
         Log.d(TAG, "startTracking() in silent mode " + silentMode);
 
         PreferenceManager.getDefaultSharedPreferences(this).edit().remove(RouteTrackingServiceUtils.ROUTE_TITLE).apply();
@@ -168,7 +170,7 @@ public class RouteTrackingService extends Service {
         startForeground(NOTIFICATION_ID, NotificationUtils.buildTrackerNotification(this, NOTIFICATION_ID));
 
         //use smart location lib
-        GmsSmartLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, priority, resetRoute);
+        GmsSmartLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, gpsAccuracy, resetRoute);
     }
 
     private synchronized void stopTracking() {

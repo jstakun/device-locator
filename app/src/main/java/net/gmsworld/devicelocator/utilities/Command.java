@@ -21,6 +21,7 @@ import android.util.Patterns;
 
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
+import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
@@ -61,7 +62,8 @@ public class Command {
     public final static String RING_COMMAND = "ringdl"; //rn play ringtone
     public final static String RING_OFF_COMMAND = "ringoffdl"; //rn stop playing ringtone
     public final static String LOCK_SCREEN_COMMAND = "lockdl"; //ls lock screen now
-    public final static String ABOUT_COMMAND = "aboutdl"; //send app version info
+    public final static String ABOUT_COMMAND = "aboutdl"; //ab send app version info
+    public final static String CONFIG_COMMAND = "configdl"; //cf change app configuration
 
     //private
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
@@ -625,21 +627,21 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).apply();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 1).apply();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
             sendSmsNotification(context, sender, GPS_HIGH_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).apply();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 1).apply();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
             sendSocialNotification(context, GPS_HIGH_COMMAND);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 1).apply();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 1).apply();
             sendAppNotification(context, GPS_HIGH_COMMAND, sender);
         }
     }
@@ -652,20 +654,20 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).apply();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 0).apply();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_BALANCED);
             sendSmsNotification(context, sender, GPS_BALANCED_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).apply();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 0).apply();
             sendSocialNotification(context, GPS_BALANCED_COMMAND);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location) {
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt("gpsAccuracy", 0).apply();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 0).apply();
             sendAppNotification(context, GPS_BALANCED_COMMAND, sender);
         }
     }
@@ -1107,6 +1109,120 @@ public class Command {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager != null) {
                 notificationManager.notify(notificationId, notification);
+            }
+        }
+    }
+
+    private static final class ConfigCommand extends AbstractCommand {
+        public ConfigCommand() { super(CONFIG_COMMAND, "cf", Finder.STARTS); }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            applyConfigChange(context);
+            sendSmsNotification(context, sender, CONFIG_COMMAND);
+        }
+
+        @Override
+        protected void onSocialCommandFound(String sender, Context context) {
+            applyConfigChange(context);
+            sendSocialNotification(context, CONFIG_COMMAND);
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context, Location location) {
+            applyConfigChange(context);
+            sendAppNotification(context, sender, CONFIG_COMMAND);
+        }
+
+        @Override
+        public boolean validateTokens() {
+            if (commandTokens != null && commandTokens.length > 1) {
+                for (int i = 0; i < commandTokens.length; i++) {
+                    String token = commandTokens[i];
+                    if (!StringUtils.equalsAnyIgnoreCase(token, "lm:on", "lm:off", "gpsm:on", "gpsm:off", "mapm:on", "mapm:off", "gpsb:on", "gpsb:off", "gpsh:on", "gpsh:off", "nt:on") || !token.startsWith("dn:")) {
+                        //location message on/off
+                        //Gps message on/off
+                        //Google maps link message on/off
+                        //Gpsbalance/Gpshigh on/off
+                        //Notification test on
+                        //Device name
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private void applyConfigChange(Context context) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+
+            for (int i = 0; i < commandTokens.length; i++) {
+                String token = commandTokens[i];
+                if (token.equalsIgnoreCase("lm:on")) {
+                    //location message on
+                    settings.edit().putBoolean(SmsSenderService.SEND_ACKNOWLEDGE_MESSAGE, true).apply();
+                } else if (token.equalsIgnoreCase("lm:off")) {
+                    //location message off
+                    settings.edit().putBoolean(SmsSenderService.SEND_ACKNOWLEDGE_MESSAGE, false).apply();
+                } else if (token.equalsIgnoreCase("gpsm:on")) {
+                    //Gps message on
+                    settings.edit().putBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, true).apply();
+                } else if (token.equalsIgnoreCase("gpsm:off")) {
+                    //Gps message off
+                    settings.edit().putBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false).apply();
+                } else if (token.equalsIgnoreCase("mapm:on")) {
+                    //Maps link message on
+                    settings.edit().putBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, true).apply();
+                } else if (token.equalsIgnoreCase("mapm:off")) {
+                    //Maps link message off
+                    settings.edit().putBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, false).apply();
+                } else if (token.equalsIgnoreCase("gpsb:on")) {
+                    //Gpsbalance on
+                    settings.edit().putInt(RouteTrackingService.GPS_ACCURACY, 0).apply();
+                } else if (token.equalsIgnoreCase("gpsb:off")) {
+                    //Gpsbalance off
+                    settings.edit().putInt(RouteTrackingService.GPS_ACCURACY, 1).apply();
+                } else if (token.equalsIgnoreCase("gpsh:on")) {
+                    //Gpshigh on
+                    settings.edit().putInt(RouteTrackingService.GPS_ACCURACY, 1).apply();
+                } else if (token.equalsIgnoreCase("gpsh:off")) {
+                    //Gpshigh off
+                    settings.edit().putInt(RouteTrackingService.GPS_ACCURACY, 0).apply();
+                } else if (token.equalsIgnoreCase("nt:on")) {
+                    //start Notification test
+                    final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+                    final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+                    final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+
+                    if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
+                        if (StringUtils.isNotEmpty(phoneNumber)) {
+                            Intent newIntent = new Intent(context, SmsSenderService.class);
+                            newIntent.putExtra("phoneNumber", phoneNumber);
+                            newIntent.putExtra("command", Command.HELLO_COMMAND);
+                            context.startService(newIntent);
+                        }
+                        if (StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
+                            Intent newIntent = new Intent(context, SmsSenderService.class);
+                            newIntent.putExtra("telegramId", telegramId);
+                            newIntent.putExtra("email", email);
+                            newIntent.putExtra("command", Command.HELLO_COMMAND);
+                            context.startService(newIntent);
+                        }
+                    }
+                } else if (token.startsWith("dn:")) {
+                    //Device name
+                    String newDeviceName = token.substring(3);
+                    if (!StringUtils.equals(settings.getString(MainActivity.DEVICE_NAME, ""), newDeviceName)) {
+                        String normalizedDeviceName = newDeviceName.replace(' ', '-');
+                        if (DlFirebaseMessagingService.sendRegistrationToServer(context, settings.getString(MainActivity.USER_LOGIN, ""), normalizedDeviceName)) {
+                            settings.edit().putString(MainActivity.DEVICE_NAME, normalizedDeviceName).apply();
+                        } else {
+                            Log.e(TAG, "Failed to register device on server");
+                        }
+                    }
+                }
             }
         }
     }
