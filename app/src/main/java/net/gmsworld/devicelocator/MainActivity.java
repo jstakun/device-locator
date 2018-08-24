@@ -209,6 +209,14 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Failed to paste text from clipboard", e);
             }
         }
+
+        //device name has been changes
+        String deviceName =  settings.getString(DEVICE_NAME);
+        EditText deviceNameEdit = findViewById(R.id.deviceName);
+        if (!StringUtils.equals(deviceName,deviceNameEdit.getText())) {
+            deviceNameEdit.setText(deviceName);
+            initDeviceList();
+        }
     }
 
     @Override
