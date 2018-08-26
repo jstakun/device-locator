@@ -82,10 +82,11 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 final String commandName = command.split("dl")[0];
                 final boolean pinValid = StringUtils.equals(pin, pinRead);
                 final String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
-                if (pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
+                boolean rejected = false;
+                //if (pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
                     //don't send confirmation to correlationId
-                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been received by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
-                }
+                    //Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been received by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
+                //}
                 if (pinValid) {
                     //search for command
                     command += pinRead;
@@ -99,16 +100,19 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     String foundCommand = Command.findCommandInMessage(this, command, sender, l);
                     if (foundCommand == null) {
                         Log.d(TAG, "Invalid command " + commandName + " found!");
+                        rejected = true;
                     }
                 } else if (!pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
-                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
+                    rejected = true;
                     Log.e(TAG, "Invalid pin found in cloud message!");
                 } else {
+                    rejected = true;
                     Log.e(TAG, "Invalid pin found in cloud message!");
                 }
-                Bundle bundle = new Bundle();
-                //bundle.putString("command", commandName);
-                firebaseAnalytics.logEvent("cloud_command_received_" + commandName.toLowerCase(), bundle);
+                if (rejected) {
+                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
+                }
+                firebaseAnalytics.logEvent("cloud_command_received_" + commandName.toLowerCase(), new Bundle());
             } else {
                 Log.e(TAG, "Invalid data payload!");
             }

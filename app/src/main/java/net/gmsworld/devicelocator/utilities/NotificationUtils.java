@@ -55,12 +55,14 @@ public class NotificationUtils {
             String deviceName = "Your+Device";
             Bundle b = location.getExtras();
             if (b != null && b.containsKey(MainActivity.DEVICE_NAME)) {
-                deviceName = b.getString(MainActivity.DEVICE_NAME);
+                deviceName = "Device+" + b.getString(MainActivity.DEVICE_NAME);
             }
             Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + location.getLatitude() + "," + location.getLongitude() + "(" + deviceName + ")");
             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
             mapIntent.setPackage("com.google.android.apps.maps");
-            contentIntent = PendingIntent.getActivity(context, notificationId, mapIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            if (mapIntent.resolveActivity(context.getPackageManager()) != null) {
+                contentIntent = PendingIntent.getActivity(context, notificationId, mapIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
 
             Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
             if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) {
@@ -69,7 +71,9 @@ public class NotificationUtils {
                     message += "\n" + DistanceFormatter.format(distance) + " away";
                 }
             }
-        } else {
+        }
+
+        if (contentIntent == null) {
             String[] tokens = message.split("\\s+");
             for (int i = 0; i < tokens.length; i++) {
                 if (tokens[i].startsWith("http://") || tokens[i].startsWith("https://")) {
