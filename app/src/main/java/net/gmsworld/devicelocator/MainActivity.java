@@ -182,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d(TAG, "onResume()");
 
+        initLocationSMSCheckbox();
         updateUI();
 
         //paste Telegram id
@@ -657,7 +658,6 @@ public class MainActivity extends AppCompatActivity {
         initTelegramButton();
         initTokenInput();
         initPingButton();
-        initLocationSMSCheckbox();
         initUserLoginInput();
         initDeviceNameInput();
         initDeviceList();

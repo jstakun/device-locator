@@ -85,21 +85,22 @@ public class Messenger {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
+                final String deviceId = getDeviceId(context, false);
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     headers.put("X-GMS-AppId", "2");
-                    String deviceId = getDeviceId(context, false);
                     if (StringUtils.isNotEmpty(deviceId)) {
                         headers.put("X-GMS-DeviceId", deviceId);
                     }
                     if (location != null) {
+                        headers.put("X-GMS-DeviceName", getDeviceId(context, true));
                         headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
                         headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     sendCloudMessage(context, imei, pin, message, 1, headers);
                 } else {
-                    String queryString = "scope=dl&user=" + getDeviceId(context, false);
+                    String queryString = "scope=dl&user=" + deviceId;
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
@@ -418,7 +419,7 @@ public class Messenger {
     }
 
     public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email, String app) {
-        String deviceId = getDeviceId(context, true);
+        final String deviceId = getDeviceId(context, true);
         String text = "Device " + deviceId + " location:" +
                 "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
                 "\n" + "Battery level: " + getBatteryLevel(context);

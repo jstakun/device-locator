@@ -64,10 +64,15 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     try {
                         if (StringUtils.startsWith(flex, "geo:")) {
                             String[] tokens = StringUtils.split(flex.substring(4), ",");
-                            if (tokens.length == 2) {
+                            if (tokens.length >= 2) {
                                 l = new Location("");
                                 l.setLatitude(Location.convert(tokens[0]));
                                 l.setLongitude(Location.convert(tokens[1]));
+                                if (tokens.length > 2 && StringUtils.isNotEmpty(tokens[2])) {
+                                    Bundle b = new Bundle();
+                                    b.putCharSequence(MainActivity.DEVICE_NAME, tokens[2]);
+                                    l.setExtras(b);
+                                }
                             }
                         }
                     } catch (Exception e) {
@@ -78,7 +83,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 final boolean pinValid = StringUtils.equals(pin, pinRead);
                 final String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
                 if (pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
-                    //send confirmation to correlationId
+                    //don't send confirmation to correlationId
                     Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been received by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
                 }
                 if (pinValid) {

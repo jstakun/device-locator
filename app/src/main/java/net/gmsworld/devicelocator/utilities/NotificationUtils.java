@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
 
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
@@ -51,13 +52,18 @@ public class NotificationUtils {
         PendingIntent contentIntent = null;
 
         if (location != null) {
-            Uri gmmIntentUri = Uri.parse("geo:" + location.getLatitude() + "," + location.getLongitude());
+            String deviceName = "Your+Device";
+            Bundle b = location.getExtras();
+            if (b != null && b.containsKey(MainActivity.DEVICE_NAME)) {
+                deviceName = b.getString(MainActivity.DEVICE_NAME);
+            }
+            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + location.getLatitude() + "," + location.getLongitude() + "(" + deviceName + ")");
             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
             mapIntent.setPackage("com.google.android.apps.maps");
             contentIntent = PendingIntent.getActivity(context, notificationId, mapIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
-            if (lastLocation != null) {
+            if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) {
                 int distance = (int)location.distanceTo(lastLocation); //in meters
                 if (distance > 0) {
                     message += "\n" + DistanceFormatter.format(distance) + " away";

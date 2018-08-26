@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator;
 
 import android.content.res.ColorStateList;
+import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.view.ViewCompat;
@@ -35,7 +36,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CommandActivity extends AppCompatActivity {
+import io.nlopez.smartlocation.OnLocationUpdatedListener;
+import io.nlopez.smartlocation.SmartLocation;
+import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
+
+public class CommandActivity extends AppCompatActivity implements OnLocationUpdatedListener {
 
     private static final String TAG = CommandActivity.class.getSimpleName();
 
@@ -218,10 +223,26 @@ public class CommandActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).oneFix().start(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).stop();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-
         //reset pin verification time
         PreferenceManager.getDefaultSharedPreferences(this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).apply();
+    }
+
+    @Override
+    public void onLocationUpdated(Location location) {
+        Log.d(TAG, "Location found with accuracy " + location.getAccuracy() + " m");
     }
 }
