@@ -486,7 +486,7 @@ public class Messenger {
             }
         }
         String message = ROUTE_MESSAGE_PREFIX + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
-                " in distance of " + distance + " meters from previous location with accuracy " + location.getAccuracy() + " m.";
+                " in distance of " + DistanceFormatter.format(distance) + " from previous location with accuracy " + DistanceFormatter.format((int)location.getAccuracy());
         if (location.hasSpeed() && location.getSpeed() > 0f) {
             message += " and speed " + getSpeed(context, location.getSpeed());
         }
