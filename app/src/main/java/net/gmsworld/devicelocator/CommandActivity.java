@@ -123,12 +123,17 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 final String command = commandSpinner.getSelectedItem().toString();
                 AbstractCommand c = Command.getCommandByName(command);
-                if (c != null && !c.hasParameters()) {
+                if (c != null && c.hasParameters()) {
+                    String defaultArgs = c.getDefaultArgs();
+                    if (StringUtils.isNotEmpty(defaultArgs)) {
+                        args.setText(defaultArgs);
+                    } else {
+                        args.setHint(R.string.params_yes_hint);
+                    }
+                    args.setInputType(InputType.TYPE_CLASS_TEXT);
+                } else {
                     args.setHint(R.string.params_no_hint);
                     args.setInputType(InputType.TYPE_NULL);
-                } else {
-                    args.setHint(R.string.params_yes_hint);
-                    args.setInputType(InputType.TYPE_CLASS_TEXT);
                 }
             }
 

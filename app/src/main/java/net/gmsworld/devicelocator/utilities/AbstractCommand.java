@@ -56,6 +56,8 @@ public abstract class AbstractCommand {
         return finder.equals(Finder.STARTS);
     }
 
+    public String getDefaultArgs() { return ""; }
+
     public boolean findSmsCommand(Context context, Intent intent) {
         String sender = null;
         if (StringUtils.isNotEmpty(smsCommand)) {

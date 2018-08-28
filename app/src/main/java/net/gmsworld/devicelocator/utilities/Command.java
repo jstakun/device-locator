@@ -142,7 +142,7 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            return true;
+            return (commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length-1], "s", "silent"));
         }
 
         @Override
@@ -279,8 +279,13 @@ public class Command {
         }
 
         @Override
+        public String getDefaultArgs() {
+            return "s";
+        }
+
+        @Override
         public boolean validateTokens() {
-            return true;
+            return (commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length-1], "s", "share"));
         }
 
         @Override
@@ -521,6 +526,11 @@ public class Command {
         }
 
         @Override
+        public String getDefaultArgs() {
+            return "100";
+        }
+
+        @Override
         public boolean validateTokens() {
             int radius = -1;
             if (commandTokens != null && commandTokens.length > 1) {
@@ -712,6 +722,37 @@ public class Command {
         public NotifySettingsCommand() {super(NOTIFY_COMMAND, "n", Finder.STARTS);}
 
         @Override
+        public boolean validateTokens() {
+            if (commandTokens != null && commandTokens.length > 1) {
+                for (int i = 0; i < commandTokens.length; i++) {
+                    String token = commandTokens[i];
+                    if (token.startsWith("m:")) {
+                        String newEmailAddress = token.substring(2);
+                        if (StringUtils.isNotEmpty(newEmailAddress) && !Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) {
+                            return false;
+                        }
+                    } else if (token.startsWith("p:")) {
+                        String newPhoneNumber = token.substring(2);
+                        if (StringUtils.isNotEmpty(newPhoneNumber) && !Patterns.PHONE.matcher(newPhoneNumber).matches()) {
+                            return false;
+                        }
+                    } else if (token.startsWith("t:")) {
+                        String newTelegramId = token.substring(2);
+                        if (StringUtils.isNotEmpty(newTelegramId) && !NumberUtils.isCreatable(newTelegramId)) {
+                            return false;
+                        }
+                    } else {
+                        //invalid token
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
         protected void onSmsCommandFound(String sender, Context context) {
             String email = null;
             String phoneNumber = null;
@@ -857,37 +898,6 @@ public class Command {
                 newIntent.putExtra("app", "app");
                 newIntent.putExtra("command", NOTIFY_COMMAND);
                 context.startService(newIntent);
-            }
-        }
-
-        @Override
-        public boolean validateTokens() {
-            if (commandTokens != null && commandTokens.length > 1) {
-                for (int i = 0; i < commandTokens.length; i++) {
-                    String token = commandTokens[i];
-                    if (token.startsWith("m:")) {
-                        String newEmailAddress = token.substring(2);
-                        if (StringUtils.isNotEmpty(newEmailAddress) && !Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) {
-                            return false;
-                        }
-                    } else if (token.startsWith("p:")) {
-                        String newPhoneNumber = token.substring(2);
-                        if (StringUtils.isNotEmpty(newPhoneNumber) && !Patterns.PHONE.matcher(newPhoneNumber).matches()) {
-                            return false;
-                        }
-                    } else if (token.startsWith("t:")) {
-                        String newTelegramId = token.substring(2);
-                        if (StringUtils.isNotEmpty(newTelegramId) && !NumberUtils.isCreatable(newTelegramId)) {
-                            return false;
-                        }
-                    } else {
-                        //invalid token
-                        return false;
-                    }
-                }
-                return true;
-            } else {
-                return false;
             }
         }
     }
@@ -1080,7 +1090,7 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            return true;
+            return (commandTokens.length >= 2);
         }
 
         @Override
@@ -1129,24 +1139,6 @@ public class Command {
         public ConfigCommand() { super(CONFIG_COMMAND, "cf", Finder.STARTS); }
 
         @Override
-        protected void onSmsCommandFound(String sender, Context context) {
-            applyConfigChange(context);
-            sendSmsNotification(context, sender, CONFIG_COMMAND);
-        }
-
-        @Override
-        protected void onSocialCommandFound(String sender, Context context) {
-            applyConfigChange(context);
-            sendSocialNotification(context, CONFIG_COMMAND);
-        }
-
-        @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
-            applyConfigChange(context);
-            sendAppNotification(context, CONFIG_COMMAND, sender);
-        }
-
-        @Override
         public boolean validateTokens() {
             if (commandTokens != null && commandTokens.length > 1) {
                 for (int i = 1; i < commandTokens.length; i++) {
@@ -1166,6 +1158,24 @@ public class Command {
             } else {
                 return false;
             }
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            applyConfigChange(context);
+            sendSmsNotification(context, sender, CONFIG_COMMAND);
+        }
+
+        @Override
+        protected void onSocialCommandFound(String sender, Context context) {
+            applyConfigChange(context);
+            sendSocialNotification(context, CONFIG_COMMAND);
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context, Location location) {
+            applyConfigChange(context);
+            sendAppNotification(context, CONFIG_COMMAND, sender);
         }
 
         private void applyConfigChange(Context context) {
