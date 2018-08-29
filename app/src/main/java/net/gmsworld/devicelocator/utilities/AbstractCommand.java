@@ -69,7 +69,7 @@ public abstract class AbstractCommand {
         if (sender != null) {
             onSmsCommandFound(sender, context);
             return true;
-        } else if (StringUtils.isNotEmpty(smsCommand) &&  (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_SOCIAL, "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_EMAIL, "")))) {
+        } else if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_SOCIAL, "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_EMAIL, "")))) {
             sender = getSenderAddress(context, intent, smsCommand + "t");
             if (sender == null && StringUtils.isNotEmpty(smsShortCommand)) {
                 sender = getSenderAddress(context, intent, smsShortCommand + "t");
@@ -180,6 +180,7 @@ public abstract class AbstractCommand {
                 }
             }
         }
+        //Log.d(TAG, "Matched " + message + " with " + command + ": " + foundCommand);
         return foundCommand;
     }
 
