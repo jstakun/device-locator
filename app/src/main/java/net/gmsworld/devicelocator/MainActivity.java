@@ -212,12 +212,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //device name has been changes
-        String deviceName =  settings.getString(DEVICE_NAME);
-        EditText deviceNameEdit = findViewById(R.id.deviceName);
-        if (!StringUtils.equals(deviceName,deviceNameEdit.getText())) {
-            deviceNameEdit.setText(deviceName);
-            initDeviceList();
+        if (settings.contains(DEVICE_NAME)) {
+            String deviceName =  settings.getString(DEVICE_NAME);
+            EditText deviceNameEdit = findViewById(R.id.deviceName);
+            if (!StringUtils.equals(deviceName, deviceNameEdit.getText())) {
+                deviceNameEdit.setText(deviceName);
+                initDeviceList();
+            }
         }
+
     }
 
     @Override
@@ -857,14 +860,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void initDeviceNameInput() {
         final TextView deviceNameInput = this.findViewById(R.id.deviceName);
-        //Log.d(TAG, "Device name: " + Messenger.getDeviceName());
+        String deviceName = "";
         if (settings.contains(DEVICE_NAME)) {
-            String deviceName = settings.getString(DEVICE_NAME);
-            if (StringUtils.isNotEmpty(deviceName)) {
-                deviceNameInput.setText(deviceName);
-            }
+            deviceName = settings.getString(DEVICE_NAME);
         } else {
-            deviceNameInput.setText(Messenger.getDeviceName());
+            deviceName = Messenger.getDeviceName();
+        }
+        Log.d(TAG, "Device name: " + deviceName);
+        if (StringUtils.isNotEmpty(deviceName)) {
+            deviceNameInput.setText(deviceName);
         }
 
         deviceNameInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -1494,8 +1498,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton(R.string.no, null);
-        builder.setMessage("It seems you've no email accounts registered on this device and there is no verified notification email set in Notification settings card." +
-                " Do you want to register new email account now?");
+        builder.setMessage("It seems you've no Device Locator or email accounts registered on this device and there is no verified notification email set in Notification settings card." +
+                " Do you want to register new account now?");
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
         AlertDialog dialog = builder.create();
         dialog.show();
