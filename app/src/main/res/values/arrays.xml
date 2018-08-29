@@ -20,15 +20,15 @@
         <item>Lock</item>
         <item>Start</item>
         <item>Stop</item>
+        <item>Mute</item>
+        <item>Unmute</item>
         <item>Resume</item>
         <item>Route</item>
         <item>Config</item>
         <item>Radius</item>
-        <item>Mute</item>
-        <item>Unmute</item>
         <item>Notify</item>
         <item>About</item>
-        <item>Gpshigh</item>
-        <item>Gpsbalance</item>
+        <!--item>Gpshigh</item>
+        <item>Gpsbalance</item-->
     </string-array>
 </resources>
