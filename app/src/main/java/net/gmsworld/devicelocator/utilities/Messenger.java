@@ -1029,7 +1029,12 @@ public class Messenger {
         String androidDeviceId = null;
 
         if (useUserDeviceName) {
-            androidDeviceId = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_NAME, null);
+            if (PreferenceManager.getDefaultSharedPreferences(context).contains(MainActivity.DEVICE_NAME)) {
+                androidDeviceId = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_NAME, null);
+            } else {
+                androidDeviceId = getDeviceName();
+            }
+
         }
 
         if (androidDeviceId == null && context != null) {
