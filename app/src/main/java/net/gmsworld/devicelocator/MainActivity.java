@@ -548,7 +548,7 @@ public class MainActivity extends AppCompatActivity {
             final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
             final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
             if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(pin)) {
-                DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, null, null);
+                DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, null, null, true);
             } else if (StringUtils.isNotEmpty(firebaseToken)) {
                 Log.d(TAG, "Firebase token already set");
             } else {
@@ -845,8 +845,10 @@ public class MainActivity extends AppCompatActivity {
             Bundle bundle = new Bundle();
             bundle.putBoolean("running", StringUtils.isNotEmpty(newUserLogin));
             firebaseAnalytics.logEvent("device_manager", bundle);
-            if (!DlFirebaseMessagingService.sendRegistrationToServer(this, newUserLogin, settings.getString(DEVICE_NAME))) {
-                Toast.makeText(this, "You device seems to be BLACKLISTED and can't be registered!", Toast.LENGTH_LONG).show();
+            if (!DlFirebaseMessagingService.sendRegistrationToServer(this, newUserLogin, settings.getString(DEVICE_NAME), false)) {
+                Toast.makeText(this, "You device can't be registered!", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -907,12 +909,13 @@ public class MainActivity extends AppCompatActivity {
         String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
             String normalizedDeviceName = newDeviceName.replace(' ', '-');
-            if (DlFirebaseMessagingService.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName)) {
+            if (DlFirebaseMessagingService.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName, false)) {
                 if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
                     EditText deviceNameEdit = findViewById(R.id.deviceName);
                     deviceNameEdit.setText(normalizedDeviceName);
                     PreferenceManager.getDefaultSharedPreferences(this).edit().putString(DEVICE_NAME, normalizedDeviceName).apply();
                 }
+                Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
             }

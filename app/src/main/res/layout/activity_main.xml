@@ -311,6 +311,7 @@
                             android:inputType="textEmailAddress"
                             android:lines="1"
                             android:maxLines="1"
+                            android:hint="@string/email_address"
                             android:textColor="@color/gray"/>
                     </LinearLayout>
 
@@ -349,6 +350,7 @@
                                 android:maxLength="32"
                                 android:inputType="text"
                                 android:maxLines="1"
+                                android:hint="\@telegram_id"
                                 android:textColor="@color/gray"/>
                         </LinearLayout>
 

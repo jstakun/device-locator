@@ -220,7 +220,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    public static boolean sendRegistrationToServer(final Context context, final String username, final String deviceName) {
+    public static boolean sendRegistrationToServer(final Context context, final String username, final String deviceName, final boolean silent) {
         final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         String firebaseToken = settings.getString(FIREBASE_TOKEN, "");
         if (StringUtils.isEmpty(firebaseToken)) {
@@ -236,7 +236,10 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     } else {
                         // Task failed with an exception
                         Exception exception = task.getException();
-                        Log.e(TAG, exception.getMessage(), exception);
+                        Log.e(TAG, "Failed to receive Firebase token!", exception);
+                        if (!silent) {
+                            Toast.makeText(context, "Failed to synchronize device. Please restart Device Locator and try again!",Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
             });

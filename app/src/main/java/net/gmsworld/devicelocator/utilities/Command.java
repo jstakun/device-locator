@@ -142,7 +142,7 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            return (commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length-1], "s", "silent"));
+            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length-1], "s", "silent"));
         }
 
         @Override
@@ -1239,7 +1239,7 @@ public class Command {
                     String newDeviceName = token.substring(3);
                     if (!StringUtils.equals(settings.getString(MainActivity.DEVICE_NAME, ""), newDeviceName)) {
                         String normalizedDeviceName = newDeviceName.replace(' ', '-');
-                        if (DlFirebaseMessagingService.sendRegistrationToServer(context, settings.getString(MainActivity.USER_LOGIN, ""), normalizedDeviceName)) {
+                        if (DlFirebaseMessagingService.sendRegistrationToServer(context, settings.getString(MainActivity.USER_LOGIN, ""), normalizedDeviceName, true)) {
                             settings.edit().putString(MainActivity.DEVICE_NAME, normalizedDeviceName).apply();
                         } else {
                             Log.e(TAG, "Failed to register device on server");

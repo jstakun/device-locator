@@ -237,6 +237,9 @@ public class RouteTrackingService extends Service {
             newIntent.putExtra("command", Command.ROUTE_COMMAND);
             newIntent.putExtra("size", 0);
             startService(newIntent);
+            if (stopSelf) {
+                RouteTrackingService.this.stopSelf();
+            }
         }
     }
 
