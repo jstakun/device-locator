@@ -142,7 +142,7 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length-1], "s", "silent"));
+            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length-1], "s", "silent") || StringUtils.isNumeric(commandTokens[commandTokens.length-1]));
         }
 
         @Override
