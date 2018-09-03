@@ -912,7 +912,7 @@ public class MainActivity extends AppCompatActivity {
         String newDeviceName = deviceNameInput.getText().toString();
         String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
-            String normalizedDeviceName = newDeviceName.replace(' ', '-');
+            String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-');
             if (DlFirebaseMessagingService.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName, false)) {
                 if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
                     EditText deviceNameEdit = findViewById(R.id.deviceName);

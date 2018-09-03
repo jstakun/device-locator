@@ -1238,7 +1238,7 @@ public class Command {
                     //Device name
                     String newDeviceName = token.substring(3);
                     if (!StringUtils.equals(settings.getString(MainActivity.DEVICE_NAME, ""), newDeviceName)) {
-                        String normalizedDeviceName = newDeviceName.replace(' ', '-');
+                        String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-');
                         if (DlFirebaseMessagingService.sendRegistrationToServer(context, settings.getString(MainActivity.USER_LOGIN, ""), normalizedDeviceName, true)) {
                             settings.edit().putString(MainActivity.DEVICE_NAME, normalizedDeviceName).apply();
                         } else {
