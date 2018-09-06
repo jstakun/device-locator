@@ -70,6 +70,7 @@ public class Command {
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
     public final static String MESSAGE_COMMAND = "messagedl"; //cloud message received from other devices
 
+
     public final static String LOCK_SCREEN_FAILED = "lockfail"; //this is not command
 
     private static List<AbstractCommand> commands = null;
@@ -291,6 +292,7 @@ public class Command {
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            //TODO if (GmsSmartLocationManager.getInstance().isEnabled() && settings.getBoolean("motionDetectorRunning", false)) {
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
                 String title = RouteTrackingServiceUtils.getRouteId(context);
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, null, null, null);
@@ -304,11 +306,11 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            //TODO if (GmsSmartLocationManager.getInstance().isEnabled() && settings.getBoolean("motionDetectorRunning", false)) {
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
                 String title = RouteTrackingServiceUtils.getRouteId(context);
                 String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId, null);
             } else {
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null, null);
@@ -320,11 +322,11 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            //TODO if (GmsSmartLocationManager.getInstance().isEnabled() && settings.getBoolean("motionDetectorRunning", false)) {
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length-1].equalsIgnoreCase("share") || commandTokens[commandTokens.length-1].equalsIgnoreCase("s"))) {
                 String title = RouteTrackingServiceUtils.getRouteId(context);
                 String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId, sender);
             } else {
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null, sender);

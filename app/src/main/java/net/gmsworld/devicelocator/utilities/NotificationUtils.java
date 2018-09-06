@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator.utilities;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -10,7 +11,9 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
 
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
@@ -28,6 +31,8 @@ public class NotificationUtils {
 
     private static final DecimalFormat distanceFormat = new DecimalFormat("#.##");
 
+    private static NotificationChannel channel = null;
+
     public static Notification buildTrackerNotification(Context context, int notificationId) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -36,13 +41,17 @@ public class NotificationUtils {
 
         final String message = "Device Locator is tracking location of your device. Click to open Device Locator";
 
-        return new Notification.Builder(context)
+        initChannels(context);
+
+        return new NotificationCompat.Builder(context, "default")
                 .setContentTitle("Device Locator")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_location_on_white)
                 .setLargeIcon(icon)
-                .setStyle(new Notification.BigTextStyle().bigText(message))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setContentIntent(contentIntent)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setCategory(NotificationCompat.CATEGORY_STATUS)
                 .setOngoing(true)
                 //.setPublicVersion(publicNotification) //API 21
                 .build();
@@ -89,15 +98,17 @@ public class NotificationUtils {
 
         Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        Notification.Builder nb = new Notification.Builder(context)
+        initChannels(context);
+
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, "default")
                 .setContentTitle("Device Locator Notification")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_devices_other_white_24dp)
                 .setLargeIcon(icon)
-                .setStyle(new Notification.BigTextStyle().bigText(message))
-                .setSound(notificationUri);
-                //.setPriority(1)
-                //.setCategory(Notification.CATEGORY_MESSAGE) //API 21
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                .setSound(notificationUri)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE);
                 //.setOngoing(false)
                 //.setPublicVersion(publicNotification) //API 21
 
@@ -123,6 +134,18 @@ public class NotificationUtils {
 
         if (notificationManager != null) {
             notificationManager.cancel(notificationId);
+        }
+    }
+
+    private static void initChannels(Context context) {
+        //TODO create channel per device
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && channel == null) {
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            channel = new NotificationChannel("default",
+                    "Device Locator",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("Notification from devices registered with Device Locator");
+            notificationManager.createNotificationChannel(channel);
         }
     }
 }
