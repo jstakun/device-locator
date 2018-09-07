@@ -18,6 +18,8 @@ import android.support.v4.app.NotificationCompat;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.DecimalFormat;
 
 import io.nlopez.smartlocation.SmartLocation;
@@ -61,6 +63,7 @@ public class NotificationUtils {
         PendingIntent contentIntent = null;
 
         if (location != null) {
+            //message has location
             String deviceName = "Your+Device";
             Bundle b = location.getExtras();
             if (b != null && b.containsKey(MainActivity.DEVICE_NAME)) {
@@ -74,7 +77,7 @@ public class NotificationUtils {
             }
 
             Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
-            if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) {
+            if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) { //10 min
                 int distance = (int)location.distanceTo(lastLocation); //in meters
                 if (distance > 0) {
                     message += "\n" + DistanceFormatter.format(distance) + " away";
@@ -84,6 +87,7 @@ public class NotificationUtils {
 
         if (contentIntent == null) {
             String[] tokens = message.split("\\s+");
+            //message has no maps intent
             for (int i = 0; i < tokens.length; i++) {
                 if (tokens[i].startsWith("http://") || tokens[i].startsWith("https://")) {
                     Uri webpage = Uri.parse(tokens[i]);
@@ -92,6 +96,16 @@ public class NotificationUtils {
                     break;
                 }
             }
+        } else {
+            //message has maps intent
+            String[] tokens = message.split("\n");
+            for (int i = 0; i < tokens.length; i++) {
+                if (tokens[i].startsWith(Messenger.MAPS_URL_PREFIX)) {
+                    tokens[i] = "Click to open Google Maps";
+                    break;
+                }
+            }
+            message = StringUtils.join(tokens, "\n");
         }
 
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);

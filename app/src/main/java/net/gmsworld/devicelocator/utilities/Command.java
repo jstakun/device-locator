@@ -327,7 +327,7 @@ public class Command {
                 String title = RouteTrackingServiceUtils.getRouteId(context);
                 String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId, sender);
+                RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, null, email, telegramId, sender);
             } else {
                 RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null, sender);
             }

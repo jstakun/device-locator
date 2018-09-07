@@ -56,6 +56,8 @@ public class Messenger {
 
     public static final String ROUTE_MESSAGE_PREFIX = "New location: ";
 
+    public static final String MAPS_URL_PREFIX = "https://maps.google.com/maps?q=";
+
     public static void sendSMS(final Context context, final String phoneNumber, final String message) {
         String status = null;
         if (Permissions.haveSendSMSPermission(context)) {
@@ -420,9 +422,9 @@ public class Messenger {
 
     public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email, String app) {
         final String deviceId = getDeviceId(context, true);
-        String text = "Device " + deviceId + " location:" +
-                "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
-                "\n" + "Battery level: " + getBatteryLevel(context);
+        String text = "Device " + deviceId + " location" +
+                "\n" + "Battery level: " + getBatteryLevel(context) +
+                "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         }
@@ -491,7 +493,7 @@ public class Messenger {
             message += " and speed " + getSpeed(context, location.getSpeed());
         }
         message += "\n" + "Battery level: " + getBatteryLevel(context) +
-                "\n" + "https://maps.google.com/maps?q=" + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
+                "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
         final Map<String, String> headers = new HashMap<String, String>();
         headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
