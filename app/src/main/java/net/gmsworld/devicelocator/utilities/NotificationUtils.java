@@ -33,7 +33,8 @@ public class NotificationUtils {
 
     private static final DecimalFormat distanceFormat = new DecimalFormat("#.##");
 
-    private static NotificationChannel channel = null;
+    private static final String DEFAULT_CHANNEL_ID = "Device-Locator";
+    private static final String DEFAULT_NOTIFICATION_TITLE = "Device Locator Notification";
 
     public static Notification buildTrackerNotification(Context context, int notificationId) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
@@ -43,10 +44,12 @@ public class NotificationUtils {
 
         final String message = "Device Locator is tracking your device location. Click to open Device Locator";
 
-        initChannels(context, Messenger.getDeviceName());
+        //TODO use device name as channel id
 
-        return new NotificationCompat.Builder(context, Messenger.getDeviceName())
-                .setContentTitle("Device Locator")
+        initChannels(context, DEFAULT_CHANNEL_ID); //Messenger.getDeviceName());
+
+        return new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID) //Messenger.getDeviceName())
+                .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_location_on_white)
                 .setLargeIcon(icon)
@@ -114,10 +117,12 @@ public class NotificationUtils {
 
         Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        initChannels(context, deviceName);
+        //TODO use device name as channel id
 
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, deviceName)
-                .setContentTitle("Device Locator Notification")
+        initChannels(context, DEFAULT_CHANNEL_ID); //deviceName);
+
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID) //deviceName)
+                .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_devices_other_white_24dp)
                 .setLargeIcon(icon)
@@ -144,13 +149,13 @@ public class NotificationUtils {
     }
 
     private static void initChannels(Context context, String channelId) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && channel == null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (channelId == null) {
-                channelId = "Device-Locator";
+                channelId = DEFAULT_CHANNEL_ID;
             }
             final String channelName = channelId.replace('-', ' ');
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            channel = notificationManager.getNotificationChannel(channelId);
+            NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
             if (channel == null) {
                 channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
                 channel.setDescription("Notifications from device " + channelName);
