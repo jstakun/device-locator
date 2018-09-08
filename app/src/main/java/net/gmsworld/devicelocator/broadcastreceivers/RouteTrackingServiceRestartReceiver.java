@@ -30,7 +30,7 @@ public class RouteTrackingServiceRestartReceiver extends BroadcastReceiver {
         restoreSavedData(context);
         if (motionDetectorRunning) {
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, false, false);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, false, RouteTrackingService.Mode.Normal);
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }

@@ -29,6 +29,7 @@ import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -132,8 +133,7 @@ public class Messenger {
         content += "&pin=" + pin;
         try {
             content += "&args=" + URLEncoder.encode(message, "UTF-8");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
         }
 
@@ -479,6 +479,7 @@ public class Messenger {
 
     public static void sendRouteMessage(Context context, Location location, int distance, String phoneNumber, String telegramId, String email, String app) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+
         if (StringUtils.isNotEmpty(phoneNumber)) {
             if (settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false)) {
                 sendLocationMessage(context, location, true, phoneNumber, null, null, null);
@@ -487,8 +488,9 @@ public class Messenger {
                 sendGoogleMapsMessage(context, location, phoneNumber, null, null, null);
             }
         }
+
         String message = ROUTE_MESSAGE_PREFIX + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
-                " in distance of " + DistanceFormatter.format(distance) + " from previous location with accuracy " + DistanceFormatter.format((int)location.getAccuracy());
+                " in distance of " + DistanceFormatter.format(distance) + " from previous location with accuracy " + DistanceFormatter.format((int) location.getAccuracy());
         if (location.hasSpeed() && location.getSpeed() > 0f) {
             message += " and speed " + getSpeed(context, location.getSpeed());
         }
@@ -515,6 +517,23 @@ public class Messenger {
         //send notification to cloud if tracking has been initiated with cloud message
         if (StringUtils.isNotEmpty(app)) {
             String[] tokens = StringUtils.split(app, "+=+");
+            sendCloudMessage(context, location, tokens[0], tokens[1], message, 1, headers);
+        }
+    }
+
+    public static void sendPerimeterMessage(Context context, Location location, String app) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        final Map<String, String> headers = new HashMap<String, String>();
+        headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
+        sendRoutePoint(context, location, 1, headers);
+        final int perimeter = settings.getInt("perimeter", RouteTrackingService.DEFAULT_PERIMETER);
+        if (StringUtils.isNotEmpty(app)) {
+            String[] tokens = StringUtils.split(app, "+=+");
+            final String deviceId = getDeviceId(context, true);
+            final String message = "Device " + deviceId + " is in perimeter " + DistanceFormatter.format(perimeter) +
+                             "\n" + "Battery level: " + getBatteryLevel(context) +
+                             "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
+                             "\n" + perimeter;
             sendCloudMessage(context, location, tokens[0], tokens[1], message, 1, headers);
         }
     }
@@ -703,7 +722,7 @@ public class Messenger {
                 break;
             case Command.ABOUT_COMMAND:
                 text = AppUtils.getInstance().getAboutMessage(context) +
-                       "\n" + "Battery level: " + getBatteryLevel(context);
+                        "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
             case Command.LOCK_SCREEN_COMMAND:
                 text = "Screen locked successfully on device " + deviceId + "!" +
@@ -714,6 +733,9 @@ public class Messenger {
                 break;
             case Command.CONFIG_COMMAND:
                 text = "Configuration change on device " + deviceId + " has been applied.";
+                break;
+            case Command.STOPPED_COMMAND:
+                text = "Device location tracking on device " + deviceId + " is stopped.\nBattery level: " + getBatteryLevel(context);
                 break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);

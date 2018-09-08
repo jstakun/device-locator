@@ -22,14 +22,14 @@ public class RouteTrackingServiceUtils {
 
     public static final String ROUTE_TITLE = "routeTitle";
 
-    public static boolean startRouteTrackingService(Context context, ServiceConnection mConnection, int radius, String phoneNumber, String email, String telegramId, String app, boolean resetRoute, boolean silentMode) {
+    public static boolean startRouteTrackingService(Context context, ServiceConnection mConnection, int radius, String phoneNumber, String email, String telegramId, String app, boolean resetRoute, RouteTrackingService.Mode mode) {
         Intent routeTracingService = new Intent(context, RouteTrackingService.class);
         routeTracingService.putExtra("radius", radius);
         routeTracingService.putExtra("phoneNumber", phoneNumber);
         routeTracingService.putExtra("email", email);
         routeTracingService.putExtra("telegramId", telegramId);
         routeTracingService.putExtra("resetRoute", resetRoute);
-        routeTracingService.putExtra("silentMode", silentMode);
+        routeTracingService.putExtra("mode", mode.name());
         routeTracingService.putExtra("app", app);
         routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_START);
         context.startService(routeTracingService);

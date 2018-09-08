@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         initApp();
         toggleBroadcastReceiver(); //set sms broadcast receiver
         if (motionDetectorRunning) {
-            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,false, false);
+            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,false, RouteTrackingService.Mode.Normal);
         }
 
         boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
@@ -852,6 +852,9 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "You device can't be registered!", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
+                if (!Permissions.haveLocationPermission(this)) {
+                    Permissions.requestLocationPermission(this, 0);
+                }
             }
         }
     }
@@ -920,6 +923,9 @@ public class MainActivity extends AppCompatActivity {
                     PreferenceManager.getDefaultSharedPreferences(this).edit().putString(DEVICE_NAME, normalizedDeviceName).apply();
                 }
                 Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
+                if (!Permissions.haveLocationPermission(this)) {
+                    Permissions.requestLocationPermission(this, 0);
+                }
             } else {
                 Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
             }
@@ -1248,7 +1254,7 @@ public class MainActivity extends AppCompatActivity {
     private void launchMotionDetectorService() {
         saveData();
         updateUI();
-        isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,true, false);
+        isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,true, RouteTrackingService.Mode.Normal);
         Toast.makeText(getApplicationContext(), getString(R.string.motion_confirm, radius), Toast.LENGTH_LONG).show();
     }
 

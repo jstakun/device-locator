@@ -41,9 +41,9 @@ public class NotificationUtils {
 
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);
 
-        final String message = "Device Locator is tracking location of your device. Click to open Device Locator";
+        final String message = "Device Locator is tracking your device location. Click to open Device Locator";
 
-        initChannels(context);
+        initChannels(context, Messenger.getDeviceName());
 
         return new NotificationCompat.Builder(context, "default")
                 .setContentTitle("Device Locator")
@@ -61,15 +61,17 @@ public class NotificationUtils {
 
     public static Notification buildMessageNotification(Context context, int notificationId, String message, Location location) {
         PendingIntent contentIntent = null;
+        String deviceName = null;
 
         if (location != null) {
             //message has location
-            String deviceName = "Your+Device";
+            String device = "Your+Device";
             Bundle b = location.getExtras();
             if (b != null && b.containsKey(MainActivity.DEVICE_NAME)) {
-                deviceName = "Device+" + b.getString(MainActivity.DEVICE_NAME);
+                deviceName = b.getString(MainActivity.DEVICE_NAME);
+                device = "Device+" + deviceName;
             }
-            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + location.getLatitude() + "," + location.getLongitude() + "(" + deviceName + ")");
+            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + location.getLatitude() + "," + location.getLongitude() + "(" + device + ")");
             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
             mapIntent.setPackage("com.google.android.apps.maps");
             if (mapIntent.resolveActivity(context.getPackageManager()) != null) {
@@ -112,7 +114,7 @@ public class NotificationUtils {
 
         Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        initChannels(context);
+        initChannels(context, deviceName);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, "default")
                 .setContentTitle("Device Locator Notification")
@@ -133,16 +135,6 @@ public class NotificationUtils {
         return nb.build();
     }
 
-    public static void notify(Context context, int notificationId) {
-        Notification notification = buildTrackerNotification(context, notificationId);
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (notificationManager != null) {
-            notificationManager.notify(notificationId, notification);
-        }
-    }
-
     public static void cancel(Context context, int notificationId) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -151,14 +143,17 @@ public class NotificationUtils {
         }
     }
 
-    private static void initChannels(Context context) {
+    private static void initChannels(Context context, String channelId) {
         //TODO create channel per device
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && channel == null) {
+            if (channelId == null) {
+                channelId = "Device-Locator";
+            }
+            final String channelName = channelId.replace('-', ' ');
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            channel = new NotificationChannel("default",
-                    "Device Locator",
-                    NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription("Notification from devices registered with Device Locator");
+
+            channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("Notifications from device " + channelName);
             notificationManager.createNotificationChannel(channel);
         }
     }

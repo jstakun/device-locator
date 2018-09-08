@@ -32,8 +32,6 @@ import java.lang.ref.WeakReference;
 
 public class RouteTrackingService extends Service {
 
-    private PowerManager.WakeLock mWakeLock;
-
     public static final String COMMAND = "RouteTracingService.COMMAND";
     public static final int COMMAND_START = 1;
     public static final int COMMAND_STOP = 0;
@@ -44,21 +42,24 @@ public class RouteTrackingService extends Service {
     public static final int COMMAND_GPS_HIGH = 5;
     public static final int COMMAND_GPS_BALANCED = 6;
     public static final int COMMAND_SHOW_ROUTE = 50;
-    public static final int DEFAULT_RADIUS = 100;
+    public static final int DEFAULT_RADIUS = 100; //meters
+    public static final int DEFAULT_PERIMETER = 500; //meters
 
     private static final int NOTIFICATION_ID = 1001;
     public static final int NOTIFICATION_ROUTE_ID = 1002;
 
     private static final String TAG = RouteTrackingService.class.getSimpleName();
-    private int radius = DEFAULT_RADIUS;
-
     public static final String GPS_ACCURACY = "gpsAccuracy"; //1>= high 0<= balanced
 
+    public enum Mode {Normal, Silent, Perimeter};
+
+    private PowerManager.WakeLock mWakeLock;
     private final Handler incomingHandler = new IncomingHandler(this);
     private final Messenger mMessenger = new Messenger(incomingHandler);
     private Messenger mClient;
+    private int radius = DEFAULT_RADIUS;
     private String phoneNumber, email, telegramId, app;
-    private boolean silentMode = false;
+    private static Mode mode = Mode.Normal;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -92,7 +93,9 @@ public class RouteTrackingService extends Service {
                         this.telegramId = intent.getStringExtra("telegramId");
                         this.app = intent.getStringExtra("app");
                         boolean resetRoute = intent.getBooleanExtra("resetRoute", false);
-                        silentMode = intent.getBooleanExtra("silentMode", false);
+                        if (intent.hasExtra("mode")) {
+                            mode = Mode.valueOf(intent.getStringExtra("mode"));
+                        }
                         int gpsAccuracy = PreferenceManager.getDefaultSharedPreferences(this).getInt(GPS_ACCURACY, 1);
                         startTracking(gpsAccuracy, resetRoute);
                         break;
@@ -151,7 +154,7 @@ public class RouteTrackingService extends Service {
     }
 
     private synchronized void startTracking(int gpsAccuracy, boolean resetRoute) {
-        Log.d(TAG, "startTracking() in silent mode " + silentMode);
+        Log.d(TAG, "startTracking() in silent mode " + mode.name());
 
         PreferenceManager.getDefaultSharedPreferences(this).edit().remove(RouteTrackingServiceUtils.ROUTE_TITLE).apply();
 
@@ -277,11 +280,15 @@ public class RouteTrackingService extends Service {
                             int distance = msg.arg1;
                             if (location != null) {
                                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(service);
+
                                 long notificationSentMillis = settings.getLong("notificationSentMillis", 0);
                                 //sent notification only if not in silent mode and if last notification was at least sent 10 seconds ago
-                                if (!service.silentMode && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
+                                if (mode.equals(Mode.Silent) && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
                                     settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).apply();
                                     net.gmsworld.devicelocator.utilities.Messenger.sendRouteMessage(service, location, distance, service.phoneNumber, service.telegramId, service.email, service.app);
+                                } else if (mode.equals(Mode.Perimeter) && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
+                                    settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).apply();
+                                    net.gmsworld.devicelocator.utilities.Messenger.sendPerimeterMessage(service, location, service.app);
                                 }
 
                                 //EXPERIMENTAL FEATURE audio transmitter
