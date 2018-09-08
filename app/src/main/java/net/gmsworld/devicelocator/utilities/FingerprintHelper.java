@@ -53,7 +53,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    public void init() {
+    public boolean init() {
         if (fingerprintManager.isHardwareDetected() && Permissions.haveFingerprintPermission(pinActivity) &&
                 fingerprintManager.hasEnrolledFingerprints() && keyguardManager.isKeyguardSecure()) {
             try {
@@ -66,6 +66,9 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
                 FingerprintManager.CryptoObject cryptoObject = new FingerprintManager.CryptoObject(cipher);
                 startAuth(fingerprintManager, cryptoObject);
             }
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -108,8 +111,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
 
         try {
             keyStore.load(null);
-            SecretKey key = (SecretKey) keyStore.getKey(KEY_NAME,
-                    null);
+            SecretKey key = (SecretKey) keyStore.getKey(KEY_NAME, null);
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return true;
         } catch (KeyPermanentlyInvalidatedException e) {

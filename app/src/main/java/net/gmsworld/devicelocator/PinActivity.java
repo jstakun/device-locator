@@ -54,8 +54,9 @@ public class PinActivity extends AppCompatActivity {
             KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
             FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
 
-            new FingerprintHelper(keyguardManager, fingerprintManager, this).init();
-            findViewById(R.id.deviceFingerprintCard).setVisibility(View.VISIBLE);
+            if (new FingerprintHelper(keyguardManager, fingerprintManager, this).init()) {
+                findViewById(R.id.deviceFingerprintCard).setVisibility(View.VISIBLE);
+            }
         }
 
         //-----------------------------------------------------------------
