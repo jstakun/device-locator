@@ -44,11 +44,9 @@ public class NotificationUtils {
 
         final String message = "Device Locator is tracking your device location. Click to open Device Locator";
 
-        //TODO use device name as channel id
+        initChannels(context, Messenger.getDeviceName());
 
-        initChannels(context, DEFAULT_CHANNEL_ID); //Messenger.getDeviceName());
-
-        return new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID) //Messenger.getDeviceName())
+        return new NotificationCompat.Builder(context, Messenger.getDeviceName())
                 .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_location_on_white)
@@ -117,11 +115,9 @@ public class NotificationUtils {
 
         Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        //TODO use device name as channel id
+        initChannels(context, deviceName);
 
-        initChannels(context, DEFAULT_CHANNEL_ID); //deviceName);
-
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID) //deviceName)
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, deviceName)
                 .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_devices_other_white_24dp)
