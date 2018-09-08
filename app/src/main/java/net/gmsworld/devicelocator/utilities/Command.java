@@ -68,13 +68,13 @@ public class Command {
     public final static String LOCK_SCREEN_COMMAND = "lockdl"; //ls lock screen now
     public final static String ABOUT_COMMAND = "aboutdl"; //ab send app version info
     public final static String CONFIG_COMMAND = "configdl"; //cf change app configuration
+    public final static String PERIMETER_COMMAND = "perimeterdl"; //perimeter cloud message
 
     //private
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
     public final static String MESSAGE_COMMAND = "messagedl"; //ms cloud message received from other devices
-    public final static String PERIMETER_COMMAND = "perimeterdl"; //perimeter cloud message
-    public final static String STOPPED_COMMAND = "stoppeddl"; //service is stopped
 
+    public final static String STOPPED_TRACKER = "stopped"; //this is not command
     public final static String LOCK_SCREEN_FAILED = "lockfail"; //this is not command
 
     private static List<AbstractCommand> commands = null;
@@ -308,7 +308,7 @@ public class Command {
                 settings.edit().putBoolean("motionDetectorRunning", false).apply();
                 sendSmsNotification(context, sender, STOP_COMMAND);
             } else {
-                sendSmsNotification(context, sender, STOPPED_COMMAND);
+                sendSmsNotification(context, sender, STOPPED_TRACKER);
             }
         }
 
@@ -329,7 +329,7 @@ public class Command {
                 settings.edit().putBoolean("motionDetectorRunning", false).apply();
                 sendSocialNotification(context, STOP_COMMAND);
             } else {
-                sendSocialNotification(context, STOPPED_COMMAND);
+                sendSocialNotification(context, STOPPED_TRACKER);
             }
         }
 
@@ -350,7 +350,7 @@ public class Command {
                 settings.edit().putBoolean("motionDetectorRunning", false).apply();
                 sendAppNotification(context, STOP_COMMAND, sender);
             } else {
-                sendAppNotification(context, STOPPED_COMMAND, sender);
+                sendAppNotification(context, STOPPED_TRACKER, sender);
             }
         }
     }

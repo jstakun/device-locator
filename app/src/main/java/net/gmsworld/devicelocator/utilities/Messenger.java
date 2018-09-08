@@ -734,7 +734,7 @@ public class Messenger {
             case Command.CONFIG_COMMAND:
                 text = "Configuration change on device " + deviceId + " has been applied.";
                 break;
-            case Command.STOPPED_COMMAND:
+            case Command.STOPPED_TRACKER:
                 text = "Device location tracking on device " + deviceId + " is stopped.\nBattery level: " + getBatteryLevel(context);
                 break;
             default:

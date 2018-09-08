@@ -129,10 +129,12 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                         args.setText(defaultArgs);
                     } else {
                         args.setHint(R.string.params_yes_hint);
+                        args.setText("");
                     }
                     args.setInputType(InputType.TYPE_CLASS_TEXT);
                 } else {
                     args.setHint(R.string.params_no_hint);
+                    args.setText("");
                     args.setInputType(InputType.TYPE_NULL);
                 }
             }

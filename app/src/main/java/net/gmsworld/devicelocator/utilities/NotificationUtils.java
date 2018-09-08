@@ -45,7 +45,7 @@ public class NotificationUtils {
 
         initChannels(context, Messenger.getDeviceName());
 
-        return new NotificationCompat.Builder(context, "default")
+        return new NotificationCompat.Builder(context, Messenger.getDeviceName())
                 .setContentTitle("Device Locator")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_location_on_white)
@@ -116,7 +116,7 @@ public class NotificationUtils {
 
         initChannels(context, deviceName);
 
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, "default")
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, deviceName)
                 .setContentTitle("Device Locator Notification")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_devices_other_white_24dp)
@@ -144,17 +144,18 @@ public class NotificationUtils {
     }
 
     private static void initChannels(Context context, String channelId) {
-        //TODO create channel per device
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && channel == null) {
             if (channelId == null) {
                 channelId = "Device-Locator";
             }
             final String channelName = channelId.replace('-', ' ');
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-            channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription("Notifications from device " + channelName);
-            notificationManager.createNotificationChannel(channel);
+            channel = notificationManager.getNotificationChannel(channelId);
+            if (channel == null) {
+                channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                channel.setDescription("Notifications from device " + channelName);
+                notificationManager.createNotificationChannel(channel);
+            }
         }
     }
 }
