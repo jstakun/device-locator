@@ -51,7 +51,6 @@ public class PinActivity extends AppCompatActivity {
         //fingerprint authentication
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
             KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
             FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
 
