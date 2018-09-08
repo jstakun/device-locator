@@ -114,6 +114,10 @@ public class Permissions {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
     }
 
+    public static boolean haveFingerprintPermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED;
+    }
+
 
     public static void setPermissionNotification(Context context) {
         Intent resultIntent = new Intent(context, MainActivity.class);

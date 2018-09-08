@@ -1,6 +1,9 @@
 package net.gmsworld.devicelocator;
 
+import android.app.KeyguardManager;
 import android.content.Intent;
+import android.hardware.fingerprint.FingerprintManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +18,7 @@ import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -24,6 +28,7 @@ import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.FingerprintHelper;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +47,19 @@ public class PinActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pin);
+
+        //fingerprint authentication
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+            FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
+
+            new FingerprintHelper(keyguardManager, fingerprintManager, this).init();
+            findViewById(R.id.deviceFingerprintCard).setVisibility(View.VISIBLE);
+        }
+
+        //-----------------------------------------------------------------
 
         final EditText tokenInput = findViewById(R.id.verify_pin_edit);
 
@@ -72,7 +90,7 @@ public class PinActivity extends AppCompatActivity {
                     finish();
                 } else if (input.length() == pin.length()) {
                     int pinFailedCount = settings.getInt("pinFailedCount");
-                    Toast.makeText(PinActivity.this,"Invalid pin!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PinActivity.this, "Invalid pin!", Toast.LENGTH_SHORT).show();
                     if (pinFailedCount == 2) {
                         pinFailedCount = -1;
                         //send failed login notification
@@ -91,7 +109,7 @@ public class PinActivity extends AppCompatActivity {
                         }
                     }
                     PreferenceManager.getDefaultSharedPreferences(PinActivity.this).edit()
-                            .putInt("pinFailedCount", pinFailedCount+1)
+                            .putInt("pinFailedCount", pinFailedCount + 1)
                             .apply();
                 }
             }

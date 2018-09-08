@@ -20,8 +20,6 @@ import net.gmsworld.devicelocator.R;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.text.DecimalFormat;
-
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
@@ -30,8 +28,6 @@ import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWith
  */
 
 public class NotificationUtils {
-
-    private static final DecimalFormat distanceFormat = new DecimalFormat("#.##");
 
     private static final String DEFAULT_CHANNEL_ID = "Device-Locator";
     private static final String DEFAULT_NOTIFICATION_TITLE = "Device Locator Notification";
@@ -42,7 +38,7 @@ public class NotificationUtils {
 
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);
 
-        final String message = "Device Locator is tracking your device location. Click to open Device Locator";
+        final String message = context.getString(R.string.notification_tracker);
 
         initChannels(context, Messenger.getDeviceName());
 
@@ -104,7 +100,7 @@ public class NotificationUtils {
             String[] tokens = message.split("\n");
             for (int i = 0; i < tokens.length; i++) {
                 if (tokens[i].startsWith(Messenger.MAPS_URL_PREFIX)) {
-                    tokens[i] = "Click to open Google Maps";
+                    tokens[i] = context.getString(R.string.notification_open_in_maps);
                     break;
                 }
             }
