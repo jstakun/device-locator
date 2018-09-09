@@ -45,6 +45,8 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
 
     private FingerprintHelper fingerprintHelper;
 
+    private PreferencesUtils settings;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +69,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
 
         final EditText tokenInput = findViewById(R.id.verify_pin_edit);
 
-        final PreferencesUtils settings = new PreferencesUtils(this);
+        settings = new PreferencesUtils(this);
 
         final String pin = settings.getEncryptedString(DEVICE_PIN);
         final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
@@ -88,28 +90,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                 if (StringUtils.equals(input, pin)) {
                     onAuthenticated();
                 } else if (input.length() == pin.length()) {
-                    int pinFailedCount = settings.getInt("pinFailedCount");
-                    Toast.makeText(PinActivity.this, "Invalid pin!", Toast.LENGTH_SHORT).show();
-                    if (pinFailedCount == 2) {
-                        pinFailedCount = -1;
-                        //send failed login notification
-                        Log.d(TAG, "Wrong pin has been entered to unlock the app. SENDING NOTIFICATION!");
-                        Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
-                        newIntent.putExtra("phoneNumber", phoneNumber);
-                        newIntent.putExtra("email", email);
-                        newIntent.putExtra("telegramId", telegramId);
-                        newIntent.putExtra("source", DeviceAdminEventReceiver.SOURCE);
-                        startService(newIntent);
-                        if (settings.getBoolean("hiddenCamera", false)) {
-                            Intent cameraIntent = new Intent(PinActivity.this, HiddenCaptureImageService.class);
-                            PinActivity.this.startService(cameraIntent);
-                        } else {
-                            Log.d(TAG, "Camera is disabled. No photo will be taken");
-                        }
-                    }
-                    PreferenceManager.getDefaultSharedPreferences(PinActivity.this).edit()
-                            .putInt("pinFailedCount", pinFailedCount + 1)
-                            .apply();
+                    onFailed();
                 }
             }
 
@@ -179,6 +160,35 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
     @Override
     public void onError() {
 
+    }
+
+    @Override
+    public void onFailed() {
+        int pinFailedCount = settings.getInt("pinFailedCount");
+        Toast.makeText(PinActivity.this, "Invalid pin!", Toast.LENGTH_SHORT).show();
+        if (pinFailedCount == 2) {
+            final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
+            final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
+            final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
+            pinFailedCount = -1;
+            //send failed login notification
+            Log.d(TAG, "Wrong pin has been entered to unlock the app. SENDING NOTIFICATION!");
+            Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", phoneNumber);
+            newIntent.putExtra("email", email);
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("source", DeviceAdminEventReceiver.SOURCE);
+            startService(newIntent);
+            if (settings.getBoolean("hiddenCamera", false)) {
+                Intent cameraIntent = new Intent(PinActivity.this, HiddenCaptureImageService.class);
+                PinActivity.this.startService(cameraIntent);
+            } else {
+                Log.d(TAG, "Camera is disabled. No photo will be taken");
+            }
+        }
+        PreferenceManager.getDefaultSharedPreferences(PinActivity.this).edit()
+                .putInt("pinFailedCount", pinFailedCount + 1)
+                .apply();
     }
 
     private abstract class TextViewLinkHandler extends LinkMovementMethod {

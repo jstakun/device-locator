@@ -144,6 +144,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     @Override
     public void onAuthenticationFailed() {
         Log.e(TAG, "Fingerprint Authentication failed");
+        callback.onFailed();
     }
 
     @Override
@@ -159,5 +160,6 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     public interface AuthenticationCallback {
         void onAuthenticated();
         void onError();
+        void onFailed();
     }
 }
