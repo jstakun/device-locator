@@ -154,7 +154,7 @@ public class RouteTrackingService extends Service {
     }
 
     private synchronized void startTracking(int gpsAccuracy, boolean resetRoute) {
-        Log.d(TAG, "startTracking() in silent mode " + mode.name());
+        Log.d(TAG, "startTracking() in mode " + mode.name());
 
         PreferenceManager.getDefaultSharedPreferences(this).edit().remove(RouteTrackingServiceUtils.ROUTE_TITLE).apply();
 
@@ -283,12 +283,14 @@ public class RouteTrackingService extends Service {
 
                                 long notificationSentMillis = settings.getLong("notificationSentMillis", 0);
                                 //sent notification only if not in silent mode and if last notification was at least sent 10 seconds ago
-                                if (mode.equals(Mode.Silent) && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
+                                if (mode == Mode.Normal && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
                                     settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).apply();
                                     net.gmsworld.devicelocator.utilities.Messenger.sendRouteMessage(service, location, distance, service.phoneNumber, service.telegramId, service.email, service.app);
-                                } else if (mode.equals(Mode.Perimeter) && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
+                                } else if (mode == Mode.Perimeter && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
                                     settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).apply();
                                     net.gmsworld.devicelocator.utilities.Messenger.sendPerimeterMessage(service, location, service.app);
+                                } else {
+                                    Log.d(TAG, "No notification will be sent in mode " + mode.name());
                                 }
 
                                 //EXPERIMENTAL FEATURE audio transmitter

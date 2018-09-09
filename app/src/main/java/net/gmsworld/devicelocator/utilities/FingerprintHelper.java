@@ -67,9 +67,11 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
                 cryptoObject = new FingerprintManager.CryptoObject(cipher);
                 return true;
             } else {
+                Log.w(TAG, "Failed to init Cipher");
                 return false;
             }
         } else {
+            Log.w(TAG, "Device has no or invalid Fingerprint configuration");
             return false;
         }
     }
@@ -156,6 +158,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
 
     @Override
     public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
+        //TODO implement callback interface
         if (pinActivity != null && !pinActivity.isFinishing()) {
             pinActivity.startActivity(new Intent(pinActivity, MainActivity.class));
             PreferenceManager.getDefaultSharedPreferences(pinActivity).edit()
