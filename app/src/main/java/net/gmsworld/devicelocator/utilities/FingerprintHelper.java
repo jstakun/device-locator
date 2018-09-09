@@ -38,6 +38,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
 
     private KeyguardManager keyguardManager;
     private FingerprintManager fingerprintManager;
+    private FingerprintManager.CryptoObject cryptoObject;
     private Activity pinActivity;
 
     private Cipher cipher;
@@ -63,12 +64,27 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
             }
 
             if (initCipher()) {
-                FingerprintManager.CryptoObject cryptoObject = new FingerprintManager.CryptoObject(cipher);
-                startAuth(fingerprintManager, cryptoObject);
+                cryptoObject = new FingerprintManager.CryptoObject(cipher);
+                return true;
+            } else {
+                return false;
             }
-            return true;
         } else {
             return false;
+        }
+    }
+
+    public void startListening() {
+        if (cryptoObject != null) {
+            cancellationSignal = new CancellationSignal();
+            fingerprintManager.authenticate(cryptoObject, cancellationSignal, 0, this, null);
+        }
+    }
+
+    public void stopListening() {
+        if (cancellationSignal != null) {
+            cancellationSignal.cancel();
+            cancellationSignal = null;
         }
     }
 
@@ -121,12 +137,6 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
                 | NoSuchAlgorithmException | InvalidKeyException e) {
             throw new RuntimeException("Failed to init Cipher", e);
         }
-    }
-
-
-    public void startAuth(FingerprintManager manager, FingerprintManager.CryptoObject cryptoObject) {
-        cancellationSignal = new CancellationSignal();
-        manager.authenticate(cryptoObject, cancellationSignal, 0, this, null);
     }
 
     @Override

@@ -43,6 +43,8 @@ public class PinActivity extends AppCompatActivity {
 
     public static final String DEVICE_PIN = "token";
 
+    private FingerprintHelper fingerprintHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,8 +56,11 @@ public class PinActivity extends AppCompatActivity {
             KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
             FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
 
-            if (new FingerprintHelper(keyguardManager, fingerprintManager, this).init()) {
+            fingerprintHelper = new FingerprintHelper(keyguardManager, fingerprintManager, this);
+            if (fingerprintHelper.init()) {
                 findViewById(R.id.deviceFingerprintCard).setVisibility(View.VISIBLE);
+            } else {
+                fingerprintHelper = null;
             }
         }
 
@@ -149,6 +154,22 @@ public class PinActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (fingerprintHelper != null) {
+            fingerprintHelper.startListening();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (fingerprintHelper != null) {
+            fingerprintHelper.stopListening();
+        }
     }
 
     private abstract class TextViewLinkHandler extends LinkMovementMethod {
