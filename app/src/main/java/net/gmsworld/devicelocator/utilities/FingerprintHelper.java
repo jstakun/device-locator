@@ -1,19 +1,15 @@
 package net.gmsworld.devicelocator.utilities;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.KeyguardManager;
-import android.content.Intent;
+import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.CancellationSignal;
-import android.preference.PreferenceManager;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
 import android.util.Log;
-
-import net.gmsworld.devicelocator.MainActivity;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -39,23 +35,21 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     private KeyguardManager keyguardManager;
     private FingerprintManager fingerprintManager;
     private FingerprintManager.CryptoObject cryptoObject;
-    private Activity pinActivity;
+    private AuthenticationCallback callback;
 
     private Cipher cipher;
     private KeyStore keyStore;
-    private KeyGenerator keyGenerator;
-
     private CancellationSignal cancellationSignal;
 
-    public FingerprintHelper(KeyguardManager keyguardManager, FingerprintManager fingerprintManager, Activity pinActivity) {
+    public FingerprintHelper(KeyguardManager keyguardManager, FingerprintManager fingerprintManager, AuthenticationCallback callback) {
         this.fingerprintManager = fingerprintManager;
         this.keyguardManager = keyguardManager;
-        this.pinActivity = pinActivity;
+        this.callback = callback;
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    public boolean init() {
-        if (fingerprintManager.isHardwareDetected() && Permissions.haveFingerprintPermission(pinActivity) &&
+    public boolean init(Context context) {
+        if (fingerprintManager.isHardwareDetected() && Permissions.haveFingerprintPermission(context) &&
                 fingerprintManager.hasEnrolledFingerprints() && keyguardManager.isKeyguardSecure()) {
             try {
                 generateKey();
@@ -93,7 +87,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     private void generateKey() throws RuntimeException {
         try {
             keyStore = KeyStore.getInstance("AndroidKeyStore");
-            keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
 
             keyStore.load(null);
             keyGenerator.init(new
@@ -116,7 +110,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
         }
     }
 
-    public boolean initCipher() {
+    private boolean initCipher() {
         try {
             cipher = Cipher.getInstance(
                     KeyProperties.KEY_ALGORITHM_AES + "/"
@@ -144,6 +138,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     @Override
     public void onAuthenticationError(int errMsgId, CharSequence errString) {
         Log.e(TAG, "Fingerprint Authentication error " + errString);
+        callback.onError();
     }
 
     @Override
@@ -158,14 +153,11 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
 
     @Override
     public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
-        //TODO implement callback interface
-        if (pinActivity != null && !pinActivity.isFinishing()) {
-            pinActivity.startActivity(new Intent(pinActivity, MainActivity.class));
-            PreferenceManager.getDefaultSharedPreferences(pinActivity).edit()
-                            .remove("pinFailedCount")
-                            .putLong("pinVerificationMillis", System.currentTimeMillis())
-                            .apply();
-            pinActivity.finish();
-        }
+        callback.onAuthenticated();
+    }
+
+    public interface AuthenticationCallback {
+        void onAuthenticated();
+        void onError();
     }
 }

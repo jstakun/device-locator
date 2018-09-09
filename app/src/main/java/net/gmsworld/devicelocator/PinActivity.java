@@ -33,7 +33,7 @@ import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class PinActivity extends AppCompatActivity {
+public class PinActivity extends AppCompatActivity implements FingerprintHelper.AuthenticationCallback {
 
     private static final String TAG = PinActivity.class.getSimpleName();
 
@@ -55,9 +55,8 @@ public class PinActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
             FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
-
             fingerprintHelper = new FingerprintHelper(keyguardManager, fingerprintManager, this);
-            if (fingerprintHelper.init()) {
+            if (fingerprintHelper.init(this)) {
                 findViewById(R.id.deviceFingerprintCard).setVisibility(View.VISIBLE);
             } else {
                 fingerprintHelper = null;
@@ -87,12 +86,7 @@ public class PinActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String input = charSequence.toString();
                 if (StringUtils.equals(input, pin)) {
-                    startActivity(new Intent(PinActivity.this, MainActivity.class));
-                    PreferenceManager.getDefaultSharedPreferences(PinActivity.this).edit()
-                            .remove("pinFailedCount")
-                            .putLong("pinVerificationMillis", System.currentTimeMillis())
-                            .apply();
-                    finish();
+                    onAuthenticated();
                 } else if (input.length() == pin.length()) {
                     int pinFailedCount = settings.getInt("pinFailedCount");
                     Toast.makeText(PinActivity.this, "Invalid pin!", Toast.LENGTH_SHORT).show();
@@ -170,6 +164,21 @@ public class PinActivity extends AppCompatActivity {
         if (fingerprintHelper != null) {
             fingerprintHelper.stopListening();
         }
+    }
+
+    @Override
+    public void onAuthenticated() {
+        startActivity(new Intent(PinActivity.this, MainActivity.class));
+        PreferenceManager.getDefaultSharedPreferences(PinActivity.this).edit()
+                .remove("pinFailedCount")
+                .putLong("pinVerificationMillis", System.currentTimeMillis())
+                .apply();
+        finish();
+    }
+
+    @Override
+    public void onError() {
+
     }
 
     private abstract class TextViewLinkHandler extends LinkMovementMethod {
