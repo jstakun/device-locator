@@ -90,7 +90,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                 if (StringUtils.equals(input, pin)) {
                     onAuthenticated();
                 } else if (input.length() == pin.length()) {
-                    onFailed();
+                    onFailed(FingerprintHelper.AuthType.Pin);
                 }
             }
 
@@ -149,8 +149,8 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
 
     @Override
     public void onAuthenticated() {
-        startActivity(new Intent(PinActivity.this, MainActivity.class));
-        PreferenceManager.getDefaultSharedPreferences(PinActivity.this).edit()
+        startActivity(new Intent(this, MainActivity.class));
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
                 .remove("pinFailedCount")
                 .putLong("pinVerificationMillis", System.currentTimeMillis())
                 .apply();
@@ -163,9 +163,14 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
     }
 
     @Override
-    public void onFailed() {
+    public void onFailed(FingerprintHelper.AuthType authType) {
         int pinFailedCount = settings.getInt("pinFailedCount");
-        Toast.makeText(PinActivity.this, "Invalid pin!", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Invalid credentials " + authType.name());
+        if (authType == FingerprintHelper.AuthType.Fingerprint) {
+            Toast.makeText(this, "Unrecognized fingerprint!", Toast.LENGTH_SHORT).show();
+        } else if (authType == FingerprintHelper.AuthType.Pin) {
+            Toast.makeText(this, "Invalid pin!", Toast.LENGTH_SHORT).show();
+        }
         if (pinFailedCount == 2) {
             final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
             final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
@@ -180,8 +185,8 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             newIntent.putExtra("source", DeviceAdminEventReceiver.SOURCE);
             startService(newIntent);
             if (settings.getBoolean("hiddenCamera", false)) {
-                Intent cameraIntent = new Intent(PinActivity.this, HiddenCaptureImageService.class);
-                PinActivity.this.startService(cameraIntent);
+                Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
+                startService(cameraIntent);
             } else {
                 Log.d(TAG, "Camera is disabled. No photo will be taken");
             }

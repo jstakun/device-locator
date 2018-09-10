@@ -68,9 +68,15 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                                 l = new Location("");
                                 l.setLatitude(Location.convert(tokens[0]));
                                 l.setLongitude(Location.convert(tokens[1]));
-                                if (tokens.length > 2 && StringUtils.isNotEmpty(tokens[2])) {
+                                if (tokens.length > 2) {
                                     Bundle b = new Bundle();
-                                    b.putCharSequence(MainActivity.DEVICE_NAME, tokens[2]);
+                                    for (int i=2;i<tokens.length;i++) {
+                                        if (tokens[i].startsWith("rid:")) {
+                                            b.putString("routeId", tokens[i].substring(4));
+                                        } else {
+                                            b.putString(MainActivity.DEVICE_NAME, tokens[i]);
+                                        }
+                                    }
                                     l.setExtras(b);
                                 }
                             }

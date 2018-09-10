@@ -32,6 +32,8 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     private static final String TAG = "FingerprintHelper";
     private static final String KEY_NAME = "dl_key";
 
+    public enum AuthType {Fingerprint, Pin};
+
     private KeyguardManager keyguardManager;
     private FingerprintManager fingerprintManager;
     private FingerprintManager.CryptoObject cryptoObject;
@@ -144,7 +146,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     @Override
     public void onAuthenticationFailed() {
         Log.e(TAG, "Fingerprint Authentication failed");
-        callback.onFailed();
+        callback.onFailed(AuthType.Fingerprint);
     }
 
     @Override
@@ -160,6 +162,6 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     public interface AuthenticationCallback {
         void onAuthenticated();
         void onError();
-        void onFailed();
+        void onFailed(AuthType authType);
     }
 }

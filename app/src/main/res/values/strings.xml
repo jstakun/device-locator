@@ -117,6 +117,6 @@
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="registerLink">In order to register click &lt;a href="https://www.gms-world.net/m/register.jsp">here&lt;a></string>
-    <string name="auhenticate_with_fingerprint">Auhenticate with Fingerprint</string>
+    <string name="auhenticate_with_fingerprint">Unlock with Fingerprint</string>
 
 </resources>

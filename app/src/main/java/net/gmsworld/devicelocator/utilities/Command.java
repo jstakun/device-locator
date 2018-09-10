@@ -290,7 +290,7 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            return (commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length-1], "s", "share") || StringUtils.isNumeric(commandTokens[commandTokens.length-1]));
+            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length-1], "s", "share") || StringUtils.isNumeric(commandTokens[commandTokens.length-1]));
         }
 
         @Override

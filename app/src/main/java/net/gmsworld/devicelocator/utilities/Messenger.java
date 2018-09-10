@@ -594,7 +594,7 @@ public class Messenger {
                 }
                 if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean("motionDetectorRunning", false)) {
                     text = "Device location tracking on device " + deviceId + " is running. " +
-                            "Track route live: " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
+                            "Track route live " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
                     if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
                         notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER));
                     }
@@ -665,7 +665,7 @@ public class Messenger {
                 if (notifications.isEmpty()) {
                     text += "No notifications will be sent from device " + deviceId + "! Please specify valid email, phone number or Telegram chat or channel.";
                 } else {
-                    text += "Notifications from device " + deviceId + " will be sent to " + StringUtils.join(notifications, ',');
+                    text += "Notifications from device " + deviceId + " will be sent to " + StringUtils.join(notifications, ", ");
                 }
                 break;
             case Command.AUDIO_COMMAND:

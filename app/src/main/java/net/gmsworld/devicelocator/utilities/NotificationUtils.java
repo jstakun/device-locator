@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
@@ -31,6 +32,7 @@ public class NotificationUtils {
 
     private static final String DEFAULT_CHANNEL_ID = "Device-Locator";
     private static final String DEFAULT_NOTIFICATION_TITLE = "Device Locator Notification";
+    private static final String TAG = NotificationUtils.class.getSimpleName();
 
     public static Notification buildTrackerNotification(Context context, int notificationId) {
         Intent notificationIntent = new Intent(context, MainActivity.class);
@@ -57,54 +59,71 @@ public class NotificationUtils {
     }
 
     public static Notification buildMessageNotification(Context context, int notificationId, String message, Location location) {
-        PendingIntent contentIntent = null;
-        String deviceName = null;
+        PendingIntent mapIntent = null, routeIntent = null, webIntent = null;
+        String deviceName = null, routeId = null;
 
         if (location != null) {
             //message has location
             String device = "Your+Device";
             Bundle b = location.getExtras();
-            if (b != null && b.containsKey(MainActivity.DEVICE_NAME)) {
-                deviceName = b.getString(MainActivity.DEVICE_NAME);
-                device = "Device+" + deviceName;
+            if (b != null) {
+                if (b.containsKey(MainActivity.DEVICE_NAME)) {
+                    deviceName = b.getString(MainActivity.DEVICE_NAME);
+                    device = "Device+" + deviceName;
+                }
+                if (b.containsKey("routeId")) {
+                    routeId = b.getString("routeId");
+                }
             }
             Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + location.getLatitude() + "," + location.getLongitude() + "(" + device + ")");
-            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-            mapIntent.setPackage("com.google.android.apps.maps");
-            if (mapIntent.resolveActivity(context.getPackageManager()) != null) {
-                contentIntent = PendingIntent.getActivity(context, notificationId, mapIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            gmsIntent.setPackage("com.google.android.apps.maps");
+            if (gmsIntent.resolveActivity(context.getPackageManager()) != null) {
+                mapIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
 
             Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
             if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) { //10 min
-                int distance = (int)location.distanceTo(lastLocation); //in meters
+                int distance = (int) location.distanceTo(lastLocation); //in meters
                 if (distance > 0) {
                     message += "\n" + DistanceFormatter.format(distance) + " away";
                 }
             }
         }
 
-        if (contentIntent == null) {
-            String[] tokens = message.split("\\s+");
-            //message has no maps intent
-            for (int i = 0; i < tokens.length; i++) {
-                if (tokens[i].startsWith("http://") || tokens[i].startsWith("https://")) {
-                    Uri webpage = Uri.parse(tokens[i]);
-                    Intent notificationIntent = new Intent(Intent.ACTION_VIEW, webpage);
-                    contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    break;
+        String[] tokens = message.split("\\s+");
+        for (String token : tokens) {
+            if (webIntent == null && (token.startsWith("http://") || token.startsWith("https://"))) {
+                Intent notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(token));
+                webIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                if (routeIntent == null && token.startsWith(context.getString(R.string.showRouteUrl))) {
+                    notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(token));
+                    routeIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 }
             }
-        } else {
-            //message has maps intent
-            String[] tokens = message.split("\n");
-            for (int i = 0; i < tokens.length; i++) {
-                if (tokens[i].startsWith(Messenger.MAPS_URL_PREFIX)) {
-                    tokens[i] = context.getString(R.string.notification_open_in_maps);
-                    break;
+        }
+
+        //change links to
+        if (mapIntent != null || routeIntent != null) {
+            tokens = message.split("\n");
+            message = "";
+            for (String token : tokens) {
+                if (token.startsWith(Messenger.MAPS_URL_PREFIX) || token.startsWith(context.getString(R.string.showRouteUrl)) ){
+                    continue;
+                } else {
+                    message += token + "\n";
                 }
             }
-            message = StringUtils.join(tokens, "\n");
+        }
+
+        if (routeIntent == null && routeId != null) {
+            tokens = StringUtils.split(routeId,'_');
+            Log.d(TAG, "Route id: " + routeId);
+            if (tokens.length == 5) {
+                String routeUrl = context.getString(R.string.showRouteUrl) + "/" + tokens[3] + "/" + tokens[4] + "/now";
+                Intent notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(routeUrl));
+                routeIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
         }
 
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);
@@ -122,11 +141,18 @@ public class NotificationUtils {
                 .setSound(notificationUri)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE);
-                //.setOngoing(false)
-                //.setPublicVersion(publicNotification) //API 21
+        //.setOngoing(false)
+        //.setPublicVersion(publicNotification) //API 21
 
-        if (contentIntent != null) {
-            nb.setContentIntent(contentIntent);
+        if (mapIntent != null) {
+            nb.setContentIntent(mapIntent);
+            nb.addAction(R.drawable.ic_place_white, "Open in Maps", mapIntent);
+        } else if (webIntent != null) {
+            nb.setContentIntent(webIntent);
+        }
+
+        if (routeIntent != null) {
+            nb.addAction(R.drawable.ic_explore_white, "Track route", routeIntent);
         }
 
         return nb.build();
@@ -149,6 +175,7 @@ public class NotificationUtils {
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
             if (channel == null) {
+                Log.d(TAG, "Creating new notification channel " + channelId);
                 channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
                 channel.setDescription("Notifications from device " + channelName);
                 notificationManager.createNotificationChannel(channel);
