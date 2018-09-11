@@ -34,7 +34,7 @@ public class DeviceLocatorApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> headers = new HashMap<>();
         final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         String tokenStr = settings.getString(GMS_TOKEN, "");
         if (StringUtils.isNotEmpty(tokenStr)) {

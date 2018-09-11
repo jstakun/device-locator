@@ -129,7 +129,7 @@ public class Network {
             this.content = content;
             this.contentType = contentType;
             this.headers = headers;
-            this.context = new WeakReference<Context>(context);
+            this.context = new WeakReference<>(context);
             this.onGetFinishListener = onGetFinishListener;
         }
 
@@ -215,7 +215,7 @@ public class Network {
         private final WeakReference<Context> context;
 
         UploadImageTask(final Context context, final String urlString, final byte[] file, final String filename, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
-            this.context = new WeakReference<Context>(context);
+            this.context = new WeakReference<>(context);
             this.urlString = urlString;
             this.filename = filename;
             this.file = file;
@@ -311,7 +311,7 @@ public class Network {
 
     private static Map<String, String> getDefaultHeaders(Context context) {
         if (defaultHeaders == null) {
-            defaultHeaders = new HashMap<String, String>();
+            defaultHeaders = new HashMap<>();
             defaultHeaders.put("X-GMS-AppId", "2");
             defaultHeaders.put("X-GMS-Scope", "dl");
             if (context != null) {
@@ -330,7 +330,7 @@ public class Network {
         private String response;
 
         GetTask(final Context context, final String urlString, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
-            this.context = new WeakReference<Context>(context);
+            this.context = new WeakReference<>(context);
             this.urlString = urlString;
             this.headers = headers;
             this.onGetFinishListener = onGetFinishListener;

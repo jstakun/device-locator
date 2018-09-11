@@ -34,10 +34,10 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
 
     public enum AuthType {Fingerprint, Pin};
 
-    private KeyguardManager keyguardManager;
-    private FingerprintManager fingerprintManager;
+    private final KeyguardManager keyguardManager;
+    private final FingerprintManager fingerprintManager;
     private FingerprintManager.CryptoObject cryptoObject;
-    private AuthenticationCallback callback;
+    private final AuthenticationCallback callback;
 
     private Cipher cipher;
     private KeyStore keyStore;

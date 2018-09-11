@@ -497,7 +497,7 @@ public class Messenger {
         message += "\n" + "Battery level: " + getBatteryLevel(context) +
                 "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> headers = new HashMap<>();
         headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
         //First send notification to telegram and if not configured to email
         //REMEMBER this could send a lot of messages and your email account could be overloaded
@@ -523,7 +523,7 @@ public class Messenger {
 
     public static void sendPerimeterMessage(Context context, Location location, String app) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        final Map<String, String> headers = new HashMap<String, String>();
+        final Map<String, String> headers = new HashMap<>();
         headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
         sendRoutePoint(context, location, 1, headers);
         final int perimeter = settings.getInt("perimeter", RouteTrackingService.DEFAULT_PERIMETER);
@@ -541,7 +541,7 @@ public class Messenger {
     public static void sendCommandMessage(final Context context, final Bundle extras) {
         String text = null, title = null, phoneNumber = null, telegramId = null, email = null, notificationNumber = null, command = null, app = null;
         String deviceId = getDeviceId(context, true);
-        List<String> notifications = new ArrayList<String>();
+        List<String> notifications = new ArrayList<>();
         PreferencesUtils settings = new PreferencesUtils(context);
 
         if (extras != null) {
@@ -917,7 +917,7 @@ public class Messenger {
     }
 
     private static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final String tokenStr, final int retryCount) {
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
 
         try {
@@ -987,7 +987,7 @@ public class Messenger {
     }
 
     private static void sendEmailRegistrationRequest(final Context context, final String email, final String tokenStr, final int retryCount) {
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
 
         try {

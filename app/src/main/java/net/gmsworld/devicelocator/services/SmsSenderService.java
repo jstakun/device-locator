@@ -47,9 +47,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private Location bestLocation = null;
     private long startTime = 0;
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
 
-    private Runnable task = new Runnable() {
+    private final Runnable task = new Runnable() {
         @Override
         public void run () {
             disableUpdates();

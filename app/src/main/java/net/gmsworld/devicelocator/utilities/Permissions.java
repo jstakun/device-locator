@@ -30,7 +30,7 @@ public class Permissions {
     public static final int PERMISSIONS_REQUEST_CALL = 1005;
 
     public static void checkAndRequestPermissionsAtStartup(Activity activity) {
-        ArrayList<String> permissions = new ArrayList<String>();
+        ArrayList<String> permissions = new ArrayList<>();
         permissions.add(0, Manifest.permission.SEND_SMS);
         permissions.add(1, Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(2, Manifest.permission.READ_CONTACTS);

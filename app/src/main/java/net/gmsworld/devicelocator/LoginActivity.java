@@ -171,7 +171,7 @@ public class LoginActivity extends AppCompatActivity  {
         UserLoginTask(String email, String password, LoginActivity context) {
             mEmail = email;
             mPassword = password;
-            this.context = new WeakReference<LoginActivity>(context);
+            this.context = new WeakReference<>(context);
         }
 
         @Override

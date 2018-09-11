@@ -100,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int ACTION_MANAGE_OVERLAY_INTENT = 13;
 
+    private static final int ACTION_ADD_DEVICE_ADMIN = 14;
+
     private static final int SHARE_ROUTE_MESSAGE = 1;
 
     private static final int UPDATE_UI_MESSAGE = 2;
@@ -242,7 +244,17 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
+        if (requestCode == ACTION_ADD_DEVICE_ADMIN && HiddenCameraUtils.canOverDrawOtherApps(this)) {
+            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, new ComponentName(this, DeviceAdminEventReceiver.class));
+            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.admin_grant_explanation));
+            startActivityForResult(intent, ENABLE_ADMIN_INTENT);
+        } else if (requestCode == ACTION_MANAGE_OVERLAY_INTENT && HiddenCameraUtils.canOverDrawOtherApps(this)) {
+            Toast.makeText(MainActivity.this, "Please wait. Device Locator is checking your camera...", Toast.LENGTH_LONG).show();
+            Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
+            cameraIntent.putExtra("test", true);
+            startService(cameraIntent);
+        } else if (resultCode == RESULT_OK) {
             if (requestCode == ENABLE_ADMIN_INTENT) {
                 if (phoneNumber == null && telegramId == null && email == null) {
                     Toast.makeText(MainActivity.this, "Please specify who should be notified in case of failed login!", Toast.LENGTH_LONG).show();
@@ -276,12 +288,6 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
                 }
             }
-        }
-        if (requestCode == ACTION_MANAGE_OVERLAY_INTENT && HiddenCameraUtils.canOverDrawOtherApps(this)) {
-            Toast.makeText(MainActivity.this, "Please wait. Device Locator is checking your camera...", Toast.LENGTH_LONG).show();
-            Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
-            cameraIntent.putExtra("test", true);
-            startService(cameraIntent);
         }
     }
 
@@ -453,6 +459,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (loginTracker) {
             //disable tracking
+            Log.d(TAG, "Disable login tracker");
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
@@ -475,11 +482,16 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog dialog = builder.create();
             dialog.show();
         } else {
-            //enable tracking
-            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, deviceAdmin);
-            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.admin_grant_explanation));
-            startActivityForResult(intent, ENABLE_ADMIN_INTENT);
+            Log.d(TAG, "Enable login tracker");
+            if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
+                Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, deviceAdmin);
+                intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.admin_grant_explanation));
+                startActivityForResult(intent, ENABLE_ADMIN_INTENT);
+            } else {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
+                startActivityForResult(intent, ACTION_ADD_DEVICE_ADMIN);
+            }
         }
     }
 
@@ -495,6 +507,7 @@ public class MainActivity extends AppCompatActivity {
             if (!HiddenCameraUtils.canOverDrawOtherApps(this)) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, ACTION_MANAGE_OVERLAY_INTENT);
+                //HiddenCameraUtils.openDrawOverPermissionSetting(this);
             } else if (Permissions.haveCameraPermission(this)) {
                 Toast.makeText(MainActivity.this, "Please wait. Device Locator is checking your camera...", Toast.LENGTH_LONG).show();
                 Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
@@ -786,7 +799,7 @@ public class MainActivity extends AppCompatActivity {
     private void initUserLoginInput() {
         final Spinner userAccounts = this.findViewById(R.id.userAccounts);
 
-        List<String> accountNames = new ArrayList<String>();
+        List<String> accountNames = new ArrayList<>();
         accountNames.add("");
 
         //add notification email to the list only if verified
@@ -863,7 +876,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initDeviceNameInput() {
         final TextView deviceNameInput = this.findViewById(R.id.deviceName);
-        String deviceName = "";
+        String deviceName;
         if (settings.contains(DEVICE_NAME)) {
             deviceName = settings.getString(DEVICE_NAME);
         } else {
@@ -1375,7 +1388,7 @@ public class MainActivity extends AppCompatActivity {
             //load device list and set array adapter
             String queryString = "username=" + userLogin;
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
-            Map<String, String> headers = new HashMap<String, String>();
+            Map<String, String> headers = new HashMap<>();
             if (StringUtils.isNotEmpty(tokenStr)) {
                 headers.put("Authorization", "Bearer " + tokenStr);
             }
@@ -1437,7 +1450,7 @@ public class MainActivity extends AppCompatActivity {
         String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
         String content = "imei=" + imei + "&action=delete";
 
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
 
         Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
@@ -1575,7 +1588,7 @@ public class MainActivity extends AppCompatActivity {
         private final WeakReference<MainActivity> mainActivity;
 
         UIHandler(MainActivity activity) {
-            mainActivity = new WeakReference<MainActivity>(activity);
+            mainActivity = new WeakReference<>(activity);
         }
 
         @Override

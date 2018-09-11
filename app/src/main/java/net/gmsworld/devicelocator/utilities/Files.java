@@ -31,7 +31,7 @@ public class Files {
     }
 
     public static List<String> readFileByLinesFromContextDir(String filename, Context context) {
-        List<String> lines = new ArrayList<String>();
+        List<String> lines = new ArrayList<>();
         QueueFile queueFile = null;
 
         try {

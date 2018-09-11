@@ -106,7 +106,7 @@ public class Command {
     private static List<AbstractCommand> getCommands() {
         Log.d(TAG, "Initializing commands...");
         if (commands == null) {
-            commands = new ArrayList<AbstractCommand>();
+            commands = new ArrayList<>();
             try {
                 Class<?>[] commandClasses = Command.class.getDeclaredClasses();
                 for (Class<?> command : commandClasses) {
@@ -745,8 +745,7 @@ public class Command {
         @Override
         public boolean validateTokens() {
             if (commandTokens != null && commandTokens.length > 1) {
-                for (int i = 0; i < commandTokens.length; i++) {
-                    String token = commandTokens[i];
+                for (String token : commandTokens) {
                     if (token.startsWith("m:")) {
                         String newEmailAddress = token.substring(2);
                         if (StringUtils.isNotEmpty(newEmailAddress) && !Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) {
@@ -780,8 +779,7 @@ public class Command {
             String telegramId = null;
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
-            for (int i = 0; i < commandTokens.length; i++) {
-                String token = commandTokens[i];
+            for (String token : commandTokens) {
                 if (token.startsWith("m:")) {
                     email = token.substring(2);
                 } else if (token.startsWith("p:")) {
@@ -831,8 +829,7 @@ public class Command {
             String telegramId = null;
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
-            for (int i = 0; i < commandTokens.length; i++) {
-                String token = commandTokens[i];
+            for (String token : commandTokens) {
                 if (token.startsWith("m:")) {
                     email = token.substring(2);
                 } else if (token.startsWith("p:")) {
@@ -881,8 +878,7 @@ public class Command {
             String telegramId = null;
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
-            for (int i = 0; i < commandTokens.length; i++) {
-                String token = commandTokens[i];
+            for (String token : commandTokens) {
                 if (token.startsWith("m:")) {
                     email = token.substring(2);
                 } else if (token.startsWith("p:")) {
@@ -1269,8 +1265,7 @@ public class Command {
         private void applyConfigChange(Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
-            for (int i = 0; i < commandTokens.length; i++) {
-                String token = commandTokens[i];
+            for (String token : commandTokens) {
                 if (token.equalsIgnoreCase("lm:on")) {
                     //location message on
                     settings.edit().putBoolean(SmsSenderService.SEND_ACKNOWLEDGE_MESSAGE, true).apply();

@@ -108,9 +108,7 @@ public class NotificationUtils {
             tokens = message.split("\n");
             message = "";
             for (String token : tokens) {
-                if (token.startsWith(Messenger.MAPS_URL_PREFIX) || token.startsWith(context.getString(R.string.showRouteUrl)) ){
-                    continue;
-                } else {
+                if (!token.startsWith(Messenger.MAPS_URL_PREFIX) && !token.startsWith(context.getString(R.string.showRouteUrl)) ){
                     message += token + "\n";
                 }
             }
@@ -146,13 +144,13 @@ public class NotificationUtils {
 
         if (mapIntent != null) {
             nb.setContentIntent(mapIntent);
-            nb.addAction(R.drawable.ic_place_white, "Open in Maps", mapIntent);
+            nb.addAction(R.drawable.ic_place_white, context.getString(R.string.map_button), mapIntent);
         } else if (webIntent != null) {
             nb.setContentIntent(webIntent);
         }
 
         if (routeIntent != null) {
-            nb.addAction(R.drawable.ic_explore_white, "Track route", routeIntent);
+            nb.addAction(R.drawable.ic_explore_white, context.getString(R.string.route_button), routeIntent);
         }
 
         return nb.build();

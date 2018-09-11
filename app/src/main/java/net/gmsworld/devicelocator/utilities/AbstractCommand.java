@@ -119,7 +119,7 @@ public abstract class AbstractCommand {
     }
 
     private ArrayList<SmsMessage> getMessagesWithKeyword(Context context, String keyword, Bundle bundle) {
-        ArrayList<SmsMessage> list = new ArrayList<SmsMessage>();
+        ArrayList<SmsMessage> list = new ArrayList<>();
         if (bundle != null) {
             Object[] pdus = (Object[]) bundle.get("pdus");
             if (pdus != null) {
@@ -175,7 +175,7 @@ public abstract class AbstractCommand {
                     foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command) && (!isPinRequired || StringUtils.equals(commandTokens[1], pin));
                 } else if (!isPinRequired) {
                     foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command);
-                } else if (isPinRequired && StringUtils.equalsIgnoreCase(commandTokens[0], command)) {
+                } else if (StringUtils.equalsIgnoreCase(commandTokens[0], command)) {
                     Log.w(TAG, "Command " + commandTokens[0] + " without Security PIN has been received!");
                 }
             }

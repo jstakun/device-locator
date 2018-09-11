@@ -113,7 +113,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
 
                     //send image to server and send notification with link
 
-                    Map<String, String> headers = new HashMap<String, String>();
+                    Map<String, String> headers = new HashMap<>();
 
                     final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
                     String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");

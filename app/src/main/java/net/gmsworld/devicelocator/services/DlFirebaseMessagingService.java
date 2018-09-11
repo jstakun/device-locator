@@ -108,14 +108,14 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         Log.d(TAG, "Invalid command " + commandName + " found!");
                         rejected = true;
                     }
-                } else if (!pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
+                } else if (correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
                     rejected = true;
                     Log.e(TAG, "Invalid pin found in cloud message!");
                 } else {
                     rejected = true;
                     Log.e(TAG, "Invalid pin found in cloud message!");
                 }
-                if (rejected) {
+                if (rejected && correlationId != null) {
                     Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
                 }
                 firebaseAnalytics.logEvent("cloud_command_received_" + commandName.toLowerCase(), new Bundle());
@@ -187,7 +187,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     content += "&name=" + deviceName;
                 }
 
-                Map<String, String> headers = new HashMap<String, String>();
+                Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + gmsTokenStr);
 
                 Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {

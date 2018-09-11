@@ -204,7 +204,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                             }
                         }
 
-                        Map<String, String> headers = new HashMap<String, String>();
+                        Map<String, String> headers = new HashMap<>();
                         headers.put("Authorization", "Bearer " + tokenStr);
 
                         Network.post(CommandActivity.this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {

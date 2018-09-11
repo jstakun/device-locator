@@ -45,13 +45,13 @@ public abstract class AbstractLocationManager {
     private static final int MAX_REASONABLE_ALTITUDECHANGE = 200; //meters
     public static final int MAX_REASONABLE_ACCURACY = 50; //meters
 
-    private static final Vector<Location> mWeakLocations = new Vector<Location>(3);
-    private static final Queue<Double> mAltitudes = new LinkedList<Double>();
+    private static final Vector<Location> mWeakLocations = new Vector<>(3);
+    private static final Queue<Double> mAltitudes = new LinkedList<>();
     private final boolean mSpeedSanityCheck = true;
 
     private int radius = -1;
 
-    private static final Map<String, Handler> mLocationHandlers = new HashMap<String, Handler>();
+    private static final Map<String, Handler> mLocationHandlers = new HashMap<>();
     private Location recentLocationSent;
     private Location lastLocation;
 
@@ -306,7 +306,7 @@ public abstract class AbstractLocationManager {
                     String desc = "Route recorded by Device Locator on device: " + deviceId;
                     String content = routeToGeoJson(route, desc, deviceId);
                     String url = context.getString(R.string.routeProviderUrl);
-                    final Map<String, String> headers = new HashMap<String, String>();
+                    final Map<String, String> headers = new HashMap<>();
                     String tokenStr = PreferenceManager.getDefaultSharedPreferences(context).getString(DeviceLocatorApp.GMS_TOKEN, "");
                     if (StringUtils.isNotEmpty(tokenStr)) {
                         url = context.getString(R.string.secureRouteProviderUrl);
