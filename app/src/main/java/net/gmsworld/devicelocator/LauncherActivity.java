@@ -20,12 +20,21 @@ public class LauncherActivity extends Activity {
         final long pinVerificationMillis = settings.getLong("pinVerificationMillis");
         final boolean settingsVerifyPin = settings.getBoolean("settings_verify_pin", false);
 
+        String action = null;
+        if (getIntent() != null) {
+            action = getIntent().getAction();
+        }
+
         Intent showIntent;
 
         if (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS) {
             showIntent = new Intent(this, PinActivity.class);
         } else {
             showIntent = new Intent(this, MainActivity.class);
+        }
+
+        if (action != null) {
+            showIntent.setAction(action);
         }
 
         startActivity(showIntent);

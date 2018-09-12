@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.LauncherActivity;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 
@@ -35,8 +36,9 @@ public class NotificationUtils {
     private static final String TAG = NotificationUtils.class.getSimpleName();
 
     public static Notification buildTrackerNotification(Context context, int notificationId) {
-        Intent notificationIntent = new Intent(context, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent trackerIntent = new Intent(context, LauncherActivity.class);
+        trackerIntent.setAction(MainActivity.ACTION_DEVICE_TRACKER);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, trackerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);
 

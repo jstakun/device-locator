@@ -36,21 +36,22 @@ import org.apache.commons.lang3.StringUtils;
 public class PinActivity extends AppCompatActivity implements FingerprintHelper.AuthenticationCallback {
 
     private static final String TAG = PinActivity.class.getSimpleName();
-
     static final int PIN_MIN_LENGTH = 4;
-
     static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
-
     public static final String DEVICE_PIN = "token";
 
     private FingerprintHelper fingerprintHelper;
-
     private PreferencesUtils settings;
+    private String action;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pin);
+
+        if (getIntent() != null) {
+            action = getIntent().getAction();
+        }
 
         //fingerprint authentication
 
@@ -149,7 +150,11 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
 
     @Override
     public void onAuthenticated() {
-        startActivity(new Intent(this, MainActivity.class));
+        Intent intent = new Intent(this, MainActivity.class);
+        if (action != null) {
+            intent.setAction(action);
+        }
+        startActivity(intent);
         PreferenceManager.getDefaultSharedPreferences(this).edit()
                 .remove("pinFailedCount")
                 .putLong("pinVerificationMillis", System.currentTimeMillis())

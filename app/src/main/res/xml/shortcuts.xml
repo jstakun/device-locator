@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android" >
+    <shortcut
+        android:shortcutId="sms_manager"
+        android:icon="@drawable/ic_textsms_white"
+        android:shortcutShortLabel="@string/sms_control"
+        android:shortcutLongLabel="@string/sms_control">
+        <intent
+            android:action="net.gmsworld.devicelocator.ActionSmsManager"
+            android:targetPackage="net.gmsworld.devicelocator"
+            android:targetClass="net.gmsworld.devicelocator.LauncherActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="device_tracker"
+        android:icon="@drawable/ic_location_on_white"
+        android:shortcutShortLabel="@string/device_tracker"
+        android:shortcutLongLabel="@string/device_tracker">
+        <intent
+            android:action="net.gmsworld.devicelocator.ActionDeviceTracker"
+            android:targetPackage="net.gmsworld.devicelocator"
+            android:targetClass="net.gmsworld.devicelocator.LauncherActivity" />
+    </shortcut>
+    <shortcut
+        android:shortcutId="device_manager"
+        android:icon="@drawable/ic_devices_other_white_24dp"
+        android:shortcutShortLabel="@string/devices"
+        android:shortcutLongLabel="@string/devices">
+        <intent
+            android:action="net.gmsworld.devicelocator.ActionDeviceManager"
+            android:targetPackage="net.gmsworld.devicelocator"
+            android:targetClass="net.gmsworld.devicelocator.LauncherActivity" />
+    </shortcut>
+</shortcuts>

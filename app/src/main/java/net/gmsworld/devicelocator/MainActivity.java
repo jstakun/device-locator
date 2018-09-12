@@ -95,45 +95,31 @@ public class MainActivity extends AppCompatActivity {
     private static final int SEND_LOCATION_INTENT = 1;
     //private static final int MOTION_DETECTOR_INTENT = 2;
     private static final int SELECT_CONTACT_INTENT = 3;
-
     private static final int ENABLE_ADMIN_INTENT = 12;
-
     private static final int ACTION_MANAGE_OVERLAY_INTENT = 13;
-
     private static final int ACTION_ADD_DEVICE_ADMIN = 14;
-
     private static final int SHARE_ROUTE_MESSAGE = 1;
-
     private static final int UPDATE_UI_MESSAGE = 2;
-
     private static final int MIN_RADIUS = 10; //meters
-
     private static final int MAX_RADIUS = 1000;
 
     public static final String USER_LOGIN = "userLogin";
-
     public static final String DEVICE_NAME = "deviceName";
-
     public static final String NOTIFICATION_EMAIL = "email";
-
     public static final String NOTIFICATION_PHONE_NUMBER = "phoneNumber";
-
     public static final String NOTIFICATION_SOCIAL = "telegramId";
 
+    public static final String ACTION_DEVICE_TRACKER = "net.gmsworld.devicelocator.ActionDeviceTracker";
+    public static final String ACTION_DEVICE_MANAGER = "net.gmsworld.devicelocator.ActionDeviceManager";
+    public static final String ACTION_SMS_MANAGER = "net.gmsworld.devicelocator.ActionSmsManager";
+
     private Boolean running = null;
-
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
-
     private boolean motionDetectorRunning = false;
-
     private String phoneNumber = null, email = null, telegramId = null;
-
     private PreferencesUtils settings;
-
     private final Handler loadingHandler = new UIHandler(this);
-
     private boolean isTrackingServiceBound = false;
-
     private FirebaseAnalytics firebaseAnalytics;
 
     @Override
@@ -142,6 +128,32 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate()");
 
         settings = new PreferencesUtils(this);
+        boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
+        boolean isDeviceManagerShown = settings.getBoolean("isDeviceManagerShown", false);
+
+        if (getIntent() != null) {
+            String action = getIntent().getAction();
+            if (action != null) {
+                Log.d(TAG, "getIntent().getAction(): " + action);
+                if (action.equals(ACTION_DEVICE_TRACKER)) {
+                    isTrackerShown = true;
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putBoolean("isTrackerShown", true)
+                            .putBoolean("isDeviceManagerShown", false).apply();
+                } else if (action.equals(ACTION_DEVICE_MANAGER)) {
+                    isDeviceManagerShown = true;
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putBoolean("isTrackerShown", false)
+                            .putBoolean("isDeviceManagerShown", true).apply();
+                } else if (action.equals(ACTION_SMS_MANAGER)) {
+                    isTrackerShown = true;
+                    isDeviceManagerShown = true;
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putBoolean("isTrackerShown", false)
+                            .putBoolean("isDeviceManagerShown", false).apply();
+                }
+            }
+        }
 
         setContentView(R.layout.activity_main);
 
@@ -152,14 +164,12 @@ public class MainActivity extends AppCompatActivity {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,false, RouteTrackingService.Mode.Normal);
         }
 
-        boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
-        boolean isDeviceTrackerShown = settings.getBoolean("isDeviceManagerShown", false);
         setupToolbar(R.id.smsToolbar);
         if (isTrackerShown) {
             findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.smsSettings).setVisibility(View.GONE);
             findViewById(R.id.deviceSettings).setVisibility(View.GONE);
-        } else if (isDeviceTrackerShown) {
+        } else if (isDeviceManagerShown) {
             findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.trackerSettings).setVisibility(View.GONE);
             findViewById(R.id.smsSettings).setVisibility(View.GONE);
@@ -374,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
+    /*@Override
     public void onNewIntent (Intent intent) {
         //show tracker view
         Log.d(TAG, "onNewIntent()");
@@ -385,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.smsSettings).setVisibility(View.GONE);
         findViewById(R.id.deviceSettings).setVisibility(View.GONE);
         supportInvalidateOptionsMenu();
-    }
+    }*/
 
     private void showRemoveDeviceDialog(final Device device) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
