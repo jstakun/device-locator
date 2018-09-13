@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -16,6 +17,7 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.NotificationUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -82,6 +84,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             String command = extras.getString("command");
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForeground(1234, NotificationUtils.buildWorkerNotification(this));
+            }
+
             if (StringUtils.isEmpty(command)) {
                 initSending(extras.getString("source"));
             } else {
@@ -91,7 +97,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             //Log.e(TAG, "This intent requires extra parameters");
         //}
     }
-
 
     private void initSending(String source) {
         Log.d(TAG, "initSending()");

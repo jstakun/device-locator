@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -29,6 +30,7 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.NotificationUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -59,6 +61,10 @@ public class HiddenCaptureImageService extends HiddenCameraService {
 
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
 
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForeground(1234, NotificationUtils.buildWorkerNotification(this));
+                }
+
                 CameraConfig cameraConfig = new CameraConfig()
                         .getBuilder(this)
                         .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
@@ -80,7 +86,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                             }
                         }
                     }, 1000);
-                } catch (Exception e) {
+                } catch (Throwable e) {
                     Log.e(TAG, e.getMessage(), e);
                     onCameraError(CameraError.ERROR_CAMERA_OPEN_FAILED);
                 }

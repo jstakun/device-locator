@@ -6,7 +6,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.RingtoneManager;
@@ -40,8 +39,6 @@ public class NotificationUtils {
         trackerIntent.setAction(MainActivity.ACTION_DEVICE_TRACKER);
         PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, trackerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);
-
         final String message = context.getString(R.string.notification_tracker);
 
         initChannels(context, Messenger.getDeviceName());
@@ -50,7 +47,7 @@ public class NotificationUtils {
                 .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_location_on_white)
-                .setLargeIcon(icon)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setContentIntent(contentIntent)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -126,8 +123,6 @@ public class NotificationUtils {
             }
         }
 
-        Bitmap icon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large);
-
         Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
         String channelId = deviceName;
@@ -141,7 +136,7 @@ public class NotificationUtils {
                 .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_devices_other_white)
-                .setLargeIcon(icon)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setSound(notificationUri)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -162,6 +157,16 @@ public class NotificationUtils {
         }
 
         return nb.build();
+    }
+
+    public static Notification buildWorkerNotification(Context context) {
+        initChannels(context, DEFAULT_CHANNEL_ID);
+        Notification notification = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_devices_other_white)
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
+                    .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
+                    .setContentText("Please wait...").build();
+        return notification;
     }
 
     public static void cancel(Context context, int notificationId) {

@@ -58,7 +58,7 @@ public class Permissions {
     }
 
     public static void requestSendSMSAndLocationPermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
     }
 
     public static void requestLocationPermission(Activity activity, int requestCode) {
@@ -83,6 +83,7 @@ public class Permissions {
 
     public static boolean haveSendSMSAndLocationPermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
