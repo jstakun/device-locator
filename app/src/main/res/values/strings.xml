@@ -120,5 +120,6 @@
     <string name="auhenticate_with_fingerprint">Unlock with Fingerprint</string>
     <string name="route_button">Track Route</string>
     <string name="map_button">Map View</string>
+    <string name="browser_button">Open in Browser</string>
 
 </resources>

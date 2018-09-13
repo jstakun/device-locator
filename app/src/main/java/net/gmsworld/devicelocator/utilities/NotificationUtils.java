@@ -149,6 +149,7 @@ public class NotificationUtils {
             nb.addAction(R.drawable.ic_place_white, context.getString(R.string.map_button), mapIntent);
         } else if (webIntent != null) {
             nb.setContentIntent(webIntent);
+            nb.addAction(R.drawable.ic_open_in_browser, context.getString(R.string.browser_button), webIntent);
         }
 
         if (routeIntent != null) {
