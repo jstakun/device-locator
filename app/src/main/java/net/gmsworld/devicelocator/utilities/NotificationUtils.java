@@ -33,6 +33,7 @@ public class NotificationUtils {
     private static final String DEFAULT_CHANNEL_ID = "Device-Locator";
     private static final String DEFAULT_NOTIFICATION_TITLE = "Device Locator Notification";
     private static final String TAG = NotificationUtils.class.getSimpleName();
+    public static final int WORKER_NOTIFICATION_ID = 1234;
 
     public static Notification buildTrackerNotification(Context context, int notificationId) {
         Intent trackerIntent = new Intent(context, LauncherActivity.class);
@@ -149,7 +150,9 @@ public class NotificationUtils {
             nb.addAction(R.drawable.ic_place_white, context.getString(R.string.map_button), mapIntent);
         } else if (webIntent != null) {
             nb.setContentIntent(webIntent);
-            nb.addAction(R.drawable.ic_open_in_browser, context.getString(R.string.browser_button), webIntent);
+            if (routeIntent == null) {
+                nb.addAction(R.drawable.ic_open_in_browser, context.getString(R.string.browser_button), webIntent);
+            }
         }
 
         if (routeIntent != null) {
