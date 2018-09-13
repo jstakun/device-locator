@@ -130,12 +130,17 @@ public class NotificationUtils {
 
         Uri notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        initChannels(context, deviceName);
+        String channelId = deviceName;
+        if (channelId == null) {
+            channelId = DEFAULT_CHANNEL_ID;
+        }
 
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, deviceName)
+        initChannels(context, channelId);
+
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, channelId)
                 .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
                 .setContentText(message)
-                .setSmallIcon(R.drawable.ic_devices_other_white_24dp)
+                .setSmallIcon(R.drawable.ic_devices_other_white)
                 .setLargeIcon(icon)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setSound(notificationUri)
@@ -169,9 +174,6 @@ public class NotificationUtils {
 
     private static void initChannels(Context context, String channelId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (channelId == null) {
-                channelId = DEFAULT_CHANNEL_ID;
-            }
             final String channelName = channelId.replace('-', ' ');
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
             NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
@@ -180,6 +182,8 @@ public class NotificationUtils {
                 channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
                 channel.setDescription("Notifications from device " + channelName);
                 notificationManager.createNotificationChannel(channel);
+            } else {
+                Log.d(TAG, "Notification channel " + channelId + " exists");
             }
         }
     }

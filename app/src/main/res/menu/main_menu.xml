@@ -13,7 +13,7 @@
     <item
         android:id="@+id/devices"
         android:title="@string/devices"
-        android:icon="@drawable/ic_devices_other_white_24dp"
+        android:icon="@drawable/ic_devices_other_white"
         app:showAsAction="ifRoom|withText"/>
     <item
         android:id="@+id/loginTracker"

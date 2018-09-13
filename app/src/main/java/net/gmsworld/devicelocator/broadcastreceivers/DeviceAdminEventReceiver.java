@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.MainActivity;
@@ -47,11 +48,13 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
         newIntent.putExtra("email", email);
         newIntent.putExtra("telegramId", telegramId);
         newIntent.putExtra("source", SOURCE);
-        context.startService(newIntent);
+        ContextCompat.startForegroundService(context, newIntent);
+        //context.startService(newIntent);
 
         if (settings.getBoolean("hiddenCamera", false)) {
             Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
-            context.startService(cameraIntent);
+            //context.startService(cameraIntent);
+            ContextCompat.startForegroundService(context, cameraIntent);
         } else {
             Log.d(TAG, "Camera is disable. No photo will be taken");
         }

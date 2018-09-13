@@ -146,8 +146,8 @@ public class MainActivity extends AppCompatActivity {
                             .putBoolean("isTrackerShown", false)
                             .putBoolean("isDeviceManagerShown", true).apply();
                 } else if (action.equals(ACTION_SMS_MANAGER)) {
-                    isTrackerShown = true;
-                    isDeviceManagerShown = true;
+                    isTrackerShown = false;
+                    isDeviceManagerShown = false;
                     PreferenceManager.getDefaultSharedPreferences(this).edit()
                             .putBoolean("isTrackerShown", false)
                             .putBoolean("isDeviceManagerShown", false).apply();

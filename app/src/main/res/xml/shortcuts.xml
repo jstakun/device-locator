@@ -2,7 +2,7 @@
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android" >
     <shortcut
         android:shortcutId="sms_manager"
-        android:icon="@drawable/ic_textsms_black"
+        android:icon="@drawable/ic_textsms_green"
         android:shortcutShortLabel="@string/sms_control"
         android:shortcutLongLabel="@string/sms_control">
         <intent
@@ -12,7 +12,7 @@
     </shortcut>
     <shortcut
         android:shortcutId="device_tracker"
-        android:icon="@drawable/ic_location_on_black"
+        android:icon="@drawable/ic_location_on_green"
         android:shortcutShortLabel="@string/device_tracker"
         android:shortcutLongLabel="@string/device_tracker">
         <intent
@@ -22,7 +22,7 @@
     </shortcut>
     <shortcut
         android:shortcutId="device_manager"
-        android:icon="@drawable/ic_devices_other_black"
+        android:icon="@drawable/ic_devices_other_green"
         android:shortcutShortLabel="@string/devices"
         android:shortcutLongLabel="@string/devices">
         <intent
