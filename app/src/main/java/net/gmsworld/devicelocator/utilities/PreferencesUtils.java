@@ -8,6 +8,8 @@ import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Set;
+
 public class PreferencesUtils {
 
     private static final String TAG = PreferencesUtils.class.getSimpleName();
@@ -70,5 +72,9 @@ public class PreferencesUtils {
 
     public boolean contains(String key) {
         return sharedPreferences.contains(key);
+    }
+
+    public Set<String> getStringSet(String key, Set<String> defaultValue) {
+        return sharedPreferences.getStringSet(key, defaultValue);
     }
 }

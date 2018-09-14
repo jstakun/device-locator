@@ -82,11 +82,16 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -105,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String USER_LOGIN = "userLogin";
     public static final String DEVICE_NAME = "deviceName";
+    public static final String USER_DEVICES = "userDevices";
     public static final String NOTIFICATION_EMAIL = "email";
     public static final String NOTIFICATION_PHONE_NUMBER = "phoneNumber";
     public static final String NOTIFICATION_SOCIAL = "telegramId";
@@ -1395,7 +1401,20 @@ public class MainActivity extends AppCompatActivity {
 
         String userLogin = settings.getString(USER_LOGIN);
         if (StringUtils.isNotEmpty(userLogin)) {
-            //load device list and set array adapter
+            //first load devices from cache
+            Set<String> deviceSet = settings.getStringSet(USER_DEVICES, null);
+            if (deviceSet != null && !deviceSet.isEmpty()) {
+                ArrayList<Device> userDevices = new ArrayList<>();
+                for (String device : deviceSet) {
+                    Device d = Device.fromString(device);
+                    if (d != null) {
+                        userDevices.add(d);
+                    }
+                }
+                Collections.sort(userDevices, new DeviceComparator());
+                populateDeviceList(userDevices, deviceList);
+            }
+            //second load device list and set array adapter
             String queryString = "username=" + userLogin;
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
@@ -1429,10 +1448,12 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                             if (thisDeviceOnList) {
-                                final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, userDevices);
-                                Log.d(TAG, "Found " + userDevices.size() + " devices");
-                                deviceList.setAdapter(adapter);
-                                setListViewHeightBasedOnChildren(deviceList);
+                                populateDeviceList(userDevices, deviceList);
+                                Set<String> deviceSet = new HashSet<>();
+                                for (Device device : userDevices) {
+                                    deviceSet.add(device.toString());
+                                }
+                                PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putStringSet(USER_DEVICES, deviceSet).apply();
                             } else {
                                 deviceListEmpty.setText(R.string.devices_list_empty);
                             }
@@ -1441,7 +1462,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if (!thisDeviceOnList) {
                             //this device has been removed from other device
-                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(USER_LOGIN, "").apply();
+                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().
+                                    remove(USER_LOGIN).remove(USER_DEVICES).apply();
                             initUserLoginInput();
                         }
                     } else {
@@ -1454,6 +1476,13 @@ public class MainActivity extends AppCompatActivity {
             //deviceList.setAdapter(adapter);
             deviceListEmpty.setText(R.string.devices_list_empty);
         }
+    }
+
+    private void populateDeviceList(final ArrayList<Device> userDevices, final ListView deviceList) {
+        final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, userDevices);
+        Log.d(TAG, "Found " + userDevices.size() + " devices");
+        deviceList.setAdapter(adapter);
+        setListViewHeightBasedOnChildren(deviceList);
     }
 
     private void deleteDevice(final String imei) {
@@ -1706,6 +1735,21 @@ public class MainActivity extends AppCompatActivity {
             TextView deviceName;
             TextView deviceDesc;
             ImageButton deviceRemove;
+        }
+    }
+
+    private class DeviceComparator implements Comparator<Device> {
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+        @Override
+        public int compare(Device device, Device device2) {
+            try {
+                return formatter.parse(device2.creationDate).compareTo(formatter.parse(device.creationDate));
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage());
+                return 0;
+            }
         }
     }
 }
