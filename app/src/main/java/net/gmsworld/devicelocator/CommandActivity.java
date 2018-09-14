@@ -1,5 +1,6 @@
 package net.gmsworld.devicelocator;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.location.Location;
 import android.os.Bundle;
@@ -21,20 +22,17 @@ import android.widget.Toast;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 import net.gmsworld.devicelocator.model.Device;
+import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractCommand;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Messenger;
-import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
@@ -44,7 +42,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
     private static final String TAG = CommandActivity.class.getSimpleName();
 
-    private static final String PIN_PREFIX = "pin_";
+    public static final String PIN_PREFIX = "pin_";
 
     private FirebaseAnalytics firebaseAnalytics;
 
@@ -190,37 +188,18 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                     if (!validArgs) {
                         Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(CommandActivity.this, "Sending command " + command + " to device " + (StringUtils.isNotEmpty(name) ? name : imei) + "...", Toast.LENGTH_SHORT).show();
-                        String tokenStr = prefs.getString(DeviceLocatorApp.GMS_TOKEN);
-                        String content = "imei=" + imei;
-                        content += "&command=" + command + "dlapp";
-                        content += "&pin=" + pin;
-                        content += "&correlationId=" + Messenger.getDeviceId(CommandActivity.this, false) + "+=+" + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
-                        if (needArgs && StringUtils.isNotEmpty(commandArgs)) {
-                            try {
-                                content += "&args=" + URLEncoder.encode(commandArgs, "UTF-8");
-                            } catch (Exception e) {
-                                Log.e(TAG, e.getMessage(), e);
-                            }
-                        }
-
-                        Map<String, String> headers = new HashMap<>();
-                        headers.put("Authorization", "Bearer " + tokenStr);
-
-                        Network.post(CommandActivity.this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
-                            @Override
-                            public void onGetFinish(String results, int responseCode, String url) {
-                                if (responseCode == 200) {
-                                    Toast.makeText(CommandActivity.this, "Command " + command + " has been sent. You'll receive notification when this message will be delivered to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!", Toast.LENGTH_SHORT).show();
-                                    Bundle bundle = new Bundle();
-                                    //bundle.putString("command", command);
-                                    firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), bundle);
-                                } else {
-                                    Toast.makeText(CommandActivity.this, "Failed to send command " + command + " to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
+                        firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
                         prefs.setEncryptedString(PIN_PREFIX + imei, pin);
+                        Intent newIntent = new Intent(CommandActivity.this, CommandService.class);
+                        if (needArgs && StringUtils.isNotEmpty(commandArgs)) {
+                            newIntent.putExtra("args", commandArgs);
+                        }
+                        newIntent.putExtra("command", command);
+                        newIntent.putExtra("imei", imei);
+                        if (StringUtils.isNotEmpty(name)) {
+                            newIntent.putExtra("name", name);
+                        }
+                        startService(newIntent);
                     }
                 }
             }

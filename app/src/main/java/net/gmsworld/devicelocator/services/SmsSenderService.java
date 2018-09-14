@@ -59,7 +59,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     };
 
     public SmsSenderService() {
-        super("SmsSenderService");
+        super(TAG);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             this.app = extras.getString("app");
 
             if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId) && StringUtils.isEmpty(email) && StringUtils.isEmpty(app)) {
-                //Log.d(TAG, "Phonenumber empty, return.");
+                Log.e(TAG, "Notification settings are empty!");
                 return;
             }
 

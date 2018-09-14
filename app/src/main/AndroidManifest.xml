@@ -81,6 +81,10 @@
             android:exported="false" />
 
         <service
+            android:name=".services.CommandService"
+            android:exported="false" />
+
+        <service
             android:name=".services.RouteTrackingService"
             android:exported="false" />
 
