@@ -476,7 +476,7 @@ public class Messenger {
         }
         if (StringUtils.isNotEmpty(app)) {
             String[] tokens = StringUtils.split(app, "+=+");
-            sendCloudMessage(context, null, tokens[0], tokens[1], text, null, 1, new HashMap<String, String>());
+            sendCloudMessage(context, null, tokens[0], tokens[1], text, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
         }
     }
 
