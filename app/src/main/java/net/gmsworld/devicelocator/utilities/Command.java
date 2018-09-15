@@ -1,8 +1,6 @@
 package net.gmsworld.devicelocator.utilities;
 
 import android.Manifest;
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1161,10 +1159,7 @@ public class Command {
                 Log.e(TAG, e.getMessage(), e);
             }
             if (StringUtils.isNotEmpty(message)) {
-                int notificationId = (int) System.currentTimeMillis();
-                if (StringUtils.startsWithIgnoreCase(message, Messenger.ROUTE_MESSAGE_PREFIX)) {
-                    notificationId = RouteTrackingService.NOTIFICATION_ROUTE_ID;
-                } else if (StringUtils.containsIgnoreCase(message, "perimeter")) {
+                if (StringUtils.containsIgnoreCase(message, "perimeter")) {
                     String[] tokens = StringUtils.split(message, "\n");
                     if (tokens.length > 1 && StringUtils.isNumeric(tokens[tokens.length-1])) {
                         int perimeter = Integer.valueOf(tokens[tokens.length-1]).intValue();
@@ -1184,11 +1179,7 @@ public class Command {
                     }
                 }
                 if (message != null) {
-                    Notification notification = NotificationUtils.buildMessageNotification(context, notificationId, message, location, extras);
-                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                    if (notificationManager != null) {
-                        notificationManager.notify(notificationId, notification);
-                    }
+                    NotificationUtils.showMessageNotification(context, message, location, extras);
                 }
             }
         }

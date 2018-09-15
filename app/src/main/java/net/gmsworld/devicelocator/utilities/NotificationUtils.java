@@ -22,6 +22,9 @@ import net.gmsworld.devicelocator.services.CommandService;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
@@ -35,6 +38,7 @@ public class NotificationUtils {
     private static final String DEFAULT_NOTIFICATION_TITLE = "Device Locator Notification";
     private static final String TAG = NotificationUtils.class.getSimpleName();
     public static final int WORKER_NOTIFICATION_ID = 1234;
+    public static final Map<String, Integer> notificationIds = new HashMap<String, Integer>();
 
     public static Notification buildTrackerNotification(Context context, int notificationId) {
         Intent trackerIntent = new Intent(context, LauncherActivity.class);
@@ -59,7 +63,35 @@ public class NotificationUtils {
                 .build();
     }
 
-    public static Notification buildMessageNotification(Context context, int notificationId, String message, Location location, Bundle extras) {
+    public static void showMessageNotification(Context context, String message, Location location, Bundle extras) {
+        int notificationId = (int) System.currentTimeMillis();
+        //if (StringUtils.startsWithIgnoreCase(message, Messenger.ROUTE_MESSAGE_PREFIX)) {
+        //    notificationId = RouteTrackingService.NOTIFICATION_ROUTE_ID;
+        //}
+        if (extras != null) {
+            String id = null;
+            if (extras.containsKey("routeId")) {
+                id = extras.getString("routeId");
+            } else if (extras.containsKey("imei") && extras.containsKey("command")) {
+                id = extras.getString("imei") + "_" + extras.getString("command");
+            }
+            if (id != null) {
+                if (notificationIds.containsKey(id)) {
+                    notificationId = notificationIds.get(id);
+                } else {
+                    notificationId = notificationIds.size();
+                    notificationIds.put(id, notificationId);
+                }
+            }
+        }
+        Notification notification = NotificationUtils.buildMessageNotification(context, notificationId, message, location, extras);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            notificationManager.notify(notificationId, notification);
+        }
+    }
+
+    private static Notification buildMessageNotification(Context context, int notificationId, String message, Location location, Bundle extras) {
         PendingIntent mapIntent = null, routeIntent = null, webIntent = null;
         String deviceName = extras.getString(MainActivity.DEVICE_NAME);
         String routeId = extras.getString("routeId");

@@ -2,6 +2,7 @@ package net.gmsworld.devicelocator.services;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -22,12 +23,34 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CommandService extends IntentService {
+import io.nlopez.smartlocation.OnLocationUpdatedListener;
+import io.nlopez.smartlocation.SmartLocation;
+import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
+
+public class CommandService extends IntentService implements OnLocationUpdatedListener {
 
     private final static String TAG = CommandService.class.getSimpleName();
 
     public CommandService() {
         super(TAG);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "onCreate()");
+        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).oneFix().start(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).stop();
+    }
+
+    @Override
+    public void onLocationUpdated(Location location) {
+        Log.d(TAG, "Location found with accuracy " + location.getAccuracy() + " m");
     }
 
     @Override

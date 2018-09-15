@@ -118,9 +118,9 @@
     <string name="password">Password</string>
     <string name="registerLink">In order to register click &lt;a href="https://www.gms-world.net/m/register.jsp">here&lt;a></string>
     <string name="auhenticate_with_fingerprint">Unlock with Fingerprint</string>
-    <string name="route_button">Track Route</string>
-    <string name="map_button">Map View</string>
-    <string name="browser_button">Open in Browser</string>
-    <string name="resend_command">Resend command</string>
+    <string name="route_button">Route view</string>
+    <string name="map_button">Map view</string>
+    <string name="browser_button">Open in browser</string>
+    <string name="resend_command">Send again</string>
 
 </resources>
