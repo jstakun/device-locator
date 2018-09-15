@@ -46,7 +46,7 @@ public abstract class AbstractCommand {
 
     protected abstract void onSocialCommandFound(String sender, Context context);
 
-    protected abstract void onAppCommandFound(String sender, Context context, Location location);
+    protected abstract void onAppCommandFound(String sender, Context context, Location location, Bundle extras);
 
     public boolean validateTokens() {
         return false;
@@ -57,6 +57,8 @@ public abstract class AbstractCommand {
     }
 
     public String getDefaultArgs() { return ""; }
+
+    public boolean canResend() { return false; }
 
     public boolean findSmsCommand(Context context, Intent intent) {
         String sender = null;
@@ -95,13 +97,13 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    public boolean findAppCommand(Context context, String message, String sender, Location location) {
+    public boolean findAppCommand(Context context, String message, String sender, Location location, Bundle extras) {
         if (StringUtils.isNotEmpty(smsCommand)) {
             if (findKeyword(context, smsCommand + "app", message)) {
-                onAppCommandFound(sender, context, location);
+                onAppCommandFound(sender, context, location, extras);
                 return true;
             } else if (findKeyword(context, smsShortCommand + "app", message)) {
-                onAppCommandFound(sender, context, location);
+                onAppCommandFound(sender, context, location, extras);
                 return true;
             }
         }

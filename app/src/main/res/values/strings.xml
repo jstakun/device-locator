@@ -121,5 +121,6 @@
     <string name="route_button">Track Route</string>
     <string name="map_button">Map View</string>
     <string name="browser_button">Open in Browser</string>
+    <string name="resend_command">Resend command</string>
 
 </resources>

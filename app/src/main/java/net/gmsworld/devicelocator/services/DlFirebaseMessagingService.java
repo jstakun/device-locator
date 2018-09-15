@@ -57,29 +57,31 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 final String pinRead = message.get("pin");
                 final String pin = new PreferencesUtils(this).getEncryptedString(PinActivity.DEVICE_PIN);
                 String command = message.get("command");
-                Location l =  null;
+                Location location =  null;
+                Bundle extras = new Bundle();
                 if (message.containsKey("flex")) {
                     String flex = message.get("flex");
                     Log.d(TAG, "Found flex string: " + flex);
                     try {
-                        if (StringUtils.startsWith(flex, "geo:")) {
-                            String[] tokens = StringUtils.split(flex.substring(4), ",");
-                            if (tokens.length >= 2) {
-                                l = new Location("");
-                                l.setLatitude(Location.convert(tokens[0]));
-                                l.setLongitude(Location.convert(tokens[1]));
-                                if (tokens.length > 2) {
-                                    Bundle b = new Bundle();
-                                    for (int i=2;i<tokens.length;i++) {
-                                        if (tokens[i].startsWith("rid:")) {
-                                            b.putString("routeId", tokens[i].substring(4));
-                                        } else {
-                                            b.putString(MainActivity.DEVICE_NAME, tokens[i]);
-                                        }
-                                    }
-                                    l.setExtras(b);
+                        String[] tokens = StringUtils.split(flex, ",");
+                        for (String token : tokens) {
+                            if (token.startsWith("geo:")) {
+                                String[] coords = StringUtils.split(token.substring(4), " ");
+                                if (coords.length == 2) {
+                                    location = new Location("");
+                                    location.setLatitude(Location.convert(coords[0]));
+                                    location.setLongitude(Location.convert(coords[1]));
                                 }
+                            } else if (token.startsWith("routeId:")) {
+                                extras.putString("routeId", token.split(":")[1]);
+                            } else if (token.startsWith("deviceName:")) {
+                                extras.putString(MainActivity.DEVICE_NAME, token.split(":")[1]);
+                            } else if (token.startsWith("deviceId:")) {
+                                extras.putString("imei", token.split(":")[1]);
+                            } else if (token.startsWith("command:")) {
+                                extras.putString("command", token.split(":")[1]);
                             }
+                            //TODO add args
                         }
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage(), e);
@@ -94,7 +96,6 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     //Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been received by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
                 //}
                 if (pinValid) {
-                    //search for command
                     command += pinRead;
                     if (message.containsKey("args")) {
                         command += " " + message.get("args");
@@ -103,7 +104,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     if (correlationId != null) {
                         sender = message.get("correlationId");
                     }
-                    String foundCommand = Command.findCommandInMessage(this, command, sender, l);
+                    String foundCommand = Command.findCommandInMessage(this, command, sender, location, extras);
                     if (foundCommand == null) {
                         Log.d(TAG, "Invalid command " + commandName + " found!");
                         rejected = true;
@@ -116,7 +117,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     Log.e(TAG, "Invalid pin found in cloud message!");
                 }
                 if (rejected && correlationId != null) {
-                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
+                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
                 }
                 firebaseAnalytics.logEvent("cloud_command_received_" + commandName.toLowerCase(), new Bundle());
             } else {

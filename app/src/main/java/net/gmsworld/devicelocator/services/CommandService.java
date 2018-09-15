@@ -8,8 +8,10 @@ import android.widget.Toast;
 
 import net.gmsworld.devicelocator.CommandActivity;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -34,32 +36,39 @@ public class CommandService extends IntentService {
         Bundle extras = intent.getExtras();
 
         if (extras == null) {
-            Log.e(TAG, "Missing command or imei!");
+            Log.e(TAG, "Missing command details!");
             return;
         }
 
         final String command = extras.getString("command");
         final String imei = extras.getString("imei");
         final String args = extras.getString("args");
-        final String name = extras.getString("name");
+        final String name = extras.getString(MainActivity.DEVICE_NAME);
 
         if (command == null || imei == null) {
             Log.e(TAG, "Missing command or imei!");
             return;
         }
 
-        final String pin = prefs.getEncryptedString(CommandActivity.PIN_PREFIX + imei);
+        Log.d(TAG, "onHandleIntent() with command: " + command);
+
+        String pin = extras.getString("pin");
+        if (pin == null) {
+            pin = prefs.getEncryptedString(CommandActivity.PIN_PREFIX + imei);
+        }
 
         if (pin == null) {
             Log.e(TAG, "Missing pin!");
             return;
         }
 
+        final String deviceId = Messenger.getDeviceId(this, false);
+
         String tokenStr = prefs.getString(DeviceLocatorApp.GMS_TOKEN);
         String content = "imei=" + imei;
         content += "&command=" + command + "dlapp";
         content += "&pin=" + pin;
-        content += "&correlationId=" + Messenger.getDeviceId(this, false) + "+=+" + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+        content += "&correlationId=" + deviceId + "+=+" + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
         if (StringUtils.isNotEmpty(args)) {
             try {
                 content += "&args=" + URLEncoder.encode(args, "UTF-8");
@@ -70,6 +79,10 @@ public class CommandService extends IntentService {
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
+        headers.put("X-GMS-AppId", "2");
+        headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(this)));
+        //headers.put("X-GMS-DeviceId", deviceId);
+        //headers.put("X-GMS-DeviceName", Messenger.getDeviceId(this, true));
 
         Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
             @Override

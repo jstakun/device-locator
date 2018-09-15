@@ -18,6 +18,7 @@ import android.util.Log;
 import net.gmsworld.devicelocator.LauncherActivity;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.services.CommandService;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -58,22 +59,16 @@ public class NotificationUtils {
                 .build();
     }
 
-    public static Notification buildMessageNotification(Context context, int notificationId, String message, Location location) {
+    public static Notification buildMessageNotification(Context context, int notificationId, String message, Location location, Bundle extras) {
         PendingIntent mapIntent = null, routeIntent = null, webIntent = null;
-        String deviceName = null, routeId = null;
+        String deviceName = extras.getString(MainActivity.DEVICE_NAME);
+        String routeId = extras.getString("routeId");
 
         if (location != null) {
             //message has location
             String device = "Your+Device";
-            Bundle b = location.getExtras();
-            if (b != null) {
-                if (b.containsKey(MainActivity.DEVICE_NAME)) {
-                    deviceName = b.getString(MainActivity.DEVICE_NAME);
-                    device = "Device+" + deviceName;
-                }
-                if (b.containsKey("routeId")) {
-                    routeId = b.getString("routeId");
-                }
+            if (StringUtils.isNotEmpty(deviceName)) {
+                device = "Device+" + deviceName;
             }
             Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + location.getLatitude() + "," + location.getLongitude() + "(" + device + ")");
             Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
@@ -157,6 +152,33 @@ public class NotificationUtils {
 
         if (routeIntent != null) {
             nb.addAction(R.drawable.ic_explore_white, context.getString(R.string.route_button), routeIntent);
+        }
+
+        //Log.d(TAG, "Extras: " +  extras);
+
+        if (extras != null && extras.containsKey("imei") && extras.containsKey("command")) {
+            final String commandName = extras.getString("command");
+            AbstractCommand command = Command.getCommandByName(commandName);
+            if (command != null && command.canResend()) {
+                Intent newIntent = new Intent(context, CommandService.class);
+                if (extras.containsKey("args")) {
+                    newIntent.putExtra("args", extras.getString("args"));
+                }
+                newIntent.putExtra("command", commandName);
+                newIntent.putExtra("imei", extras.getString("imei"));
+                if (extras.containsKey("pin")) {
+                    newIntent.putExtra("pin", extras.getString("pin"));
+                }
+                if (extras.containsKey(MainActivity.DEVICE_NAME)) {
+                    newIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
+                }
+                PendingIntent retryIntent = PendingIntent.getService(context, notificationId, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                nb.addAction(R.drawable.ic_open_in_browser, context.getString(R.string.resend_command), retryIntent);
+            } else if (command == null) {
+                Log.d(TAG, "Command " + commandName + " not found!");
+            } else {
+                Log.d(TAG, "Command " + commandName + " doesn't allow resending!");
+            }
         }
 
         return nb.build();

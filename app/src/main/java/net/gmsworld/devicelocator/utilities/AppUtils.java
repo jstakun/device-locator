@@ -90,6 +90,10 @@ public class AppUtils {
         return pi;
     }
 
+    public int getVersionCode(Context c) {
+        return getPackageInfo(c).versionCode;
+    }
+
     //private ApplicationInfo getApplicationInfo(Context c) throws PackageManager.NameNotFoundException {
     //    PackageManager pm = c.getPackageManager();
     //    ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), 0);

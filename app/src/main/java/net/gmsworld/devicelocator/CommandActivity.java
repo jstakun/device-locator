@@ -196,8 +196,9 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                         }
                         newIntent.putExtra("command", command);
                         newIntent.putExtra("imei", imei);
+                        newIntent.putExtra("pin", pin);
                         if (StringUtils.isNotEmpty(name)) {
-                            newIntent.putExtra("name", name);
+                            newIntent.putExtra(MainActivity.DEVICE_NAME, name);
                         }
                         startService(newIntent);
                     }

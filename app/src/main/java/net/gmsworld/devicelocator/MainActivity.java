@@ -1415,13 +1415,7 @@ public class MainActivity extends AppCompatActivity {
                 populateDeviceList(userDevices, deviceList);
             }
             //second load device list and set array adapter
-            String queryString = "username=" + userLogin;
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
-            Map<String, String> headers = new HashMap<>();
-            if (StringUtils.isNotEmpty(tokenStr)) {
-                headers.put("Authorization", "Bearer " + tokenStr);
-            }
-            Network.get(this, getString(R.string.deviceManagerUrl) + "?" + queryString, headers, new Network.OnGetFinishListener() {
+            loadDeviceList(new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
@@ -1472,9 +1466,36 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
-            //final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, new ArrayList<Device>());
-            //deviceList.setAdapter(adapter);
             deviceListEmpty.setText(R.string.devices_list_empty);
+        }
+    }
+
+    private void loadDeviceList(final Network.OnGetFinishListener onGetFinishListener) {
+        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("X-GMS-AppId", "2");
+        headers.put("X-GMS-Scope", "dl");
+        if (StringUtils.isNotEmpty(tokenStr)) {
+            String userLogin = settings.getString(USER_LOGIN);
+            if (StringUtils.isNotEmpty(userLogin)) {
+                headers.put("Authorization", "Bearer " + tokenStr);
+                Network.get(this, getString(R.string.deviceManagerUrl) + "?username=" + userLogin, headers, onGetFinishListener);
+            } else {
+                Log.e(TAG, "User loginis unset. No device list will be loaded");
+            }
+        } else if (Network.isNetworkAvailable(this)) {
+            String queryString = "scope=dl&user=" + Messenger.getDeviceId(this, false);
+            Network.get(this, getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    if (responseCode == 200) {
+                        Messenger.getToken(MainActivity.this, results);
+                        loadDeviceList(onGetFinishListener);
+                    } else {
+                        Log.d(TAG, "Failed to receive token: " + results);
+                    }
+                }
+            });
         }
     }
 

@@ -14,6 +14,7 @@ import android.media.AudioManager;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -89,12 +90,12 @@ public class Command {
         return null;
     }
 
-    public static String findCommandInMessage(Context context, String message, String sender, Location location) {
+    public static String findCommandInMessage(Context context, String message, String sender, Location location, Bundle extras) {
         for (AbstractCommand c : getCommands()) {
             if (c.findSocialCommand(context, message)) {
                 Log.d(TAG, "Found matching social command");
                 return c.getSmsCommand();
-            } else if (c.findAppCommand(context, message, sender, location)) {
+            } else if (c.findAppCommand(context, message, sender, location, extras)) {
                 Log.d(TAG, "Found matching cloud command");
                 return c.getSmsCommand();
             }
@@ -104,8 +105,8 @@ public class Command {
     }
 
     private static List<AbstractCommand> getCommands() {
-        Log.d(TAG, "Initializing commands...");
         if (commands == null) {
+            Log.d(TAG, "Initializing commands...");
             commands = new ArrayList<>();
             try {
                 Class<?>[] commandClasses = Command.class.getDeclaredClasses();
@@ -116,20 +117,21 @@ public class Command {
                     Log.d(TAG, "Initialized command " + c.getClass().getName());
                     commands.add(c);
                 }
+                Log.d(TAG, "Done");
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
             }
         }
-        Log.d(TAG, "Done");
         return commands;
     }
 
     public static AbstractCommand getCommandByName(String name) {
         List<AbstractCommand> commands = getCommands();
-        if (!StringUtils.endsWith("dl", name)) {
+        if (!StringUtils.endsWith(name, "dl")) {
             name = name + "dl";
         }
         for (AbstractCommand c : commands) {
+            //Log.d(TAG, "Comparing " + name + " to " +  c.getSmsCommand() + "...");
             if (StringUtils.equalsIgnoreCase(name, c.getSmsCommand())) {
                 return c;
             }
@@ -192,7 +194,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
             String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
@@ -259,7 +261,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
             String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
@@ -334,7 +336,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (GmsSmartLocationManager.getInstance().isEnabled()) {
                 if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
@@ -362,6 +364,11 @@ public class Command {
         }
 
         @Override
+        public boolean canResend() {
+            return true;
+        }
+
+        @Override
         protected void onSmsCommandFound(String sender, Context context) {
             if (!Permissions.haveSendSMSAndLocationPermission(context)) {
                 try {
@@ -386,7 +393,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (!Permissions.haveLocationPermission(context)) {
                 sendAppNotification(context, SHARE_COMMAND, sender);
             } else {
@@ -420,7 +427,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
             routeTracingService.putExtra("app", sender);
@@ -453,7 +460,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             if (audioMode != null) {
                 audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
@@ -487,7 +494,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             if (audioMode != null) {
                 audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
@@ -516,7 +523,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             sendAppNotification(context, CALL_COMMAND, sender);
         }
 
@@ -589,7 +596,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             final int radius = Integer.parseInt(commandTokens[1]);
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
@@ -620,7 +627,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).apply();
             sendSocialNotification(context, AUDIO_COMMAND);
         }
@@ -645,7 +652,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).apply();
             sendSocialNotification(context, AUDIO_OFF_COMMAND);
         }
@@ -672,7 +679,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 1).apply();
             sendAppNotification(context, GPS_HIGH_COMMAND, sender);
         }
@@ -698,7 +705,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 0).apply();
             sendAppNotification(context, GPS_BALANCED_COMMAND, sender);
         }
@@ -728,7 +735,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false)) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
                 cameraIntent.putExtra("app", sender);
@@ -872,7 +879,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             String email = null;
             String phoneNumber = null;
             String telegramId = null;
@@ -934,7 +941,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             sendAppNotification(context, PING_COMMAND, sender);
         }
     }
@@ -942,6 +949,11 @@ public class Command {
     private static final class HelloCommand extends AbstractCommand {
 
         public HelloCommand() { super(HELLO_COMMAND, "hl", Finder.EQUALS); }
+
+        @Override
+        public boolean canResend() {
+            return true;
+        }
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
@@ -954,7 +966,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             sendAppNotification(context, HELLO_COMMAND, sender);
         }
     }
@@ -974,7 +986,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             sendAppNotification(context, ABOUT_COMMAND, sender);
         }
     }
@@ -1002,7 +1014,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (lockScreenNow(context)) {
                 sendAppNotification(context, LOCK_SCREEN_COMMAND, sender);
             } else {
@@ -1056,7 +1068,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             playBeep(context);
             if (ringtone != null) {
                 sendAppNotification(context, RING_COMMAND, sender);
@@ -1123,11 +1135,11 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
-            showMessageNotification(context, location);
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
+            showMessageNotification(context, location, extras);
         }
 
-        private void showMessageNotification(Context context, Location location) {
+        private void showMessageNotification(Context context, Location location, Bundle extras) {
             String message = null;
             try {
                 if (commandTokens.length > 2) {
@@ -1162,7 +1174,7 @@ public class Command {
                     }
                 }
                 if (message != null) {
-                    Notification notification = NotificationUtils.buildMessageNotification(context, notificationId, message, location);
+                    Notification notification = NotificationUtils.buildMessageNotification(context, notificationId, message, location, extras);
                     NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
                     if (notificationManager != null) {
                         notificationManager.notify(notificationId, notification);
@@ -1206,7 +1218,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (Permissions.haveLocationPermission(context)) {
                 final int perimeter = Integer.parseInt(commandTokens[1]);
                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
@@ -1257,7 +1269,7 @@ public class Command {
         }
 
         @Override
-        protected void onAppCommandFound(String sender, Context context, Location location) {
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             applyConfigChange(context);
             sendAppNotification(context, CONFIG_COMMAND, sender);
         }
