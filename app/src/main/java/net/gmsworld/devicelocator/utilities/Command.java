@@ -716,6 +716,11 @@ public class Command {
         public TakePhotoCommand() { super(TAKE_PHOTO_COMMAND, "p", Finder.EQUALS); }
 
         @Override
+        public boolean canResend() {
+            return true;
+        }
+
+        @Override
         protected void onSmsCommandFound(String sender, Context context) {
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false)) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
@@ -994,6 +999,11 @@ public class Command {
     private static final class LockScreenCommand extends AbstractCommand {
 
         public LockScreenCommand() { super(LOCK_SCREEN_COMMAND, "ls", Finder.EQUALS); }
+
+        @Override
+        public boolean canResend() {
+            return true;
+        }
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {

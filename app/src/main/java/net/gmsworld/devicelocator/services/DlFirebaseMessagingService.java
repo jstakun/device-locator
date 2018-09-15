@@ -81,7 +81,6 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                             } else if (token.startsWith("command:")) {
                                 extras.putString("command", token.split(":")[1]);
                             }
-                            //TODO add args
                         }
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage(), e);
