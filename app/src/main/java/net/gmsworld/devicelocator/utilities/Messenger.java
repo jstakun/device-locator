@@ -102,6 +102,9 @@ public class Messenger {
                         headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
+                    if (StringUtils.equalsAnyIgnoreCase(replyToCommand, Command.START_COMMAND, Command.STOP_COMMAND, Command.RESUME_COMMAND)) {
+                        headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
+                    }
                     sendCloudMessage(context, imei, pin, message, replyToCommand, 1, headers);
                 } else {
                     String queryString = "scope=dl&user=" + deviceId;
@@ -454,7 +457,7 @@ public class Messenger {
         if (GmsSmartLocationManager.isLocationEnabled(context)) {
             text = context.getString(R.string.acknowledgeMessage, deviceId) + "\n";
             text += context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context)) + "\n";
-            text += context.getString(R.string.gps) + " " + SmsSenderService.locationToString(context) + "\n";
+            text += context.getString(R.string.gps) + " " + locationToString(context) + "\n";
         } else {
             text = "Location service is disabled on device " + deviceId + "! Unable to send location. Please enable location service and send the command again.\n";
         }
@@ -1152,5 +1155,34 @@ public class Messenger {
             return model;
         }
         return StringUtils.replaceAll(manufacturer + " " + model, " ", "-");
+    }
+
+    private static int getLocationMode(Context context) {
+        try {
+            return Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
+        } catch (Settings.SettingNotFoundException e) {
+            return -1;
+        }
+    }
+
+    private static String locationToString(Context context) {
+        int mode = getLocationMode(context);
+        switch (mode) {
+            case Settings.Secure.LOCATION_MODE_OFF:
+                return context.getString(R.string.location_mode_off);
+            case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
+                return context.getString(R.string.location_battery_saving);
+            case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
+                return context.getString(R.string.location_sensors_only);
+            case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
+                return context.getString(R.string.location_high_accuracy);
+            default:
+                //API version <= 17
+                String status =  Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+                if (StringUtils.isEmpty(status)) {
+                    status = "Unknown";
+                }
+                return status;
+        }
     }
 }

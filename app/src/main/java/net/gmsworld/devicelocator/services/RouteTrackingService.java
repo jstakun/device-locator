@@ -179,7 +179,6 @@ public class RouteTrackingService extends Service {
     private synchronized void stopTracking() {
         Log.d(TAG, "stopTracking()");
 
-        //NotificationUtils.cancel(this, NOTIFICATION_ID);
         stopForeground(true);
 
         if (this.mWakeLock != null)
@@ -198,12 +197,12 @@ public class RouteTrackingService extends Service {
             GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, true, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                    final Intent newIntent = new Intent(RouteTrackingService.this, SmsSenderService.class);
-                    if (StringUtils.isNotEmpty(phoneNumber)) {
-                        newIntent.putExtra("phoneNumber", phoneNumber);
-                    } else {
-                        if (StringUtils.isNotEmpty(telegramId)) {
+                Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
+                final Intent newIntent = new Intent(RouteTrackingService.this, SmsSenderService.class);
+                if (StringUtils.isNotEmpty(phoneNumber)) {
+                    newIntent.putExtra("phoneNumber", phoneNumber);
+                } else {
+                    if (StringUtils.isNotEmpty(telegramId)) {
                             newIntent.putExtra("telegramId", telegramId);
                         }
                         if (StringUtils.isNotEmpty(email)) {

@@ -1,7 +1,6 @@
 package net.gmsworld.devicelocator.services;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -10,10 +9,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.util.Log;
 
-import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.Messenger;
@@ -79,6 +76,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId) && StringUtils.isEmpty(email) && StringUtils.isEmpty(app)) {
                 Log.e(TAG, "Notification settings are empty!");
+                //TODO
+                stopSelf();
                 return;
             }
 
@@ -93,9 +92,11 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             } else {
                 Messenger.sendCommandMessage(this, extras);
             }
-        } //else {
-            //Log.e(TAG, "This intent requires extra parameters");
-        //}
+        } else {
+            Log.e(TAG, "Required parameters missing");
+            //TODO
+            stopSelf();
+        }
     }
 
     private void initSending(String source) {
@@ -224,35 +225,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         keywordReceivedSms = settings.getBoolean(SEND_ACKNOWLEDGE_MESSAGE, true);
         gpsSms = settings.getBoolean(SEND_LOCATION_MESSAGE, false);
         googleMapsSms = settings.getBoolean(SEND_MAP_LINK_MESSAGE, true);
-    }
-
-    private static int getLocationMode(Context context) {
-        try {
-            return Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-        } catch (Settings.SettingNotFoundException e) {
-            return -1;
-        }
-    }
-
-    public static String locationToString(Context context) {
-        int mode = getLocationMode(context);
-        switch (mode) {
-            case Settings.Secure.LOCATION_MODE_OFF:
-                return context.getString(R.string.location_mode_off);
-            case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
-                return context.getString(R.string.location_battery_saving);
-            case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
-                return context.getString(R.string.location_sensors_only);
-            case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
-                return context.getString(R.string.location_high_accuracy);
-            default:
-                //API version <= 17
-                String status =  Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-                if (StringUtils.isEmpty(status)) {
-                    status = "Unknown";
-                }
-                return status;
-        }
     }
 }
 
