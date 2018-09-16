@@ -12,6 +12,8 @@ import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Created by jstakun on 8/24/17.
  */
@@ -43,13 +45,17 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
         String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
         String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
-        Intent newIntent = new Intent(context, SmsSenderService.class);
-        newIntent.putExtra("phoneNumber", phoneNumber);
-        newIntent.putExtra("email", email);
-        newIntent.putExtra("telegramId", telegramId);
-        newIntent.putExtra("source", SOURCE);
-        ContextCompat.startForegroundService(context, newIntent);
-        //context.startService(newIntent);
+        if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email)) {
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            newIntent.putExtra("phoneNumber", phoneNumber);
+            newIntent.putExtra("email", email);
+            newIntent.putExtra("telegramId", telegramId);
+            newIntent.putExtra("source", SOURCE);
+            ContextCompat.startForegroundService(context, newIntent);
+            //context.startService(newIntent);
+        } else {
+            Log.d(TAG, "Unable to send notification. No notifiers are set.");
+        }
 
         if (settings.getBoolean("hiddenCamera", false)) {
             Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);

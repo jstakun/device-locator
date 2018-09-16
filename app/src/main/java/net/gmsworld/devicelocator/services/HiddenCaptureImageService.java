@@ -140,12 +140,13 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                     Network.uploadScreenshot(this, uploadUrl, out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String imageUrl, int responseCode, String url) {
-                            if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {
-                                //send notification with image url
-                                String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-                                String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-                                String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+                        if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {
+                            //send notification with image url
+                            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+                            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+                            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
+                            if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(sender) || StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email)) {
                                 Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
                                 newIntent.putExtra("command", Command.TAKE_PHOTO_COMMAND);
                                 newIntent.putExtra("imageUrl", imageUrl);
@@ -160,12 +161,15 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                                         newIntent.putExtra("phoneNumber", phoneNumber);
                                     }
                                 }
-                                Files.deleteFileFromContextDir(imageFile.getName(), HiddenCaptureImageService.this, true);
                                 HiddenCaptureImageService.this.startService(newIntent);
                             } else {
-                                Log.e(TAG, "Received error response: " + imageUrl);
-                                Log.d(TAG, "Image will be saved to local storage: " + imageFile.getAbsolutePath());
+                                Log.d(TAG, "Unable to send notification. No notifiers are set.");
                             }
+                            Files.deleteFileFromContextDir(imageFile.getName(), HiddenCaptureImageService.this, true);
+                        } else {
+                            Log.e(TAG, "Received error response: " + imageUrl);
+                            Log.d(TAG, "Image will be saved to local storage: " + imageFile.getAbsolutePath());
+                        }
                         }
                     });
                 } else {
