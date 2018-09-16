@@ -102,7 +102,7 @@ public class Messenger {
                         headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
-                    if (StringUtils.equalsAnyIgnoreCase(replyToCommand, Command.START_COMMAND, Command.STOP_COMMAND, Command.RESUME_COMMAND)) {
+                    if (StringUtils.equalsAnyIgnoreCase(replyToCommand, Command.START_COMMAND, Command.STOP_COMMAND, Command.RESUME_COMMAND, Command.PERIMETER_COMMAND, Command.ROUTE_COMMAND)) {
                         headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
                     }
                     sendCloudMessage(context, imei, pin, message, replyToCommand, 1, headers);

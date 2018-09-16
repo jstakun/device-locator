@@ -49,7 +49,8 @@ public class Command {
     public final static String START_COMMAND = "startdl"; //s start route tracking and delete old route points if exists
     public final static String STOP_COMMAND = "stopdl"; //sp stop route tracking
     public final static String ROUTE_COMMAND = "routedl"; //r share currently recorded route
-    public final static String SHARE_COMMAND = "locatedl"; //l hare current location via sms
+
+    public final static String SHARE_COMMAND = "locatedl"; //l share current location
     public final static String MUTE_COMMAND = "mutedl"; //m mute phone
     public final static String UNMUTE_COMMAND = "unmutedl"; //um unmute phone
     public final static String CALL_COMMAND = "calldl"; //c call to sender
