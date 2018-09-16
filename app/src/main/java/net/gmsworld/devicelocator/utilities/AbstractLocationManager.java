@@ -311,10 +311,10 @@ public abstract class AbstractLocationManager {
                     if (StringUtils.isNotEmpty(tokenStr)) {
                         url = context.getString(R.string.secureRouteProviderUrl);
                         headers.put("Authorization", "Bearer " + tokenStr);
-                        headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
-                        headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
                     }
                     //Log.d(TAG, "Route:\n" + route);
+                    headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
+                    headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
                     Network.post(context, url, "route=" + content, null, headers, onFinishListener);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
