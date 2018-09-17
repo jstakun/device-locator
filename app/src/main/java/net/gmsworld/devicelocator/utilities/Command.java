@@ -418,6 +418,15 @@ public class Command {
         }
 
         @Override
+        public String getOppositeCommand() {
+            if (!GmsSmartLocationManager.getInstance().isEnabled()) {
+                return START_COMMAND;
+            } else {
+                return super.getOppositeCommand();
+            }
+        }
+
+        @Override
         protected void onSmsCommandFound(String sender, Context context) {
             Intent routeTracingService = new Intent(context, RouteTrackingService.class);
             routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
@@ -448,6 +457,11 @@ public class Command {
 
         public MuteCommand() {
             super(MUTE_COMMAND, "m", Finder.EQUALS);
+        }
+
+        @Override
+        public String getOppositeCommand() {
+            return UNMUTE_COMMAND;
         }
 
         @Override
@@ -482,6 +496,11 @@ public class Command {
 
         public UnmuteCommand() {
             super(UNMUTE_COMMAND, "um", Finder.EQUALS);
+        }
+
+        @Override
+        public String getOppositeCommand() {
+            return MUTE_COMMAND;
         }
 
         @Override
@@ -1065,6 +1084,20 @@ public class Command {
         int currentVolume = -1;
 
         public RingCommand() { super(RING_COMMAND, "rn", Finder.EQUALS); }
+
+        @Override
+        public String getOppositeCommand() {
+            return RING_COMMAND;
+        }
+
+        @Override
+        public String getLabel() {
+            if (ringtone != null) {
+                return "Stop ringing";
+            } else {
+                return super.getLabel();
+            }
+        }
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {

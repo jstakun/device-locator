@@ -220,7 +220,7 @@ public class NotificationUtils {
                     newIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
                 }
                 PendingIntent retryIntent = PendingIntent.getService(context, notificationId, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                nb.addAction(R.drawable.ic_open_in_browser, command.getLabel(), retryIntent);
+                nb.addAction(R.drawable.ic_open_in_browser, Command.getCommandByName(command.getOppositeCommand()).getLabel() + " again", retryIntent);
             } else if (command == null) {
                 Log.d(TAG, "Command " + commandName + " not found!");
             } else {
