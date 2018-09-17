@@ -222,8 +222,8 @@ public class NotificationUtils {
                 if (extras.containsKey(MainActivity.DEVICE_NAME)) {
                     newIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
                 }
-                PendingIntent retryIntent = PendingIntent.getService(context, notificationId, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                nb.addAction(R.drawable.ic_open_in_browser, Command.getCommandByName(command.getOppositeCommand()).getLabel(), retryIntent);
+                PendingIntent oppositeIntent = PendingIntent.getService(context, notificationId, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                nb.addAction(R.drawable.ic_open_in_browser, Command.getCommandByName(command.getOppositeCommand()).getLabel(), oppositeIntent);
             } else if (command == null) {
                 Log.d(TAG, "Command " + commandName + " not found!");
             } else {

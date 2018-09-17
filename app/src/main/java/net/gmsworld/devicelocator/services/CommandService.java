@@ -89,7 +89,11 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
         String tokenStr = prefs.getString(DeviceLocatorApp.GMS_TOKEN);
         String content = "imei=" + imei;
-        content += "&command=" + command + "dlapp";
+        if (command.endsWith("dl")) {
+            content += "&command=" + command + "app";
+        } else {
+            content += "&command=" + command + "dlapp";
+        }
         content += "&pin=" + pin;
         content += "&correlationId=" + deviceId + "+=+" + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
         if (StringUtils.isNotEmpty(args)) {
