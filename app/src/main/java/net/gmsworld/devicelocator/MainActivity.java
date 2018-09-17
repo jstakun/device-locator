@@ -1369,23 +1369,27 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
-                    Toast.makeText(MainActivity.this, "Please wait...", Toast.LENGTH_LONG).show();
-                    registerPhoneNumber((TextView)findViewById(R.id.phoneNumber));
-                    registerEmail((TextView)findViewById(R.id.email), false);
-                    registerTelegram((TextView)findViewById(R.id.telegramId));
+                    if (Network.isNetworkAvailable(MainActivity.this)) {
+                        Toast.makeText(MainActivity.this, "Please wait...", Toast.LENGTH_LONG).show();
+                        registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
+                        registerEmail((TextView) findViewById(R.id.email), false);
+                        registerTelegram((TextView) findViewById(R.id.telegramId));
 
-                    if (StringUtils.isNotEmpty(phoneNumber)) {
-                        Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
-                        newIntent.putExtra("phoneNumber", phoneNumber);
-                        newIntent.putExtra("command", Command.HELLO_COMMAND);
-                        MainActivity.this.startService(newIntent);
-                    }
-                    if (StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
-                        Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
-                        newIntent.putExtra("telegramId", telegramId);
-                        newIntent.putExtra("email", email);
-                        newIntent.putExtra("command", Command.HELLO_COMMAND);
-                        MainActivity.this.startService(newIntent);
+                        if (StringUtils.isNotEmpty(phoneNumber)) {
+                            Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
+                            newIntent.putExtra("phoneNumber", phoneNumber);
+                            newIntent.putExtra("command", Command.HELLO_COMMAND);
+                            MainActivity.this.startService(newIntent);
+                        }
+                        if (StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
+                            Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
+                            newIntent.putExtra("telegramId", telegramId);
+                            newIntent.putExtra("email", email);
+                            newIntent.putExtra("command", Command.HELLO_COMMAND);
+                            MainActivity.this.startService(newIntent);
+                        }
+                    } else {
+                        Toast.makeText(MainActivity.this, getString(R.string.no_network_error), Toast.LENGTH_LONG).show();
                     }
                 } else {
                     Toast.makeText(MainActivity.this, "Please provide notification settings above.", Toast.LENGTH_LONG).show();
@@ -1471,31 +1475,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadDeviceList(final Network.OnGetFinishListener onGetFinishListener) {
-        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
-        final Map<String, String> headers = new HashMap<>();
-        headers.put("X-GMS-AppId", "2");
-        headers.put("X-GMS-Scope", "dl");
-        if (StringUtils.isNotEmpty(tokenStr)) {
-            String userLogin = settings.getString(USER_LOGIN);
-            if (StringUtils.isNotEmpty(userLogin)) {
-                headers.put("Authorization", "Bearer " + tokenStr);
-                Network.get(this, getString(R.string.deviceManagerUrl) + "?username=" + userLogin, headers, onGetFinishListener);
-            } else {
-                Log.e(TAG, "User loginis unset. No device list will be loaded");
-            }
-        } else if (Network.isNetworkAvailable(this)) {
-            String queryString = "scope=dl&user=" + Messenger.getDeviceId(this, false);
-            Network.get(this, getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String results, int responseCode, String url) {
-                    if (responseCode == 200) {
-                        Messenger.getToken(MainActivity.this, results);
-                        loadDeviceList(onGetFinishListener);
-                    } else {
-                        Log.d(TAG, "Failed to receive token: " + results);
-                    }
+        if (Network.isNetworkAvailable(this)) {
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+            final Map<String, String> headers = new HashMap<>();
+            headers.put("X-GMS-AppId", "2");
+            headers.put("X-GMS-Scope", "dl");
+            if (StringUtils.isNotEmpty(tokenStr)) {
+                String userLogin = settings.getString(USER_LOGIN);
+                if (StringUtils.isNotEmpty(userLogin)) {
+                    headers.put("Authorization", "Bearer " + tokenStr);
+                    Network.get(this, getString(R.string.deviceManagerUrl) + "?username=" + userLogin, headers, onGetFinishListener);
+                } else {
+                    Log.e(TAG, "User loginis unset. No device list will be loaded");
                 }
-            });
+            } else {
+                String queryString = "scope=dl&user=" + Messenger.getDeviceId(this, false);
+                Network.get(this, getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        if (responseCode == 200) {
+                            Messenger.getToken(MainActivity.this, results);
+                            loadDeviceList(onGetFinishListener);
+                        } else {
+                            Log.d(TAG, "Failed to receive token: " + results);
+                        }
+                    }
+                });
+            }
         }
     }
 
@@ -1507,28 +1513,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void deleteDevice(final String imei) {
-        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
-        String content = "imei=" + imei + "&action=delete";
+        if (Network.isNetworkAvailable(this)) {
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+            String content = "imei=" + imei + "&action=delete";
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + tokenStr);
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer " + tokenStr);
 
-        Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
-            @Override
-            public void onGetFinish(String results, int responseCode, String url) {
-                if (responseCode == 200) {
-                    Toast.makeText(MainActivity.this, "Device has been removed!", Toast.LENGTH_SHORT).show();
-                    //current device has been removed
-                    if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
-                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(USER_LOGIN, "").apply();
-                        initUserLoginInput();
+
+            Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    if (responseCode == 200) {
+                        Toast.makeText(MainActivity.this, "Device has been removed!", Toast.LENGTH_SHORT).show();
+                        //current device has been removed
+                        if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
+                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(USER_LOGIN, "").apply();
+                            initUserLoginInput();
+                        }
+                        initDeviceList();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Failed to remove device!", Toast.LENGTH_SHORT).show();
                     }
-                    initDeviceList();
-                } else {
-                    Toast.makeText(MainActivity.this, "Failed to remove device!", Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
+            });
+        } else {
+            Toast.makeText(MainActivity.this, "No network available. Failed to remove device!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void saveData() {

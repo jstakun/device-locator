@@ -152,6 +152,11 @@ public class Command {
         }
 
         @Override
+        public String getOppositeCommand() {
+            return STOP_COMMAND;
+        }
+
+        @Override
         protected void onSmsCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
@@ -287,6 +292,11 @@ public class Command {
         @Override
         public String getDefaultArgs() {
             return "s";
+        }
+
+        @Override
+        public String getOppositeCommand() {
+            return START_COMMAND;
         }
 
         @Override

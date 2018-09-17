@@ -48,6 +48,10 @@ public abstract class AbstractCommand {
 
     protected abstract void onAppCommandFound(String sender, Context context, Location location, Bundle extras);
 
+    public String getOppositeCommand() { return null; }
+
+    public String getLabel() { return StringUtils.capitalize(getSmsCommand().substring(0, getSmsCommand().length()-2)); }
+
     public boolean validateTokens() {
         return false;
     }
@@ -59,6 +63,8 @@ public abstract class AbstractCommand {
     public String getDefaultArgs() { return ""; }
 
     public boolean canResend() { return false; }
+
+    public boolean hasOppositeCommand() { return getOppositeCommand() != null; }
 
     public boolean findSmsCommand(Context context, Intent intent) {
         String sender = null;

@@ -206,6 +206,21 @@ public class NotificationUtils {
                 }
                 PendingIntent retryIntent = PendingIntent.getService(context, notificationId, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 nb.addAction(R.drawable.ic_open_in_browser, context.getString(R.string.resend_command), retryIntent);
+            } else if (command != null && command.hasOppositeCommand()) {
+                Intent newIntent = new Intent(context, CommandService.class);
+                if (extras.containsKey("args")) {
+                    newIntent.putExtra("args", extras.getString("args"));
+                }
+                newIntent.putExtra("command", command.getOppositeCommand());
+                newIntent.putExtra("imei", extras.getString("imei"));
+                if (extras.containsKey("pin")) {
+                    newIntent.putExtra("pin", extras.getString("pin"));
+                }
+                if (extras.containsKey(MainActivity.DEVICE_NAME)) {
+                    newIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
+                }
+                PendingIntent retryIntent = PendingIntent.getService(context, notificationId, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                nb.addAction(R.drawable.ic_open_in_browser, command.getLabel(), retryIntent);
             } else if (command == null) {
                 Log.d(TAG, "Command " + commandName + " not found!");
             } else {
