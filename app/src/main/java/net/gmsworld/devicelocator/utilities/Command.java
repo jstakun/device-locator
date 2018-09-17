@@ -289,6 +289,8 @@ public class Command {
             super(STOP_COMMAND, "sp", Finder.STARTS);
         }
 
+        public String getLabel() { return StringUtils.capitalize(getSmsCommand().substring(0, getSmsCommand().length()-2)); }
+
         @Override
         public String getDefaultArgs() {
             return "s";

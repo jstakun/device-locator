@@ -184,6 +184,9 @@ public class NotificationUtils {
 
         if (routeIntent != null) {
             nb.addAction(R.drawable.ic_explore_white, context.getString(R.string.route_button), routeIntent);
+            if (extras != null) {
+                extras.putString("command", Command.START_COMMAND);
+            }
         }
 
         //Log.d(TAG, "Extras: " +  extras);
