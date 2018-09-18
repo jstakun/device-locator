@@ -743,6 +743,9 @@ public class Messenger {
             case Command.STOPPED_TRACKER:
                 text = "Device location tracking on device " + deviceId + " is stopped.\nBattery level: " + getBatteryLevel(context);
                 break;
+            case Command.MUTE_FAILED:
+                text = "Mute failed on device " + deviceId + " due to insufficient privileges!";
+                break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;

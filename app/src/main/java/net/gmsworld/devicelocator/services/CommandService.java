@@ -15,6 +15,7 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -67,6 +68,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         final String imei = extras.getString("imei");
         final String args = extras.getString("args");
         final String name = extras.getString(MainActivity.DEVICE_NAME);
+        final String cancelCommand = extras.getString("cancelCommand");
 
         if (command == null || imei == null) {
             Log.e(TAG, "Missing command or imei!");
@@ -74,6 +76,11 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         }
 
         Log.d(TAG, "onHandleIntent() with command: " + command);
+
+        if (StringUtils.isNotEmpty(cancelCommand)) {
+            String notificationId = imei + "_" + cancelCommand;
+            NotificationUtils.cancel(this, notificationId);
+        }
 
         String pin = extras.getString("pin");
         if (pin == null) {
@@ -116,7 +123,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             public void onGetFinish(String results, int responseCode, String url) {
                 final String n = (StringUtils.isNotEmpty(name) ? name : imei);
                 if (responseCode == 200) {
-                    Toast.makeText(CommandService.this, "Command " + command + " has been sent. You'll receive notification when this message will be delivered to the device " + n + "!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CommandService.this, "Command " + command + " has been sent to the device " + n + "!", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(CommandService.this, "Failed to send command " + command + " to the device " + n + "!", Toast.LENGTH_SHORT).show();
                 }

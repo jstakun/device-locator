@@ -50,7 +50,7 @@ public abstract class AbstractCommand {
 
     public String getOppositeCommand() { return null; }
 
-    public String getLabel() { return StringUtils.capitalize(getSmsCommand().substring(0, getSmsCommand().length()-2)) + " again"; }
+    public String getLabel() { return StringUtils.capitalize(getSmsCommand().substring(0, getSmsCommand().length()-2)); }
 
     public boolean validateTokens() {
         return false;

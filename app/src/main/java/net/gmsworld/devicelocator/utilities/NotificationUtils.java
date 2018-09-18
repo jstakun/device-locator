@@ -184,12 +184,18 @@ public class NotificationUtils {
 
         if (routeIntent != null) {
             nb.addAction(R.drawable.ic_explore_white, context.getString(R.string.route_button), routeIntent);
-            if (extras != null && !StringUtils.equals(extras.getString("command"), Command.STOP_COMMAND)) {
-                extras.putString("command", Command.START_COMMAND);
-            }
         }
 
-        //Log.d(TAG, "Extras: " +  extras);
+        //modify some command names to create better actions
+        if (routeIntent != null && extras != null && !extras.containsKey("command")) {
+            extras.putString("command", Command.START_COMMAND);
+        } else if (extras != null && StringUtils.equals(extras.getString("command"), Command.RING_OFF_COMMAND)) {
+            extras.putString("command", Command.RING_COMMAND);
+        } else if (extras != null && StringUtils.equals(extras.getString("command"), Command.MUTE_FAILED)) {
+            extras.putString("command", Command.UNMUTE_COMMAND);
+        }
+
+        //Log.d(TAG, " ---------------------- ----------------------- Extras: " +  extras);
 
         if (extras != null && extras.containsKey("imei") && extras.containsKey("command")) {
             final String commandName = extras.getString("command");
@@ -215,6 +221,7 @@ public class NotificationUtils {
                     newIntent.putExtra("args", extras.getString("args"));
                 }
                 newIntent.putExtra("command", command.getOppositeCommand());
+                newIntent.putExtra("cancelCommand", commandName);
                 newIntent.putExtra("imei", extras.getString("imei"));
                 if (extras.containsKey("pin")) {
                     newIntent.putExtra("pin", extras.getString("pin"));
@@ -244,11 +251,11 @@ public class NotificationUtils {
         return notification;
     }
 
-    public static void cancel(Context context, int notificationId) {
+    public static void cancel(Context context, String notificationId) {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        if (notificationManager != null) {
-            notificationManager.cancel(notificationId);
+        if (notificationManager != null && notificationIds.containsKey(notificationId)) {
+            notificationManager.cancel(notificationIds.remove(notificationId));
         }
     }
 

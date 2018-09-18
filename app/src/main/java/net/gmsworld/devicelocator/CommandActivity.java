@@ -165,7 +165,9 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             @Override
             public void onClick(View view) {
                 final String pin = pinEdit.getText().toString();
-                if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
+                if (pin.length() == 0) {
+                    Toast.makeText(CommandActivity.this, "Please enter PIN!", Toast.LENGTH_SHORT).show();
+                } else if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
                     Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
                 } else if (StringUtils.isNotEmpty(name) || StringUtils.isNotEmpty(imei)) {
                     final String command = commandSpinner.getSelectedItem().toString();

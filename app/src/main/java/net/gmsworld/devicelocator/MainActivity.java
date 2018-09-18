@@ -2,6 +2,7 @@ package net.gmsworld.devicelocator;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -14,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -596,6 +598,16 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            // if user granted access else ask for permission
+            if (!this.running && !notificationManager.isNotificationPolicyAccessGranted()) {
+                Toast.makeText(this, "Please grant this permission if you want to use Audio Mute command", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+                startActivity(intent);
+            }
+        }
+
         if (!this.running && !Permissions.haveCallPhonePermission(MainActivity.this)) {
             Permissions.requestCallPhonePermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_CALL);
         }
@@ -878,7 +890,7 @@ public class MainActivity extends AppCompatActivity {
             bundle.putBoolean("running", StringUtils.isNotEmpty(newUserLogin));
             firebaseAnalytics.logEvent("device_manager", bundle);
             if (!DlFirebaseMessagingService.sendRegistrationToServer(this, newUserLogin, settings.getString(DEVICE_NAME), false)) {
-                Toast.makeText(this, "You device can't be registered!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
                 if (!Permissions.haveLocationPermission(this)) {
