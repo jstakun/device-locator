@@ -121,11 +121,15 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
             @Override
             public void onGetFinish(String results, int responseCode, String url) {
+                String commandStr = command;
+                if (commandStr.endsWith("dl")) {
+                    commandStr = command.substring(0, command.length() - 2);
+                }
                 final String n = (StringUtils.isNotEmpty(name) ? name : imei);
                 if (responseCode == 200) {
-                    Toast.makeText(CommandService.this, "Command " + command + " has been sent to the device " + n + "!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CommandService.this, "Command " + commandStr + " has been sent to the device " + n + "!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(CommandService.this, "Failed to send command " + command + " to the device " + n + "!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CommandService.this, "Failed to send command " + commandStr + " to the device " + n + "!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
