@@ -123,7 +123,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             public void onGetFinish(String results, int responseCode, String url) {
                 String commandStr = command;
                 if (commandStr.endsWith("dl")) {
-                    commandStr = command.substring(0, command.length() - 2);
+                    commandStr = StringUtils.capitalize(command.substring(0, command.length() - 2));
                 }
                 final String n = (StringUtils.isNotEmpty(name) ? name : imei);
                 if (responseCode == 200) {
