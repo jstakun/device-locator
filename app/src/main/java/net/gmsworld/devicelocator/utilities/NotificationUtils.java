@@ -189,12 +189,16 @@ public class NotificationUtils {
         //modify some command names to create better actions
         if (routeIntent != null && extras != null && !extras.containsKey("command")) {
             extras.putString("command", Command.START_COMMAND);
-        } else if (extras != null && StringUtils.equals(extras.getString("command"), Command.RING_OFF_COMMAND)) {
-            extras.putString("command", Command.RING_COMMAND);
-        } else if (extras != null && StringUtils.equals(extras.getString("command"), Command.MUTE_FAILED)) {
-            extras.putString("command", Command.UNMUTE_COMMAND);
+        } else if (extras != null && (extras.containsKey("command"))) {
+            String commandName = extras.getString("command");
+            if (StringUtils.equals(commandName + "dl", Command.RING_OFF_COMMAND)) {
+                extras.putString("command", Command.RING_COMMAND);
+            } else if (StringUtils.equals(commandName, Command.MUTE_FAILED)) {
+                extras.putString("command", Command.UNMUTE_COMMAND);
+            }
         }
 
+        //remove
         //Log.d(TAG, " ---------------------- ----------------------- Extras: " +  extras);
 
         if (extras != null && extras.containsKey("imei") && extras.containsKey("command")) {
