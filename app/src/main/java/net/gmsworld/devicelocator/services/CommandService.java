@@ -92,9 +92,10 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             return;
         }
 
+        prefs.setEncryptedString(CommandActivity.PIN_PREFIX + imei, pin);
+
         final String deviceId = Messenger.getDeviceId(this, false);
 
-        String tokenStr = prefs.getString(DeviceLocatorApp.GMS_TOKEN);
         String content = "imei=" + imei;
         if (command.endsWith("dl")) {
             content += "&command=" + command + "app";
@@ -111,29 +112,46 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             }
         }
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppId", "2");
-        headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(this)));
-        //headers.put("X-GMS-DeviceId", deviceId);
-        //headers.put("X-GMS-DeviceName", Messenger.getDeviceId(this, true));
+        sendCommand(content, command, imei, name, prefs);
+    }
 
-        Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
-            @Override
-            public void onGetFinish(String results, int responseCode, String url) {
-                String commandStr = command;
-                if (commandStr.endsWith("dl")) {
-                    commandStr = StringUtils.capitalize(command.substring(0, command.length() - 2));
-                }
-                final String n = (StringUtils.isNotEmpty(name) ? name : imei);
-                if (responseCode == 200) {
-                    Toast.makeText(CommandService.this, "Command " + commandStr + " has been sent to the device " + n + "!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(CommandService.this, "Failed to send command " + commandStr + " to the device " + n + "!", Toast.LENGTH_SHORT).show();
-                }
+    private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils prefs) {
+        if (Network.isNetworkAvailable(this)) {
+            String tokenStr = prefs.getString(DeviceLocatorApp.GMS_TOKEN);
+            Map<String, String> headers = new HashMap<>();
+            headers.put("X-GMS-AppId", "2");
+            headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(this)));
+            if (StringUtils.isNotEmpty(tokenStr)) {
+                headers.put("Authorization", "Bearer " + tokenStr);
+                Network.post(this, getString(R.string.deviceManagerUrl), queryString, null, headers, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        String commandStr = command;
+                        if (commandStr.endsWith("dl")) {
+                            commandStr = StringUtils.capitalize(command.substring(0, command.length() - 2));
+                        }
+                        final String n = (StringUtils.isNotEmpty(name) ? name : imei);
+                        if (responseCode == 200) {
+                            Toast.makeText(CommandService.this, "Command " + commandStr + " has been sent to the device " + n + "!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(CommandService.this, "Failed to send command " + commandStr + " to the device " + n + "!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            } else {
+                String qs = "scope=dl&user=" + Messenger.getDeviceId(this, false);
+                Network.get(this, getString(R.string.tokenUrl) + "?" + qs, null, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        if (responseCode == 200) {
+                            Messenger.getToken(CommandService.this, results);
+                            sendCommand(queryString, command, imei, name, prefs);
+                        } else {
+                            Log.d(TAG, "Failed to receive token: " + results);
+                        }
+                    }
+                });
             }
-        });
-
-        prefs.setEncryptedString(CommandActivity.PIN_PREFIX + imei, pin);
+        }
     }
 }

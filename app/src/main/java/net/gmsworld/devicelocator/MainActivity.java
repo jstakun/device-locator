@@ -1532,7 +1532,6 @@ public class MainActivity extends AppCompatActivity {
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bearer " + tokenStr);
 
-
             Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
