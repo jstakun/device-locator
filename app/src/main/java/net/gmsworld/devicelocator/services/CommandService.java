@@ -64,7 +64,12 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             return;
         }
 
-        final String command = extras.getString("command");
+        String cmd = extras.getString("command");
+        if (StringUtils.endsWith(cmd, "dl")) {
+            cmd = cmd.substring(0, cmd.length()-2);
+        }
+
+        final String command = cmd;
         final String imei = extras.getString("imei");
         final String args = extras.getString("args");
         final String name = extras.getString(MainActivity.DEVICE_NAME);
@@ -79,7 +84,9 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
         if (StringUtils.isNotEmpty(cancelCommand)) {
             String notificationId = imei + "_" + cancelCommand;
+            Log.d(TAG, "Cancelling command " + cancelCommand);
             NotificationUtils.cancel(this, notificationId);
+            NotificationUtils.cancel(this, notificationId.substring(0, notificationId.length()-2));
         }
 
         String pin = extras.getString("pin");
@@ -97,11 +104,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         final String deviceId = Messenger.getDeviceId(this, false);
 
         String content = "imei=" + imei;
-        if (command.endsWith("dl")) {
-            content += "&command=" + command + "app";
-        } else {
-            content += "&command=" + command + "dlapp";
-        }
+        content += "&command=" + command + "dlapp";
         content += "&pin=" + pin;
         content += "&correlationId=" + deviceId + "+=+" + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
         if (StringUtils.isNotEmpty(args)) {
@@ -126,15 +129,11 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 Network.post(this, getString(R.string.deviceManagerUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
-                        String commandStr = command;
-                        if (commandStr.endsWith("dl")) {
-                            commandStr = StringUtils.capitalize(command.substring(0, command.length() - 2));
-                        }
                         final String n = (StringUtils.isNotEmpty(name) ? name : imei);
                         if (responseCode == 200) {
-                            Toast.makeText(CommandService.this, "Command " + commandStr + " has been sent to the device " + n + "!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CommandService.this, "Command " + StringUtils.capitalize(command) + " has been sent to the device " + n + "!", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(CommandService.this, "Failed to send command " + commandStr + " to the device " + n + "!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + n + "!", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

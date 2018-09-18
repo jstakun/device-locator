@@ -65,11 +65,9 @@ public class NotificationUtils {
 
     public static void showMessageNotification(Context context, String message, Location location, Bundle extras) {
         int notificationId = (int) System.currentTimeMillis();
-        //if (StringUtils.startsWithIgnoreCase(message, Messenger.ROUTE_MESSAGE_PREFIX)) {
-        //    notificationId = RouteTrackingService.NOTIFICATION_ROUTE_ID;
-        //}
+        String id = null;
+
         if (extras != null) {
-            String id = null;
             if (extras.containsKey("routeId")) {
                 id = extras.getString("routeId");
             } else if (extras.containsKey("imei") && extras.containsKey("command")) {
@@ -84,9 +82,11 @@ public class NotificationUtils {
                 }
             }
         }
+
         Notification notification = NotificationUtils.buildMessageNotification(context, notificationId, message, location, extras);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
+            Log.d(TAG, "Creating notification " + id);
             notificationManager.notify(notificationId, notification);
         }
     }
@@ -186,14 +186,17 @@ public class NotificationUtils {
             nb.addAction(R.drawable.ic_explore_white, context.getString(R.string.route_button), routeIntent);
         }
 
+        String cancelCommand = null;
         //modify some command names to create better actions
         if (routeIntent != null && extras != null && !extras.containsKey("command")) {
             extras.putString("command", Command.START_COMMAND);
         } else if (extras != null && (extras.containsKey("command"))) {
             String commandName = extras.getString("command");
             if (StringUtils.equals(commandName + "dl", Command.RING_OFF_COMMAND)) {
+                cancelCommand = Command.RING_OFF_COMMAND;
                 extras.putString("command", Command.RING_COMMAND);
             } else if (StringUtils.equals(commandName, Command.MUTE_FAILED)) {
+                cancelCommand = Command.MUTE_FAILED;
                 extras.putString("command", Command.UNMUTE_COMMAND);
             }
         }
@@ -225,7 +228,7 @@ public class NotificationUtils {
                     newIntent.putExtra("args", extras.getString("args"));
                 }
                 newIntent.putExtra("command", command.getOppositeCommand());
-                newIntent.putExtra("cancelCommand", commandName);
+                newIntent.putExtra("cancelCommand", StringUtils.isNotEmpty(cancelCommand) ? cancelCommand : commandName);
                 newIntent.putExtra("imei", extras.getString("imei"));
                 if (extras.containsKey("pin")) {
                     newIntent.putExtra("pin", extras.getString("pin"));
