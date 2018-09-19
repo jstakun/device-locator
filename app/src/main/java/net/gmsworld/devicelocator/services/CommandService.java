@@ -32,6 +32,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     private final static String TAG = CommandService.class.getSimpleName();
 
+    private static boolean commandInProgress = false;
+
     public CommandService() {
         super(TAG);
     }
@@ -82,13 +84,6 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
         Log.d(TAG, "onHandleIntent() with command: " + command);
 
-        if (StringUtils.isNotEmpty(cancelCommand)) {
-            String notificationId = imei + "_" + cancelCommand;
-            Log.d(TAG, "Cancelling command " + cancelCommand);
-            NotificationUtils.cancel(this, notificationId);
-            NotificationUtils.cancel(this, notificationId.substring(0, notificationId.length()-2));
-        }
-
         String pin = extras.getString("pin");
         if (pin == null) {
             pin = prefs.getEncryptedString(CommandActivity.PIN_PREFIX + imei);
@@ -115,11 +110,21 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             }
         }
 
-        sendCommand(content, command, imei, name, prefs);
+        if (!commandInProgress) {
+            if (StringUtils.isNotEmpty(cancelCommand)) {
+                String notificationId = imei + "_" + cancelCommand;
+                Log.d(TAG, "Cancelling command " + cancelCommand);
+                NotificationUtils.cancel(this, notificationId);
+            }
+            sendCommand(content, command, imei, name, prefs);
+        } else {
+            Toast.makeText(this, "Command in progress...", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils prefs) {
         if (Network.isNetworkAvailable(this)) {
+            commandInProgress = true;
             String tokenStr = prefs.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
             headers.put("X-GMS-AppId", "2");
@@ -135,6 +140,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         } else {
                             Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + n + "!", Toast.LENGTH_SHORT).show();
                         }
+                        commandInProgress = false;
                     }
                 });
             } else {
@@ -148,9 +154,12 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
+                        commandInProgress = false;
                     }
                 });
             }
+        } else {
+            Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
         }
     }
 }
