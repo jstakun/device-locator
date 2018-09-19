@@ -115,6 +115,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 String notificationId = imei + "_" + cancelCommand;
                 Log.d(TAG, "Cancelling command " + cancelCommand);
                 NotificationUtils.cancel(this, notificationId);
+                NotificationUtils.cancel(this, notificationId.substring(0, notificationId.length()-2));
             }
             sendCommand(content, command, imei, name, prefs);
         } else {
