@@ -76,6 +76,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         final String args = extras.getString("args");
         final String name = extras.getString(MainActivity.DEVICE_NAME);
         final String cancelCommand = extras.getString("cancelCommand");
+        final String routeId = extras.getString("routeId");
 
         if (command == null || imei == null) {
             Log.e(TAG, "Missing command or imei!");
@@ -116,6 +117,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 Log.d(TAG, "Cancelling command " + cancelCommand);
                 NotificationUtils.cancel(this, notificationId);
                 NotificationUtils.cancel(this, notificationId.substring(0, notificationId.length()-2));
+            } else if (StringUtils.isNotEmpty("routeId")) {
+                NotificationUtils.cancel(this, routeId);
             }
             sendCommand(content, command, imei, name, prefs);
         } else {

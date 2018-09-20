@@ -59,6 +59,7 @@ public class NotificationUtils {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setCategory(NotificationCompat.CATEGORY_STATUS)
                 .setOngoing(true)
+                .addAction(R.drawable.ic_open_in_browser, "Open Device Locator", contentIntent)
                 //.setPublicVersion(publicNotification) //API 21
                 .build();
     }
@@ -202,7 +203,7 @@ public class NotificationUtils {
         }
 
         //remove
-        //Log.d(TAG, " ---------------------- ----------------------- Extras: " +  extras);
+        Log.d(TAG, " ---------------------- ----------------------- Extras: " +  extras);
 
         if (extras != null && extras.containsKey("imei") && extras.containsKey("command")) {
             final String commandName = extras.getString("command");
@@ -228,7 +229,11 @@ public class NotificationUtils {
                     newIntent.putExtra("args", extras.getString("args"));
                 }
                 newIntent.putExtra("command", command.getOppositeCommand());
-                newIntent.putExtra("cancelCommand", StringUtils.isNotEmpty(cancelCommand) ? cancelCommand : commandName);
+                if (StringUtils.isNotEmpty(routeId)) {
+                    newIntent.putExtra("routeId", routeId);
+                } else {
+                    newIntent.putExtra("cancelCommand", StringUtils.isNotEmpty(cancelCommand) ? cancelCommand : commandName);
+                }
                 newIntent.putExtra("imei", extras.getString("imei"));
                 if (extras.containsKey("pin")) {
                     newIntent.putExtra("pin", extras.getString("pin"));
