@@ -76,7 +76,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             if (StringUtils.isEmpty(this.phoneNumber) && StringUtils.isEmpty(this.telegramId) && StringUtils.isEmpty(email) && StringUtils.isEmpty(app)) {
                 Log.e(TAG, "Notification settings are empty!");
-                //TODO
                 stopSelf();
                 return;
             }
@@ -94,7 +93,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             }
         } else {
             Log.e(TAG, "Required parameters missing");
-            //TODO
             stopSelf();
         }
     }

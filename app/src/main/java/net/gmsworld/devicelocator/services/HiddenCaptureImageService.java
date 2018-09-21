@@ -92,12 +92,10 @@ public class HiddenCaptureImageService extends HiddenCameraService {
                 }
             } else {
                 Log.e(TAG, "Draw over other apps permission is missing. Can't take a picture");
-                //TODO
                 stopSelf();
             }
         } else {
             Log.e(TAG, "Camera permission not available");
-            //TODO
             stopSelf();
         }
 
