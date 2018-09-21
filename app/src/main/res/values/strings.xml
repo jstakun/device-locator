@@ -122,5 +122,6 @@
     <string name="map_button">Map view</string>
     <string name="browser_button">Open in browser</string>
     <string name="resend_command">Send again</string>
+    <string name="please_wait">Please wait...</string>
 
 </resources>

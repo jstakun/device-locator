@@ -268,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.admin_grant_explanation));
             startActivityForResult(intent, ENABLE_ADMIN_INTENT);
         } else if (requestCode == ACTION_MANAGE_OVERLAY_INTENT && HiddenCameraUtils.canOverDrawOtherApps(this)) {
-            Toast.makeText(MainActivity.this, "Please wait. Device Locator is checking your camera...", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "Please wait. Device Locator is now checking your camera...", Toast.LENGTH_LONG).show();
             Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
             cameraIntent.putExtra("test", true);
             startService(cameraIntent);
@@ -276,7 +276,11 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == ENABLE_ADMIN_INTENT) {
                 if (phoneNumber == null && telegramId == null && email == null) {
                     Toast.makeText(MainActivity.this, "Please specify who should be notified in case of failed login!", Toast.LENGTH_LONG).show();
-                    findViewById(R.id.phoneNumber).requestFocus();
+                    //show notifications card if no notifiers are set
+                    findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
+                    findViewById(R.id.smsSettings).setVisibility(View.GONE);
+                    findViewById(R.id.deviceSettings).setVisibility(View.GONE);
+                    findViewById(R.id.email).requestFocus();
                 } else {
                     Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
                 }
@@ -1382,7 +1386,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
                     if (Network.isNetworkAvailable(MainActivity.this)) {
-                        Toast.makeText(MainActivity.this, "Please wait...", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
                         registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
                         registerEmail((TextView) findViewById(R.id.email), false);
                         registerTelegram((TextView) findViewById(R.id.telegramId));

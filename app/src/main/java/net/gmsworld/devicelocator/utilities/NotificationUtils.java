@@ -259,7 +259,7 @@ public class NotificationUtils {
                     .setSmallIcon(R.drawable.ic_devices_other_white)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
                     .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
-                    .setContentText("Please wait...").build();
+                    .setContentText(context.getString(R.string.please_wait)).build();
         return notification;
     }
 

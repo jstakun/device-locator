@@ -190,6 +190,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                     if (!validArgs) {
                         Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
                     } else {
+                        Toast.makeText(CommandActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
                         firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
                         prefs.setEncryptedString(PIN_PREFIX + imei, pin);
                         Intent newIntent = new Intent(CommandActivity.this, CommandService.class);
