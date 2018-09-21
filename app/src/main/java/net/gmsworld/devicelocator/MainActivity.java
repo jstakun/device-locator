@@ -274,19 +274,9 @@ public class MainActivity extends AppCompatActivity {
             startService(cameraIntent);
         } else if (resultCode == RESULT_OK) {
             if (requestCode == ENABLE_ADMIN_INTENT) {
-                if (phoneNumber == null && telegramId == null && email == null) {
-                    Toast.makeText(MainActivity.this, "Please specify who should be notified in case of failed login!", Toast.LENGTH_LONG).show();
-                    //show notifications card if no notifiers are set
-                    findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
-                    findViewById(R.id.smsSettings).setVisibility(View.GONE);
-                    findViewById(R.id.deviceSettings).setVisibility(View.GONE);
-                    findViewById(R.id.email).requestFocus();
-                } else {
-                    Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
-                }
-                //
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("loginTracker", true).apply();
                 supportInvalidateOptionsMenu();
+                checkNotifiers();
                 //open dialog to enable photo on failed login
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
@@ -514,6 +504,19 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, ACTION_ADD_DEVICE_ADMIN);
             }
+        }
+    }
+
+    private void checkNotifiers() {
+        if (StringUtils.isEmpty(phoneNumber) && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email)) {
+            Toast.makeText(MainActivity.this, "Please specify who should be notified in case of failed login!", Toast.LENGTH_LONG).show();
+            //show notifications card if no notifiers are set
+            findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
+            findViewById(R.id.smsSettings).setVisibility(View.GONE);
+            findViewById(R.id.deviceSettings).setVisibility(View.GONE);
+            findViewById(R.id.email).requestFocus();
+        } else {
+            Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
         }
     }
 

@@ -125,9 +125,13 @@ public class LoginActivity extends AppCompatActivity  {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
-            mAuthTask = new UserLoginTask(email, password, this);
-            mAuthTask.execute((Void) null);
+            if (Network.isNetworkAvailable(this)) {
+                showProgress(true);
+                mAuthTask = new UserLoginTask(email, password, this);
+                mAuthTask.execute((Void) null);
+            } else {
+                Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+            }
         }
     }
 
