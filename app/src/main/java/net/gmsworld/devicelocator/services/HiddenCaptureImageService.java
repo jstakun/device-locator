@@ -1,9 +1,7 @@
 package net.gmsworld.devicelocator.services;
 
-import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -11,7 +9,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -31,6 +28,7 @@ import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
+import net.gmsworld.devicelocator.utilities.Permissions;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -57,7 +55,7 @@ public class HiddenCaptureImageService extends HiddenCameraService {
         sender = intent.getStringExtra("sender");
         app = intent.getStringExtra("app");
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (Permissions.haveCameraPermission(this)) {
 
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
 

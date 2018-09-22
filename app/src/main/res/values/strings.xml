@@ -50,7 +50,7 @@
     <string name="settings_kmh_or_mph_string">Speed unit settings</string>
     <string name="read_contacts_permission">Can\'t select a contact without Read Contacts permission.</string>
     <string name="send_sms_and_location_permission">SMS and Location permissions are required to receive SMS notifications.</string>
-    <string name="notification_title">Locate driver not working</string>
+    <string name="notification_title">Location driver not working</string>
     <string name="notification_content">SMS and Location permissions needed.</string>
     <string name="docsLink">Check all available commands &lt;a href="http://www.gms-world.net/dl">here&lt;a></string>
     <string name="pinLink">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a>&lt;/font></string>

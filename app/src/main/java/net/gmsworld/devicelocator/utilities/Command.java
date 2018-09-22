@@ -1,13 +1,11 @@
 package net.gmsworld.devicelocator.utilities;
 
-import android.Manifest;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.media.AudioManager;
 import android.media.Ringtone;
@@ -16,7 +14,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.util.Patterns;
 
@@ -385,11 +382,6 @@ public class Command {
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             if (!Permissions.haveSendSMSAndLocationPermission(context)) {
-                try {
-                    Permissions.setPermissionNotification(context);
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage(), e);
-                }
                 Log.e(TAG, "Missing SMS and/or Location permission");
                 sendSmsNotification(context, sender, SHARE_COMMAND);
             } else {
@@ -577,21 +569,21 @@ public class Command {
         }
 
         private boolean initPhoneCall(String sender, Context context) {
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+            if (Permissions.haveCallPhonePermission(context)) {
                 try {
                     Uri call = Uri.parse("tel:" + sender);
-                    Intent surf = new Intent(Intent.ACTION_CALL, call);
+                    Intent callIntent = new Intent(Intent.ACTION_CALL, call);
                     //surf.setPackage("com.android.phone"); //use default phone
                     //surf.setPackage("com.google.android.dialer");
-                    surf.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(surf);
+                    callIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(callIntent);
                     return true;
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
                     return false;
                 }
             } else {
-                Log.e(TAG, "Unable to initiate phone call due to missing permission");
+                Log.e(TAG, "Unable to initiate phone call due to missing permission!");
                 return false;
             }
         }

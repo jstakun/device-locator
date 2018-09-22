@@ -508,15 +508,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkNotifiers() {
-        if (StringUtils.isEmpty(phoneNumber) && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email)) {
+        if (StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(phoneNumber)) {
+            Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
+        } else {
             Toast.makeText(MainActivity.this, "Please specify who should be notified in case of failed login!", Toast.LENGTH_LONG).show();
             //show notifications card if no notifiers are set
             findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.smsSettings).setVisibility(View.GONE);
             findViewById(R.id.deviceSettings).setVisibility(View.GONE);
             findViewById(R.id.email).requestFocus();
-        } else {
-            Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -1606,8 +1606,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         builder.setNegativeButton(R.string.no, null);
-        builder.setMessage("It seems you've no Device Locator or email accounts registered on this device and there is no verified notification email set in Notification settings card." +
-                " Do you want to register new account now?");
+        builder.setMessage("It seems you haven't Device Locator accounts or email registered on this device and there is no verified notification email set in Notification settings card." +
+                " Do you want to register Device Locator account now?");
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
         AlertDialog dialog = builder.create();
         dialog.show();

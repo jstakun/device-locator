@@ -2,20 +2,10 @@ package net.gmsworld.devicelocator.utilities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-
-import net.gmsworld.devicelocator.MainActivity;
-import net.gmsworld.devicelocator.R;
-
-import java.util.ArrayList;
 
 public class Permissions {
 
@@ -29,7 +19,7 @@ public class Permissions {
 
     public static final int PERMISSIONS_REQUEST_CALL = 1005;
 
-    public static void checkAndRequestPermissionsAtStartup(Activity activity) {
+    /*public static void checkAndRequestPermissionsAtStartup(Activity activity) {
         ArrayList<String> permissions = new ArrayList<>();
         permissions.add(0, Manifest.permission.SEND_SMS);
         permissions.add(1, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -55,7 +45,7 @@ public class Permissions {
         arr = neededPermissions.toArray(arr);
 
         ActivityCompat.requestPermissions(activity, arr, 1);
-    }
+    }*/
 
     public static void requestSendSMSAndLocationPermission(Activity activity, int requestCode) {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
@@ -117,25 +107,5 @@ public class Permissions {
 
     public static boolean haveFingerprintPermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED;
-    }
-
-
-    public static void setPermissionNotification(Context context) {
-        Intent resultIntent = new Intent(context, MainActivity.class);
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(context, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Notification.Builder notificationBuilder = new Notification.Builder(context)
-                //.setSmallIcon(R.drawable.notification_icon)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-                .setContentTitle(context.getString(R.string.notification_title))
-                .setContentText(context.getString(R.string.notification_content))
-                .setContentIntent(resultPendingIntent)
-                .setAutoCancel(true)
-                .setDefaults(Notification.DEFAULT_ALL);
-
-        NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (nm != null) {
-            nm.notify(0, notificationBuilder.build());
-        }
     }
 }
