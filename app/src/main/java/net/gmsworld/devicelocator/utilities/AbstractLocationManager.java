@@ -50,6 +50,7 @@ public abstract class AbstractLocationManager {
     private final boolean mSpeedSanityCheck = true;
 
     private int radius = -1;
+    protected int gpsAccuracy = 1;
 
     private static final Map<String, Handler> mLocationHandlers = new HashMap<>();
     private Location recentLocationSent;
@@ -69,6 +70,10 @@ public abstract class AbstractLocationManager {
             Log.d(TAG, "checkRadius compared " + distance + " + " + lastLocation.getAccuracy() + " with " + radius);
             if (distWithAccuracy > radius && radius > 0 && lastLocation.getAccuracy() < MAX_REASONABLE_ACCURACY) { //radius * 0.9f) {
                 update = true;
+                //TODO if device has changed temporary gps accuracy to balanced change it back to high
+            } else if (lastLocation.getTime() - recentLocationSent.getTime() >= 5 * 60 * 1000 && gpsAccuracy >= 1) {
+                //TODO if device not moving change temporary gps accuracy to balanced
+                Log.d(TAG, "No location change since 5 mins. Consider to change temporary gps accuracy");
             }
         } else { //if (recentLocationSent == null) {
             Log.d(TAG, "checkRadius compared " + lastLocation.getAccuracy() + " with " + radius);

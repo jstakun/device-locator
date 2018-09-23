@@ -32,6 +32,8 @@ public class GmsSmartLocationManager extends AbstractLocationManager implements 
 
         LocationParams config = (gpsAccuracy <= 0) ? LocationParams.BEST_EFFORT : LocationParams.NAVIGATION;
 
+        this.gpsAccuracy = gpsAccuracy;
+
         SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context))
                 .config(config)
                 .start(this);

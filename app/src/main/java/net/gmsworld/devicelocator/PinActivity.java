@@ -36,8 +36,9 @@ import org.apache.commons.lang3.StringUtils;
 public class PinActivity extends AppCompatActivity implements FingerprintHelper.AuthenticationCallback {
 
     private static final String TAG = PinActivity.class.getSimpleName();
-    static final int PIN_MIN_LENGTH = 4;
-    static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
+
+    public static final int PIN_MIN_LENGTH = 4;
+    public static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
     public static final String DEVICE_PIN = "token";
 
     private FingerprintHelper fingerprintHelper;
@@ -58,11 +59,13 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
             FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
-            fingerprintHelper = new FingerprintHelper(keyguardManager, fingerprintManager, this);
-            if (fingerprintHelper.init(this)) {
-                findViewById(R.id.deviceFingerprintCard).setVisibility(View.VISIBLE);
-            } else {
-                fingerprintHelper = null;
+            if (keyguardManager != null && fingerprintManager != null) {
+                fingerprintHelper = new FingerprintHelper(keyguardManager, fingerprintManager, this);
+                if (fingerprintHelper.init(this)) {
+                    findViewById(R.id.deviceFingerprintCard).setVisibility(View.VISIBLE);
+                } else {
+                    fingerprintHelper = null;
+                }
             }
         }
 

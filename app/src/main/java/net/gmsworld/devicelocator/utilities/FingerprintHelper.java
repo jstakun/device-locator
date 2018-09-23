@@ -51,8 +51,8 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
 
     @TargetApi(Build.VERSION_CODES.M)
     public boolean init(Context context) {
-        if (fingerprintManager.isHardwareDetected() && Permissions.haveFingerprintPermission(context) &&
-                fingerprintManager.hasEnrolledFingerprints() && keyguardManager.isKeyguardSecure()) {
+        if (fingerprintManager != null && keyguardManager != null && fingerprintManager.isHardwareDetected() &&
+                Permissions.haveFingerprintPermission(context) && fingerprintManager.hasEnrolledFingerprints() && keyguardManager.isKeyguardSecure()) {
             try {
                 generateKey();
             } catch (Exception e) {

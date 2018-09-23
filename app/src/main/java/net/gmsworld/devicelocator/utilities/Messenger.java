@@ -55,8 +55,6 @@ public class Messenger {
 
     private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
 
-    public static final String ROUTE_MESSAGE_PREFIX = "New location: ";
-
     public static final String MAPS_URL_PREFIX = "https://maps.google.com/maps?q=";
 
     public static void sendSMS(final Context context, final String phoneNumber, final String message) {
@@ -385,8 +383,8 @@ public class Messenger {
 
     public static void sendLocationMessage(Context context, Location location, boolean fused, String phoneNumber, String telegramId, String email, String app) {
         //Log.d(TAG, "sendLocationMessage()" + location.getAccuracy());
-        String deviceId = getDeviceId(context, true);
-        String text = "Device " + deviceId + " " + context.getString(fused ? R.string.approximate : R.string.accurate) + " location:\n";
+        final String deviceId = getDeviceId(context, true);
+        String text = deviceId + " " + context.getString(fused ? R.string.approximate : R.string.accurate) + " location:\n";
 
         text += context.getString(R.string.latitude) + " " + latAndLongFormat.format(location.getLatitude()) + "\n";
         text += context.getString(R.string.longitude) + " " + latAndLongFormat.format(location.getLongitude()) + "\n";
@@ -428,7 +426,7 @@ public class Messenger {
 
     public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email, String app) {
         final String deviceId = getDeviceId(context, true);
-        String text = "Device " + deviceId + " location" +
+        String text = deviceId + " location" +
                 "\n" + "Battery level: " + getBatteryLevel(context) +
                 "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
         if (StringUtils.isNotEmpty(phoneNumber)) {
@@ -453,7 +451,7 @@ public class Messenger {
 
     public static void sendAcknowledgeMessage(Context context, String phoneNumber, String telegramId, String email, String app) {
         String text;
-        String deviceId = getDeviceId(context, true);
+        final String deviceId = getDeviceId(context, true);
         if (GmsSmartLocationManager.isLocationEnabled(context)) {
             text = context.getString(R.string.acknowledgeMessage, deviceId) + "\n";
             text += context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context)) + "\n";
@@ -495,7 +493,9 @@ public class Messenger {
             }
         }
 
-        String message = ROUTE_MESSAGE_PREFIX + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
+        String deviceId = getDeviceId(context, true);
+
+        String message = deviceId + " location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
                 " in distance of " + DistanceFormatter.format(distance) + " from previous location with accuracy " + DistanceFormatter.format((int) location.getAccuracy());
         if (location.hasSpeed() && location.getSpeed() > 0f) {
             message += " and speed " + getSpeed(context, location.getSpeed());
@@ -511,7 +511,6 @@ public class Messenger {
             sendTelegram(context, location, telegramId, message, 1, headers);
         } else if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message);
-            String deviceId = getDeviceId(context, true);
             if (deviceId != null) {
                 title += " installed on device " + deviceId + " - location change";
             }
@@ -536,7 +535,7 @@ public class Messenger {
         if (StringUtils.isNotEmpty(app)) {
             String[] tokens = StringUtils.split(app, "+=+");
             final String deviceId = getDeviceId(context, true);
-            final String message = "Device " + deviceId + " is in perimeter " + DistanceFormatter.format(perimeter) +
+            final String message = deviceId + " is in perimeter " + DistanceFormatter.format(perimeter) +
                              "\n" + "Battery level: " + getBatteryLevel(context) +
                              "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
                              "\n" + perimeter;
@@ -621,10 +620,10 @@ public class Messenger {
                 text += "\nBattery level: " + getBatteryLevel(context);
                 break;
             case Command.MUTE_COMMAND:
-                text = "Device " + deviceId + " has been muted.";
+                text = deviceId + " has been muted.";
                 break;
             case Command.UNMUTE_COMMAND:
-                text = "Device " + deviceId + " has been unmuted.";
+                text = deviceId + " has been unmuted.";
                 break;
             case Command.RADIUS_COMMAND:
                 int radius = settings.getInt("radius");
@@ -652,10 +651,10 @@ public class Messenger {
                 }
                 break;
             case Command.GPS_HIGH_COMMAND:
-                text = "GPS settings on device " + deviceId + " has been changed to high accuracy.";
+                text = "GPS settings on " + deviceId + " has been changed to high accuracy.";
                 break;
             case Command.GPS_BALANCED_COMMAND:
-                text = "GPS settings on device " + deviceId + " has been changed to balanced accuracy.";
+                text = "GPS settings on " + deviceId + " has been changed to balanced accuracy.";
                 break;
             case Command.NOTIFY_COMMAND:
                 text = "";

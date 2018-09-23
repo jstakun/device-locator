@@ -59,6 +59,13 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     @Override
     protected void onHandleIntent(Intent intent) {
         final PreferencesUtils prefs = new PreferencesUtils(this);
+        final long pinVerificationMillis = prefs.getLong("pinVerificationMillis", System.currentTimeMillis());
+
+        if (System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS) {
+            //TODO open pin activity
+            Log.d(TAG, "User should authenticate again!");
+        }
+
         Bundle extras = intent.getExtras();
 
         if (extras == null) {

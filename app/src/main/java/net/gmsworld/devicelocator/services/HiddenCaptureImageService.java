@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -34,8 +35,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.nlopez.smartlocation.OnLocationUpdatedListener;
+import io.nlopez.smartlocation.SmartLocation;
+import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
 import static android.graphics.Bitmap.CompressFormat.JPEG;
 
@@ -43,11 +49,27 @@ import static android.graphics.Bitmap.CompressFormat.JPEG;
  * Created by jstakun on 9/6/17.
  */
 
-public class HiddenCaptureImageService extends HiddenCameraService {
+public class HiddenCaptureImageService extends HiddenCameraService implements OnLocationUpdatedListener {
 
     private static final String TAG = HiddenCaptureImageService.class.getSimpleName();
+    private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
+
     private boolean isTest = false;
     private String sender = null, app = null;
+    private Location location;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Log.d(TAG, "onCreate()");
+        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).oneFix().start(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).stop();
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -132,6 +154,11 @@ public class HiddenCaptureImageService extends HiddenCameraService {
 
                     headers.put("X-GMS-AppId", "2");
                     headers.put("X-GMS-Scope", "dl");
+
+                    if (location != null) {
+                        headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
+                        headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
+                    }
 
                     Network.uploadScreenshot(this, uploadUrl, out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
                         @Override
@@ -218,5 +245,11 @@ public class HiddenCaptureImageService extends HiddenCameraService {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    public void onLocationUpdated(Location location) {
+        Log.d(TAG, "Location found with accuracy " + location.getAccuracy() + " m");
+        this.location = location;
     }
 }

@@ -44,12 +44,10 @@ public class RouteTrackingService extends Service {
     public static final int COMMAND_SHOW_ROUTE = 50;
     public static final int DEFAULT_RADIUS = 100; //meters
     public static final int DEFAULT_PERIMETER = 500; //meters
+    public static final String GPS_ACCURACY = "gpsAccuracy"; //1>= high 0<= balanced
 
     private static final int NOTIFICATION_ID = 1001;
-    //public static final int NOTIFICATION_ROUTE_ID = 1002;
-
     private static final String TAG = RouteTrackingService.class.getSimpleName();
-    public static final String GPS_ACCURACY = "gpsAccuracy"; //1>= high 0<= balanced
 
     public enum Mode {Normal, Silent, Perimeter};
 
