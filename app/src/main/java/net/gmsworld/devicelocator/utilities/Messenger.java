@@ -57,7 +57,7 @@ public class Messenger {
 
     public static final String MAPS_URL_PREFIX = "https://maps.google.com/maps?q=";
 
-    public static void sendSMS(final Context context, final String phoneNumber, final String message) {
+    private static void sendSMS(final Context context, final String phoneNumber, final String message) {
         String status = null;
         if (Permissions.haveSendSMSPermission(context)) {
             try {
@@ -154,7 +154,7 @@ public class Messenger {
         });
     }
 
-    public static void sendEmail(final Context context, final Location location, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
+    private static void sendEmail(final Context context, final Location location, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
         if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message))) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
@@ -231,7 +231,7 @@ public class Messenger {
         }
     }
 
-    public static void sendTelegram(final Context context, final Location location, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
+    private static void sendTelegram(final Context context, final Location location, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
         if (isValidTelegramId(telegramId)) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
@@ -544,7 +544,7 @@ public class Messenger {
     }
 
     public static void sendCommandMessage(final Context context, final Bundle extras) {
-        String text = null, title = null, phoneNumber = null, telegramId = null, email = null, notificationNumber = null, command = null, app = null;
+        String text = null, title = null, phoneNumber = null, telegramId = null, email = null, command = null, app = null;
         String deviceId = getDeviceId(context, true);
         List<String> notifications = new ArrayList<>();
         PreferencesUtils settings = new PreferencesUtils(context);
@@ -860,7 +860,7 @@ public class Messenger {
         }
     }
 
-    public static int getBatteryLevel(Context context) {
+    private static int getBatteryLevel(Context context) {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = context.registerReceiver(null, ifilter);
 

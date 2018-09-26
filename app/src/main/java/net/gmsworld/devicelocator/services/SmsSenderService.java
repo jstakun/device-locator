@@ -132,11 +132,13 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             handler.postDelayed(task, LOCATION_REQUEST_MAX_WAIT_TIME * 1000);
 
-        } else {
+        } else if (!isRunning)  {
 
             Log.e(TAG, "No GPS providers are available!");
 
             Messenger.sendLocationErrorMessage(this, phoneNumber, telegramId, email, app);
+        } else {
+            Log.d(TAG, "GPS Location service is currently running!");
         }
     }
 
@@ -154,7 +156,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             //check if location is older than 10 minutes
             if ((System.currentTimeMillis() - location.getTime()) > 10 * 60 * 1000) {
-                //Log.d(TAG, "Location is older than 10 minutes");
+                Log.d(TAG, "Location is older than 10 minutes");
                 return;
             }
 
@@ -162,15 +164,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 bestLocation = location;
             }
 
-            //still null? check again
-            if (bestLocation == null) {
-                return;
-            }
-
             if (!bestLocation.getProvider().equals(LocationManager.GPS_PROVIDER) || bestLocation.getProvider().equals(location.getProvider())) {
-                //Log.d(TAG, "NOT GPS OR BOTH GPS!");
                 if (location.hasAccuracy() && bestLocation.hasAccuracy() && location.getAccuracy() < bestLocation.getAccuracy()) {
-                    //Log.d(TAG, "Update best location.");
+                    Log.d(TAG, "Updating best location.");
                     bestLocation = location;
                 }
             }
@@ -182,12 +178,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             //}
 
             if (bestLocation.getAccuracy() > AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
-                //Log.d(TAG, "Accuracy more than 50, check again.");
+                Log.d(TAG, "Accuracy more than " + AbstractLocationManager.MAX_REASONABLE_ACCURACY + ", will check again.");
                 return;
             }
         }
-
-        handler.removeCallbacks(task);
 
         disableUpdates();
     }
@@ -198,6 +192,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             Log.d(TAG, "Disabling location updates...");
 
             SmartLocation.with(this).location().stop();
+
+            handler.removeCallbacks(task);
 
             if (bestLocation == null) {
                 Messenger.sendLocationErrorMessage(this, phoneNumber, telegramId, email, app);

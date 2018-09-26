@@ -203,7 +203,7 @@ public class NotificationUtils {
         }
 
         //remove
-        Log.d(TAG, " ---------------------- ----------------------- Extras: " +  extras);
+        //Log.d(TAG, " ---------------------- ----------------------- Extras: " +  extras);
 
         if (extras != null && extras.containsKey("imei") && extras.containsKey("command")) {
             final String commandName = extras.getString("command");
