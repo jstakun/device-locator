@@ -417,10 +417,12 @@ public class MainActivity extends AppCompatActivity {
         ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false));
         ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, true));
         ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
-        //TODO check if READ_CONTACTS permission is set
-        ((Switch) findViewById(R.id.settings_sms_contacts)).setChecked(settings.getBoolean("settings_sms_contacts", false));
-        //
         ((Switch) findViewById(R.id.settings_sms_without_pin)).setChecked(settings.getBoolean("settings_sms_without_pin", true));
+        //check if READ_CONTACTS permission is set
+        if (settings.getBoolean("settings_sms_contacts", false) && !Permissions.haveReadContactsPermission(this)) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("settings_sms_contacts", false).apply();
+        }
+        ((Switch) findViewById(R.id.settings_sms_contacts)).setChecked(settings.getBoolean("settings_sms_contacts", false));
     }
 
     public void onLocationSMSCheckboxClicked(View view) {
@@ -563,8 +565,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
-        //TODO check if sms permission is present
+        //check if sms permission is present
+        if (running && !Permissions.haveSendSMSPermission(this)) {
+            toggleRunning();
+        }
         ((Switch) this.findViewById(R.id.dlSmsSwitch)).setChecked(running);
+
         ((Switch) this.findViewById(R.id.dlTrackerSwitch)).setChecked(motionDetectorRunning);
 
         if (Files.hasRoutePoints(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
@@ -584,7 +590,7 @@ public class MainActivity extends AppCompatActivity {
             final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
             final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
             if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(pin)) {
-                DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, null, null, true);
+                DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), settings.getString(DEVICE_NAME), true);
             } else if (StringUtils.isNotEmpty(firebaseToken)) {
                 Log.d(TAG, "Firebase token already set");
             } else {
@@ -599,24 +605,6 @@ public class MainActivity extends AppCompatActivity {
             Permissions.requestSendSMSAndLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_SMS_CONTROL);
             return;
         }
-
-        //TODO show toast with permissions and don't request this now
-        //required for mute action
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            // if user granted access else ask for permission
-            if (!this.running && !notificationManager.isNotificationPolicyAccessGranted()) {
-                Toast.makeText(this, "Please grant this permission if you want to use Audio Mute command", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
-                startActivity(intent);
-            }
-        }
-
-        //required for call action
-        if (!this.running && !Permissions.haveCallPhonePermission(MainActivity.this)) {
-            Permissions.requestCallPhonePermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_CALL);
-        }*/
-        //
 
         this.running = !this.running;
         saveData();
@@ -636,9 +624,9 @@ public class MainActivity extends AppCompatActivity {
         if (running) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setPositiveButton("OK", null);
-            builder.setNegativeButton("Commands",  new DialogInterface.OnClickListener() {
+            builder.setNegativeButton("Permissions",  new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.commandsUrl)));
+                    Intent intent = new Intent(MainActivity.this, PermissionsActivity.class);
                     startActivity(intent);
                 }
             });

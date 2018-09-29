@@ -1070,7 +1070,7 @@ public class Messenger {
         }
 
         if (androidDeviceId == null && context != null) {
-            //get telephony imei android.Manifest.permission.READ_PHONE_STATE required
+            //get telephony imei Manifest.permission.READ_PHONE_STATE required
             if (Permissions.haveReadPhoneStatePermission(context)) {
                 try {
                     final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);

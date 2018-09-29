@@ -14,9 +14,22 @@ import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
 
+import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
+import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PermissionsActivity extends AppCompatActivity {
+
+    private String deviceId;
+
+    private static final int CALL_PERMISSION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +39,12 @@ public class PermissionsActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
+        if (requestCode == CALL_PERMISSION && resultCode == RESULT_OK) {
+            String newDeviceId = Messenger.getDeviceId(this, false);
+            if (!StringUtils.equals(newDeviceId, deviceId)) {
+                registerDevice();
+            }
+        }
     }
 
     @Override
@@ -44,7 +62,11 @@ public class PermissionsActivity extends AppCompatActivity {
         Switch notificationPolicyAccessPermission = findViewById(R.id.notification_policy_access_permission);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationPolicyAccessPermission.setChecked(notificationManager.isNotificationPolicyAccessGranted());
+            if (notificationManager != null) {
+                notificationPolicyAccessPermission.setChecked(notificationManager.isNotificationPolicyAccessGranted());
+            } else {
+                notificationPolicyAccessPermission.setChecked(true);
+            }
         } else {
             notificationPolicyAccessPermission.setChecked(true);
         }
@@ -146,17 +168,20 @@ public class PermissionsActivity extends AppCompatActivity {
                 break;
             case R.id.call_phone_permission:
                 if (checked && !Permissions.haveCallPhonePermission(this)) {
-                    Permissions.requestCallPhonePermission(this, 0);
+                    deviceId = Messenger.getDeviceId(this, false);
+                    Permissions.requestCallPhonePermission(this, CALL_PERMISSION);
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this);
                 }
                 break;
             case R.id.read_phone_state_permission:
                 if (checked && !Permissions.haveReadPhoneStatePermission(this)) {
+                    deviceId = Messenger.getDeviceId(this, false);
                     Permissions.requestReadPhoneStatePermission(this);
-                    //TODO this will change deviceId!
-                    //Send device registration request to the backend by appending -1 to device name
-                    //and call DlFirebaseMessagingService.sendRegistrationToServer
+                    String newDeviceId = Messenger.getDeviceId(this, false);
+                    if (!StringUtils.equals(newDeviceId, deviceId)) {
+                        registerDevice();
+                    }
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this);
                 }
@@ -168,7 +193,23 @@ public class PermissionsActivity extends AppCompatActivity {
                     Permissions.startSettingsIntent(this);
                 }
                 break;
-            default: break;
+            default:
+                break;
+        }
+    }
+
+    private void registerDevice() {
+        PreferencesUtils settings = new PreferencesUtils(this);
+        if (DlFirebaseMessagingService.sendRegistrationToServer(this, settings.getString(MainActivity.USER_LOGIN), settings.getString(MainActivity.DEVICE_NAME), true)) {
+            //delete old device
+            final String content = "imei=" + deviceId + "&action=delete";
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer " + settings.getString(DeviceLocatorApp.GMS_TOKEN));
+            Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                }
+            });
         }
     }
 }
