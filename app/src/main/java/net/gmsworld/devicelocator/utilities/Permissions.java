@@ -2,10 +2,20 @@ package net.gmsworld.devicelocator.utilities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
+
+import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 
 public class Permissions {
 
@@ -115,5 +125,41 @@ public class Permissions {
 
     public static boolean haveFingerprintPermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static void startSettingsIntent(Context context) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + context.getPackageName()));
+        //TODO open permissions fragment
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
+    public static void startAddDeviceAdminIntent(Activity context, int requestCode) {
+        final ComponentName deviceAdmin = new ComponentName(context, DeviceAdminEventReceiver.class);
+        Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, deviceAdmin);
+        intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, context.getString(R.string.admin_grant_explanation));
+        context.startActivityForResult(intent, requestCode);
+    }
+
+    public static void startManageOverlayIntent(Activity context, int requestCode) {
+        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
+        context.startActivityForResult(intent, requestCode);
+    }
+
+    public static void startNotificationPolicyAccessIntent(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+            context.startActivity(intent);
+        } else {
+            Toast.makeText(context, "This permission is granted by default on your device!", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public static void startDeviceAdminIntent(Context context) {
+        Intent intent = new Intent();
+        intent.setComponent(new ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings"));
+        context.startActivity(intent);
     }
 }

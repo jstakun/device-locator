@@ -2,7 +2,6 @@ package net.gmsworld.devicelocator;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -15,7 +14,6 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -263,10 +261,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ACTION_ADD_DEVICE_ADMIN && HiddenCameraUtils.canOverDrawOtherApps(this)) {
-            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, new ComponentName(this, DeviceAdminEventReceiver.class));
-            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.admin_grant_explanation));
-            startActivityForResult(intent, ENABLE_ADMIN_INTENT);
+            Permissions.startAddDeviceAdminIntent(this, ENABLE_ADMIN_INTENT);
         } else if (requestCode == ACTION_MANAGE_OVERLAY_INTENT && HiddenCameraUtils.canOverDrawOtherApps(this)) {
             Toast.makeText(MainActivity.this, "Please wait. Device Locator is now checking your camera...", Toast.LENGTH_LONG).show();
             Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
@@ -422,7 +417,9 @@ public class MainActivity extends AppCompatActivity {
         ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false));
         ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, true));
         ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
+        //TODO check if READ_CONTACTS permission is set
         ((Switch) findViewById(R.id.settings_sms_contacts)).setChecked(settings.getBoolean("settings_sms_contacts", false));
+        //
         ((Switch) findViewById(R.id.settings_sms_without_pin)).setChecked(settings.getBoolean("settings_sms_without_pin", true));
     }
 
@@ -499,13 +496,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.d(TAG, "Enable login tracker");
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
-                Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-                intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, deviceAdmin);
-                intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.admin_grant_explanation));
-                startActivityForResult(intent, ENABLE_ADMIN_INTENT);
+                Permissions.startAddDeviceAdminIntent(this, ENABLE_ADMIN_INTENT);
             } else {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, ACTION_ADD_DEVICE_ADMIN);
+                Permissions.startManageOverlayIntent(this, ACTION_ADD_DEVICE_ADMIN);
             }
         }
     }
@@ -533,9 +526,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (!HiddenCameraUtils.canOverDrawOtherApps(this)) {
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
-                startActivityForResult(intent, ACTION_MANAGE_OVERLAY_INTENT);
-                //HiddenCameraUtils.openDrawOverPermissionSetting(this);
+                Permissions.startManageOverlayIntent(this, ACTION_MANAGE_OVERLAY_INTENT);
             } else if (Permissions.haveCameraPermission(this)) {
                 Toast.makeText(MainActivity.this, "Please wait. Device Locator is checking your camera...", Toast.LENGTH_LONG).show();
                 Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
@@ -572,6 +563,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateUI() {
+        //TODO check if sms permission is present
         ((Switch) this.findViewById(R.id.dlSmsSwitch)).setChecked(running);
         ((Switch) this.findViewById(R.id.dlTrackerSwitch)).setChecked(motionDetectorRunning);
 
@@ -610,7 +602,7 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO show toast with permissions and don't request this now
         //required for mute action
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
             // if user granted access else ask for permission
             if (!this.running && !notificationManager.isNotificationPolicyAccessGranted()) {
@@ -623,7 +615,7 @@ public class MainActivity extends AppCompatActivity {
         //required for call action
         if (!this.running && !Permissions.haveCallPhonePermission(MainActivity.this)) {
             Permissions.requestCallPhonePermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_CALL);
-        }
+        }*/
         //
 
         this.running = !this.running;
@@ -636,7 +628,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseAnalytics.logEvent("sms_control", bundle);
 
         //check if location settings are enabled
-        if (!GmsSmartLocationManager.isLocationEnabled(this)) {
+        if (running && !GmsSmartLocationManager.isLocationEnabled(this)) {
             startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
             Toast.makeText(getApplicationContext(), "Please enable location services in order to receive device location updates!", Toast.LENGTH_SHORT).show();
         }
