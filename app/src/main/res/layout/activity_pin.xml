@@ -66,7 +66,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:layout_margin="8dp"
-                    ldcard:title="@string/auhenticate_with_fingerprint"
+                    ldcard:title="@string/unlock_with_fingerprint"
                     android:visibility="gone">
 
                     <LinearLayout

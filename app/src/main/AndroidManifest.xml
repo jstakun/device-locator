@@ -27,7 +27,6 @@
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
-
     <uses-feature
         android:name="android.hardware.camera.autofocus"
         android:required="false" />
@@ -42,36 +41,35 @@
         android:resizeableActivity="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity
             android:name=".LauncherActivity"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts"/>
-        </activity>
 
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity>
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize"
             android:exported="false"
             android:launchMode="singleTop"
             android:windowSoftInputMode="stateAlwaysHidden" />
-
         <activity
             android:name=".CommandActivity"
             android:configChanges="orientation|screenSize"
             android:exported="false"
             android:launchMode="singleTop" />
-
         <activity
             android:name=".PinActivity"
             android:configChanges="orientation|screenSize"
             android:exported="false" />
-
         <activity
             android:name=".LoginActivity"
             android:configChanges="orientation|screenSize"
@@ -80,19 +78,15 @@
         <service
             android:name=".services.SmsSenderService"
             android:exported="false" />
-
         <service
             android:name=".services.CommandService"
             android:exported="false" />
-
         <service
             android:name=".services.RouteTrackingService"
             android:exported="false" />
-
         <service
             android:name=".services.HiddenCaptureImageService"
             android:exported="false" />
-
         <service
             android:name=".services.DlFirebaseMessagingService"
             android:enabled="true"
@@ -101,14 +95,16 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <service android:name=".services.GMSWorldAuthenticatorService"
+        <service
+            android:name=".services.GMSWorldAuthenticatorService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
-            <meta-data android:name="android.accounts.AccountAuthenticator"
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
 
@@ -121,7 +117,6 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".broadcastreceivers.RouteTrackingServiceRestartReceiver"
             android:enabled="true"
@@ -136,7 +131,6 @@
             </intent-filter
             -->
         </receiver>
-
         <receiver
             android:name=".broadcastreceivers.DeviceAdminEventReceiver"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
@@ -156,6 +150,9 @@
             android:value="@integer/google_play_services_version"
             tools:replace="android:value" />
 
+        <activity
+            android:name=".PermissionsActivity"
+            android:label="@string/title_activity_permissions" />
     </application>
 
 </manifest>

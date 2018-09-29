@@ -25,4 +25,9 @@
         android:title="@string/camera_control"
         android:icon="@drawable/ic_camera"
         app:showAsAction="ifRoom|withText"/>
+    <item
+        android:id="@+id/permissions"
+        android:title="@string/title_activity_permissions"
+        android:icon="@drawable/ic_settings_cell_white"
+        app:showAsAction="ifRoom|withText"/>
 </menu>

@@ -117,11 +117,14 @@
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="registerLink">In order to register click &lt;a href="https://www.gms-world.net/m/register.jsp">here&lt;a></string>
-    <string name="auhenticate_with_fingerprint">Unlock with Fingerprint</string>
+    <string name="unlock_with_fingerprint">Unlock with Fingerprint</string>
     <string name="route_button">Route view</string>
     <string name="map_button">Map view</string>
     <string name="browser_button">Open in browser</string>
     <string name="resend_command">Send again</string>
     <string name="please_wait">Please wait...</string>
+    <string name="title_activity_permissions">Permissions</string>
+    <string name="device_permissions">Device permissions</string>
+    <string name="app_permissions">Application permissions</string>
 
 </resources>

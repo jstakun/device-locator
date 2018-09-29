@@ -51,6 +51,10 @@ public class Permissions {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
     }
 
+    public static void requestSendSMSPermission(Activity activity, int requestCode) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS}, requestCode);
+    }
+
     public static void requestLocationPermission(Activity activity, int requestCode) {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
     }
@@ -69,6 +73,10 @@ public class Permissions {
 
     public static void requestGetAccountsPermission(Activity activity) {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.GET_ACCOUNTS}, PERMISSIONS_REQUEST_GET_ACCOUNTS);
+    }
+
+    public static void requestReadPhoneStatePermission(Activity activity) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_PHONE_STATE}, PERMISSIONS_REQUEST_GET_ACCOUNTS);
     }
 
     public static boolean haveSendSMSAndLocationPermission(Context context) {

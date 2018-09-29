@@ -356,6 +356,9 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "First please enable failed login notification service!", Toast.LENGTH_LONG).show();
                 }
                 return true;
+            case R.id.permissions:
+                startActivity(new Intent(this, PermissionsActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -605,6 +608,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        //TODO show toast with permissions and don't request this now
+        //required for mute action
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
             // if user granted access else ask for permission
@@ -615,9 +620,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        //required for call action
         if (!this.running && !Permissions.haveCallPhonePermission(MainActivity.this)) {
             Permissions.requestCallPhonePermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_CALL);
         }
+        //
 
         this.running = !this.running;
         saveData();

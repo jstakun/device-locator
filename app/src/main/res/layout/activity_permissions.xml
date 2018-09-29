@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ldcard="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".PermissionsActivity">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <net.gmsworld.devicelocator.views.LDCard
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_margin="8dp"
+            ldcard:title="@string/device_permissions">
+
+            <Switch
+                android:id="@+id/device_admin_permission"
+                android:text="DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
+                android:id="@+id/manage_overlay_permission"
+                android:text="Settings.ACTION_MANAGE_OVERLAY_PERMISSION"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
+                android:id="@+id/notification_policy_access_permission"
+                android:text="Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+        </net.gmsworld.devicelocator.views.LDCard>
+
+        <net.gmsworld.devicelocator.views.LDCard
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_margin="8dp"
+            ldcard:title="@string/app_permissions">
+
+            <Switch
+                android:id="@+id/access_fine_location_permission"
+                android:text="Manifest.permission.ACCESS_FINE_LOCATION"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
+                android:id="@+id/sms_permission"
+                android:text="Manifest.permission.SEND_SMS"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
+                android:id="@+id/camera_permission"
+                android:text="Manifest.permission.CAMERA"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
+                android:id="@+id/read_contacts_permission"
+                android:text="Manifest.permission.READ_CONTACTS"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
+                android:id="@+id/call_phone_permission"
+                android:text="Manifest.permission.CALL_PHONE"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
+                android:id="@+id/use_fingerprint_permission"
+                android:text="Manifest.permission.USE_FINGERPRINT"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
+                android:id="@+id/read_phone_state_permission"
+                android:text="Manifest.permission.READ_PHONE_STATE"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
+                android:id="@+id/get_accounts_permission"
+                android:text="Manifest.permission.GET_ACCOUNTS"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+        </net.gmsworld.devicelocator.views.LDCard>
+
+    </LinearLayout>
+
+    </ScrollView>
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

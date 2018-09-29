@@ -178,7 +178,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             //}
 
             if (bestLocation.getAccuracy() > AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
-                Log.d(TAG, "Accuracy more than " + AbstractLocationManager.MAX_REASONABLE_ACCURACY + ", will check again.");
+                Log.d(TAG, "Accuracy is " + bestLocation.getAccuracy() + " more than max " + AbstractLocationManager.MAX_REASONABLE_ACCURACY + ", will check again.");
                 return;
             }
         }
