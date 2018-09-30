@@ -52,13 +52,7 @@ public class PermissionsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         //RESULT_OK = -1. RESULT_CANCELLED = 0
         Log.d(TAG, "onActivityResult() - requestCode: " + requestCode + ", resultCode: " + resultCode);
-        if (requestCode == CALL_PERMISSION && resultCode == RESULT_OK) {
-            Log.d(TAG, "Call permission callback");
-            String newDeviceId = Messenger.getDeviceId(this, false);
-            if (!StringUtils.equals(newDeviceId, deviceId)) {
-                registerDevice();
-            }
-        } else if (requestCode == DEVICE_ADMIN && resultCode == RESULT_OK) {
+        if (requestCode == DEVICE_ADMIN && resultCode == RESULT_OK) {
             Log.d(TAG, "Device Admin callback");
             if (StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL)) && StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL)) && StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
                 Toast.makeText(this, "Please specify who should be notified in case of failed login!", Toast.LENGTH_LONG).show();
@@ -81,6 +75,12 @@ public class PermissionsActivity extends AppCompatActivity {
         if (requestCode ==  CAMERA_PERMISSION) {
             Log.d(TAG, "Camera permission callback");
             startCameraTest();
+        } else if (requestCode == CALL_PERMISSION) {
+            Log.d(TAG, "Call permission callback");
+            String newDeviceId = Messenger.getDeviceId(this, false);
+            if (!StringUtils.equals(newDeviceId, deviceId)) {
+                registerDevice();
+            }
         }
     }
 

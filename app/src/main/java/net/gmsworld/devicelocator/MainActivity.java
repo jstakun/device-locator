@@ -161,11 +161,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         restoreSavedData();
-        initApp();
-        toggleBroadcastReceiver(); //set sms broadcast receiver
-        if (motionDetectorRunning) {
-            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,false, RouteTrackingService.Mode.Normal);
-        }
 
         setupToolbar(R.id.smsToolbar);
         if (isTrackerShown) {
@@ -180,6 +175,12 @@ public class MainActivity extends AppCompatActivity {
             findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
             findViewById(R.id.trackerSettings).setVisibility(View.GONE);
             findViewById(R.id.deviceSettings).setVisibility(View.GONE);
+        }
+
+        initApp();
+        toggleBroadcastReceiver(); //set sms broadcast receiver
+        if (motionDetectorRunning) {
+            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,false, RouteTrackingService.Mode.Normal);
         }
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -821,6 +822,7 @@ public class MainActivity extends AppCompatActivity {
     //user login input setup -------------------------------------------------------------
 
     private void initUserLoginInput(boolean requestPermission) {
+        Log.d(TAG, "initUserLoginInput()");
         final Spinner userAccounts = this.findViewById(R.id.userAccounts);
 
         List<String> accountNames = new ArrayList<>();
