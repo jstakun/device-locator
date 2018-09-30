@@ -236,18 +236,18 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 result.addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                     @Override
                     public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        if (task.isSuccessful()) {
-                            // Task completed successfully
-                            InstanceIdResult result = task.getResult();
-                            sendRegistrationToServer(context, result.getToken(), username, deviceName);
-                        } else {
-                            // Task failed with an exception
-                            Exception exception = task.getException();
-                            Log.e(TAG, "Failed to receive Firebase token!", exception);
-                            if (!silent) {
-                                Toast.makeText(context, "Failed to synchronize device. Please restart Device Locator and try again!", Toast.LENGTH_LONG).show();
-                            }
+                    if (task.isSuccessful()) {
+                        // Task completed successfully
+                        InstanceIdResult result = task.getResult();
+                        sendRegistrationToServer(context, result.getToken(), username, deviceName);
+                    } else {
+                        // Task failed with an exception
+                        Exception exception = task.getException();
+                        Log.e(TAG, "Failed to receive Firebase token!", exception);
+                        if (!silent) {
+                            Toast.makeText(context, "Failed to synchronize device. Please restart Device Locator and try again!", Toast.LENGTH_LONG).show();
                         }
+                    }
                     }
                 });
 

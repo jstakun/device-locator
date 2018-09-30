@@ -15,7 +15,7 @@
         android:title="@string/devices"
         android:icon="@drawable/ic_devices_other_white"
         app:showAsAction="ifRoom|withText"/>
-    <item
+    <!--item
         android:id="@+id/loginTracker"
         android:title="@string/failed_login_tracker"
         android:icon="@drawable/ic_perm_identity_white"
@@ -24,7 +24,7 @@
         android:id="@+id/camera"
         android:title="@string/camera_control"
         android:icon="@drawable/ic_camera"
-        app:showAsAction="ifRoom|withText"/>
+        app:showAsAction="ifRoom|withText"/-->
     <item
         android:id="@+id/permissions"
         android:title="@string/title_activity_permissions"

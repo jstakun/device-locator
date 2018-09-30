@@ -77,8 +77,8 @@ public class Permissions {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, requestCode);
     }
 
-    public static void requestCameraPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, 6);
+    public static void requestCameraPermission(Activity activity, int requestCode) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, requestCode);
     }
 
     public static void requestGetAccountsPermission(Activity activity) {
