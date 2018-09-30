@@ -102,10 +102,10 @@ public class PermissionsActivity extends AppCompatActivity {
             if (notificationManager != null) {
                 notificationPolicyAccessPermission.setChecked(notificationManager.isNotificationPolicyAccessGranted());
             } else {
-                notificationPolicyAccessPermission.setChecked(true);
+                notificationPolicyAccessPermission.setVisibility(View.GONE);
             }
         } else {
-            notificationPolicyAccessPermission.setChecked(true);
+            notificationPolicyAccessPermission.setVisibility(View.GONE);
         }
 
         // ----------------------------
@@ -170,7 +170,11 @@ public class PermissionsActivity extends AppCompatActivity {
                 Permissions.startManageOverlayIntent(this, 0);
                 break;
             case R.id.notification_policy_access_permission:
-                Permissions.startNotificationPolicyAccessIntent(this);
+                try {
+                    Permissions.startNotificationPolicyAccessIntent(this);
+                } catch (Exception e) {
+                    Toast.makeText(this, "This permission is enabled by default on your device.", Toast.LENGTH_LONG).show();
+                }
                 break;
             case R.id.access_fine_location_permission:
                 if (checked && !Permissions.haveLocationPermission(this)) {
