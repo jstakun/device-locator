@@ -94,12 +94,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int SEND_LOCATION_INTENT = 1;
-    //private static final int MOTION_DETECTOR_INTENT = 2;
     private static final int SELECT_CONTACT_INTENT = 3;
-    //private static final int ENABLE_ADMIN_INTENT = 12;
-    //private static final int ACTION_MANAGE_OVERLAY_INTENT = 13;
-    //private static final int ACTION_ADD_DEVICE_ADMIN = 14;
-    private static final int GET_ACCOUNTS_INTENT = 15;
     private static final int SHARE_ROUTE_MESSAGE = 1;
     private static final int UPDATE_UI_MESSAGE = 2;
     private static final int MIN_RADIUS = 10; //meters
@@ -113,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String NOTIFICATION_SOCIAL = "telegramId";
 
     public static final String ACTION_DEVICE_TRACKER = "net.gmsworld.devicelocator.ActionDeviceTracker";
+    public static final String ACTION_DEVICE_TRACKER_NOTIFICATION = "net.gmsworld.devicelocator.ActionDeviceTrackerNotification";
     public static final String ACTION_DEVICE_MANAGER = "net.gmsworld.devicelocator.ActionDeviceManager";
     public static final String ACTION_SMS_MANAGER = "net.gmsworld.devicelocator.ActionSmsManager";
 
@@ -131,56 +127,29 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate()");
 
         settings = new PreferencesUtils(this);
-        boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
-        boolean isDeviceManagerShown = settings.getBoolean("isDeviceManagerShown", false);
-
-        if (getIntent() != null) {
-            String action = getIntent().getAction();
-            if (action != null) {
-                Log.d(TAG, "getIntent().getAction(): " + action);
-                if (action.equals(ACTION_DEVICE_TRACKER)) {
-                    isTrackerShown = true;
-                    PreferenceManager.getDefaultSharedPreferences(this).edit()
-                            .putBoolean("isTrackerShown", true)
-                            .putBoolean("isDeviceManagerShown", false).apply();
-                } else if (action.equals(ACTION_DEVICE_MANAGER)) {
-                    isDeviceManagerShown = true;
-                    PreferenceManager.getDefaultSharedPreferences(this).edit()
-                            .putBoolean("isTrackerShown", false)
-                            .putBoolean("isDeviceManagerShown", true).apply();
-                } else if (action.equals(ACTION_SMS_MANAGER)) {
-                    isTrackerShown = false;
-                    isDeviceManagerShown = false;
-                    PreferenceManager.getDefaultSharedPreferences(this).edit()
-                            .putBoolean("isTrackerShown", false)
-                            .putBoolean("isDeviceManagerShown", false).apply();
-                }
-            }
-        }
 
         setContentView(R.layout.activity_main);
 
         restoreSavedData();
 
         setupToolbar(R.id.smsToolbar);
-        if (isTrackerShown) {
-            findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
-            findViewById(R.id.smsSettings).setVisibility(View.GONE);
-            findViewById(R.id.deviceSettings).setVisibility(View.GONE);
-        } else if (isDeviceManagerShown) {
-            findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
-            findViewById(R.id.trackerSettings).setVisibility(View.GONE);
-            findViewById(R.id.smsSettings).setVisibility(View.GONE);
+
+        //show card: sms, tracker, devices
+
+        if (getIntent() != null) {
+            showCard(getIntent().getAction());
         } else {
-            findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
-            findViewById(R.id.trackerSettings).setVisibility(View.GONE);
-            findViewById(R.id.deviceSettings).setVisibility(View.GONE);
+            showCard(null);
         }
 
+        //
+
         initApp();
+
         toggleBroadcastReceiver(); //set sms broadcast receiver
+
         if (motionDetectorRunning) {
-            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,false, RouteTrackingService.Mode.Normal);
+            isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null, false, RouteTrackingService.Mode.Normal);
         }
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -188,8 +157,22 @@ public class MainActivity extends AppCompatActivity {
         //send email registration request once every day if still unverified
         String emailStatus = settings.getString("emailStatus");
         long emailRegistrationMillis = settings.getLong("emailRegistrationMillis", System.currentTimeMillis());
-        if (StringUtils.equalsIgnoreCase(emailStatus, "unverified") && StringUtils.isNotEmpty(email) && (System.currentTimeMillis() - emailRegistrationMillis) > 1000 * 60 * 60 * 24 ) {
-            registerEmail((TextView)findViewById(R.id.email), true);
+        if (StringUtils.equalsIgnoreCase(emailStatus, "unverified") && StringUtils.isNotEmpty(email) && (System.currentTimeMillis() - emailRegistrationMillis) > 1000 * 60 * 60 * 24) {
+            registerEmail((TextView) findViewById(R.id.email), true);
+        }
+    }
+
+    @Override
+    public void onNewIntent (Intent intent) {
+        //show tracker view
+        Log.d(TAG, "onNewIntent()");
+        if (intent != null) {
+            String action = intent.getAction();
+            if (action != null) {
+                Log.d(TAG, "getIntent().getAction(): " + action);
+                showCard(action);
+                supportInvalidateOptionsMenu();
+            }
         }
     }
 
@@ -211,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 if (clipboard != null && clipboard.hasPrimaryClip()) {
                     int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
-                    for (int i=0;i<clipboardItemCount; i++) {
+                    for (int i = 0; i < clipboardItemCount; i++) {
                         ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
                         String pasteData = item.getText().toString();
                         Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
@@ -257,43 +240,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //if (requestCode == ACTION_ADD_DEVICE_ADMIN && HiddenCameraUtils.canOverDrawOtherApps(this)) {
-        //    Permissions.startAddDeviceAdminIntent(this, ENABLE_ADMIN_INTENT);
-        //} else
-        /*if (requestCode == ACTION_MANAGE_OVERLAY_INTENT && HiddenCameraUtils.canOverDrawOtherApps(this)) {
-            Toast.makeText(MainActivity.this, "Please wait. Device Locator is now checking your camera...", Toast.LENGTH_LONG).show();
-            Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
-            cameraIntent.putExtra("test", true);
-            startService(cameraIntent);
-        } else*/
         if (requestCode == SELECT_CONTACT_INTENT && resultCode == RESULT_OK) {
-            /*if (requestCode == ENABLE_ADMIN_INTENT) {
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("loginTracker", true).apply();
-                supportInvalidateOptionsMenu();
-                checkNotifiers();
-                //open dialog to enable photo on failed login
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        onCameraItemSelected();
-                    }
-                });
-                builder.setNegativeButton(R.string.no, null);
-                builder.setMessage(Html.fromHtml(getString(R.string.take_photo_prompt)));
-                builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-                AlertDialog dialog = builder.create();
-                dialog.show();
-            } else {*/
-                phoneNumber = getNumber(data);
-                initPhoneNumberInput();
-                if (phoneNumber != null) {
-                    if (requestCode == SEND_LOCATION_INTENT) {
-                        launchService();
-                    }
-                } else {
-                    Toast.makeText(this, "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
+            phoneNumber = getNumber(data);
+            initPhoneNumberInput();
+            if (phoneNumber != null) {
+                if (requestCode == SEND_LOCATION_INTENT) {
+                    launchService();
                 }
-            //}
+            } else {
+                Toast.makeText(this, "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -340,16 +296,6 @@ public class MainActivity extends AppCompatActivity {
                 supportInvalidateOptionsMenu();
                 initUserLoginInput(true);
                 return true;
-            /*case R.id.loginTracker:
-                onLoginTrackerItemSelected();
-                return true;
-            case R.id.camera:
-                if (settings.getBoolean("loginTracker", false)) {
-                    onCameraItemSelected();
-                } else {
-                    Toast.makeText(this, "First please enable failed login notification service!", Toast.LENGTH_LONG).show();
-                }
-                return true;*/
             case R.id.permissions:
                 startActivity(new Intent(this, PermissionsActivity.class));
                 return true;
@@ -359,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onPrepareOptionsMenu (Menu menu) {
+    public boolean onPrepareOptionsMenu(Menu menu) {
         //Log.d(TAG, "onPrepareOptionsMenu()");
         //menu.findItem(R.id.camera).setVisible(settings.getBoolean("loginTracker", false));
 
@@ -383,36 +329,69 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    /*@Override
-    public void onNewIntent (Intent intent) {
-        //show tracker view
-        Log.d(TAG, "onNewIntent()");
-        PreferenceManager.getDefaultSharedPreferences(this).edit()
-                .putBoolean("isTrackerShown", true)
-                .putBoolean("isDeviceManagerShown", false).apply();
-        findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
-        findViewById(R.id.smsSettings).setVisibility(View.GONE);
-        findViewById(R.id.deviceSettings).setVisibility(View.GONE);
-        supportInvalidateOptionsMenu();
-    }*/
+    private void showCard(String action) {
+        boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
+        boolean isDeviceManagerShown = settings.getBoolean("isDeviceManagerShown", false);
+
+        if (action != null) {
+            Log.d(TAG, "getIntent().getAction(): " + action);
+            if (action.equals(ACTION_DEVICE_TRACKER)) {
+                isTrackerShown = true;
+                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putBoolean("isTrackerShown", true)
+                            .putBoolean("isDeviceManagerShown", false).apply();
+            } else if (action.equals(ACTION_DEVICE_TRACKER_NOTIFICATION)) {
+                isTrackerShown = true;
+                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putBoolean("isTrackerShown", true)
+                            .putBoolean("isDeviceManagerShown", false).apply();
+                findViewById(R.id.email).requestFocus();
+            } else if (action.equals(ACTION_DEVICE_MANAGER)) {
+                isDeviceManagerShown = true;
+                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putBoolean("isTrackerShown", false)
+                            .putBoolean("isDeviceManagerShown", true).apply();
+            } else if (action.equals(ACTION_SMS_MANAGER)) {
+                isTrackerShown = false;
+                isDeviceManagerShown = false;
+                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putBoolean("isTrackerShown", false)
+                            .putBoolean("isDeviceManagerShown", false).apply();
+            }
+        }
+
+        if (isTrackerShown) {
+            findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
+            findViewById(R.id.smsSettings).setVisibility(View.GONE);
+            findViewById(R.id.deviceSettings).setVisibility(View.GONE);
+        } else if (isDeviceManagerShown) {
+            findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
+            findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+            findViewById(R.id.smsSettings).setVisibility(View.GONE);
+        } else {
+            findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
+            findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+            findViewById(R.id.deviceSettings).setVisibility(View.GONE);
+        }
+    }
 
     private void showRemoveDeviceDialog(final Device device) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage("Remove device " + (StringUtils.isNotEmpty(device.name) ? device.name : device.imei) + " from the list?");
         alertDialogBuilder.setPositiveButton("yes",
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface arg0, int arg1) {
-                                deleteDevice(device.imei);
-                            }
-                        });
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface arg0, int arg1) {
+                        deleteDevice(device.imei);
+                    }
+                });
         alertDialogBuilder.setNegativeButton("No", null);
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
 
     private void initLocationSMSCheckbox() {
-        ((Switch)findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_ACKNOWLEDGE_MESSAGE, true));
+        ((Switch) findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_ACKNOWLEDGE_MESSAGE, true));
         ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false));
         ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, true));
         ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
@@ -456,91 +435,6 @@ public class MainActivity extends AppCompatActivity {
 
         editor.apply();
     }
-
-    /*private void onLoginTrackerItemSelected() {
-        boolean loginTracker = settings.getBoolean("loginTracker", false);
-        final ComponentName deviceAdmin = new ComponentName(this, DeviceAdminEventReceiver.class);
-
-        if (loginTracker) {
-            //disable tracking
-            Log.d(TAG, "Disable login tracker");
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    DevicePolicyManager devicePolicyManager = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
-                    if (devicePolicyManager != null) {
-                        devicePolicyManager.removeActiveAdmin(deviceAdmin);
-                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit()
-                                .putBoolean("loginTracker", false)
-                                .putBoolean("hiddenCamera", false).apply();
-                        supportInvalidateOptionsMenu();
-                        Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, "Failed. Please retry!", Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
-            builder.setNegativeButton(R.string.no, null);
-            builder.setMessage(Html.fromHtml(getString(R.string.disable_fln_prompt)));
-            builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        } else {
-            Log.d(TAG, "Enable login tracker");
-            if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
-                Permissions.startAddDeviceAdminIntent(this, ENABLE_ADMIN_INTENT);
-            } else {
-                Permissions.startManageOverlayIntent(this, ACTION_ADD_DEVICE_ADMIN);
-            }
-        }
-    }*/
-
-    /*private void checkNotifiers() {
-        if (StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(phoneNumber)) {
-            Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(MainActivity.this, "Please specify who should be notified in case of failed login!", Toast.LENGTH_LONG).show();
-            //show notifications card if no notifiers are set
-            findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
-            findViewById(R.id.smsSettings).setVisibility(View.GONE);
-            findViewById(R.id.deviceSettings).setVisibility(View.GONE);
-            findViewById(R.id.email).requestFocus();
-        }
-    }*/
-
-    /*private void onCameraItemSelected() {
-        boolean hiddenCamera = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("hiddenCamera", false);
-
-        if (!hiddenCamera) {
-            Log.d(TAG, "Camera is off");
-            if (!Permissions.haveCameraPermission(this)) {
-                Permissions.requestCameraPermission(this);
-            }
-
-            if (!HiddenCameraUtils.canOverDrawOtherApps(this)) {
-                Permissions.startManageOverlayIntent(this, ACTION_MANAGE_OVERLAY_INTENT);
-            } else if (Permissions.haveCameraPermission(this)) {
-                Toast.makeText(MainActivity.this, "Please wait. Device Locator is checking your camera...", Toast.LENGTH_LONG).show();
-                Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
-                cameraIntent.putExtra("test", true);
-                startService(cameraIntent);
-            }
-        } else {
-            Log.d(TAG, "Camera is on");
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("hiddenCamera", false).apply();
-                    Toast.makeText(MainActivity.this, "Camera disabled", Toast.LENGTH_LONG).show();
-                }
-            });
-            builder.setNegativeButton(R.string.no, null);
-            builder.setMessage(Html.fromHtml(getString(R.string.disable_photo_prompt)));
-            builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        }
-    }*/
 
     private void clearFocus() {
         View current = getCurrentFocus();
@@ -618,7 +512,7 @@ public class MainActivity extends AppCompatActivity {
             //        Toast.makeText(MainActivity.this, "Your Security PIN is " + settings.getEncryptedString(PinActivity.DEVICE_PIN), Toast.LENGTH_LONG).show();
             //    }
             //});
-            builder.setPositiveButton("Permissions",  new DialogInterface.OnClickListener() {
+            builder.setPositiveButton("Permissions", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     Intent intent = new Intent(MainActivity.this, PermissionsActivity.class);
                     startActivity(intent);
@@ -757,7 +651,7 @@ public class MainActivity extends AppCompatActivity {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (keyCode) {
                         case KeyEvent.KEYCODE_BACK:
-                            TextView tokenInput = (TextView)v;
+                            TextView tokenInput = (TextView) v;
                             if (tokenInput.getText().length() < PinActivity.PIN_MIN_LENGTH) {
                                 Toast.makeText(MainActivity.this, R.string.pin_length_error, Toast.LENGTH_LONG).show();
                                 tokenInput.setText(pin);
@@ -775,7 +669,7 @@ public class MainActivity extends AppCompatActivity {
     // --------------------------------------------------------------------------------------------------------------------------------------------
 
     private void initRadiusInput() {
-        SeekBar radiusBar= findViewById(R.id.radiusBar);
+        SeekBar radiusBar = findViewById(R.id.radiusBar);
         radiusBar.setProgress(radius);
 
         ((TextView) this.findViewById(R.id.motion_radius)).setText(getString(R.string.motion_radius, radius));
@@ -833,7 +727,7 @@ public class MainActivity extends AppCompatActivity {
             Account[] allAccounts = AccountManager.get(this).getAccounts();
             for (Account a : allAccounts) {
                 if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.equalsIgnoreCase(a.name, email)) {
-                   accountNames.add(a.name);
+                    accountNames.add(a.name);
                 }
             }
 
@@ -851,7 +745,7 @@ public class MainActivity extends AppCompatActivity {
                 showLoginDialog();
             }
 
-            final CommandArrayAdapter accs = new CommandArrayAdapter(this, R.layout.command_row,  accountNames);
+            final CommandArrayAdapter accs = new CommandArrayAdapter(this, R.layout.command_row, accountNames);
             userAccounts.setAdapter(accs);
 
             if (index > 0) {
@@ -876,7 +770,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private synchronized void registerUserLogin(Spinner userLoginSpinner) {
-        String newUserLogin = (String)userLoginSpinner.getSelectedItem();
+        String newUserLogin = (String) userLoginSpinner.getSelectedItem();
         String userLogin = settings.getString(USER_LOGIN);
         if (!StringUtils.equals(userLogin, newUserLogin)) {
             Bundle bundle = new Bundle();
@@ -907,7 +801,7 @@ public class MainActivity extends AppCompatActivity {
         deviceNameInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
-                if(!hasFocus) {
+                if (!hasFocus) {
                     registerDeviceName(deviceNameInput);
                 }
             }
@@ -971,7 +865,7 @@ public class MainActivity extends AppCompatActivity {
         emailInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
-                if(!hasFocus) {
+                if (!hasFocus) {
                     registerEmail(emailInput, false);
                 } else {
                     //paste email from clipboard
@@ -1132,7 +1026,7 @@ public class MainActivity extends AppCompatActivity {
 
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    registerPhoneNumber((TextView)v);
+                    registerPhoneNumber((TextView) v);
                 }
             }
         });
@@ -1196,7 +1090,7 @@ public class MainActivity extends AppCompatActivity {
                     GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
-                            Log.d(TAG, "Received following response code: "+ responseCode + " from url " + url);
+                            Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                             Message message = loadingHandler.obtainMessage(SHARE_ROUTE_MESSAGE, responseCode, 0);
                             message.sendToTarget();
                         }
@@ -1284,7 +1178,7 @@ public class MainActivity extends AppCompatActivity {
     private void launchMotionDetectorService() {
         saveData();
         updateUI();
-        isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null,true, RouteTrackingService.Mode.Normal);
+        isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null, true, RouteTrackingService.Mode.Normal);
         Toast.makeText(getApplicationContext(), getString(R.string.motion_confirm, radius), Toast.LENGTH_LONG).show();
     }
 
@@ -1353,7 +1247,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.setPackage(appName);
                     //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
                     MainActivity.this.startActivity(intent);
-                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("telegramPaste",true).apply();
+                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("telegramPaste", true).apply();
                     Toast.makeText(MainActivity.this, "In order to get your Chat ID please select Device Locator bot now.", Toast.LENGTH_LONG).show();
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, appName + " not found on this device");
@@ -1544,8 +1438,8 @@ public class MainActivity extends AppCompatActivity {
     private void saveData() {
         PreferenceManager.getDefaultSharedPreferences(this).edit()
                 .putBoolean("running", this.running)
-                .putBoolean("motionDetectorRunning" , this.motionDetectorRunning)
-                .putInt("radius" , this.radius)
+                .putBoolean("motionDetectorRunning", this.motionDetectorRunning)
+                .putInt("radius", this.radius)
                 .putString(NOTIFICATION_PHONE_NUMBER, phoneNumber)
                 .putString(NOTIFICATION_EMAIL, email)
                 .putString(NOTIFICATION_SOCIAL, telegramId)
@@ -1571,7 +1465,7 @@ public class MainActivity extends AppCompatActivity {
         this.telegramId = settings.getString(NOTIFICATION_SOCIAL);
         //testing use count
         int useCount = settings.getInt("useCount", 0);
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putInt("useCount", useCount+1).apply();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putInt("useCount", useCount + 1).apply();
     }
 
     private void setupToolbar(int toolbarId) {
@@ -1618,28 +1512,29 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS:
-                     initUserLoginInput(false);
-                     break;
+                initUserLoginInput(false);
+                break;
             case Permissions.PERMISSIONS_REQUEST_SMS_CONTROL:
-                    if (Permissions.haveSendSMSPermission(this)) {
-                        toggleRunning();
-                    } else  {
-                        Toast.makeText(this, R.string.send_sms_permission, Toast.LENGTH_SHORT).show();
-                    }
-                    break;
+                if (Permissions.haveSendSMSPermission(this)) {
+                    toggleRunning();
+                } else {
+                    Toast.makeText(this, R.string.send_sms_permission, Toast.LENGTH_SHORT).show();
+                }
+                break;
             case Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL:
-                    if (Permissions.haveLocationPermission(this)) {
-                        toggleMotionDetectorRunning();
-                    } else {
-                        Toast.makeText(this, R.string.send_location_permission, Toast.LENGTH_SHORT).show();
-                    }
-                    break;
+                if (Permissions.haveLocationPermission(this)) {
+                    toggleMotionDetectorRunning();
+                } else {
+                    Toast.makeText(this, R.string.send_location_permission, Toast.LENGTH_SHORT).show();
+                }
+                break;
             case Permissions.PERMISSIONS_REQUEST_CALL:
-                        if (!Permissions.haveCallPhonePermission(this)) {
-                            Toast.makeText(this, "Call command won't work without this permission!", Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-            default: break;
+                if (!Permissions.haveCallPhonePermission(this)) {
+                    Toast.makeText(this, "Call command won't work without this permission!", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+                break;
         }
     }
 

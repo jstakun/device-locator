@@ -57,11 +57,10 @@ public class PermissionsActivity extends AppCompatActivity {
             Log.d(TAG, "Device Admin callback");
             if (StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL)) && StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL)) && StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
                 Toast.makeText(this, R.string.notifiers_missing, Toast.LENGTH_LONG).show();
-                //TODO show notifications card if no notifiers are set
-                //findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
-                //findViewById(R.id.smsSettings).setVisibility(View.GONE);
-                //findViewById(R.id.deviceSettings).setVisibility(View.GONE);
-                //findViewById(R.id.email).requestFocus();
+                Intent mainIntent = new Intent(this, MainActivity.class);
+                mainIntent.setAction(MainActivity.ACTION_DEVICE_TRACKER_NOTIFICATION);
+                startActivity(mainIntent);
+                finish();
             }
         } else if (requestCode == MANAGE_OVERLAY_WITH_CAMERA) {
             Log.d(TAG, "Manage overlay with camera permission callback");

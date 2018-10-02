@@ -38,6 +38,7 @@ public class LauncherActivity extends Activity {
         }
 
         startActivity(showIntent);
+        finish();
     }
 
     @Override
