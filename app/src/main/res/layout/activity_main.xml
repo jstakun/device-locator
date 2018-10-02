@@ -55,24 +55,13 @@
                         android:paddingBottom="8dp"/>
 
                     <Switch
-                        android:id="@+id/settings_sms_contacts"
-                        android:text="@string/accept_sms_commands"
-                        android:textColor="@color/gray"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="8dp"
-                        android:checked="false"
-                        android:onClick="onLocationSMSCheckboxClicked"/>
-
-                    <Switch
                         android:id="@+id/settings_sms_without_pin"
                         android:text="@string/accept_sms_without_pin"
                         android:textColor="@color/gray"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        android:paddingTop="15dp"
+                        android:paddingTop="8dp"
                         android:paddingBottom="8dp"
                         android:onClick="onLocationSMSCheckboxClicked"/>
 

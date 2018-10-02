@@ -421,7 +421,6 @@ public class MainActivity extends AppCompatActivity {
         if (settings.getBoolean("settings_sms_contacts", false) && !Permissions.haveReadContactsPermission(this)) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("settings_sms_contacts", false).apply();
         }
-        ((Switch) findViewById(R.id.settings_sms_contacts)).setChecked(settings.getBoolean("settings_sms_contacts", false));
     }
 
     public void onLocationSMSCheckboxClicked(View view) {
@@ -443,14 +442,6 @@ public class MainActivity extends AppCompatActivity {
                 editor.putBoolean("settings_verify_pin", checked);
                 if (checked && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email) && StringUtils.isNotEmpty(phoneNumber)) {
                     Toast.makeText(this, "Please remember your Security PIN and set Notification settings in order to be able to recover forgotten Security PIN.", Toast.LENGTH_LONG).show();
-                }
-                break;
-            case R.id.settings_sms_contacts:
-                if (checked && !Permissions.haveReadContactsPermission(this)) {
-                    Permissions.requestContactsPermission(this, Permissions.PERMISSIONS_REQUEST_SMS_CONTACTS);
-                    ((Switch) view).setChecked(false);
-                } else {
-                    editor.putBoolean("settings_sms_contacts", checked);
                 }
                 break;
             case R.id.settings_sms_without_pin:
@@ -600,8 +591,8 @@ public class MainActivity extends AppCompatActivity {
         }
         //
 
-        if (!this.running && !Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
-            Permissions.requestSendSMSAndLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_SMS_CONTROL);
+        if (!this.running && !Permissions.haveSendSMSPermission(MainActivity.this)) {
+            Permissions.requestSendSMSPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_SMS_CONTROL);
             return;
         }
 
@@ -622,12 +613,12 @@ public class MainActivity extends AppCompatActivity {
 
         if (running) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setPositiveButton("Show PIN", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    Toast.makeText(MainActivity.this, "Your Security PIN is " + settings.getEncryptedString(PinActivity.DEVICE_PIN), Toast.LENGTH_LONG).show();
-                }
-            });
-            builder.setNegativeButton("Permissions",  new DialogInterface.OnClickListener() {
+            //builder.setNegativeButton("Show PIN", new DialogInterface.OnClickListener() {
+            //    public void onClick(DialogInterface dialog, int id) {
+            //        Toast.makeText(MainActivity.this, "Your Security PIN is " + settings.getEncryptedString(PinActivity.DEVICE_PIN), Toast.LENGTH_LONG).show();
+            //    }
+            //});
+            builder.setPositiveButton("Permissions",  new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
                     Intent intent = new Intent(MainActivity.this, PermissionsActivity.class);
                     startActivity(intent);
@@ -1185,7 +1176,7 @@ public class MainActivity extends AppCompatActivity {
             }
             if (!Permissions.haveSendSMSPermission(this)) {
                 Permissions.requestSendSMSAndLocationPermission(this, 0);
-                Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.send_sms_permission, Toast.LENGTH_SHORT).show();
             }
         } else if (!StringUtils.equals(phoneNumber, newPhoneNumber)) {
             Toast.makeText(getApplicationContext(), "Make sure to specify valid phone number!", Toast.LENGTH_SHORT).show();
@@ -1277,9 +1268,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void launchSmsService() {
-        if (!Permissions.haveSendSMSAndLocationPermission(MainActivity.this)) {
-            Permissions.requestSendSMSAndLocationPermission(MainActivity.this, 0);
-            Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+        if (!Permissions.haveSendSMSPermission(MainActivity.this)) {
+            Permissions.requestSendSMSPermission(MainActivity.this, 0);
+            Toast.makeText(this, R.string.send_sms_permission, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -1630,28 +1621,20 @@ public class MainActivity extends AppCompatActivity {
                      initUserLoginInput(false);
                      break;
             case Permissions.PERMISSIONS_REQUEST_SMS_CONTROL:
-                    if (Permissions.haveSendSMSAndLocationPermission(this)) {
+                    if (Permissions.haveSendSMSPermission(this)) {
                         toggleRunning();
                     } else  {
-                        Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.send_sms_permission, Toast.LENGTH_SHORT).show();
                     }
                     break;
             case Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL:
-                    if (Permissions.haveSendSMSAndLocationPermission(this)) {
+                    if (Permissions.haveLocationPermission(this)) {
                         toggleMotionDetectorRunning();
                     } else {
-                        Toast.makeText(this, R.string.send_sms_and_location_permission, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.send_location_permission, Toast.LENGTH_SHORT).show();
                     }
                     break;
-            case Permissions.PERMISSIONS_REQUEST_SMS_CONTACTS:
-                    if (Permissions.haveReadContactsPermission(this)) {
-                        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("settings_sms_contacts", true).apply();
-                        ((Switch)findViewById(R.id.settings_sms_contacts)).setChecked(true);
-                    } else {
-                        Toast.makeText(this, "Access to your device contacts is required to use this function!", Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-                    case Permissions.PERMISSIONS_REQUEST_CALL:
+            case Permissions.PERMISSIONS_REQUEST_CALL:
                         if (!Permissions.haveCallPhonePermission(this)) {
                             Toast.makeText(this, "Call command won't work without this permission!", Toast.LENGTH_SHORT).show();
                         }

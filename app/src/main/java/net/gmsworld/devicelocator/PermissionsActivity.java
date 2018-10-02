@@ -36,6 +36,7 @@ public class PermissionsActivity extends AppCompatActivity {
     private static final int DEVICE_ADMIN = 2;
     private static final int CAMERA_PERMISSION = 3;
     private static final int MANAGE_OVERLAY_WITH_CAMERA = 4;
+    private static final int CONTACTS_PERMISSION = 5;
 
     private PreferencesUtils settings;
 
@@ -55,7 +56,7 @@ public class PermissionsActivity extends AppCompatActivity {
         if (requestCode == DEVICE_ADMIN && resultCode == RESULT_OK) {
             Log.d(TAG, "Device Admin callback");
             if (StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL)) && StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL)) && StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
-                Toast.makeText(this, "Please specify who should be notified in case of failed login!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.notifiers_missing, Toast.LENGTH_LONG).show();
                 //TODO show notifications card if no notifiers are set
                 //findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
                 //findViewById(R.id.smsSettings).setVisibility(View.GONE);
@@ -80,6 +81,11 @@ public class PermissionsActivity extends AppCompatActivity {
             String newDeviceId = Messenger.getDeviceId(this, false);
             if (!StringUtils.equals(newDeviceId, deviceId)) {
                 registerDevice();
+            }
+        } else if (requestCode == CONTACTS_PERMISSION) {
+            Log.d(TAG, "Contects permission callback");
+            if (Permissions.haveReadContactsPermission(this)) {
+                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", true).apply();
             }
         }
     }
@@ -125,7 +131,9 @@ public class PermissionsActivity extends AppCompatActivity {
         }
 
         Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
-        readContactsPermission.setChecked(Permissions.haveReadContactsPermission(this));
+        boolean perm = Permissions.haveReadContactsPermission(this);
+        readContactsPermission.setChecked(perm);
+        PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", perm).apply();
 
         Switch callPhonePermission = findViewById(R.id.call_phone_permission);
         callPhonePermission.setChecked(Permissions.haveCallPhonePermission(this));
@@ -195,7 +203,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 break;
             case R.id.read_contacts_permission:
                 if (checked && !Permissions.haveReadContactsPermission(this)) {
-                    Permissions.requestContactsPermission(this, 0);
+                    Permissions.requestContactsPermission(this, CONTACTS_PERMISSION);
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this);
                 }
