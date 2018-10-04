@@ -245,9 +245,16 @@ public class RouteTrackingService extends Service {
 
     private static class IncomingHandler extends Handler {
 
-        final MorseSoundGenerator morseSoundGenerator = new MorseSoundGenerator(44100, 800.0, 50);
+        MorseSoundGenerator morseSoundGenerator = null;
 
         private final WeakReference<RouteTrackingService> routeTrackingService;
+
+        private synchronized MorseSoundGenerator getMorseSoundGenerator() {
+            if (morseSoundGenerator == null) {
+                morseSoundGenerator = new MorseSoundGenerator(44100, 800.0, 50);
+            }
+            return morseSoundGenerator;
+        }
 
         IncomingHandler(RouteTrackingService service) {
             routeTrackingService = new WeakReference<RouteTrackingService>(service);
@@ -294,11 +301,9 @@ public class RouteTrackingService extends Service {
                                 //you should plug antenna to your device audio transmitter
                                 boolean useAudio = PreferenceManager.getDefaultSharedPreferences(service).getBoolean("useAudio", false);
                                 if (useAudio) {
-                                    synchronized (morseSoundGenerator) {
-                                        final String signal = ((int) (location.getLatitude() * 1e6)) + "," + ((int) (location.getLongitude() * 1e6));
-                                        Log.d(TAG, "Sending audio signal: " + signal);
-                                        morseSoundGenerator.morseOnce(signal);
-                                    }
+                                    final String signal = ((int) (location.getLatitude() * 1e6)) + "," + ((int) (location.getLongitude() * 1e6));
+                                    Log.d(TAG, "Sending audio signal: " + signal);
+                                    getMorseSoundGenerator().morseOnce(signal);
                                 }
                                 //------------------
                             }
