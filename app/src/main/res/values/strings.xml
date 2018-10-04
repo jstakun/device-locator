@@ -138,8 +138,8 @@
     <string name="Manifest.permission.SEND_SMS">Allow receiving SMS commands and sending SMS notifications</string>
     <string name="Manifest.permission.CAMERA">Allow taking photos by failed device login notification service and take Photo command</string>
     <string name="Manifest.permission.READ_CONTACTS">Only accept SMS commands sent from my contacts</string>
-    <string name="Manifest.permission.CALL_PHONE">Allow initiate phone call to Call command sender</string>
-    <string name="Manifest.permission.USE_FINGERPRINT">Allow fingerprint authentication</string>
+    <string name="Manifest.permission.CALL_PHONE">Allow to initiate phone call to Call command sender</string>
+    <string name="Manifest.permission.USE_FINGERPRINT">Allow application authentication with fingerprint</string>
     <string name="Manifest.permission.GET_ACCOUNTS">Allow to list email based user logins registered in the device</string>
-    <string name="Manifest.permission.READ_PHONE_STATE">Allow read device IMEI number for device identification</string>
+    <string name="Manifest.permission.READ_PHONE_STATE">Allow to read device IMEI number for device identification</string>
 </resources>
