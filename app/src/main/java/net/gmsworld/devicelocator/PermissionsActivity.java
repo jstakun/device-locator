@@ -98,8 +98,10 @@ public class PermissionsActivity extends AppCompatActivity {
         Switch deviceAdminPermission = findViewById(R.id.device_admin_permission);
         deviceAdminPermission.setChecked(settings.getBoolean("loginTracker", false));
 
+        //TODO hide this?
         Switch manageOverlayPermission = findViewById(R.id.manage_overlay_permission);
         manageOverlayPermission.setChecked(HiddenCameraUtils.canOverDrawOtherApps(this));
+        //
 
         Switch notificationPolicyAccessPermission = findViewById(R.id.notification_policy_access_permission);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

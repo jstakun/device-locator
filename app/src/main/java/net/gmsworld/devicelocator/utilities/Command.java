@@ -48,7 +48,6 @@ public class Command {
     public final static String START_COMMAND = "startdl"; //s start route tracking and delete old route points if exists
     public final static String STOP_COMMAND = "stopdl"; //sp stop route tracking
     public final static String ROUTE_COMMAND = "routedl"; //r share currently recorded route
-
     public final static String SHARE_COMMAND = "locatedl"; //l share current location
     public final static String MUTE_COMMAND = "mutedl"; //m mute phone
     public final static String UNMUTE_COMMAND = "unmutedl"; //um unmute phone
@@ -57,8 +56,6 @@ public class Command {
     public final static String GPS_HIGH_COMMAND = "gpshighdl"; //g set high gps accuracy
     public final static String GPS_BALANCED_COMMAND = "gpsbalancedl"; //gb set balanced gps accuracy
     public final static String NOTIFY_COMMAND = "notifydl"; //n set notification email, phone or telegram chat id usage notifydl p:x m:y t:z where x is mobile phone number, y is email address and z is Telegram chat or channel id.
-    public final static String AUDIO_COMMAND = "audiodl"; //a enable audio transmitter
-    public final static String AUDIO_OFF_COMMAND = "noaudiodl"; //na disable audio transmitter
     public final static String TAKE_PHOTO_COMMAND = "photodl"; //p if all permissions set take photo and send link
     public final static String PING_COMMAND = "pingdl"; //pg send ping to test connectivity
     public final static String HELLO_COMMAND = "hellodl"; //hl send ping to test connectivity
@@ -72,7 +69,10 @@ public class Command {
     //private
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
     public final static String MESSAGE_COMMAND = "messagedl"; //ms cloud message received from other devices
+    public final static String AUDIO_COMMAND = "audiodl"; //a enable audio transmitter
+    public final static String AUDIO_OFF_COMMAND = "noaudiodl"; //na disable audio transmitter
 
+    //not a command
     public final static String STOPPED_TRACKER = "stopped"; //this is not command
     public final static String LOCK_SCREEN_FAILED = "lockfail"; //this is not command
     public final static String MUTE_FAILED = "mutefail"; //this is not command

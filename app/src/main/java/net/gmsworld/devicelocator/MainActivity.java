@@ -139,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
         if (getIntent() != null) {
             showCard(getIntent().getAction());
         } else {
-            showCard(null);
+            showCard(ACTION_SMS_MANAGER);
         }
 
         //
@@ -334,7 +334,6 @@ public class MainActivity extends AppCompatActivity {
         boolean isDeviceManagerShown = settings.getBoolean("isDeviceManagerShown", false);
 
         if (action != null) {
-            Log.d(TAG, "getIntent().getAction(): " + action);
             if (action.equals(ACTION_DEVICE_TRACKER)) {
                 isTrackerShown = true;
                 PreferenceManager.getDefaultSharedPreferences(this).edit()

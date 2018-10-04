@@ -186,8 +186,9 @@ public abstract class AbstractLocationManager {
             if (speed > MAX_REASONABLE_SPEED) {
                 Log.d(TAG, "A strange location was received, a really high speed of " + speed + " m/s, prob wrong...");
                 proposedLocation = addBadLocation(proposedLocation);
-                //Might be a messed up Samsung Galaxy S GPS, reset the logging
-                //stop and start gps listener
+            } else if (meters < 1f) {
+                Log.d(TAG, "Location is in distance less that 1 meter from previous: "+ meters);
+                proposedLocation = addBadLocation(proposedLocation);
             }
         }
 

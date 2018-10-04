@@ -129,17 +129,17 @@
     <string name="device_permissions">Device permissions</string>
     <string name="app_permissions">Application permissions</string>
     <string name="other_permissions">Other permissions</string>
-    <string name="notifiers_missing">Please specify who should be notified in case of failed login!</string>
-    <string name="DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN.html">Failed device login notification service and &lt;a href="https://www.gms-world.net/dl#lock">Lock&lt;a> command</string>
-    <string name="DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN">Enable failed device login notification service and Lock command</string>
-    <string name="Settings.ACTION_MANAGE_OVERLAY_PERMISSION">Prerequisite for taking photo by failed device login notification service and for Photo command</string>
-    <string name="Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS">Enable Mute command on some devices</string>
-    <string name="Manifest.permission.ACCESS_FINE_LOCATION">Enable route tracking service and Location command</string>
-    <string name="Manifest.permission.SEND_SMS">Enable to receive SMS commands and send SMS notifications</string>
-    <string name="Manifest.permission.CAMERA">Enable to allow taking photo by failed device login notification service and for Photo command</string>
+    <string name="notifiers_missing">Please specify who should get notified in case of failed login</string>
+    <string name="DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN.html">Allow failed device login notification service and &lt;a href="https://www.gms-world.net/dl#lock">Lock screen&lt;a> command</string>
+    <string name="DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN">Allow failed device login notification service and Lock device screen command</string>
+    <string name="Settings.ACTION_MANAGE_OVERLAY_PERMISSION">Allow taking photos by failed device login notification service and take Photo command</string>
+    <string name="Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS">Allow Mute device audio command</string>
+    <string name="Manifest.permission.ACCESS_FINE_LOCATION">Allow route tracking service and Location command</string>
+    <string name="Manifest.permission.SEND_SMS">Allow receiving SMS commands and sending SMS notifications</string>
+    <string name="Manifest.permission.CAMERA">Allow taking photos by failed device login notification service and take Photo command</string>
     <string name="Manifest.permission.READ_CONTACTS">Only accept SMS commands sent from my contacts</string>
-    <string name="Manifest.permission.CALL_PHONE">Enable to allow Call command</string>
-    <string name="Manifest.permission.USE_FINGERPRINT">Enable to allow fingerprint login</string>
-    <string name="Manifest.permission.GET_ACCOUNTS">Enable to allow list user logins registered in the device</string>
-    <string name="Manifest.permission.READ_PHONE_STATE">Enable to allow read device IMEI number</string>
+    <string name="Manifest.permission.CALL_PHONE">Allow initiate phone call to Call command sender</string>
+    <string name="Manifest.permission.USE_FINGERPRINT">Allow fingerprint authentication</string>
+    <string name="Manifest.permission.GET_ACCOUNTS">Allow to list email based user logins registered in the device</string>
+    <string name="Manifest.permission.READ_PHONE_STATE">Allow read device IMEI number for device identification</string>
 </resources>
