@@ -107,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
     public static final String NOTIFICATION_PHONE_NUMBER = "phoneNumber";
     public static final String NOTIFICATION_SOCIAL = "telegramId";
 
+    public static final String EMAIL_REGISTRATION_STATUS = "emailStatus";
+
     public static final String ACTION_DEVICE_TRACKER = "net.gmsworld.devicelocator.ActionDeviceTracker";
     public static final String ACTION_DEVICE_TRACKER_NOTIFICATION = "net.gmsworld.devicelocator.ActionDeviceTrackerNotification";
     public static final String ACTION_DEVICE_MANAGER = "net.gmsworld.devicelocator.ActionDeviceManager";
@@ -155,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
         //send email registration request once every day if still unverified
-        String emailStatus = settings.getString("emailStatus");
+        String emailStatus = settings.getString(EMAIL_REGISTRATION_STATUS);
         long emailRegistrationMillis = settings.getLong("emailRegistrationMillis", System.currentTimeMillis());
         if (StringUtils.equalsIgnoreCase(emailStatus, "unverified") && StringUtils.isNotEmpty(email) && (System.currentTimeMillis() - emailRegistrationMillis) > 1000 * 60 * 60 * 24) {
             registerEmail((TextView) findViewById(R.id.email), true);
@@ -713,7 +715,7 @@ public class MainActivity extends AppCompatActivity {
         accountNames.add("");
 
         //add notification email to the list only if verified
-        String emailStatus = settings.getString("emailStatus");
+        String emailStatus = settings.getString(EMAIL_REGISTRATION_STATUS);
         if (!StringUtils.equalsIgnoreCase(emailStatus, "unverified") && StringUtils.isNotEmpty(email)) {
             accountNames.add(email);
         }

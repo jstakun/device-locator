@@ -176,7 +176,11 @@ public class PermissionsActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.manage_overlay_permission:
-                Permissions.startManageOverlayIntent(this, 0);
+                try {
+                    Permissions.startManageOverlayIntent(this, 0);
+                } catch (Exception e) {
+                    Toast.makeText(this, "This permission is enabled by default on your device.", Toast.LENGTH_LONG).show();
+                }
                 break;
             case R.id.notification_policy_access_permission:
                 try {

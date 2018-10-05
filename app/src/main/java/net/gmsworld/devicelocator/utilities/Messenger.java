@@ -215,7 +215,7 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
-                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("emailStatus", status).apply();
+                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, status).apply();
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
@@ -1015,7 +1015,7 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
-                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("emailStatus", status).apply();
+                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, status).apply();
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your email address is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
