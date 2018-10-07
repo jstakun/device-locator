@@ -61,60 +61,15 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
         final List<Device> devices = getIntent().getParcelableArrayListExtra("devices");
 
+        //commands list
+
         final Spinner commandSpinner = findViewById(R.id.deviceCommand);
+        final EditText args = findViewById(R.id.deviceCommandArgs);
+
         final CommandArrayAdapter commands = new CommandArrayAdapter(this, R.layout.command_row,  getResources().getStringArray(R.array.device_commands));
         commandSpinner.setAdapter(commands);
 
-        List<String> deviceNames = new ArrayList<>();
-        if (devices != null) {
-            for (int i = 0; i < devices.size(); i++) {
-                deviceNames.add(StringUtils.isNotEmpty(devices.get(i).name) ? devices.get(i).name : devices.get(i).imei);
-            }
-        }
-
-        final Spinner deviceSpinner = findViewById(R.id.deviceList);
-        final CommandArrayAdapter devicesAdapter = new CommandArrayAdapter(this, R.layout.command_row,  deviceNames);
-        deviceSpinner.setAdapter(devicesAdapter);
-
-        if (devices != null) {
-            for (int i = 0; i < devices.size(); i++) {
-                if (StringUtils.equalsIgnoreCase(name, devices.get(i).name) || StringUtils.equalsIgnoreCase(imei, devices.get(i).imei)) {
-                    deviceSpinner.setSelection(i);
-                    break;
-                }
-            }
-        }
-
-        final EditText pinEdit = findViewById(R.id.devicePin);
-
-        deviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                name = devices.get(position).name;
-                imei = devices.get(position).imei;
-                String savedPin;
-                if (StringUtils.equals(imei, Messenger.getDeviceId(CommandActivity.this, false))) {
-                    savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
-                } else {
-                    savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
-                }
-                if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
-                    pinEdit.setText(savedPin);
-                } else {
-                    pinEdit.setText("");
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
-        final EditText args = findViewById(R.id.deviceCommandArgs);
-
-        final Button send = findViewById(R.id.sendDeviceCommand);
-        ViewCompat.setBackgroundTintList(send, ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        setSelectedCommand(prefs, commandSpinner);
 
         commandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -143,12 +98,9 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             }
         });
 
-        TextView commandLink = findViewById(R.id.docs_link);
-        commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
-        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
+        //pin
 
-        findViewById(R.id.commandView).requestFocus();
-
+        final EditText pinEdit = findViewById(R.id.devicePin);
         String savedPin;
         if (StringUtils.equals(imei, Messenger.getDeviceId(this, false))) {
             savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
@@ -160,6 +112,58 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         } else {
             pinEdit.setText("");
         }
+
+        //devices list
+
+        List<String> deviceNames = new ArrayList<>();
+        if (devices != null) {
+            for (int i = 0; i < devices.size(); i++) {
+                deviceNames.add(StringUtils.isNotEmpty(devices.get(i).name) ? devices.get(i).name : devices.get(i).imei);
+            }
+        }
+
+        final Spinner deviceSpinner = findViewById(R.id.deviceList);
+        final CommandArrayAdapter devicesAdapter = new CommandArrayAdapter(this, R.layout.command_row,  deviceNames);
+        deviceSpinner.setAdapter(devicesAdapter);
+
+        if (devices != null) {
+            for (int i = 0; i < devices.size(); i++) {
+                if (StringUtils.equalsIgnoreCase(name, devices.get(i).name) || StringUtils.equalsIgnoreCase(imei, devices.get(i).imei)) {
+                    deviceSpinner.setSelection(i);
+                    break;
+                }
+            }
+        }
+
+        deviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                name = devices.get(position).name;
+                imei = devices.get(position).imei;
+                String savedPin;
+                if (StringUtils.equals(imei, Messenger.getDeviceId(CommandActivity.this, false))) {
+                    savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+                } else {
+                    savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
+                }
+                if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
+                    pinEdit.setText(savedPin);
+                } else {
+                    pinEdit.setText("");
+                }
+                setSelectedCommand(prefs, commandSpinner);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        //send button
+
+        final Button send = findViewById(R.id.sendDeviceCommand);
+        ViewCompat.setBackgroundTintList(send, ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
 
         send.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -190,6 +194,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                     if (!validArgs) {
                         Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
                     } else {
+                        PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(imei + "_lastCommand", command).apply();
                         Toast.makeText(CommandActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
                         firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
                         prefs.setEncryptedString(PIN_PREFIX + imei, pin);
@@ -208,6 +213,14 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 }
             }
         });
+
+        //
+
+        TextView commandLink = findViewById(R.id.docs_link);
+        commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
+        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
+
+        findViewById(R.id.commandView).requestFocus();
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
     }
@@ -234,5 +247,23 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
     @Override
     public void onLocationUpdated(Location location) {
         Log.d(TAG, "Location found with accuracy " + location.getAccuracy() + " m");
+    }
+
+    private void setSelectedCommand(PreferencesUtils prefs, Spinner commandSpinner) {
+        String lastCommand = prefs.getString(imei + "_lastCommand");
+        Log.d(TAG, "Found last command " + lastCommand);
+        if (StringUtils.isNotEmpty(lastCommand)) {
+            AbstractCommand c = Command.getCommandByName(lastCommand);
+            if (c.hasOppositeCommand()) {
+                lastCommand = c.getOppositeCommand().substring(0, c.getOppositeCommand().length()-2);
+            }
+            for (int i = 0;i < commandSpinner.getAdapter().getCount();i++) {
+                //Log.d(TAG, "Comparing " + commandSpinner.getItemAtPosition(i) + " with " + lastCommand);
+                if (StringUtils.equalsIgnoreCase((String)commandSpinner.getItemAtPosition(i), lastCommand)) {
+                   commandSpinner.setSelection(i);
+                   break;
+                }
+            }
+        }
     }
 }
