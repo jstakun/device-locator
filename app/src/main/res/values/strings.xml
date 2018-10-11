@@ -88,9 +88,13 @@
     <string name="test">Test</string>
     <string name="action_settings">Settings</string>
     <string name="last_edited_on">Last edited on %1$s</string>
-
     <string name="notification_open_in_maps">Click to open in Google Maps</string>
     <string name="notification_tracker">"Device Locator is tracking your device location. Click to open Device Locator"</string>
+    <string name="activation_email_title">Email activation</string>
+    <string name="activation_telegram_title">Telegram activation</string>
+    <string name="activation_email_desc">In order to activate email notifications please enter 4 digit activation code we\'ve sent to your email address</string>
+    <string name="activation_telegram_desc">In order to activate Telegram notifications please enter 4 digit activation code we\'ve sent to your Telegram channel or chat</string>
+
     <!-- Command Activity -->
     <string name="title_activity_command">CommandActivity</string>
     <string name="device_command_prompt">Select command</string>

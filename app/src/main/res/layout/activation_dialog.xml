@@ -7,20 +7,20 @@
 
 
     <TextView
-        android:id="@+id/title"
+        android:id="@+id/activationTitle"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="8dp"
         style="@android:style/TextAppearance.Medium"
         android:textStyle="bold"
         android:textColor="@color/gray"
-        android:text="Email activation" />
+        android:text="@string/activation_email_title" />
 
     <TextView
-        android:id="@+id/description"
+        android:id="@+id/activationDescription"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="In order to activate email notifications please enter 4 digit activation code we've sent to your email address:"
+        android:text="@string/activation_email_desc"
         android:layout_margin="8dp"
         android:layout_marginLeft="8dp"
         android:textColor="@color/gray"/>

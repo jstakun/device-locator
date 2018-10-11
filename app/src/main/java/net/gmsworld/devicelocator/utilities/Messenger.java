@@ -951,7 +951,7 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            //TODO show dialog to enter activation code sent to user
+                            //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
                                 if (!((Activity) context).isFinishing()) {
                                     NotificationActivationDialogFragment notificationDialog = new NotificationActivationDialogFragment();
@@ -969,15 +969,6 @@ public class Messenger {
                             onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!");
                         }
                     } else {
-                        //if (telegramId.startsWith("-100") || telegramId.startsWith("@")) {
-                        //    Toast.makeText(context, "Please add @device_locator_bot to your channel with message sending permission and send us email with your Telegram channel to finish registration!", Toast.LENGTH_LONG).show();
-                        //    composeEmail(context, new String[]{"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram chat or channel " + telegramId + " to Device Locator notifications service.", false);
-                        //} else {
-                        //    PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
-                        //    final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-                        //    telegramInput.setText(telegramId);
-                        //    Toast.makeText(context, "Oops! Your Telegram channel id seems to be wrong. Please register again your Telegram chat or channel!", Toast.LENGTH_LONG).show();
-                        //}
                         onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!");
                     }
                 }
@@ -1025,7 +1016,7 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your email address is already verified.", Toast.LENGTH_SHORT).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            //TODO show dialog to enter activation code sent to user
+                            //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
                                 if (!((Activity) context).isFinishing()) {
                                     NotificationActivationDialogFragment notificationDialog = new NotificationActivationDialogFragment();

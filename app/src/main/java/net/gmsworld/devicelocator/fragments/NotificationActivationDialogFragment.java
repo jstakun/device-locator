@@ -60,6 +60,8 @@ public class NotificationActivationDialogFragment extends DialogFragment {
         String s = null;
         if (mode == Mode.Telegram) {
             s = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(TELEGRAM_SECRET, "");
+            ((TextView)dialogView.findViewById(R.id.activationTitle)).setText(R.string.activation_telegram_title);
+            ((TextView)dialogView.findViewById(R.id.activationDescription)).setText(R.string.activation_telegram_desc);
         } else {
             s = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(EMAIL_SECRET, "");
         }
@@ -88,7 +90,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                         String tokenStr = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(DeviceLocatorApp.GMS_TOKEN, "");
                         Map<String, String> headers = new HashMap<>();
                         headers.put("Authorization", "Bearer " + tokenStr);
-                        Toast.makeText(getActivity(), "Please wait...", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_LONG).show();
                         final String verifyUrl = getActivity().getString(R.string.verifyUrl) + "/" + secret;
                         final Context context = getActivity();
                         Network.get(context, verifyUrl, headers, new Network.OnGetFinishListener() {
@@ -139,7 +141,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                             String telegramId = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(MainActivity.NOTIFICATION_SOCIAL, "");
                             if (StringUtils.isNotEmpty(telegramId)) {
                                 Messenger.sendTelegramRegistrationRequest(getActivity(), telegramId, 1);
-                                Toast.makeText(getActivity(), "Please wait...", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_LONG).show();
                                 NotificationActivationDialogFragment.this.dismiss();
                             } else {
                                 Toast.makeText(getActivity(), "Failed to send Telegram channel or chat registration request!", Toast.LENGTH_SHORT).show();
@@ -149,7 +151,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                             String email = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(MainActivity.NOTIFICATION_EMAIL, "");
                             if (StringUtils.isNotEmpty(email)) {
                                 Messenger.sendEmailRegistrationRequest(getActivity(), email, 1);
-                                Toast.makeText(getActivity(), "Please wait...", Toast.LENGTH_LONG).show();
+                                Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_LONG).show();
                                 NotificationActivationDialogFragment.this.dismiss();
                             } else {
                                 Toast.makeText(getActivity(), "Failed to send email registration request!", Toast.LENGTH_SHORT).show();
