@@ -41,9 +41,10 @@ public class NotificationActivationDialogFragment extends DialogFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (getArguments().containsKey("mode")) {
+        Bundle args = getArguments();
+        if (args != null && args.containsKey("mode")) {
             try {
-                mode = (Mode) getArguments().get("mode");
+                mode = (Mode) args.get("mode");
             } catch (Exception e) {
             }
         }

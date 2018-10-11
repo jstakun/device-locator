@@ -498,6 +498,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
 
         if (running) {
+            //TODO move alertdialog to fragment
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             //builder.setNegativeButton("Show PIN", new DialogInterface.OnClickListener() {
             //    public void onClick(DialogInterface dialog, int id) {
@@ -1121,6 +1122,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void launchService() {
+        //TODO move alertdialog to fragment
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setPositiveButton(R.string.send, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -1138,6 +1140,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (!running) {
             if (!PreferenceManager.getDefaultSharedPreferences(this).contains("smsDialog")) {
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("smsDialog", true).apply();
+                //TODO move alertdialog to fragment
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
@@ -1466,6 +1469,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void showLoginDialog() {
+        //TODO move alertdialog to fragment
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
