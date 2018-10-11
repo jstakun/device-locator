@@ -13,5 +13,6 @@
     <string name="deviceUrl">https://www.gms-world.net/showDevice</string>
     <string name="serverUrl">https://www.gms-world.net/</string>
     <string name="authnUrl">https://www.gms-world.net/s/authenticate</string>
+    <string name="verifyUrl">https://www.gms-world.net/verify</string>
 
 </resources>

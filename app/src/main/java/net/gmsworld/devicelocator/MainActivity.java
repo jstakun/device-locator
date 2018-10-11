@@ -59,6 +59,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
+import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
+import net.gmsworld.devicelocator.fragments.RemoveDeviceDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
@@ -89,7 +91,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String NOTIFICATION_SOCIAL = "telegramId";
 
     public static final String EMAIL_REGISTRATION_STATUS = "emailStatus";
+    public static final String SOCIAL_REGISTRATION_STATUS = "telegramStatus";
 
     public static final String ACTION_DEVICE_TRACKER = "net.gmsworld.devicelocator.ActionDeviceTracker";
     public static final String ACTION_DEVICE_TRACKER_NOTIFICATION = "net.gmsworld.devicelocator.ActionDeviceTrackerNotification";
@@ -156,11 +159,16 @@ public class MainActivity extends AppCompatActivity {
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-        //send email registration request once every day if still unverified
-        String emailStatus = settings.getString(EMAIL_REGISTRATION_STATUS);
-        long emailRegistrationMillis = settings.getLong("emailRegistrationMillis", System.currentTimeMillis());
-        if (StringUtils.equalsIgnoreCase(emailStatus, "unverified") && StringUtils.isNotEmpty(email) && (System.currentTimeMillis() - emailRegistrationMillis) > 1000 * 60 * 60 * 24) {
-            registerEmail((TextView) findViewById(R.id.email), true);
+        //show email or telegram registration dialog if still unverified
+        if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
+            NotificationActivationDialogFragment notificationActivationDialogFragment = new NotificationActivationDialogFragment();
+            notificationActivationDialogFragment.show(getFragmentManager(), "activationCodeDialog");
+        } else if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
+            NotificationActivationDialogFragment notificationActivationDialogFragment = new NotificationActivationDialogFragment();
+            Bundle b = new Bundle();
+            b.putSerializable("mode", NotificationActivationDialogFragment.Mode.Telegram);
+            notificationActivationDialogFragment.setArguments(b);
+            notificationActivationDialogFragment.show(getFragmentManager(), "activationCodeDialog");
         }
     }
 
@@ -211,16 +219,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Failed to paste text from clipboard", e);
             }
         }
-
-        //TODO device name has been changed - when this is needed?
-        /*if (settings.contains(DEVICE_NAME)) {
-            String deviceName =  settings.getString(DEVICE_NAME);
-            EditText deviceNameEdit = findViewById(R.id.deviceName);
-            if (!StringUtils.equals(deviceName, deviceNameEdit.getText())) {
-                deviceNameEdit.setText(deviceName);
-                initDeviceList();
-            }
-        }*/
     }
 
     @Override
@@ -376,19 +374,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showRemoveDeviceDialog(final Device device) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setMessage("Remove device " + (StringUtils.isNotEmpty(device.name) ? device.name : device.imei) + " from the list?");
-        alertDialogBuilder.setPositiveButton("yes",
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface arg0, int arg1) {
-                        deleteDevice(device.imei);
-                    }
-                });
-        alertDialogBuilder.setNegativeButton("No", null);
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
+    private void showRemoveDeviceDialogFragment(final Device device) {
+        RemoveDeviceDialogFragment removeDeviceDialogFragment = new RemoveDeviceDialogFragment();
+        Bundle args = new Bundle();
+        args.putParcelable("device", device);
+        removeDeviceDialogFragment.setArguments(args);
+        removeDeviceDialogFragment.show(getFragmentManager(), "removeDevice");
     }
 
     private void initLocationSMSCheckbox() {
@@ -1407,7 +1398,7 @@ public class MainActivity extends AppCompatActivity {
         setListViewHeightBasedOnChildren(deviceList);
     }
 
-    private void deleteDevice(final String imei) {
+    public void onDeleteDevice(final String imei) {
         if (Network.isNetworkAvailable(this)) {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             String content = "imei=" + imei + "&action=delete";
@@ -1478,11 +1469,13 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                startActivity(new Intent(Settings.ACTION_SYNC_SETTINGS));
+                Intent intent = new Intent(Settings.ACTION_ADD_ACCOUNT); //new Intent(Settings.ACTION_SYNC_SETTINGS)
+                //intent.putExtra(Settings.EXTRA_ACCOUNT_TYPES, getString(R.string.account_type));
+                startActivity(intent);
             }
         });
         builder.setNegativeButton(R.string.no, null);
-        builder.setMessage("It seems you haven't Device Locator accounts or email registered on this device and there is no verified notification email set in Notification settings card." +
+        builder.setMessage("It seems you have neither Device Locator nor email account registered on this device and there is no verified notification email set in Notification settings card." +
                 " Do you want to register Device Locator account now?");
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
         AlertDialog dialog = builder.create();
@@ -1633,7 +1626,7 @@ public class MainActivity extends AppCompatActivity {
 
             viewHolder.deviceRemove.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    showRemoveDeviceDialog(devices.get(position));
+                    showRemoveDeviceDialogFragment(devices.get(position));
                 }
             });
 

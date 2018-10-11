@@ -93,16 +93,17 @@ public class PermissionsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        // --------------------------
+        // device permissions
 
+        //device admin
         Switch deviceAdminPermission = findViewById(R.id.device_admin_permission);
         deviceAdminPermission.setChecked(settings.getBoolean("loginTracker", false));
 
-        //TODO hide this?
+        //manage overlay
         Switch manageOverlayPermission = findViewById(R.id.manage_overlay_permission);
         manageOverlayPermission.setChecked(HiddenCameraUtils.canOverDrawOtherApps(this));
-        //
 
+        //do not disturb
         Switch notificationPolicyAccessPermission = findViewById(R.id.notification_policy_access_permission);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -115,7 +116,7 @@ public class PermissionsActivity extends AppCompatActivity {
             notificationPolicyAccessPermission.setVisibility(View.GONE);
         }
 
-        // ----------------------------
+        // application permissions
 
         Switch accessFineLocationPermission = findViewById(R.id.access_fine_location_permission);
         accessFineLocationPermission.setChecked(Permissions.haveLocationPermission(this));
@@ -139,6 +140,8 @@ public class PermissionsActivity extends AppCompatActivity {
         Switch callPhonePermission = findViewById(R.id.call_phone_permission);
         callPhonePermission.setChecked(Permissions.haveCallPhonePermission(this));
 
+        //other permissions
+
         Switch useFingerprintPermission = findViewById(R.id.use_fingerprint_permission);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
@@ -154,7 +157,6 @@ public class PermissionsActivity extends AppCompatActivity {
         } else {
             useFingerprintPermission.setVisibility(View.GONE);
         }
-
         useFingerprintPermission.setChecked(Permissions.haveFingerprintPermission(this));
 
         Switch readPhoneStatePermission = findViewById(R.id.read_phone_state_permission);

@@ -142,4 +142,6 @@
     <string name="Manifest.permission.USE_FINGERPRINT">Allow application authentication with fingerprint</string>
     <string name="Manifest.permission.GET_ACCOUNTS">Allow to list email based user logins registered in the device</string>
     <string name="Manifest.permission.READ_PHONE_STATE">Allow to read device IMEI number for device identification</string>
+    <string name="forget_me">Forget me</string>
+    <string name="send_code_again">Send code again</string>
 </resources>

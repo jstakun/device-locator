@@ -4,18 +4,15 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.v7.app.AlertDialog;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -29,6 +26,7 @@ import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
@@ -294,7 +292,7 @@ public class Messenger {
                             }
                         }
                         if (context instanceof Activity) {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramStatus", status).apply();
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
                             if (StringUtils.equalsIgnoreCase(status, "sent")) {
                                 Log.d(TAG, "Telegram notification sent successfully!");
                             } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
@@ -937,61 +935,64 @@ public class Messenger {
                         sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
                     } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
-                        String status = null;
+                        String status = null, secret = null;
                         if (reply != null) {
                             JsonElement st = reply.getAsJsonObject().get("status");
                             if (st != null) {
                                 status = st.getAsString();
                             }
+                            JsonElement se = reply.getAsJsonObject().get("secret");
+                            if (se != null) {
+                                secret = se.getAsString();
+                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret).apply();
+                            }
                         }
-                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString("telegramStatus", status).apply();
+                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            if (!((Activity) context).isFinishing()) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                                builder.setPositiveButton(R.string.done, null);
-                                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
-                                        final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-                                        telegramInput.setText(telegramId);
-                                    }
-                                });
-                                builder.setMessage("Please check your Telegram chat or channel and confirm your registration.");
-                                builder.setTitle("Telegram registration");
-                                AlertDialog dialog = builder.create();
-                                dialog.show();
+                            //TODO show dialog to enter activation code sent to user
+                            if (StringUtils.isNotEmpty(secret)) {
+                                if (!((Activity) context).isFinishing()) {
+                                    NotificationActivationDialogFragment notificationDialog = new NotificationActivationDialogFragment();
+                                    Bundle b = new Bundle();
+                                    b.putSerializable("mode", NotificationActivationDialogFragment.Mode.Telegram);
+                                    notificationDialog.setArguments(b);
+                                    notificationDialog.show(((Activity) context).getFragmentManager(), "activationCodeDialog");
+                                }
                             } else {
-                                Toast.makeText(context, "Please check your Telegram chat or channel and confirm your registration.", Toast.LENGTH_LONG).show();
+                                onFailedEmailRegistration(context, "Failed to send activation code to your Telegram chat or channel. Please register again your Telegram chat or channel!");
                             }
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
-                            final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-                            telegramInput.setText(telegramId);
-                            Toast.makeText(context, "Oops! Your Telegram chat id seems to be wrong. Please register again your Telegram chat or channel!", Toast.LENGTH_LONG).show();
+                            onFailedTelegramRegistration(context, "Oops! Failed to send activation code to your Telegram channel or chat. If this is Telegram channel please add @device_locator_bot with publish rights to your channel.");
                         } else {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
-                            final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-                            telegramInput.setText(telegramId);
-                            Toast.makeText(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", Toast.LENGTH_LONG).show();
+                            onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!");
                         }
                     } else {
-                        if (telegramId.startsWith("-100") || telegramId.startsWith("@")) {
-                            Toast.makeText(context, "Please add @device_locator_bot to your channel with message sending permission and send us email with your Telegram channel to finish registration!", Toast.LENGTH_LONG).show();
-                            composeEmail(context, new String[]{"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram chat or channel " + telegramId + " to Device Locator notifications service.", false);
-                        } else {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
-                            final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-                            telegramInput.setText(telegramId);
-                            Toast.makeText(context, "Oops! Your Telegram channel id seems to be wrong. Please register again your Telegram chat or channel!", Toast.LENGTH_LONG).show();
-                        }
+                        //if (telegramId.startsWith("-100") || telegramId.startsWith("@")) {
+                        //    Toast.makeText(context, "Please add @device_locator_bot to your channel with message sending permission and send us email with your Telegram channel to finish registration!", Toast.LENGTH_LONG).show();
+                        //    composeEmail(context, new String[]{"device-locator@gms-world.net"}, "Device Locator registration", "Please register my Telegram chat or channel " + telegramId + " to Device Locator notifications service.", false);
+                        //} else {
+                        //    PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
+                        //    final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
+                        //    telegramInput.setText(telegramId);
+                        //    Toast.makeText(context, "Oops! Your Telegram channel id seems to be wrong. Please register again your Telegram chat or channel!", Toast.LENGTH_LONG).show();
+                        //}
+                        onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!");
                     }
                 }
             });
         } catch (Exception e) {
             Log.d(TAG, e.getMessage(), e);
         }
+    }
+
+    private static void onFailedTelegramRegistration(Context context, String message) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
+        final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
+        telegramInput.setText("");
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+
     }
 
     private static void sendEmailRegistrationRequest(final Context context, final String email, final String tokenStr, final int retryCount) {
@@ -1008,52 +1009,49 @@ public class Messenger {
                         sendEmailRegistrationRequest(context, email, tokenStr, retryCount - 1);
                     } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
-                        String status = null;
+                        String status = null, secret = null;
                         if (reply != null) {
                             JsonElement st = reply.getAsJsonObject().get("status");
                             if (st != null) {
                                 status = st.getAsString();
                             }
+                            JsonElement se = reply.getAsJsonObject().get("secret");
+                            if (se != null) {
+                                secret = se.getAsString();
+                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NotificationActivationDialogFragment.EMAIL_SECRET, secret).apply();
+                            }
                         }
                         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, status).apply();
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
-                            Toast.makeText(context, "Your email address is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Your email address is already verified.", Toast.LENGTH_SHORT).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putLong("emailRegistrationMillis", System.currentTimeMillis()).apply();
-                            if (!((Activity) context).isFinishing()) {
-                                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                                builder.setPositiveButton(R.string.done, null);
-                                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
-                                        final TextView emailInput = ((Activity) context).findViewById(R.id.email);
-                                        emailInput.setText("");
-                                    }
-                                });
-                                builder.setMessage("Please check your mail inbox for message from device-locator@gms-world.net and confirm your registration.");
-                                builder.setTitle("Email registration");
-                                AlertDialog dialog = builder.create();
-                                dialog.show();
+                            //TODO show dialog to enter activation code sent to user
+                            if (StringUtils.isNotEmpty(secret)) {
+                                if (!((Activity) context).isFinishing()) {
+                                    NotificationActivationDialogFragment notificationDialog = new NotificationActivationDialogFragment();
+                                    notificationDialog.show(((Activity) context).getFragmentManager(), "activationCodeDialog");
+                                }
                             } else {
-                                Toast.makeText(context, "Please check your mail inbox for message from device-locator@gms-world.net and confirm your registration.", Toast.LENGTH_LONG).show();
+                                onFailedEmailRegistration(context, "Failed to send activation email to your inbox. Please register your email address again!");
                             }
                         } else {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
-                            final TextView emailInput = ((Activity) context).findViewById(R.id.email);
-                            emailInput.setText("");
-                            Toast.makeText(context, "Oops! Something went wrong. Please add again your email address!", Toast.LENGTH_LONG).show();
+                            onFailedEmailRegistration(context, "Oops! Something went wrong. Please add again your email address!");
                         }
                     } else {
-                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
-                        final TextView emailInput = ((Activity) context).findViewById(R.id.email);
-                        emailInput.setText("");
-                        Toast.makeText(context, "Oops! Something went wrong. Please add again your email address!", Toast.LENGTH_LONG).show();
+                        onFailedEmailRegistration(context, "Oops! Something went wrong. Please add again your email address!");
                     }
                 }
             });
         } catch (Exception e) {
             Log.d(TAG, e.getMessage(), e);
         }
+    }
+
+    private static void onFailedEmailRegistration(Context context, String message) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
+        final TextView emailInput = ((Activity) context).findViewById(R.id.email);
+        emailInput.setText("");
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
     @SuppressLint("MissingPermission")
@@ -1099,7 +1097,7 @@ public class Messenger {
         return androidDeviceId;
     }
 
-    private static void composeEmail(Context context, String[] addresses, String subject, String message, boolean showToast) {
+    /*private static void composeEmail(Context context, String[] addresses, String subject, String message, boolean showToast) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto:")); // only email apps should handle this
         intent.putExtra(Intent.EXTRA_EMAIL, addresses);
@@ -1110,7 +1108,7 @@ public class Messenger {
         } else if (showToast) {
             Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         }
-    }
+    }*/
 
     public static String getToken(Context context, String response) {
         JsonElement reply = new JsonParser().parse(response);
