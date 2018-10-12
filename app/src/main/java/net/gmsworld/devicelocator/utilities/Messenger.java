@@ -925,6 +925,7 @@ public class Messenger {
     private static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
+        headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
 
         try {
             String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context, false);
@@ -968,6 +969,8 @@ public class Messenger {
                         } else {
                             onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!");
                         }
+                    } else if (responseCode == 403) {
+                        onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!");
                     } else {
                         onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!");
                     }
@@ -989,6 +992,7 @@ public class Messenger {
     private static void sendEmailRegistrationRequest(final Context context, final String email, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
+        headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
 
         try {
             String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false);
