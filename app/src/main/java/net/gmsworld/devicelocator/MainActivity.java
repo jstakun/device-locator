@@ -6,7 +6,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -21,7 +20,6 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -59,8 +57,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
+import net.gmsworld.devicelocator.fragments.LoginDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.RemoveDeviceDialogFragment;
+import net.gmsworld.devicelocator.fragments.SmsCommandsEnabledDialogFragment;
+import net.gmsworld.devicelocator.fragments.SmsCommandsInitDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
@@ -91,11 +92,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener {
+public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener, SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final int SEND_LOCATION_INTENT = 1;
     private static final int SELECT_CONTACT_INTENT = 3;
     private static final int SHARE_ROUTE_MESSAGE = 1;
     private static final int UPDATE_UI_MESSAGE = 2;
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             Bundle b = new Bundle();
             b.putSerializable("mode", NotificationActivationDialogFragment.Mode.Telegram);
             notificationActivationDialogFragment.setArguments(b);
-            notificationActivationDialogFragment.show(getFragmentManager(), "activationCodeDialog");
+            notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
         }
     }
 
@@ -242,11 +242,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SELECT_CONTACT_INTENT && resultCode == RESULT_OK) {
             phoneNumber = getNumber(data);
-            initPhoneNumberInput();
-            if (phoneNumber != null) {
-                if (requestCode == SEND_LOCATION_INTENT) {
-                    launchService();
-                }
+            if (StringUtils.isNotEmpty(phoneNumber)) {
+                initPhoneNumberInput();
             } else {
                 Toast.makeText(this, "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
             }
@@ -379,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         Bundle args = new Bundle();
         args.putParcelable("device", device);
         removeDeviceDialogFragment.setArguments(args);
-        removeDeviceDialogFragment.show(getFragmentManager(), "removeDevice");
+        removeDeviceDialogFragment.show(getFragmentManager(), RemoveDeviceDialogFragment.TAG);
     }
 
     private void initLocationSMSCheckbox() {
@@ -460,7 +457,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.ping_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
     }
 
-    private void toggleRunning() {
+    public void toggleRunning() {
         //enable Firebase
         if (!this.running) {
             final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
@@ -498,23 +495,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
 
         if (running) {
-            //TODO move alertdialog to fragment
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            //builder.setNegativeButton("Show PIN", new DialogInterface.OnClickListener() {
-            //    public void onClick(DialogInterface dialog, int id) {
-            //        Toast.makeText(MainActivity.this, "Your Security PIN is " + settings.getEncryptedString(PinActivity.DEVICE_PIN), Toast.LENGTH_LONG).show();
-            //    }
-            //});
-            builder.setPositiveButton("Permissions", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    Intent intent = new Intent(MainActivity.this, PermissionsActivity.class);
-                    startActivity(intent);
-                }
-            });
-            builder.setMessage(Html.fromHtml(getString(R.string.commands_enabled_prompt)));
-            builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-            AlertDialog dialog = builder.create();
-            dialog.show();
+            SmsCommandsEnabledDialogFragment smsCommandsEnabledDialogFragment = new SmsCommandsEnabledDialogFragment();
+            smsCommandsEnabledDialogFragment.show(getFragmentManager(), SmsCommandsEnabledDialogFragment.TAG);
         }
     }
 
@@ -735,7 +717,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE) {
                 //show dialog with info What to do if no account is created
-                showLoginDialog();
+                showLoginDialogFragment();
             }
 
             final CommandArrayAdapter accs = new CommandArrayAdapter(this, R.layout.command_row, accountNames);
@@ -757,7 +739,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             if (requestPermission) {
                 Permissions.requestGetAccountsPermission(this);
             } else {
-                showLoginDialog();
+                showLoginDialogFragment();
             }
         }
     }
@@ -1121,53 +1103,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         return number;
     }
 
-    private void launchService() {
-        //TODO move alertdialog to fragment
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setPositiveButton(R.string.send, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                launchSmsService();
-            }
-        });
-        builder.setNegativeButton(R.string.cancel, null);
-        builder.setMessage(Html.fromHtml(getString(R.string.location_prompt, phoneNumber)));
-        builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
     private void initRemoteControl() {
         if (!running) {
             if (!PreferenceManager.getDefaultSharedPreferences(this).contains("smsDialog")) {
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("smsDialog", true).apply();
-                //TODO move alertdialog to fragment
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        toggleRunning();
-                    }
-                });
-                builder.setNegativeButton(R.string.no, null);
-                builder.setMessage(Html.fromHtml(getString(R.string.enable_sms_command_prompt)));
-                builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-                AlertDialog dialog = builder.create();
-                dialog.show();
+                SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = new SmsCommandsInitDialogFragment();
+                smsCommandsInitDialogFragment.show(getFragmentManager(), smsCommandsInitDialogFragment.TAG);
             }
         }
-    }
-
-    private void launchSmsService() {
-        if (!Permissions.haveSendSMSPermission(MainActivity.this)) {
-            Permissions.requestSendSMSPermission(MainActivity.this, 0);
-            Toast.makeText(this, R.string.send_sms_permission, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
-        newIntent.putExtra("phoneNumber", phoneNumber);
-        newIntent.putExtra("email", email);
-        newIntent.putExtra("telegramId", telegramId);
-        MainActivity.this.startService(newIntent);
     }
 
     private void launchMotionDetectorService() {
@@ -1468,22 +1411,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         setSupportActionBar(toolbar);
     }
 
-    private void showLoginDialog() {
-        //TODO move alertdialog to fragment
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                Intent intent = new Intent(Settings.ACTION_ADD_ACCOUNT); //new Intent(Settings.ACTION_SYNC_SETTINGS)
-                //intent.putExtra(Settings.EXTRA_ACCOUNT_TYPES, getString(R.string.account_type));
-                startActivity(intent);
-            }
-        });
-        builder.setNegativeButton(R.string.no, null);
-        builder.setMessage("It seems you have neither Device Locator nor email account registered on this device and there is no verified notification email set in Notification settings card." +
-                " Do you want to register Device Locator account now?");
-        builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-        AlertDialog dialog = builder.create();
-        dialog.show();
+    private void showLoginDialogFragment() {
+        LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
+        loginDialogFragment.show(getFragmentManager(), LoginDialogFragment.TAG);
     }
 
     private static void setListViewHeightBasedOnChildren(ListView listView) {

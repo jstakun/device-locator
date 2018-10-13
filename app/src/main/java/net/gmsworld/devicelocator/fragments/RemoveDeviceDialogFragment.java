@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class RemoveDeviceDialogFragment extends DialogFragment {
 
+    public static final String TAG = "RemoveDeviceDialog";
+
     private RemoveDeviceDialogListener parent;
     private Device device;
 

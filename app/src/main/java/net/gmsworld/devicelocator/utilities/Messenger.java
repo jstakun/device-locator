@@ -959,7 +959,7 @@ public class Messenger {
                                     Bundle b = new Bundle();
                                     b.putSerializable("mode", NotificationActivationDialogFragment.Mode.Telegram);
                                     notificationDialog.setArguments(b);
-                                    notificationDialog.show(((Activity) context).getFragmentManager(), "activationCodeDialog");
+                                    notificationDialog.show(((Activity) context).getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                 }
                             } else {
                                 onFailedEmailRegistration(context, "Failed to send activation code to your Telegram chat or channel. Please register again your Telegram chat or channel!");
@@ -1024,7 +1024,7 @@ public class Messenger {
                             if (StringUtils.isNotEmpty(secret)) {
                                 if (!((Activity) context).isFinishing()) {
                                     NotificationActivationDialogFragment notificationDialog = new NotificationActivationDialogFragment();
-                                    notificationDialog.show(((Activity) context).getFragmentManager(), "activationCodeDialog");
+                                    notificationDialog.show(((Activity) context).getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                 }
                             } else {
                                 onFailedEmailRegistration(context, "Failed to send activation email to your inbox. Please register your email address again!");

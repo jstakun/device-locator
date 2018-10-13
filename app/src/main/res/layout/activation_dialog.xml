@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="8dp"
-        style="@android:style/TextAppearance.Medium"
+        style="@android:style/TextAppearance.Large"
         android:textStyle="bold"
         android:textColor="@color/gray"
         android:text="@string/activation_email_title" />
@@ -20,6 +20,7 @@
         android:id="@+id/activationDescription"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        style="@android:style/TextAppearance.Medium"
         android:text="@string/activation_email_desc"
         android:layout_margin="8dp"
         android:layout_marginLeft="8dp"

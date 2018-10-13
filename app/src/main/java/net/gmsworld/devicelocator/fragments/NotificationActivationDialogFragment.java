@@ -33,7 +33,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
     public static final String EMAIL_SECRET = "emailSecret";
     public static final String TELEGRAM_SECRET = "telegramSecret";
 
-    private static final String TAG = "NotifActDialogFragment";
+    public static final String TAG = "NotificationActivationDialog";
 
     //default mode is Email
     private Mode mode = Mode.Email;
