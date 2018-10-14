@@ -950,7 +950,7 @@ public class Messenger {
                         }
                         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
-                            Toast.makeText(context, "Your chat or channel is already verified. You should start receiving notifications...", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Your Telegram chat or channel is already verified.", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
@@ -999,7 +999,6 @@ public class Messenger {
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    Log.d(TAG, "Received following response code: " + responseCode + " from url " + url + " with content " + results);
                     if (responseCode != 200 && retryCount > 0) {
                         sendEmailRegistrationRequest(context, email, tokenStr, retryCount - 1);
                     } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {

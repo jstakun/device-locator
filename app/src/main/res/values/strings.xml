@@ -94,7 +94,7 @@
     <string name="activation_telegram_title">Telegram activation</string>
     <string name="activation_email_desc">In order to activate email notifications please enter 4 digit activation code we\'ve sent to your email address:</string>
     <string name="activation_telegram_desc">In order to activate Telegram notifications please enter 4 digit activation code we\'ve sent to your Telegram chat or channel:</string>
-    <string name="login_dialog_desc">It seems you haven\'t any accounts registered on this Device. Do you want to register Device Locator account now?</string>
+    <string name="login_dialog_desc">It seems you haven\'t any accounts registered on this device. Do you want to register Device Locator account now?</string>
 
     <!-- Command Activity -->
     <string name="title_activity_command">CommandActivity</string>
@@ -137,7 +137,7 @@
     <string name="notifiers_missing">Please specify who should get notified in case of failed login</string>
     <string name="DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN.html">Allow failed device login notification service and &lt;a href="https://www.gms-world.net/dl#lock">Lock screen&lt;a> command</string>
     <string name="DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN">Allow failed device login notification service and Lock device screen command</string>
-    <string name="Settings.ACTION_MANAGE_OVERLAY_PERMISSION">Allow taking photos by failed device login notification service and take Photo command</string>
+    <string name="Settings.ACTION_MANAGE_OVERLAY_PERMISSION">Allow taking front camera photo after failed device login and with Photo command</string>
     <string name="Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS">Allow Mute device audio command</string>
     <string name="Manifest.permission.ACCESS_FINE_LOCATION">Allow route tracking service and Location command</string>
     <string name="Manifest.permission.SEND_SMS">Allow receiving SMS commands and sending SMS notifications</string>
