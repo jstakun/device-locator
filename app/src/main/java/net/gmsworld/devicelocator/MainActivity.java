@@ -161,13 +161,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         //show email or telegram registration dialog if still unverified
         if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-            NotificationActivationDialogFragment notificationActivationDialogFragment = new NotificationActivationDialogFragment();
-            notificationActivationDialogFragment.show(getFragmentManager(), "activationCodeDialog");
+            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
+            notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
         } else if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
-            NotificationActivationDialogFragment notificationActivationDialogFragment = new NotificationActivationDialogFragment();
-            Bundle b = new Bundle();
-            b.putSerializable("mode", NotificationActivationDialogFragment.Mode.Telegram);
-            notificationActivationDialogFragment.setArguments(b);
+            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
             notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
         }
     }
@@ -372,10 +369,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void showRemoveDeviceDialogFragment(final Device device) {
-        RemoveDeviceDialogFragment removeDeviceDialogFragment = new RemoveDeviceDialogFragment();
-        Bundle args = new Bundle();
-        args.putParcelable("device", device);
-        removeDeviceDialogFragment.setArguments(args);
+        RemoveDeviceDialogFragment removeDeviceDialogFragment = RemoveDeviceDialogFragment.newInstance(this, device);
         removeDeviceDialogFragment.show(getFragmentManager(), RemoveDeviceDialogFragment.TAG);
     }
 
@@ -1107,7 +1101,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (!running) {
             if (!PreferenceManager.getDefaultSharedPreferences(this).contains("smsDialog")) {
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("smsDialog", true).apply();
-                SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = new SmsCommandsInitDialogFragment();
+                SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = SmsCommandsInitDialogFragment.newInstance(this);
                 smsCommandsInitDialogFragment.show(getFragmentManager(), smsCommandsInitDialogFragment.TAG);
             }
         }

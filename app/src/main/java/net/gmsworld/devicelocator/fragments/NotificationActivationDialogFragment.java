@@ -38,16 +38,12 @@ public class NotificationActivationDialogFragment extends DialogFragment {
     //default mode is Email
     private Mode mode = Mode.Email;
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Bundle args = getArguments();
-        if (args != null && args.containsKey("mode")) {
-            try {
-                mode = (Mode) args.get("mode");
-            } catch (Exception e) {
-            }
+    public static NotificationActivationDialogFragment newInstance(Mode mode) {
+        NotificationActivationDialogFragment frag = new NotificationActivationDialogFragment();
+        if (mode != null) {
+            frag.mode = mode;
         }
+        return frag;
     }
 
     @Override

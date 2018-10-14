@@ -2,7 +2,6 @@ package net.gmsworld.devicelocator.fragments;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -20,14 +19,10 @@ public class SmsCommandsInitDialogFragment extends DialogFragment {
         void toggleRunning();
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        try {
-            initListener = (SmsCommandsInitDialogListener) context;
-        } catch (Exception e) {
-            throw new ClassCastException(context.toString() + " must implement SmsCommandsInitDialogListener");
-        }
+    public static SmsCommandsInitDialogFragment newInstance(SmsCommandsInitDialogListener initListener) {
+        SmsCommandsInitDialogFragment frag = new SmsCommandsInitDialogFragment();
+        frag.initListener = initListener;
+        return frag;
     }
 
     @Override

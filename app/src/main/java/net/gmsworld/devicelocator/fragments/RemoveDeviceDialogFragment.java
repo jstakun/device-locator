@@ -2,7 +2,6 @@ package net.gmsworld.devicelocator.fragments;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -23,22 +22,11 @@ public class RemoveDeviceDialogFragment extends DialogFragment {
         void onDeleteDevice(String imei);
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        try {
-            parent = (RemoveDeviceDialogListener) context;
-            device = (Device) getArguments().get("device");
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement RemoveDeviceDialogListener");
-        }
-        try {
-            device = (Device) getArguments().get("device");
-        } catch (Exception e) {
-            if (device == null) {
-                throw new NullPointerException("Device must be set!");
-            }
-        }
+    public static RemoveDeviceDialogFragment newInstance(RemoveDeviceDialogListener removeListener, Device device) {
+        RemoveDeviceDialogFragment removeDeviceDialogFragment = new RemoveDeviceDialogFragment();
+        removeDeviceDialogFragment.parent = removeListener;
+        removeDeviceDialogFragment.device = device;
+        return removeDeviceDialogFragment;
     }
 
     @Override

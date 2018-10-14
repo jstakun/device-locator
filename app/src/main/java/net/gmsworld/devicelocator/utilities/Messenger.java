@@ -955,11 +955,8 @@ public class Messenger {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
                                 if (!((Activity) context).isFinishing()) {
-                                    NotificationActivationDialogFragment notificationDialog = new NotificationActivationDialogFragment();
-                                    Bundle b = new Bundle();
-                                    b.putSerializable("mode", NotificationActivationDialogFragment.Mode.Telegram);
-                                    notificationDialog.setArguments(b);
-                                    notificationDialog.show(((Activity) context).getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                                    notificationActivationDialogFragment.show(((Activity) context).getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                 }
                             } else {
                                 onFailedEmailRegistration(context, "Failed to send activation code to your Telegram chat or channel. Please register again your Telegram chat or channel!");
@@ -1022,8 +1019,8 @@ public class Messenger {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
                                 if (!((Activity) context).isFinishing()) {
-                                    NotificationActivationDialogFragment notificationDialog = new NotificationActivationDialogFragment();
-                                    notificationDialog.show(((Activity) context).getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
+                                    notificationActivationDialogFragment.show(((Activity) context).getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                 }
                             } else {
                                 onFailedEmailRegistration(context, "Failed to send activation email to your inbox. Please register your email address again!");
