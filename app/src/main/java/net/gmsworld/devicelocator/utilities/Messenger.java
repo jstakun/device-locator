@@ -959,17 +959,17 @@ public class Messenger {
                                     notificationActivationDialogFragment.show(((Activity) context).getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                 }
                             } else {
-                                onFailedEmailRegistration(context, "Failed to send activation code to your Telegram chat or channel. Please register again your Telegram chat or channel!");
+                                onFailedTelegramRegistration(context, "Failed to send activation code to your Telegram chat or channel. Please register again your Telegram chat or channel!", true);
                             }
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                            onFailedTelegramRegistration(context, "Oops! Failed to send activation code to your Telegram channel or chat. If this is Telegram channel please add @device_locator_bot with publish rights to your channel.");
+                            onFailedTelegramRegistration(context, "Oops! Failed to send activation code to your Telegram channel or chat. Please register again your Telegram chat or channel!", true);
                         } else {
-                            onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!");
+                            onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                         }
                     } else if (responseCode == 403) {
-                        onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!");
+                        onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
                     } else {
-                        onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!");
+                        onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
                     }
                 }
             });
@@ -978,10 +978,12 @@ public class Messenger {
         }
     }
 
-    private static void onFailedTelegramRegistration(Context context, String message) {
+    private static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
-        final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-        telegramInput.setText("");
+        if (clearTextInput) {
+            final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
+            telegramInput.setText("");
+        }
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 
     }
@@ -1023,13 +1025,15 @@ public class Messenger {
                                     notificationActivationDialogFragment.show(((Activity) context).getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                 }
                             } else {
-                                onFailedEmailRegistration(context, "Failed to send activation email to your inbox. Please register your email address again!");
+                                onFailedEmailRegistration(context, "Failed to send activation email to your inbox. Please register your email address again!", true);
                             }
                         } else {
-                            onFailedEmailRegistration(context, "Oops! Something went wrong. Please add again your email address!");
+                            onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", true);
                         }
+                    } else if (responseCode == 400) {
+                        onFailedEmailRegistration(context, "Your email address seems to be incorrect. Please check it once again!", false);
                     } else {
-                        onFailedEmailRegistration(context, "Oops! Something went wrong. Please add again your email address!");
+                        onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", true);
                     }
                 }
             });
@@ -1038,10 +1042,12 @@ public class Messenger {
         }
     }
 
-    private static void onFailedEmailRegistration(Context context, String message) {
+    private static void onFailedEmailRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
-        final TextView emailInput = ((Activity) context).findViewById(R.id.email);
-        emailInput.setText("");
+        if (clearTextInput) {
+            final TextView emailInput = ((Activity) context).findViewById(R.id.email);
+            emailInput.setText("");
+        }
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
