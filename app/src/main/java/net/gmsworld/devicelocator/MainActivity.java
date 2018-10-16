@@ -892,6 +892,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private synchronized void registerEmail(TextView emailInput, boolean retry) {
         String newEmailAddress = emailInput.getText().toString();
+        email = settings.getString(NOTIFICATION_EMAIL);
         if ((!StringUtils.equals(email, newEmailAddress) || retry) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
             if (Network.isNetworkAvailable(MainActivity.this)) {
                 Log.d(TAG, "Setting new email address: " + newEmailAddress);
@@ -961,6 +962,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private synchronized void registerTelegram(TextView telegramInput) {
         String newTelegramId = telegramInput.getText().toString();
+        telegramId = settings.getString(NOTIFICATION_SOCIAL);
         if (!StringUtils.equals(telegramId, newTelegramId) && (StringUtils.isEmpty(newTelegramId) || Messenger.isValidTelegramId(newTelegramId))) {
             if (Network.isNetworkAvailable(MainActivity.this)) {
                 Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);

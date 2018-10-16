@@ -980,10 +980,11 @@ public class Messenger {
 
     private static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
+        final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
         if (clearTextInput) {
-            final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
             telegramInput.setText("");
         }
+        telegramInput.requestFocus();
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 
     }
@@ -1044,10 +1045,11 @@ public class Messenger {
 
     private static void onFailedEmailRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
+        final TextView emailInput = ((Activity) context).findViewById(R.id.email);
         if (clearTextInput) {
-            final TextView emailInput = ((Activity) context).findViewById(R.id.email);
             emailInput.setText("");
         }
+        emailInput.requestFocus();
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
