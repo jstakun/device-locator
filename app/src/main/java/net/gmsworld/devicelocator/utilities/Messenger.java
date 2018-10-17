@@ -932,9 +932,7 @@ public class Messenger {
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    if (responseCode != 200 && retryCount > 0) {
-                        sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
-                    } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
+                    if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         String status = null, secret = null;
                         if (reply != null) {
@@ -968,6 +966,8 @@ public class Messenger {
                         }
                     } else if (responseCode == 403) {
                         onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
+                    } else if (responseCode != 200 && retryCount > 0) {
+                        sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
                     } else {
                         onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
                     }
@@ -999,9 +999,7 @@ public class Messenger {
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    if (responseCode != 200 && retryCount > 0) {
-                        sendEmailRegistrationRequest(context, email, tokenStr, retryCount - 1);
-                    } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
+                    if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         String status = null, secret = null;
                         if (reply != null) {
@@ -1033,6 +1031,8 @@ public class Messenger {
                         }
                     } else if (responseCode == 400) {
                         onFailedEmailRegistration(context, "Your email address seems to be incorrect. Please check it once again!", false);
+                    } else if (responseCode != 200 && retryCount > 0) {
+                        sendEmailRegistrationRequest(context, email, tokenStr, retryCount - 1);
                     } else {
                         onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", true);
                     }
