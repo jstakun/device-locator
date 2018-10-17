@@ -971,7 +971,7 @@ public class Messenger {
                     } else if (responseCode != 200 && retryCount > 0) {
                         sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
                     } else {
-                        onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
+                        onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                     }
                 }
             });
