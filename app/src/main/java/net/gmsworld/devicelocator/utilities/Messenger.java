@@ -966,6 +966,8 @@ public class Messenger {
                         }
                     } else if (responseCode == 403) {
                         onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
+                    } else if (responseCode == 400) {
+                        onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
                     } else if (responseCode != 200 && retryCount > 0) {
                         sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
                     } else {
