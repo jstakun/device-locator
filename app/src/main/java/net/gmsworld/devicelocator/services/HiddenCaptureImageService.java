@@ -204,7 +204,8 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
         } else {
             Toast.makeText(this, "Camera enabled", Toast.LENGTH_LONG).show();
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).apply();
-            imageFile.delete();
+            boolean deleted = imageFile.delete();
+            Log.d(TAG, "Camera photo deleted: " + deleted);
         }
 
         stopSelf();

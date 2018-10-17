@@ -149,4 +149,5 @@
     <string name="Manifest.permission.READ_PHONE_STATE">Allow to read device IMEI number for device identification</string>
     <string name="forget_me">Forget me</string>
     <string name="send_code_again">Send code again</string>
+    <string name="activation_code">Activation code</string>
 </resources>

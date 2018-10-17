@@ -38,7 +38,7 @@ public class NotificationUtils {
     private static final String DEFAULT_NOTIFICATION_TITLE = "Device Locator Notification";
     private static final String TAG = NotificationUtils.class.getSimpleName();
     public static final int WORKER_NOTIFICATION_ID = 1234;
-    public static final Map<String, Integer> notificationIds = new HashMap<String, Integer>();
+    private static final Map<String, Integer> notificationIds = new HashMap<String, Integer>();
 
     public static Notification buildTrackerNotification(Context context, int notificationId) {
         Intent trackerIntent = new Intent(context, LauncherActivity.class);
@@ -134,12 +134,13 @@ public class NotificationUtils {
         //change links to
         if (mapIntent != null || routeIntent != null) {
             tokens = message.split("\n");
-            message = "";
+            StringBuilder messageBuilder = new StringBuilder();
             for (String token : tokens) {
                 if (!token.startsWith(Messenger.MAPS_URL_PREFIX) && !token.startsWith(context.getString(R.string.showRouteUrl)) ){
-                    message += token + "\n";
+                    messageBuilder.append(token).append("\n");
                 }
             }
+            message = messageBuilder.toString();
         }
 
         if (routeIntent == null && routeId != null) {
@@ -189,9 +190,9 @@ public class NotificationUtils {
 
         String cancelCommand = null;
         //modify some command names to create better actions
-        if (routeIntent != null && extras != null && !extras.containsKey("command")) {
+        if (routeIntent != null && !extras.containsKey("command")) {
             extras.putString("command", Command.START_COMMAND);
-        } else if (extras != null && (extras.containsKey("command"))) {
+        } else if (extras.containsKey("command")) {
             String commandName = extras.getString("command");
             if (StringUtils.equals(commandName + "dl", Command.RING_OFF_COMMAND)) {
                 cancelCommand = Command.RING_OFF_COMMAND;
@@ -205,7 +206,7 @@ public class NotificationUtils {
         //remove
         //Log.d(TAG, " ---------------------- ----------------------- Extras: " +  extras);
 
-        if (extras != null && extras.containsKey("imei") && extras.containsKey("command")) {
+        if (extras.containsKey("imei") && extras.containsKey("command")) {
             final String commandName = extras.getString("command");
             AbstractCommand command = Command.getCommandByName(commandName);
             if (command != null && command.canResend()) {
@@ -241,8 +242,11 @@ public class NotificationUtils {
                 if (extras.containsKey(MainActivity.DEVICE_NAME)) {
                     newIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
                 }
-                PendingIntent oppositeIntent = PendingIntent.getService(context, notificationId, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                nb.addAction(R.drawable.ic_open_in_browser, Command.getCommandByName(command.getOppositeCommand()).getLabel(), oppositeIntent);
+                AbstractCommand c = Command.getCommandByName(command.getOppositeCommand());
+                if (c != null) {
+                    PendingIntent oppositeIntent = PendingIntent.getService(context, notificationId, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    nb.addAction(R.drawable.ic_open_in_browser, c.getLabel(), oppositeIntent);
+                }
             } else if (command == null) {
                 Log.d(TAG, "Command " + commandName + " not found!");
             } else {
@@ -255,12 +259,11 @@ public class NotificationUtils {
 
     public static Notification buildWorkerNotification(Context context) {
         initChannels(context, DEFAULT_CHANNEL_ID);
-        Notification notification = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
+        return new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_devices_other_white)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
                     .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
                     .setContentText(context.getString(R.string.please_wait)).build();
-        return notification;
     }
 
     public static void cancel(Context context, String notificationId) {
@@ -275,14 +278,16 @@ public class NotificationUtils {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             final String channelName = channelId.replace('-', ' ');
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
-            if (channel == null) {
-                Log.d(TAG, "Creating new notification channel " + channelId);
-                channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
-                channel.setDescription("Notifications from device " + channelName);
-                notificationManager.createNotificationChannel(channel);
-            } else {
-                Log.d(TAG, "Notification channel " + channelId + " exists");
+            if (notificationManager != null) {
+                NotificationChannel channel = notificationManager.getNotificationChannel(channelId);
+                if (channel == null) {
+                    Log.d(TAG, "Creating new notification channel " + channelId);
+                    channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                    channel.setDescription("Notifications from device " + channelName);
+                    notificationManager.createNotificationChannel(channel);
+                } else {
+                    Log.d(TAG, "Notification channel " + channelId + " exists");
+                }
             }
         }
     }

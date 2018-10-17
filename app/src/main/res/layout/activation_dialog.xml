@@ -33,7 +33,7 @@
         android:lines="1"
         android:maxLength="4"
         android:maxLines="1"
-        android:hint="Activation code"
+        android:hint="@string/activation_code"
         android:inputType="numberPassword"
         android:layout_margin="8dp"
         android:textColor="@color/gray"/>

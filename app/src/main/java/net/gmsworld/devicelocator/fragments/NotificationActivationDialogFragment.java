@@ -54,7 +54,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
 
         View dialogView = inflater.inflate(R.layout.activation_dialog, null);
 
-        String s = null;
+        String s;
         if (mode == Mode.Telegram) {
             s = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(TELEGRAM_SECRET, "");
             ((TextView)dialogView.findViewById(R.id.activationTitle)).setText(R.string.activation_telegram_title);

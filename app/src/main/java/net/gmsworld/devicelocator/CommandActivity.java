@@ -254,7 +254,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         Log.d(TAG, "Found last command " + lastCommand);
         if (StringUtils.isNotEmpty(lastCommand)) {
             AbstractCommand c = Command.getCommandByName(lastCommand);
-            if (c.hasOppositeCommand()) {
+            if (c != null && c.hasOppositeCommand()) {
                 lastCommand = c.getOppositeCommand().substring(0, c.getOppositeCommand().length()-2);
             }
             for (int i = 0;i < commandSpinner.getAdapter().getCount();i++) {

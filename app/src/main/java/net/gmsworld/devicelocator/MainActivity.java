@@ -1104,7 +1104,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             if (!PreferenceManager.getDefaultSharedPreferences(this).contains("smsDialog")) {
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("smsDialog", true).apply();
                 SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = SmsCommandsInitDialogFragment.newInstance(this);
-                smsCommandsInitDialogFragment.show(getFragmentManager(), smsCommandsInitDialogFragment.TAG);
+                smsCommandsInitDialogFragment.show(getFragmentManager(), SmsCommandsInitDialogFragment.TAG);
             }
         }
     }
@@ -1580,7 +1580,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private class DeviceComparator implements Comparator<Device> {
 
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         @Override
         public int compare(Device device, Device device2) {

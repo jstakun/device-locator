@@ -491,7 +491,7 @@ public class Command {
         private boolean mute(Context context) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                if (!notificationManager.isNotificationPolicyAccessGranted()) {
+                if (notificationManager != null && !notificationManager.isNotificationPolicyAccessGranted()) {
                     return false;
                 }
             }
@@ -1219,7 +1219,7 @@ public class Command {
                 if (StringUtils.containsIgnoreCase(message, "perimeter")) {
                     String[] tokens = StringUtils.split(message, "\n");
                     if (tokens.length > 1 && StringUtils.isNumeric(tokens[tokens.length-1])) {
-                        int perimeter = Integer.valueOf(tokens[tokens.length-1]).intValue();
+                        int perimeter = Integer.valueOf(tokens[tokens.length - 1]);
                         Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
                         if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) { //10 min
                             int distance = (int) location.distanceTo(lastLocation);
