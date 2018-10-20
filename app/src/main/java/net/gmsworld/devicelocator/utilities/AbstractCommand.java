@@ -16,6 +16,7 @@ import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -24,7 +25,9 @@ import java.util.ArrayList;
 
 public abstract class AbstractCommand {
 
-    static final String TAG = "DeviceCommand";
+    private static final String TAG = "DeviceCommand";
+
+    private static final String AUDIT_FILE = "audit_log.bin";
 
     protected enum Finder {STARTS, EQUALS}
 
@@ -68,11 +71,14 @@ public abstract class AbstractCommand {
 
     public boolean findSmsCommand(Context context, Intent intent) {
         String sender = null;
+        String suffix = commandTokens != null ? " " + StringUtils.join(commandTokens , ' ') : "";
         if (StringUtils.isNotEmpty(smsCommand)) {
             sender = getSenderAddress(context, intent, smsCommand);
+            auditCommand(context, smsCommand + suffix);
         }
         if (sender == null && StringUtils.isNotEmpty(smsShortCommand)) {
-            sender = getSenderAddress(context, intent, smsShortCommand);
+            sender = getSenderAddress(context, intent, smsShortCommand + suffix);
+            auditCommand(context, smsShortCommand);
         }
         if (sender != null) {
             onSmsCommandFound(sender, context);
@@ -92,6 +98,7 @@ public abstract class AbstractCommand {
 
     public boolean findSocialCommand(Context context, String message) {
         if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_SOCIAL, "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_EMAIL, "")))) {
+            auditCommand(context, message);
             if (findKeyword(context, smsCommand + "t", message)) {
                 onSocialCommandFound(null, context);
                 return true;
@@ -105,6 +112,7 @@ public abstract class AbstractCommand {
 
     public boolean findAppCommand(Context context, String message, String sender, Location location, Bundle extras) {
         if (StringUtils.isNotEmpty(smsCommand)) {
+            auditCommand(context, message);
             if (findKeyword(context, smsCommand + "app", message)) {
                 onAppCommandFound(sender, context, location, extras);
                 return true;
@@ -229,5 +237,10 @@ public abstract class AbstractCommand {
 
     public void setCommandTokens(String[] commandTokens) {
         this.commandTokens = commandTokens;
+    }
+
+    private void auditCommand(Context context, String command) {
+        File auditFile = Files.getFilesDir(context, AUDIT_FILE, false);
+        Files.appendLineToFileFromContextDir(auditFile, System.currentTimeMillis() + " " + command);
     }
 }

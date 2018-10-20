@@ -61,7 +61,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
     }
 
-    private static boolean contactExists(Context context, String number) {
+    public static boolean contactExists(Context context, String number) {
         if (Permissions.haveReadContactsPermission(context)) {
             Uri lookupUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
             String[] mPhoneNumberProjection = {ContactsContract.PhoneLookup._ID, ContactsContract.PhoneLookup.NUMBER, ContactsContract.PhoneLookup.DISPLAY_NAME};

@@ -38,7 +38,7 @@ public class NotificationUtils {
     private static final String DEFAULT_NOTIFICATION_TITLE = "Device Locator Notification";
     private static final String TAG = NotificationUtils.class.getSimpleName();
     public static final int WORKER_NOTIFICATION_ID = 1234;
-    private static final Map<String, Integer> notificationIds = new HashMap<String, Integer>();
+    private static final Map<String, Integer> notificationIds = new HashMap<>();
 
     public static Notification buildTrackerNotification(Context context, int notificationId) {
         Intent trackerIntent = new Intent(context, LauncherActivity.class);

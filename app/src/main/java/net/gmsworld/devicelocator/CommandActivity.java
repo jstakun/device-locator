@@ -11,7 +11,9 @@ import android.text.Html;
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -61,10 +63,21 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
         final List<Device> devices = getIntent().getParcelableArrayListExtra("devices");
 
-        //commands list
-
         final Spinner commandSpinner = findViewById(R.id.deviceCommand);
         final EditText args = findViewById(R.id.deviceCommandArgs);
+        final EditText pinEdit = findViewById(R.id.devicePin);
+
+        //commands list
+
+        args.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
+                    sendCommand(prefs, pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString());
+                }
+                return false;
+            }
+        });
 
         final CommandArrayAdapter commands = new CommandArrayAdapter(this, R.layout.command_row,  getResources().getStringArray(R.array.device_commands));
         commandSpinner.setAdapter(commands);
@@ -100,7 +113,6 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
         //pin
 
-        final EditText pinEdit = findViewById(R.id.devicePin);
         String savedPin;
         if (StringUtils.equals(imei, Messenger.getDeviceId(this, false))) {
             savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
@@ -168,49 +180,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final String pin = pinEdit.getText().toString();
-                if (pin.length() == 0) {
-                    Toast.makeText(CommandActivity.this, "Please enter PIN!", Toast.LENGTH_SHORT).show();
-                } else if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
-                    Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
-                } else if (StringUtils.isNotEmpty(name) || StringUtils.isNotEmpty(imei)) {
-                    final String command = commandSpinner.getSelectedItem().toString();
-                    //check if command requires args and validate args
-                    boolean validArgs = true, needArgs = false;
-                    String commandArgs = args.getText().toString();
-                    AbstractCommand c = Command.getCommandByName(command);
-                    if (c != null) {
-                        if (StringUtils.isNotEmpty(commandArgs)) {
-                            c.setCommandTokens(StringUtils.split(command + " " + commandArgs, " "));
-                        }
-
-                        if (c.hasParameters()) {
-                            needArgs = true;
-                            if (!c.validateTokens()) {
-                                validArgs = false;
-                            }
-                        }
-                    }
-                    if (!validArgs) {
-                        Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(imei + "_lastCommand", command).apply();
-                        Toast.makeText(CommandActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
-                        firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
-                        prefs.setEncryptedString(PIN_PREFIX + imei, pin);
-                        Intent newIntent = new Intent(CommandActivity.this, CommandService.class);
-                        if (needArgs && StringUtils.isNotEmpty(commandArgs)) {
-                            newIntent.putExtra("args", commandArgs);
-                        }
-                        newIntent.putExtra("command", command);
-                        newIntent.putExtra("imei", imei);
-                        newIntent.putExtra("pin", pin);
-                        if (StringUtils.isNotEmpty(name)) {
-                            newIntent.putExtra(MainActivity.DEVICE_NAME, name);
-                        }
-                        startService(newIntent);
-                    }
-                }
+                sendCommand(prefs, pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString());
             }
         });
 
@@ -247,6 +217,49 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
     @Override
     public void onLocationUpdated(Location location) {
         Log.d(TAG, "Location found with accuracy " + location.getAccuracy() + " m");
+    }
+
+    private void sendCommand(PreferencesUtils prefs, String pin, String command, String commandArgs) {
+        if (pin.length() == 0) {
+            Toast.makeText(CommandActivity.this, "Please enter PIN!", Toast.LENGTH_SHORT).show();
+        } else if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
+            Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
+        } else if (StringUtils.isNotEmpty(name) || StringUtils.isNotEmpty(imei)) {
+            //check if command requires args and validate args
+            boolean validArgs = true, needArgs = false;
+            AbstractCommand c = Command.getCommandByName(command);
+            if (c != null) {
+                if (StringUtils.isNotEmpty(commandArgs)) {
+                    c.setCommandTokens(StringUtils.split(command + " " + commandArgs, " "));
+                }
+
+                if (c.hasParameters()) {
+                    needArgs = true;
+                    if (!c.validateTokens()) {
+                        validArgs = false;
+                    }
+                }
+            }
+            if (!validArgs) {
+                Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
+            } else {
+                PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(imei + "_lastCommand", command).apply();
+                Toast.makeText(CommandActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
+                firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
+                prefs.setEncryptedString(PIN_PREFIX + imei, pin);
+                Intent newIntent = new Intent(CommandActivity.this, CommandService.class);
+                if (needArgs && StringUtils.isNotEmpty(commandArgs)) {
+                    newIntent.putExtra("args", commandArgs);
+                }
+                newIntent.putExtra("command", command);
+                newIntent.putExtra("imei", imei);
+                newIntent.putExtra("pin", pin);
+                if (StringUtils.isNotEmpty(name)) {
+                    newIntent.putExtra(MainActivity.DEVICE_NAME, name);
+                }
+                startService(newIntent);
+            }
+        }
     }
 
     private void setSelectedCommand(PreferencesUtils prefs, Spinner commandSpinner) {

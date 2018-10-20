@@ -97,7 +97,9 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 if (pinValid) {
                     command += pinRead;
                     if (message.containsKey("args")) {
-                        command += " " + message.get("args");
+                        String args = message.get("args");
+                        command += " " + args;
+                        extras.putString("args", args);
                     }
                     String sender = null;
                     if (correlationId != null) {

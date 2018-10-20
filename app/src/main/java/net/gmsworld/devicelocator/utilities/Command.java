@@ -19,6 +19,7 @@ import android.util.Patterns;
 
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
+import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
@@ -547,9 +548,13 @@ public class Command {
     private static final class StartPhoneCallCommand extends AbstractCommand {
 
         public StartPhoneCallCommand() {
-            super(CALL_COMMAND, "c", Finder.EQUALS);
+            super(CALL_COMMAND, "c", Finder.STARTS);
         }
 
+        @Override
+        public boolean validateTokens() {
+            return (commandTokens == null || commandTokens.length == 1 || Patterns.PHONE.matcher(commandTokens[commandTokens.length-1]).matches() || StringUtils.isNumeric(commandTokens[commandTokens.length-1]));
+        }
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
@@ -565,12 +570,20 @@ public class Command {
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            sendAppNotification(context, CALL_COMMAND, sender);
+            String phoneNumber = extras.getString("args");
+            if (phoneNumber != null && Patterns.PHONE.matcher(phoneNumber).matches() && SmsReceiver.contactExists(context, phoneNumber)) {
+                if (!initPhoneCall(phoneNumber, context)) {
+                    sendAppNotification(context, CALL_COMMAND, sender);
+                }
+            } else {
+                sendAppNotification(context, CALL_COMMAND, sender);
+            }
         }
 
         private boolean initPhoneCall(String sender, Context context) {
             if (Permissions.haveCallPhonePermission(context)) {
                 try {
+                    Log.d(TAG, "Calling " + sender + " ...");
                     Uri call = Uri.parse("tel:" + sender);
                     Intent callIntent = new Intent(Intent.ACTION_CALL, call);
                     //surf.setPackage("com.android.phone"); //use default phone

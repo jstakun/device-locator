@@ -137,7 +137,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         restoreSavedData();
 
-        setupToolbar(R.id.smsToolbar);
+        final Toolbar toolbar = findViewById(R.id.smsToolbar);
+        setSupportActionBar(toolbar);
 
         //show card: sms, tracker, devices
 
@@ -1400,11 +1401,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         //testing use count
         int useCount = settings.getInt("useCount", 0);
         PreferenceManager.getDefaultSharedPreferences(this).edit().putInt("useCount", useCount + 1).apply();
-    }
-
-    private void setupToolbar(int toolbarId) {
-        final Toolbar toolbar = findViewById(toolbarId);
-        setSupportActionBar(toolbar);
     }
 
     private void showLoginDialogFragment() {

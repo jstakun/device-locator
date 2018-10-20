@@ -9,7 +9,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -47,6 +51,9 @@ public class PermissionsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_permissions);
         settings = new PreferencesUtils(this);
+
+        final Toolbar toolbar = findViewById(R.id.smsToolbar);
+        setSupportActionBar(toolbar);
     }
 
     @Override
@@ -164,6 +171,39 @@ public class PermissionsActivity extends AppCompatActivity {
 
         Switch getAccountsPermission = findViewById(R.id.get_accounts_permission);
         getAccountsPermission.setChecked(Permissions.haveGetAccountsPermission(this));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        //Log.d(TAG, "onCreateOptionsMenu()");
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        menu.findItem(R.id.permissions).setVisible(false);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent = new Intent(this, MainActivity.class);
+        switch (item.getItemId()) {
+            case R.id.sms:
+                intent.setAction(MainActivity.ACTION_SMS_MANAGER);
+                startActivity(intent);
+                finish();
+                return true;
+            case R.id.tracker:
+                intent.setAction(MainActivity.ACTION_DEVICE_TRACKER_NOTIFICATION);
+                startActivity(intent);
+                finish();
+                return true;
+            case R.id.devices:
+                intent.setAction(MainActivity.ACTION_DEVICE_MANAGER);
+                startActivity(intent);
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void onPermissionSwitchSelected(View view) {
