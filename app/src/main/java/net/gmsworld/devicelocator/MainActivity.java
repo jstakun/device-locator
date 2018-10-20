@@ -1313,7 +1313,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 String userLogin = settings.getString(USER_LOGIN);
                 if (StringUtils.isNotEmpty(userLogin)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
-                    Network.get(this, getString(R.string.deviceManagerUrl) + "?username=" + userLogin, headers, onGetFinishListener);
+                    String content = "username=" + userLogin + "&action=list";
+                    Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, onGetFinishListener);
                 } else {
                     Log.e(TAG, "User loginis unset. No device list will be loaded");
                 }
