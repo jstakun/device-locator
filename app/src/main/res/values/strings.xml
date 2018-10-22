@@ -150,4 +150,5 @@
     <string name="forget_me">Forget me</string>
     <string name="send_code_again">Send code again</string>
     <string name="activation_code">Activation code</string>
+    <string name="sms_notification_warning">SMS notifications will be sent from this device. This could generate additional costs! Is this ok for you?</string>
 </resources>

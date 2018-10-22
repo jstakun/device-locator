@@ -42,9 +42,9 @@ public class PermissionsActivity extends AppCompatActivity {
     private static final int MANAGE_OVERLAY_WITH_CAMERA = 4;
     private static final int CONTACTS_PERMISSION = 5;
 
-    private PreferencesUtils settings;
+    private static final String CURRENT_DEVICE_ID = "currentDeviceId";
 
-    private String deviceId;
+    private PreferencesUtils settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +84,7 @@ public class PermissionsActivity extends AppCompatActivity {
             startCameraTest();
         } else if (requestCode == CALL_PERMISSION) {
             Log.d(TAG, "Call permission callback");
+            String deviceId = PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).getString(CURRENT_DEVICE_ID, null);
             String newDeviceId = Messenger.getDeviceId(this, false);
             if (!StringUtils.equals(newDeviceId, deviceId)) {
                 registerDevice();
@@ -100,6 +101,11 @@ public class PermissionsActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        Log.d(TAG, "onResume()");
+        final String deviceId = PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).getString(CURRENT_DEVICE_ID, null);
+        if (deviceId != null && !StringUtils.equals(Messenger.getDeviceId(this, false), deviceId)) {
+            registerDevice();
+        }
         // device permissions
 
         //device admin
@@ -171,6 +177,12 @@ public class PermissionsActivity extends AppCompatActivity {
 
         Switch getAccountsPermission = findViewById(R.id.get_accounts_permission);
         getAccountsPermission.setChecked(Permissions.haveGetAccountsPermission(this));
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(CURRENT_DEVICE_ID).apply();
     }
 
     @Override
@@ -268,28 +280,24 @@ public class PermissionsActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.call_phone_permission:
+                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putString(CURRENT_DEVICE_ID, Messenger.getDeviceId(this, false)).apply();
                 if (checked && !Permissions.haveCallPhonePermission(this)) {
-                    deviceId = Messenger.getDeviceId(this, false);
                     Permissions.requestCallPhonePermission(this, CALL_PERMISSION);
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this);
                 }
                 break;
             case R.id.read_phone_state_permission:
+                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putString(CURRENT_DEVICE_ID, Messenger.getDeviceId(this, false)).apply();
                 if (checked && !Permissions.haveReadPhoneStatePermission(this)) {
-                    deviceId = Messenger.getDeviceId(this, false);
-                    Permissions.requestReadPhoneStatePermission(this);
-                    String newDeviceId = Messenger.getDeviceId(this, false);
-                    if (!StringUtils.equals(newDeviceId, deviceId)) {
-                        registerDevice();
-                    }
+                    Permissions.requestReadPhoneStatePermission(this, CALL_PERMISSION);
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this);
                 }
                 break;
             case R.id.get_accounts_permission:
                 if (checked && !Permissions.haveGetAccountsPermission(this)) {
-                    Permissions.requestGetAccountsPermission(this);
+                    Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this);
                 }
@@ -307,12 +315,17 @@ public class PermissionsActivity extends AppCompatActivity {
         }
         if (DlFirebaseMessagingService.sendRegistrationToServer(this, userLogin, settings.getString(MainActivity.DEVICE_NAME), true)) {
             //delete old device
+            final String deviceId = settings.getString(CURRENT_DEVICE_ID);
             final String content = "imei=" + deviceId + "&action=delete";
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bearer " + settings.getString(DeviceLocatorApp.GMS_TOKEN));
             Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
+                    if (responseCode == 200) {
+                        Log.d(TAG, "Device " + deviceId + " has been removed!");
+                        PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(MainActivity.USER_DEVICES).apply();
+                    }
                 }
             });
         } else {

@@ -21,8 +21,7 @@ public class LoginDialogFragment extends DialogFragment {
         builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Intent intent = new Intent(Settings.ACTION_ADD_ACCOUNT); //new Intent(Settings.ACTION_SYNC_SETTINGS)
-                //TODO filter accounts to R.string.account_type
-                //intent.putExtra(Settings.EXTRA_ACCOUNT_TYPES, getString(R.string.account_type));
+                intent.putExtra(Settings.EXTRA_ACCOUNT_TYPES, new String[]{getString(R.string.account_type)});
                 getActivity().startActivity(intent);
             }
         });

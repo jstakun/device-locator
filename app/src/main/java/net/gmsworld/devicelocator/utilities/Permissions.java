@@ -81,12 +81,14 @@ public class Permissions {
         ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, requestCode);
     }
 
-    public static void requestGetAccountsPermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.GET_ACCOUNTS}, PERMISSIONS_REQUEST_GET_ACCOUNTS);
+    public static void requestGetAccountsPermission(Activity activity, int requestCode) {
+        //READ_CONTACTS permission is needed to GET_ACCOUNT
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, requestCode);
+        //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.GET_ACCOUNTS}, requestCode);
     }
 
-    public static void requestReadPhoneStatePermission(Activity activity) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_PHONE_STATE}, PERMISSIONS_REQUEST_GET_ACCOUNTS);
+    public static void requestReadPhoneStatePermission(Activity activity, int requestCode) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_PHONE_STATE}, requestCode);
     }
 
     public static boolean haveSendSMSAndLocationPermission(Context context) {
@@ -108,7 +110,9 @@ public class Permissions {
     }
 
     public static boolean haveGetAccountsPermission(Context context) {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED;
+        //READ_CONTACTS permission is needed to GET_ACCOUNT
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED;
+        //return ContextCompat.checkSelfPermission(context, Manifest.permission.GET_ACCOUNTS) == PackageManager.PERMISSION_GRANTED;
     }
 
     public static boolean haveReadContactsPermission(Context context) {

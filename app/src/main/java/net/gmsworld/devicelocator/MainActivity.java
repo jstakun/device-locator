@@ -62,6 +62,7 @@ import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment
 import net.gmsworld.devicelocator.fragments.RemoveDeviceDialogFragment;
 import net.gmsworld.devicelocator.fragments.SmsCommandsEnabledDialogFragment;
 import net.gmsworld.devicelocator.fragments.SmsCommandsInitDialogFragment;
+import net.gmsworld.devicelocator.fragments.SmsNotificationWarningDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
@@ -92,7 +93,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener, SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener {
+public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener,
+        SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -191,6 +193,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         initLocationSMSCheckbox();
         updateUI();
+        initUserLoginInput(true);
+        initDeviceList();
 
         //paste Telegram id
         boolean telegramPaste = settings.getBoolean("telegramPaste", false);
@@ -345,6 +349,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 PreferenceManager.getDefaultSharedPreferences(this).edit()
                             .putBoolean("isTrackerShown", false)
                             .putBoolean("isDeviceManagerShown", true).apply();
+                initUserLoginInput(true);
             } else if (action.equals(ACTION_SMS_MANAGER)) {
                 isTrackerShown = false;
                 isDeviceManagerShown = false;
@@ -554,9 +559,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initTelegramButton();
         initTokenInput();
         initPingButton();
-        initUserLoginInput(true);
         initDeviceNameInput();
-        initDeviceList();
 
         TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
@@ -677,7 +680,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     //user login input setup -------------------------------------------------------------
 
     private void initUserLoginInput(boolean requestPermission) {
-        Log.d(TAG, "initUserLoginInput()");
+        Log.d(TAG, "initUserLoginInput(" + requestPermission + ")");
         final Spinner userAccounts = this.findViewById(R.id.userAccounts);
 
         List<String> accountNames = new ArrayList<>();
@@ -690,12 +693,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
 
         if (Permissions.haveGetAccountsPermission(this)) {
+            //Log.d(TAG, "GET_ACCOUNTS permission is set");
             Account[] dlAccounts = AccountManager.get(this).getAccountsByType(getString(R.string.account_type));
             for (Account a : dlAccounts) {
                 accountNames.add(a.name);
             }
             Account[] allAccounts = AccountManager.get(this).getAccounts();
             for (Account a : allAccounts) {
+                Log.d(TAG, "Found account " + a.name);
                 if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.equalsIgnoreCase(a.name, email)) {
                     accountNames.add(a.name);
                 }
@@ -731,8 +736,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             });
         } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE) {
+            //Log.d(TAG, "Device settings view is visible");
             if (requestPermission) {
-                Permissions.requestGetAccountsPermission(this);
+                Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
             } else {
                 showLoginDialogFragment();
             }
@@ -907,6 +913,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (StringUtils.isNotEmpty(email)) {
                     Toast.makeText(MainActivity.this, "Email verification in progress...", Toast.LENGTH_SHORT).show();
                     net.gmsworld.devicelocator.utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
+                } else {
+                    Toast.makeText(MainActivity.this, "No email notifications will be sent...", Toast.LENGTH_LONG).show();
                 }
             } else {
                 Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
@@ -967,7 +975,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (!StringUtils.equals(telegramId, newTelegramId) && (StringUtils.isEmpty(newTelegramId) || Messenger.isValidTelegramId(newTelegramId))) {
             if (Network.isNetworkAvailable(MainActivity.this)) {
                 Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
-                Toast.makeText(MainActivity.this, "Telegram verification in progress...", Toast.LENGTH_LONG).show();
                 telegramId = newTelegramId;
                 saveData();
                 //update route tracking service if running
@@ -976,7 +983,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
 
                 if (StringUtils.isNotEmpty(telegramId)) {
+                    Toast.makeText(MainActivity.this, "Telegram verification in progress...", Toast.LENGTH_LONG).show();
                     net.gmsworld.devicelocator.utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
+                } else {
+                    Toast.makeText(MainActivity.this, "No Telegram notifications will be sent...", Toast.LENGTH_LONG).show();
                 }
             } else {
                 Toast.makeText(MainActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
@@ -1031,7 +1041,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         });
     }
 
-    private synchronized void registerPhoneNumber(TextView phoneNumberInput) {
+    public synchronized void registerPhoneNumber(TextView phoneNumberInput) {
         String newPhoneNumber = phoneNumberInput.getText().toString();
         if (!StringUtils.equals(phoneNumber, newPhoneNumber) && ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || StringUtils.isEmpty(newPhoneNumber))) {
             Log.d(TAG, "Setting new phone number: " + newPhoneNumber);
@@ -1043,6 +1053,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             if (!Permissions.haveSendSMSPermission(this)) {
                 Permissions.requestSendSMSAndLocationPermission(this, 0);
                 Toast.makeText(this, R.string.send_sms_permission, Toast.LENGTH_SHORT).show();
+            } else if (StringUtils.isNotEmpty(phoneNumber)) {
+                SmsNotificationWarningDialogFragment smsWarningDialog = SmsNotificationWarningDialogFragment.newInstance(this);
+                smsWarningDialog.show(getFragmentManager(), SmsNotificationWarningDialogFragment.TAG);
+            } else {
+                Toast.makeText(MainActivity.this, "No SMS notifications will be sent...", Toast.LENGTH_LONG).show();
             }
         } else if (!StringUtils.equals(phoneNumber, newPhoneNumber)) {
             Toast.makeText(getApplicationContext(), "Make sure to specify valid phone number!", Toast.LENGTH_SHORT).show();
@@ -1229,6 +1244,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     public void initDeviceList() {
+        Log.d(TAG, "initDeviceList()");
         final ListView deviceList = findViewById(R.id.deviceList);
         final TextView deviceListEmpty = findViewById(R.id.deviceListEmpty);
         deviceList.setEmptyView(deviceListEmpty);
@@ -1316,7 +1332,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     String content = "username=" + userLogin + "&action=list";
                     Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, onGetFinishListener);
                 } else {
-                    Log.e(TAG, "User loginis unset. No device list will be loaded");
+                    Log.e(TAG, "User login is unset. No device list will be loaded");
                 }
             } else {
                 String queryString = "scope=dl&user=" + Messenger.getDeviceId(this, false);
