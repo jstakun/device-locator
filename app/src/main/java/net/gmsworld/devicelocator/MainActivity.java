@@ -349,7 +349,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 PreferenceManager.getDefaultSharedPreferences(this).edit()
                             .putBoolean("isTrackerShown", false)
                             .putBoolean("isDeviceManagerShown", true).apply();
-                initUserLoginInput(true);
             } else if (action.equals(ACTION_SMS_MANAGER)) {
                 isTrackerShown = false;
                 isDeviceManagerShown = false;
