@@ -27,7 +27,6 @@
         android:layout_height="match_parent">
 
         <net.gmsworld.devicelocator.views.LDCard
-            android:id="@+id/deviceCommandCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -35,7 +34,6 @@
             ldcard:title="@string/app_name">
 
         <LinearLayout
-            android:id="@+id/email_login_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"

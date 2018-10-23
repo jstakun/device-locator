@@ -41,6 +41,7 @@ public class RemoveDeviceDialogFragment extends DialogFragment {
                     }
                 });
         alertDialogBuilder.setNegativeButton(R.string.no, null);
+        alertDialogBuilder.setIcon(R.drawable.ic_warning_gray);
         return alertDialogBuilder.create();
     }
 }

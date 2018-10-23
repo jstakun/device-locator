@@ -84,11 +84,7 @@ public class PermissionsActivity extends AppCompatActivity {
             startCameraTest();
         } else if (requestCode == CALL_PERMISSION) {
             Log.d(TAG, "Call permission callback");
-            String deviceId = PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).getString(CURRENT_DEVICE_ID, null);
-            String newDeviceId = Messenger.getDeviceId(this, false);
-            if (!StringUtils.equals(newDeviceId, deviceId)) {
-                registerDevice();
-            }
+            //device is registered in onResume()
         } else if (requestCode == CONTACTS_PERMISSION) {
             Log.d(TAG, "Contects permission callback");
             if (Permissions.haveReadContactsPermission(this)) {
@@ -317,6 +313,7 @@ public class PermissionsActivity extends AppCompatActivity {
             //delete old device
             final String deviceId = settings.getString(CURRENT_DEVICE_ID);
             final String content = "imei=" + deviceId + "&action=delete";
+            Log.d(TAG, "---------------------" + content);
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bearer " + settings.getString(DeviceLocatorApp.GMS_TOKEN));
             Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {

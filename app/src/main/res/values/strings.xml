@@ -3,19 +3,7 @@
     <string name="account_type">net.gmsworld</string>
     <string name="app_name_html">&lt;font color="#808080">Device Locator&lt;/font></string>
     <string name="message">Message from Device Locator</string>
-    <string name="current_state_card_title">Setup</string>
     <string name="settings_card_title">Notification settings</string>
-    <string name="about_card_title">About</string>
-    <string name="destination">Pick destination</string>
-    <string name="keyword">SMS Keyword:</string>
-    <string name="destination_error">Error choosing destination :(</string>
-    <string name="stop">Stop</string>
-    <string name="start">Start</string>
-    <string name="error_no_keyword">You can\'t start the application without a keyword.</string>
-    <string name="send_button">Share location</string>
-    <string name="error_permission">Application needs all the permissions to be granted because without them it can\'t function correctly.</string>
-    <string name="sound_title">Sound (not yet)</string>
-    <string name="sound_summary">Notification when keyword was detected.</string>
     <string name="detected_message_summary">Acknowledge that location command was received and send mobile data and GPS status.</string>
     <string name="gps_message_summary">GPS information - Accuracy, Latitude, Longitude, Speed, Altitude.</string>
     <string name="google_message_summary">Google maps link with your device current location.</string>
@@ -33,26 +21,15 @@
     <string name="longitude">Longitude:</string>
     <string name="altitude">Altitude:</string>
     <string name="speed">Speed:</string>
-    <string name="no_network">Internet is disabled, can\'t get address or distance.</string>
-    <string name="address">Address:</string>
-    <string name="no_destination">No destination set.</string>
-    <string name="remaining_distance_to">Distance to</string>
-    <string name="aprox_duration">Approximate time left</string>
     <string name="error_getting_location">GPS error. Device %1$s couldn\'t get the location. Please try again!</string>
-    <string name="done">Done</string>
-    <string name="cancel">Cancel</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="send">Send</string>
     <string name="approximate">Approximate</string>
     <string name="accurate">Accurate</string>
-    <string name="no_speed_or_altitude">No speed or altitude.</string>
-    <string name="settings_kmh_or_mph_string">Speed unit settings</string>
     <string name="read_contacts_permission">Can\'t select a contact without Read Contacts permission.</string>
     <string name="send_sms_permission">SMS permission is required to receive SMS notifications.</string>
     <string name="send_location_permission">Location permission is required to receive location notifications.</string>
-    <string name="notification_title">Location driver not working</string>
-    <string name="notification_content">SMS and Location permissions needed.</string>
     <string name="docsLink">Check all available commands &lt;a href="http://www.gms-world.net/dl">here&lt;a></string>
     <string name="pinLink">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a>&lt;/font></string>
     <string name="Crash.error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
@@ -60,24 +37,14 @@
     <string name="motion_radius">Notify me when device will move %1$d meters from present location</string>
     <string name="motion_confirm">You\'ll receive notification every time device will move %1$d meters from present location</string>
     <string name="motion_confirm_empty">Please setup Notification settings to receive notification every time device will move %1$d meters from present location</string>
-    <string name="gps_accuracy">GPS Accuracy</string>
-    <string name="gps_balanced">Balanced</string>
-    <string name="gps_high">High</string>
     <string name="phone_number">Phone number</string>
-    <string name="find">Find</string>
     <string name="email_address">Email address</string>
     <string name="telegram_chat_id">Telegram chat or channel id</string>
     <string name="share_route">Share route</string>
     <string name="device_tracker">Device tracker</string>
     <string name="sms_control">SMS control</string>
-    <string name="failed_login_tracker">Failed login tracker</string>
-    <string name="camera_control">Camera control</string>
     <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
     <string name="verify_security_pin">From time to time authenticate me at application startup</string>
-    <string name="location_prompt">&lt;font color="#808080">Send your location to %1$s?&lt;/font></string>
-    <string name="take_photo_prompt">&lt;font color="#808080">Take photo when wrong password or pin will be entered?&lt;/font></string>
-    <string name="disable_fln_prompt">&lt;font color="#808080">Disable failed login notifications and screen locking?&lt;/font></string>
-    <string name="disable_photo_prompt">&lt;font color="#808080">Disable taking photos?&lt;/font></string>
     <string name="enable_sms_command_prompt">&lt;font color="#808080">Do you want to enable now SMS commands on your device?&lt;/font></string>
     <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and click Permissions button to grant permissions required by some commands."&lt;/font></string>
     <string name="pin_length_error">Security PIN must have at least 4 digits! Reverting to previous value…</string>
@@ -86,9 +53,7 @@
     <string name="Info.about">%1$s (R)\nVersion: %2$s-%3$d built on %4$s\nCopyright © 2010–%5$s GMS World\n%6$s installed on %7$s</string>
     <string name="admin_grant_explanation">Please grant this permissions to enable failed login notification service and lock screen command in Device Locator.</string>
     <string name="test">Test</string>
-    <string name="action_settings">Settings</string>
     <string name="last_edited_on">Last edited on %1$s</string>
-    <string name="notification_open_in_maps">Click to open in Google Maps</string>
     <string name="notification_tracker">"Device Locator is tracking your device location. Click to open Device Locator"</string>
     <string name="activation_email_title">Email activation</string>
     <string name="activation_telegram_title">Telegram activation</string>
@@ -97,7 +62,6 @@
     <string name="login_dialog_desc">It seems you haven\'t any accounts registered on this device. Do you want to register Device Locator account now?</string>
 
     <!-- Command Activity -->
-    <string name="title_activity_command">CommandActivity</string>
     <string name="device_command_prompt">Select command</string>
     <string name="devices_list_empty">No devices found! Make sure to set the same Login on card above and on all your devices.</string>
     <string name="devices_list_loading">Synchronizing your devices…</string>
@@ -135,7 +99,6 @@
     <string name="app_permissions">Application permissions</string>
     <string name="other_permissions">Other permissions</string>
     <string name="notifiers_missing">Please specify who should get notified in case of failed login</string>
-    <string name="DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN.html">Allow failed device login notification service and &lt;a href="https://www.gms-world.net/dl#lock">Lock screen&lt;a> command</string>
     <string name="DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN">Allow failed device login notification service and Lock device screen command</string>
     <string name="Settings.ACTION_MANAGE_OVERLAY_PERMISSION">Allow taking front camera photo after failed device login and with Photo command</string>
     <string name="Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS">Allow Mute device audio command</string>

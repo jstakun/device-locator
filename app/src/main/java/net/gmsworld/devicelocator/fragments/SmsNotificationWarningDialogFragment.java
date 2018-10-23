@@ -40,7 +40,7 @@ public class SmsNotificationWarningDialogFragment extends DialogFragment {
         });
         builder.setMessage(R.string.sms_notification_warning);
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-        builder.setIcon(R.drawable.ic_warning_black);
+        builder.setIcon(R.drawable.ic_warning_gray);
         return builder.create();
     }
 }

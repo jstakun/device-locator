@@ -28,6 +28,7 @@ public class LoginDialogFragment extends DialogFragment {
         builder.setNegativeButton(R.string.no, null);
         builder.setMessage(getString(R.string.login_dialog_desc));
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
+        builder.setIcon(R.drawable.ic_account_circle_gray);
         return builder.create();
     }
 }

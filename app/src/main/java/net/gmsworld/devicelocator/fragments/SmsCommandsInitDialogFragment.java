@@ -36,6 +36,7 @@ public class SmsCommandsInitDialogFragment extends DialogFragment {
         builder.setNegativeButton(R.string.no, null);
         builder.setMessage(Html.fromHtml(getString(R.string.enable_sms_command_prompt)));
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
+        builder.setIcon(R.drawable.ic_sms_gray);
         return builder.create();
     }
 }

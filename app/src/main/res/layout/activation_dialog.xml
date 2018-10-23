@@ -14,7 +14,9 @@
         style="@android:style/TextAppearance.Large"
         android:textStyle="bold"
         android:textColor="@color/gray"
-        android:text="@string/activation_email_title" />
+        android:text="@string/activation_email_title"
+        android:drawableLeft="@drawable/ic_verified_user_gray"
+        android:drawablePadding="6dp"/>
 
     <TextView
         android:id="@+id/activationDescription"

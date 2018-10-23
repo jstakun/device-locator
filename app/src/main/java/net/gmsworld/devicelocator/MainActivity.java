@@ -33,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -193,7 +194,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         initLocationSMSCheckbox();
         updateUI();
-        initUserLoginInput(true);
         initDeviceList();
 
         //paste Telegram id
@@ -233,8 +233,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         registerEmail((TextView) findViewById(R.id.email), false);
         registerTelegram((TextView) findViewById(R.id.telegramId));
         registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
-        registerUserLogin((Spinner) findViewById(R.id.userAccounts));
-        registerDeviceName((TextView) findViewById(R.id.deviceName));
+        registerUserLogin((Spinner) findViewById(R.id.userAccounts), true);
+        registerDeviceName((TextView) findViewById(R.id.deviceName), true);
 
         //reset pin verification time
         PreferenceManager.getDefaultSharedPreferences(this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).apply();
@@ -293,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_device_focus).requestFocus();
                 supportInvalidateOptionsMenu();
-                initUserLoginInput(true);
+                initUserLoginInput(true, false);
                 return true;
             case R.id.permissions:
                 startActivity(new Intent(this, PermissionsActivity.class));
@@ -559,6 +559,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initTokenInput();
         initPingButton();
         initDeviceNameInput();
+        initUserLoginInput(false, true);
 
         TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
@@ -678,9 +679,19 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     //user login input setup -------------------------------------------------------------
 
-    private void initUserLoginInput(boolean requestPermission) {
+    private void initUserLoginInput(boolean requestPermission, boolean silent) {
         Log.d(TAG, "initUserLoginInput(" + requestPermission + ")");
         final Spinner userAccounts = this.findViewById(R.id.userAccounts);
+
+        userAccounts.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && userAccounts.getAdapter() == null) {
+                    initUserLoginInput(true, false);
+                }
+                return false;
+            }
+        });
 
         List<String> accountNames = new ArrayList<>();
         accountNames.add("");
@@ -708,11 +719,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             int index = 0;
             if (accountNames.size() > 1) {
                 String userLogin = settings.getString(USER_LOGIN);
-                for (int i = 0; i < accountNames.size(); i++) {
-                    if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
-                        index = i;
-                        break;
+                if (StringUtils.isNotEmpty(userLogin)) {
+                    for (int i = 0; i < accountNames.size(); i++) {
+                        if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
+                            index = i;
+                            break;
+                        }
                     }
+                } else {
+                    index = 1;
                 }
             } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE) {
                 //show dialog with info What to do if no account is created
@@ -728,15 +743,16 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
             userAccounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    registerUserLogin(userAccounts);
+                    registerUserLogin(userAccounts, false);
                 }
 
                 public void onNothingSelected(AdapterView<?> adapterView) {
                 }
             });
-        } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE) {
+        } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && !silent) {
             //Log.d(TAG, "Device settings view is visible");
             if (requestPermission) {
+                Toast.makeText(this, "Please grant this permission to list email based login registered on your device", Toast.LENGTH_LONG).show();
                 Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
             } else {
                 showLoginDialogFragment();
@@ -744,7 +760,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
     }
 
-    private synchronized void registerUserLogin(Spinner userLoginSpinner) {
+    private synchronized void registerUserLogin(Spinner userLoginSpinner, boolean silent) {
         String newUserLogin = (String) userLoginSpinner.getSelectedItem();
         String userLogin = settings.getString(USER_LOGIN);
         if (!StringUtils.equals(userLogin, newUserLogin)) {
@@ -752,11 +768,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             bundle.putBoolean("running", StringUtils.isNotEmpty(newUserLogin));
             firebaseAnalytics.logEvent("device_manager", bundle);
             if (!DlFirebaseMessagingService.sendRegistrationToServer(this, newUserLogin, settings.getString(DEVICE_NAME), false)) {
-                Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
+                if (!silent) {
+                    Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
+                }
             } else {
-                Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
-                if (!Permissions.haveLocationPermission(this)) {
-                    Permissions.requestLocationPermission(this, 0);
+                if (!silent) {
+                    Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
+                    if (!Permissions.haveLocationPermission(this)) {
+                        Permissions.requestLocationPermission(this, 0);
+                    }
                 }
             }
         }
@@ -777,7 +797,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    registerDeviceName(deviceNameInput);
+                    registerDeviceName(deviceNameInput, false);
                 }
             }
         });
@@ -786,7 +806,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
-                    registerDeviceName(v);
+                    registerDeviceName(v, false);
                 }
                 return false;
             }
@@ -799,7 +819,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (keyCode) {
                         case KeyEvent.KEYCODE_BACK:
-                            registerDeviceName((TextView) v);
+                            registerDeviceName((TextView) v, false);
                             break;
                         default:
                             break;
@@ -810,7 +830,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         });
     }
 
-    private synchronized void registerDeviceName(TextView deviceNameInput) {
+    private synchronized void registerDeviceName(TextView deviceNameInput, boolean silent) {
         String newDeviceName = deviceNameInput.getText().toString();
         String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
@@ -821,13 +841,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     deviceNameEdit.setText(normalizedDeviceName);
                     PreferenceManager.getDefaultSharedPreferences(this).edit().putString(DEVICE_NAME, normalizedDeviceName).apply();
                 }
-                Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
-                if (!Permissions.haveLocationPermission(this)) {
-                    Permissions.requestLocationPermission(this, 0);
+                if (!silent) {
+                    Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
+                    if (!Permissions.haveLocationPermission(this)) {
+                        Permissions.requestLocationPermission(this, 0);
+                    }
                 }
             } else {
-                Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
-            }
+                if (!silent) {
+                    Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
+                }
+           }
         }
     }
 
@@ -1243,12 +1267,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     public void initDeviceList() {
-        Log.d(TAG, "initDeviceList()");
         final ListView deviceList = findViewById(R.id.deviceList);
         final TextView deviceListEmpty = findViewById(R.id.deviceListEmpty);
         deviceList.setEmptyView(deviceListEmpty);
-
+        deviceList.setAdapter(null);
         String userLogin = settings.getString(USER_LOGIN);
+        Log.d(TAG, "initDeviceList(" + userLogin + ")");
+
         if (StringUtils.isNotEmpty(userLogin)) {
             //first load devices from cache
             Set<String> deviceSet = settings.getStringSet(USER_DEVICES, null);
@@ -1306,7 +1331,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         if (!thisDeviceOnList) {
                             //this device has been removed from other device
                             PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(USER_LOGIN).remove(USER_DEVICES).apply();
-                            initUserLoginInput(true);
+                            initUserLoginInput(true, false);
                         }
                     } else {
                         deviceListEmpty.setText(R.string.devices_list_loading_failed);
@@ -1372,8 +1397,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         Toast.makeText(MainActivity.this, "Device has been removed!", Toast.LENGTH_SHORT).show();
                         //current device has been removed
                         if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
-                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(USER_LOGIN, "").apply();
-                            initUserLoginInput(true);
+                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(USER_LOGIN, "").remove(USER_DEVICES).apply();
+                            initUserLoginInput(true, false);
                         }
                         initDeviceList();
                     } else {
@@ -1448,7 +1473,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS:
-                initUserLoginInput(false);
+                initUserLoginInput(false, true);
                 break;
             case Permissions.PERMISSIONS_REQUEST_SMS_CONTROL:
                 if (Permissions.haveSendSMSPermission(this)) {

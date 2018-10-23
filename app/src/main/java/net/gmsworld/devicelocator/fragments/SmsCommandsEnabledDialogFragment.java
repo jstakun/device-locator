@@ -31,6 +31,7 @@ public class SmsCommandsEnabledDialogFragment extends DialogFragment {
         });
         builder.setMessage(Html.fromHtml(getString(R.string.commands_enabled_prompt)));
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
+        builder.setIcon(R.drawable.ic_sms_gray);
         return builder.create();
     }
 }
