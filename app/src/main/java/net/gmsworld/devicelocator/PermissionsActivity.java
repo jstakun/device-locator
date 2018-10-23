@@ -100,7 +100,7 @@ public class PermissionsActivity extends AppCompatActivity {
         Log.d(TAG, "onResume()");
         final String savedDeviceId = settings.getString(CURRENT_DEVICE_ID);
         final String deviceId = Messenger.getDeviceId(this, false);
-        if (savedDeviceId != null && !StringUtils.equals(deviceId, savedDeviceId)) {
+        if (StringUtils.isNotEmpty(savedDeviceId) && !StringUtils.equals(deviceId, savedDeviceId)) {
             //device name has changed because READ_PHONE_STATE permission was revoked
             registerDevice();
         }
