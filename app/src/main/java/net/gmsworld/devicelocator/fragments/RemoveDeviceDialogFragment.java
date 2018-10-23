@@ -19,7 +19,7 @@ public class RemoveDeviceDialogFragment extends DialogFragment {
     private Device device;
 
     public interface RemoveDeviceDialogListener {
-        void onDeleteDevice(String imei);
+        void onDeleteDevice(String imei, boolean silent);
     }
 
     public static RemoveDeviceDialogFragment newInstance(RemoveDeviceDialogListener removeListener, Device device) {
@@ -37,7 +37,7 @@ public class RemoveDeviceDialogFragment extends DialogFragment {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
-                        parent.onDeleteDevice(device.imei);
+                        parent.onDeleteDevice(device.imei, false);
                     }
                 });
         alertDialogBuilder.setNegativeButton(R.string.no, null);

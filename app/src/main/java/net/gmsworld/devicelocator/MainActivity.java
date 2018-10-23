@@ -732,6 +732,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE) {
                 //show dialog with info What to do if no account is created
                 showLoginDialogFragment();
+                if (settings.contains(USER_LOGIN)) {
+                    PreferenceManager.getDefaultSharedPreferences(this).edit().remove(MainActivity.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
+                    onDeleteDevice(Messenger.getDeviceId(this, false), true);
+                }
             }
 
             final CommandArrayAdapter accs = new CommandArrayAdapter(this, R.layout.command_row, accountNames);
@@ -749,13 +753,19 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 public void onNothingSelected(AdapterView<?> adapterView) {
                 }
             });
-        } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && !silent) {
+        } else {
             //Log.d(TAG, "Device settings view is visible");
-            if (requestPermission) {
-                Toast.makeText(this, "Please grant this permission to list email based login registered on your device", Toast.LENGTH_LONG).show();
-                Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
-            } else {
-                showLoginDialogFragment();
+            if (settings.contains(USER_LOGIN) && settings.contains(USER_DEVICES)) {
+                PreferenceManager.getDefaultSharedPreferences(this).edit().remove(MainActivity.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
+                onDeleteDevice(Messenger.getDeviceId(this, false), true);
+            }
+            if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && !silent) {
+                if (requestPermission) {
+                    Toast.makeText(this, "Please grant this permission to list accounts registered on this device", Toast.LENGTH_LONG).show();
+                    Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
+                } else {
+                    showLoginDialogFragment();
+                }
             }
         }
     }
@@ -1382,7 +1392,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         setListViewHeightBasedOnChildren(deviceList);
     }
 
-    public void onDeleteDevice(final String imei) {
+    public void onDeleteDevice(final String imei, final boolean silent) {
         if (Network.isNetworkAvailable(this)) {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             String content = "imei=" + imei + "&action=delete";
@@ -1394,14 +1404,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     if (responseCode == 200) {
-                        Toast.makeText(MainActivity.this, "Device has been removed!", Toast.LENGTH_SHORT).show();
+                        if (! silent) {
+                            Toast.makeText(MainActivity.this, "Device has been removed!", Toast.LENGTH_SHORT).show();
+                        }
                         //current device has been removed
                         if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
-                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(USER_LOGIN, "").remove(USER_DEVICES).apply();
-                            initUserLoginInput(true, false);
+                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(USER_LOGIN).remove(USER_DEVICES).apply();
+                            if (! silent) {
+                                initUserLoginInput(true, false);
+                            }
                         }
                         initDeviceList();
-                    } else {
+                    } else if (! silent) {
                         Toast.makeText(MainActivity.this, "Failed to remove device!", Toast.LENGTH_SHORT).show();
                     }
                 }

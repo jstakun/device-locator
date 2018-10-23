@@ -86,7 +86,7 @@ public class PermissionsActivity extends AppCompatActivity {
             Log.d(TAG, "Call permission callback");
             //device is registered in onResume()
         } else if (requestCode == CONTACTS_PERMISSION) {
-            Log.d(TAG, "Contects permission callback");
+            Log.d(TAG, "Contacts permission callback");
             if (Permissions.haveReadContactsPermission(this)) {
                 PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", true).apply();
             }
@@ -98,8 +98,10 @@ public class PermissionsActivity extends AppCompatActivity {
         super.onResume();
 
         Log.d(TAG, "onResume()");
-        final String deviceId = PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).getString(CURRENT_DEVICE_ID, null);
-        if (deviceId != null && !StringUtils.equals(Messenger.getDeviceId(this, false), deviceId)) {
+        final String savedDeviceId = settings.getString(CURRENT_DEVICE_ID);
+        final String deviceId = Messenger.getDeviceId(this, false);
+        if (savedDeviceId != null && !StringUtils.equals(deviceId, savedDeviceId)) {
+            //device name has changed because READ_PHONE_STATE permission was revoked
             registerDevice();
         }
         // device permissions
@@ -145,6 +147,11 @@ public class PermissionsActivity extends AppCompatActivity {
         boolean perm = Permissions.haveReadContactsPermission(this);
         readContactsPermission.setChecked(perm);
         PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", perm).apply();
+        if (!perm && settings.contains(MainActivity.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
+            //READ_CONTACTS permission has been revoked: remove devices data
+            PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(MainActivity.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
+            deleteDevice(deviceId);
+        }
 
         Switch callPhonePermission = findViewById(R.id.call_phone_permission);
         callPhonePermission.setChecked(Permissions.haveCallPhonePermission(this));
@@ -311,20 +318,9 @@ public class PermissionsActivity extends AppCompatActivity {
         }
         if (DlFirebaseMessagingService.sendRegistrationToServer(this, userLogin, settings.getString(MainActivity.DEVICE_NAME), true)) {
             //delete old device
-            final String deviceId = settings.getString(CURRENT_DEVICE_ID);
-            final String content = "imei=" + deviceId + "&action=delete";
-            Log.d(TAG, "---------------------" + content);
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "Bearer " + settings.getString(DeviceLocatorApp.GMS_TOKEN));
-            Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String results, int responseCode, String url) {
-                    if (responseCode == 200) {
-                        Log.d(TAG, "Device " + deviceId + " has been removed!");
-                        PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(MainActivity.USER_DEVICES).apply();
-                    }
-                }
-            });
+            if (settings.contains(CURRENT_DEVICE_ID)) {
+                deleteDevice(settings.getString(CURRENT_DEVICE_ID));
+            }
         } else {
             Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
         }
@@ -352,5 +348,20 @@ public class PermissionsActivity extends AppCompatActivity {
         Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
         cameraIntent.putExtra("test", true);
         startService(cameraIntent);
+    }
+
+    private void deleteDevice(final String deviceId) {
+        final String content = "imei=" + deviceId + "&action=delete";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + settings.getString(DeviceLocatorApp.GMS_TOKEN));
+        Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
+            @Override
+            public void onGetFinish(String results, int responseCode, String url) {
+                if (responseCode == 200) {
+                    Log.d(TAG, "Device " + deviceId + " has been removed!");
+                    PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(MainActivity.USER_DEVICES).remove(CURRENT_DEVICE_ID).apply();
+                }
+            }
+        });
     }
 }
