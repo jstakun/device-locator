@@ -27,6 +27,7 @@ import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Files;
+import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
@@ -156,8 +157,9 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                     headers.put("X-GMS-Scope", "dl");
 
                     if (location != null) {
-                        headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
-                        headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
+                        headers.put(Messenger.LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
+                        headers.put(Messenger.LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
+                        headers.put(Messenger.ACC_HEADER, Float.toString(location.getAccuracy()));
                     }
 
                     Network.uploadScreenshot(this, uploadUrl, out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {

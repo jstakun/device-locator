@@ -54,6 +54,10 @@ public class Messenger {
     private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
 
     public static final String MAPS_URL_PREFIX = "https://maps.google.com/maps?q=";
+    public static final String LAT_HEADER = "X-GMS-Lat";
+    public static final String LNG_HEADER = "X-GMS-Lng";
+    public static final String ACC_HEADER = "X-GMS-Acc";
+
 
     private static void sendSMS(final Context context, final String phoneNumber, final String message) {
         String status = null;
@@ -94,8 +98,9 @@ public class Messenger {
                     }
                     headers.put("X-GMS-DeviceName", getDeviceId(context, true));
                     if (location != null) {
-                        headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
-                        headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
+                        headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
+                        headers.put(LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
+                        headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     if (StringUtils.equalsAnyIgnoreCase(replyToCommand, Command.START_COMMAND, Command.STOP_COMMAND, Command.RESUME_COMMAND, Command.PERIMETER_COMMAND, Command.ROUTE_COMMAND)) {
@@ -165,8 +170,9 @@ public class Messenger {
                         headers.put("X-GMS-DeviceId", deviceId);
                     }
                     if (location != null) {
-                        headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
-                        headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
+                        headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
+                        headers.put(LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
+                        headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     sendEmail(context, email, message, title, 1, headers);
@@ -241,8 +247,9 @@ public class Messenger {
                         headers.put("X-GMS-DeviceId", deviceId);
                     }
                     if (location != null) {
-                        headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
-                        headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
+                        headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
+                        headers.put(LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
+                        headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     sendTelegram(context, telegramId, message, 1, headers);
@@ -334,8 +341,9 @@ public class Messenger {
                     headers.put("X-GMS-DeviceId", deviceId);
                 }
                 if (location != null) {
-                    headers.put("X-GMS-Lat", latAndLongFormat.format(location.getLatitude()));
-                    headers.put("X-GMS-Lng", latAndLongFormat.format(location.getLongitude()));
+                    headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
+                    headers.put(LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
+                    headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
                 }
                 headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                 sendRoutePoint(context, 1, headers);

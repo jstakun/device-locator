@@ -799,8 +799,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         String deviceName = settings.getString(DEVICE_NAME);
         if (StringUtils.isEmpty(deviceName)) {
             deviceName = Messenger.getDeviceName();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putString(DEVICE_NAME, deviceName).apply();
         }
-        Log.d(TAG, "Device name: -" + deviceName + "-");
+        //Log.d(TAG, "Device name: -" + deviceName + "-");
         deviceNameInput.setText(deviceName);
 
         deviceNameInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
