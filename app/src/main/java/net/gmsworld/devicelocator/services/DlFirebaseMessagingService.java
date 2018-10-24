@@ -67,10 +67,13 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         for (String token : tokens) {
                             if (token.startsWith("geo:")) {
                                 String[] coords = StringUtils.split(token.substring(4), " ");
-                                if (coords.length == 2) {
+                                if (coords.length >= 2) {
                                     location = new Location("");
                                     location.setLatitude(Location.convert(coords[0]));
                                     location.setLongitude(Location.convert(coords[1]));
+                                    if (coords.length >= 3) {
+                                        location.setAccuracy(Float.valueOf(coords[2]));
+                                    }
                                 }
                             } else if (token.startsWith("routeId:")) {
                                 extras.putString("routeId", token.split(":")[1]);
