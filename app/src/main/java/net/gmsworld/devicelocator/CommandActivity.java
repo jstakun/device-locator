@@ -27,13 +27,16 @@ import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractCommand;
 import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -48,7 +51,9 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
     private FirebaseAnalytics firebaseAnalytics;
 
-    private String name, imei;
+    private Device device;
+
+    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +62,11 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
         final PreferencesUtils prefs = new PreferencesUtils(this);
 
-        name = getIntent().getStringExtra("name");
-
-        imei = getIntent().getStringExtra("imei");
-
         final List<Device> devices = getIntent().getParcelableArrayListExtra("devices");
+
+        device = devices.get(getIntent().getIntExtra("index", 0));
+
+        showDeviceGeoToast();
 
         final Spinner commandSpinner = findViewById(R.id.deviceCommand);
         final EditText args = findViewById(R.id.deviceCommandArgs);
@@ -114,10 +119,10 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         //pin
 
         String savedPin;
-        if (StringUtils.equals(imei, Messenger.getDeviceId(this, false))) {
+        if (StringUtils.equals(device.imei, Messenger.getDeviceId(this, false))) {
             savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
         } else {
-            savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
+            savedPin = prefs.getEncryptedString(PIN_PREFIX + device.imei);
         }
         if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
             pinEdit.setText(savedPin);
@@ -140,7 +145,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
         if (devices != null) {
             for (int i = 0; i < devices.size(); i++) {
-                if (StringUtils.equalsIgnoreCase(name, devices.get(i).name) || StringUtils.equalsIgnoreCase(imei, devices.get(i).imei)) {
+                if (StringUtils.equalsIgnoreCase(device.name, devices.get(i).name) || StringUtils.equalsIgnoreCase(device.imei, devices.get(i).imei)) {
                     deviceSpinner.setSelection(i);
                     break;
                 }
@@ -150,13 +155,13 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         deviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                name = devices.get(position).name;
-                imei = devices.get(position).imei;
+                device = devices.get(position);
+                showDeviceGeoToast();
                 String savedPin;
-                if (StringUtils.equals(imei, Messenger.getDeviceId(CommandActivity.this, false))) {
+                if (StringUtils.equals(device.imei, Messenger.getDeviceId(CommandActivity.this, false))) {
                     savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
                 } else {
-                    savedPin = prefs.getEncryptedString(PIN_PREFIX + imei);
+                    savedPin = prefs.getEncryptedString(PIN_PREFIX + device.imei);
                 }
                 if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
                     pinEdit.setText(savedPin);
@@ -224,7 +229,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             Toast.makeText(CommandActivity.this, "Please enter PIN!", Toast.LENGTH_SHORT).show();
         } else if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
             Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
-        } else if (StringUtils.isNotEmpty(name) || StringUtils.isNotEmpty(imei)) {
+        } else if (StringUtils.isNotEmpty(device.name) || StringUtils.isNotEmpty(device.imei)) {
             //check if command requires args and validate args
             boolean validArgs = true, needArgs = false;
             AbstractCommand c = Command.getCommandByName(command);
@@ -243,19 +248,19 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             if (!validArgs) {
                 Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
             } else {
-                PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(imei + "_lastCommand", command).apply();
+                PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(device.imei + "_lastCommand", command).apply();
                 Toast.makeText(CommandActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
                 firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
-                prefs.setEncryptedString(PIN_PREFIX + imei, pin);
+                prefs.setEncryptedString(PIN_PREFIX + device.imei, pin);
                 Intent newIntent = new Intent(CommandActivity.this, CommandService.class);
                 if (needArgs && StringUtils.isNotEmpty(commandArgs)) {
                     newIntent.putExtra("args", commandArgs);
                 }
                 newIntent.putExtra("command", command);
-                newIntent.putExtra("imei", imei);
+                newIntent.putExtra("imei", device.imei);
                 newIntent.putExtra("pin", pin);
-                if (StringUtils.isNotEmpty(name)) {
-                    newIntent.putExtra(MainActivity.DEVICE_NAME, name);
+                if (StringUtils.isNotEmpty(device.name)) {
+                    newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
                 }
                 startService(newIntent);
             }
@@ -263,7 +268,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
     }
 
     private void setSelectedCommand(PreferencesUtils prefs, Spinner commandSpinner) {
-        String lastCommand = prefs.getString(imei + "_lastCommand");
+        String lastCommand = prefs.getString(device.imei + "_lastCommand");
         Log.d(TAG, "Found last command " + lastCommand);
         if (StringUtils.isNotEmpty(lastCommand)) {
             AbstractCommand c = Command.getCommandByName(lastCommand);
@@ -277,6 +282,29 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                    break;
                 }
             }
+        }
+    }
+
+    private void showDeviceGeoToast() {
+        if (StringUtils.isNotEmpty(device.geo)) {
+            String[] tokens = StringUtils.split(device.geo, " ");
+            Location deviceLocation = new Location("");
+            deviceLocation.setLatitude(Location.convert(tokens[0]));
+            deviceLocation.setLongitude(Location.convert(tokens[1]));
+            if (tokens.length > 3) {
+                deviceLocation.setAccuracy(Float.valueOf(tokens[2]));
+            }
+            String message = "This device has been seen recently ";
+            long timestamp = Long.valueOf(tokens[tokens.length-1]);
+            Location location = SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).getLastLocation();
+            if (location != null) {
+                float meters = location.distanceTo(deviceLocation);
+                message += DistanceFormatter.format((int)meters) + " away";
+            } else {
+                message += "at " + tokens[0] + "," + tokens[1];
+            }
+            message += " on " + formatter.format(new Date(timestamp));
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
 }

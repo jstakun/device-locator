@@ -9,6 +9,7 @@ public class Device implements Parcelable{
     public String imei;
     public String name;
     public String creationDate;
+    public String geo;
 
     public Device() {
 
@@ -18,6 +19,7 @@ public class Device implements Parcelable{
         imei = in.readString();
         name = in.readString();
         creationDate = in.readString();
+        geo = in.readString();
     }
 
     public static final Creator<Device> CREATOR = new Creator<Device>() {
@@ -42,22 +44,26 @@ public class Device implements Parcelable{
         parcel.writeString(imei);
         parcel.writeString(name);
         parcel.writeString(creationDate);
+        parcel.writeString(geo);
     }
 
     public String toString() {
-        return imei + "," + creationDate + "," + name;
+        return imei + "," + creationDate + "," + (StringUtils.isNotEmpty(name) ? name : "") + "," + (StringUtils.isNotEmpty(geo) ? geo : "");
     }
 
     public static Device fromString(String device) {
-        //imei,creation,name
+        //imei,creation,name,geo
         String[] tokens = StringUtils.split(device,',');
         Device d = null;
         if (tokens != null && tokens.length >= 2) {
             d = new Device();
             d.imei = tokens[0];
             d.creationDate = tokens[1];
-            if (tokens.length >= 3) {
+            if (StringUtils.isNotEmpty(tokens[2])) {
                 d.name = tokens[2];
+            }
+            if (tokens.length > 3 && StringUtils.isNotEmpty(tokens[3])) {
+                d.geo = tokens[3];
             }
         }
         return d;

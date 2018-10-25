@@ -1320,6 +1320,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     }
                                     device.imei = deviceObject.get("imei").getAsString();
                                     device.creationDate = deviceObject.get("creationDate").getAsString();
+                                    if (deviceObject.has("geo")) {
+                                        device.geo = deviceObject.get("geo").getAsString();
+                                    }
                                     if (StringUtils.equals(device.imei, imei)) {
                                         thisDeviceOnList = true;
                                     }
@@ -1596,13 +1599,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
             viewHolder.deviceName.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    showCommandActivity(devices.get(position));
+                    showCommandActivity(position);
                 }
             });
 
             viewHolder.deviceDesc.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    showCommandActivity(devices.get(position));
+                    showCommandActivity(position);
                 }
             });
 
@@ -1615,10 +1618,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             return convertView;
         }
 
-        private void showCommandActivity(Device device) {
+        private void showCommandActivity(int selectedPosition) {
             Intent intent = new Intent(MainActivity.this, CommandActivity.class);
-            intent.putExtra("name", device.name);
-            intent.putExtra("imei", device.imei);
+            intent.putExtra("index", selectedPosition);
             intent.putParcelableArrayListExtra("devices", devices);
             MainActivity.this.startActivity(intent);
         }
