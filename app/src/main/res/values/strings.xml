@@ -32,7 +32,7 @@
     <string name="send_location_permission">Location permission is required to receive location notifications.</string>
     <string name="docsLink">Check all available commands &lt;a href="http://www.gms-world.net/dl">here&lt;a></string>
     <string name="pinLink">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a>&lt;/font></string>
-    <string name="Crash.error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
+    <string name="crash_error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
     <string name="security_pin">Your Security PIN</string>
     <string name="motion_radius">Notify me when device will move %1$d meters from present location</string>
     <string name="motion_confirm">You\'ll receive notification every time device will move %1$d meters from present location</string>
@@ -42,15 +42,18 @@
     <string name="telegram_chat_id">Telegram chat or channel id</string>
     <string name="share_route">Share route</string>
     <string name="device_tracker">Device tracker</string>
-    <string name="sms_control">SMS control</string>
+    <string name="sms_control">SMS commands</string>
     <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
     <string name="verify_security_pin">From time to time authenticate me at application startup</string>
-    <string name="enable_sms_command_prompt">&lt;font color="#808080">Do you want to enable now SMS commands on your device?&lt;/font></string>
+    <string name="sms_manager_first_time_use">&lt;font color="#808080">On this screen you can enable SMS commands, set your Security PIN, and select Location messages sent in reply to Locate command.&lt;br/>Do you want to enable now SMS commands on your device?&lt;/font></string>
+    <string name="device_manager_first_time_use">&lt;font color="#808080">On this screen you can register devices in order to send commands between then. Select your login, wait for devices synchronization and click on device from the list to send command.&lt;/font></string>
+    <string name="device_tracker_first_time_use">&lt;font color="#808080">On this screen you can enable device tracker which will record your device location and set who should get notified when commands are executed in your device.&lt;/font></string>
+    <string name="permissions_first_time_use">&lt;font color="#808080">On this screen you can grant permissions required to execute commands in your device.&lt;/font></string>
     <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and click Permissions button to grant permissions required by some commands."&lt;/font></string>
     <string name="pin_length_error">Security PIN must have at least 4 digits! Reverting to previous value…</string>
     <string name="enter_security_pin">Enter Security PIN</string>
     <string name="accept_sms_without_pin">Only accept SMS commands with Security PIN</string>
-    <string name="Info.about">%1$s (R)\nVersion: %2$s-%3$d built on %4$s\nCopyright © 2010–%5$s GMS World\n%6$s installed on %7$s</string>
+    <string name="info_about">%1$s (R)\nVersion: %2$s-%3$d built on %4$s\nCopyright © 2010–%5$s GMS World\n%6$s installed on %7$s</string>
     <string name="admin_grant_explanation">Please grant this permissions to enable failed login notification service and lock screen command in Device Locator.</string>
     <string name="test">Test</string>
     <string name="notification_tracker">"Device Locator is tracking your device location. Click to open Device Locator"</string>
@@ -58,7 +61,9 @@
     <string name="activation_telegram_title">Telegram activation</string>
     <string name="activation_email_desc">In order to activate email notifications please enter 4 digit activation code we\'ve sent to your email address:</string>
     <string name="activation_telegram_desc">In order to activate Telegram notifications please enter 4 digit activation code we\'ve sent to your Telegram chat or channel:</string>
-    <string name="login_dialog_desc">It seems you haven\'t any accounts registered on this device. Do you want to register Device Locator account now?</string>
+    <string name="login_dialog_desc">&lt;font color="#808080">It seems you haven\'t any accounts registered on this device. Do you want to register Device Locator account now?&lt;/font></string>
+    <string name="your_devices">Your devices</string>
+    <string name="device_manager">Device manager</string>
 
     <!-- Command Activity -->
     <string name="device_command_prompt">Select command</string>
@@ -66,8 +71,8 @@
     <string name="devices_list_loading">Synchronizing your devices…</string>
     <string name="devices_list_loading_failed">Device synchronization failed!</string>
     <string name="devices">Devices</string>
-    <string name="device_name">This Device Name</string>
-    <string name="your_login">Your Login</string>
+    <string name="device_name">This device name</string>
+    <string name="your_login">Your login</string>
     <string name="send_command_title">Send Command to Device</string>
     <string name="command">Command</string>
     <string name="device_security_pin">Device Security PIN</string>
@@ -112,5 +117,6 @@
     <string name="forget_me">Forget me</string>
     <string name="send_code_again">Send code again</string>
     <string name="activation_code">Activation code</string>
-    <string name="sms_notification_warning">SMS notifications will be sent from this device. This could generate additional costs! Is this ok for you?</string>
+    <string name="sms_notification_warning">&lt;font color="#808080">SMS notifications will be sent from this device. This could generate additional costs! Is this ok for you?&lt;/font></string>
+    <string name="remove_device_message">&lt;font color="#808080">Remove device %1$s from the list?&lt;/font></string>
 </resources>

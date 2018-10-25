@@ -385,7 +385,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:layout_margin="8dp"
-                    ldcard:title="Device Manager">
+                    ldcard:title="@string/device_manager">
 
                     <LinearLayout
                         android:id="@+id/ll_device_focus"
@@ -440,7 +440,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
-                    ldcard:title="Your Devices">
+                    ldcard:title="@string/your_devices">
 
                     <LinearLayout
                         android:layout_width="match_parent"

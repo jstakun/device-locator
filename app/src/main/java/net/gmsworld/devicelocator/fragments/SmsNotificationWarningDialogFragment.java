@@ -38,7 +38,7 @@ public class SmsNotificationWarningDialogFragment extends DialogFragment {
                 initListener.registerPhoneNumber(phoneNumberInput);
             }
         });
-        builder.setMessage(R.string.sms_notification_warning);
+        builder.setMessage(Html.fromHtml(getString(R.string.sms_notification_warning)));
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
         builder.setIcon(R.drawable.ic_warning_gray);
         return builder.create();

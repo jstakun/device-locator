@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
 
+import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.utilities.Messenger;
@@ -54,6 +55,12 @@ public class PermissionsActivity extends AppCompatActivity {
 
         final Toolbar toolbar = findViewById(R.id.smsToolbar);
         setSupportActionBar(toolbar);
+
+        if (!settings.contains("PermissionsFirstTimeUseDialog")) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("PermissionsFirstTimeUseDialog", true).apply();
+            FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.permissions_first_time_use, R.drawable.ic_settings_cell_gray);
+            firstTimeUseDialogFragment.show(getFragmentManager(), "PermissionsFirstTimeUseDialog");
+        }
     }
 
     @Override

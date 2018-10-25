@@ -66,7 +66,7 @@ public class DeviceLocatorApp extends Application {
                     .setFormUri(getString(R.string.crashReportUrl))
                     .setMode(ReportingInteractionMode.TOAST)
                     .setHttpHeaders(headers)
-                    .setResToastText(R.string.Crash_error)
+                    .setResToastText(R.string.crash_error)
                     .setSocketTimeout(30000)
                     .build();
             ACRA.init(this, config);

@@ -59,6 +59,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
+import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
 import net.gmsworld.devicelocator.fragments.LoginDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.RemoveDeviceDialogFragment;
@@ -160,7 +161,23 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         //
 
-        initApp();
+        initRunningButton();
+        initShareRouteButton();
+        initRadiusInput();
+        initMotionDetectorButton();
+        initPhoneNumberInput();
+        initEmailInput();
+        initTelegramInput();
+        initContactButton();
+        initTelegramButton();
+        initTokenInput();
+        initPingButton();
+        initDeviceNameInput();
+        initUserLoginInput(false, true);
+
+        TextView commandLink = findViewById(R.id.docs_link);
+        commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
+        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
         toggleBroadcastReceiver(); //set sms broadcast receiver
 
@@ -279,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_sms_focus).requestFocus();
                 supportInvalidateOptionsMenu();
+                showFirstTimeUsageDialog(false, false);
                 return true;
             case R.id.tracker:
                 Log.d(TAG, "Show tracker settings");
@@ -289,6 +307,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_tracker_focus).requestFocus();
                 supportInvalidateOptionsMenu();
+                showFirstTimeUsageDialog(true, false);
                 return true;
             case R.id.devices:
                 Log.d(TAG, "Show Device Manager settings");
@@ -301,6 +320,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 findViewById(R.id.ll_device_focus).requestFocus();
                 supportInvalidateOptionsMenu();
                 initUserLoginInput(true, false);
+                showFirstTimeUsageDialog(false, true);
                 return true;
             case R.id.permissions:
                 startActivity(new Intent(this, PermissionsActivity.class));
@@ -378,6 +398,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             findViewById(R.id.trackerSettings).setVisibility(View.GONE);
             findViewById(R.id.deviceSettings).setVisibility(View.GONE);
         }
+
+        showFirstTimeUsageDialog(isTrackerShown, isDeviceManagerShown);
     }
 
     private void showRemoveDeviceDialogFragment(final Device device) {
@@ -552,29 +574,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 (running) ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED : PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP);
     }
-
-    private void initApp() {
-        initRunningButton();
-        initShareRouteButton();
-        initRadiusInput();
-        initMotionDetectorButton();
-        initPhoneNumberInput();
-        initEmailInput();
-        initTelegramInput();
-        initContactButton();
-        initTelegramButton();
-        initTokenInput();
-        initPingButton();
-        initDeviceNameInput();
-        initUserLoginInput(false, true);
-
-        TextView commandLink = findViewById(R.id.docs_link);
-        commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
-        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
-
-        initRemoteControl();
-    }
-
 
     //pin input --------------------------------------------------------------------------------------------------
 
@@ -1156,14 +1155,31 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         return number;
     }
 
-    private void initRemoteControl() {
-        if (!running) {
-            if (!PreferenceManager.getDefaultSharedPreferences(this).contains("smsDialog")) {
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("smsDialog", true).apply();
+    private void showFirstTimeUsageDialog(boolean isTrackerShown, boolean isDeviceManagerShown) {
+        //if (!running) {
+        if (isTrackerShown) {
+            //Device Tracker
+            if (!settings.contains("DeviceTrackerFirstTimeUseDialog")) {
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("DeviceTrackerFirstTimeUseDialog", true).apply();
+                FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.device_tracker_first_time_use, R.drawable.ic_location_on_gray);
+                firstTimeUseDialogFragment.show(getFragmentManager(), "DeviceTrackerFirstTimeUseDialog");
+            }
+        } else if (isDeviceManagerShown) {
+            //Device Manager
+            if (!settings.contains("DeviceManagerFirstTimeUseDialog")) {
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("DeviceManagerFirstTimeUseDialog", true).apply();
+                FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.device_manager_first_time_use, R.drawable.ic_devices_other_gray);
+                firstTimeUseDialogFragment.show(getFragmentManager(), "DeviceManagerFirstTimeUseDialog");
+            }
+        } else {
+            //SMS Manager
+            if (!settings.contains(SmsCommandsInitDialogFragment.TAG)) {
+                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SmsCommandsInitDialogFragment.TAG, true).apply();
                 SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = SmsCommandsInitDialogFragment.newInstance(this);
                 smsCommandsInitDialogFragment.show(getFragmentManager(), SmsCommandsInitDialogFragment.TAG);
             }
         }
+        //}
     }
 
     private void launchMotionDetectorService() {

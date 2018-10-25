@@ -5,6 +5,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.text.Html;
 
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.model.Device;
@@ -32,7 +33,8 @@ public class RemoveDeviceDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-        alertDialogBuilder.setMessage("Remove device " + (StringUtils.isNotEmpty(device.name) ? device.name : device.imei) + " from the list?");
+        alertDialogBuilder.setMessage(Html.fromHtml(getString(R.string.remove_device_message,(StringUtils.isNotEmpty(device.name) ? device.name : device.imei))));
+        alertDialogBuilder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
         alertDialogBuilder.setPositiveButton(R.string.yes,
                 new DialogInterface.OnClickListener() {
                     @Override
