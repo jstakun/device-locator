@@ -45,10 +45,10 @@
     <string name="sms_control">SMS commands</string>
     <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
     <string name="verify_security_pin">From time to time authenticate me at application startup</string>
-    <string name="sms_manager_first_time_use">&lt;font color="#808080">On this screen you can enable SMS commands, set your Security PIN, and select Location messages sent in reply to Locate command.&lt;br/>Do you want to enable now SMS commands on your device?&lt;/font></string>
-    <string name="device_manager_first_time_use">&lt;font color="#808080">On this screen you can register devices in order to send commands between then. Select your login, wait for devices synchronization and click on device from the list to send command.&lt;/font></string>
+    <string name="sms_manager_first_time_use">&lt;font color="#808080">On this screen you can enable SMS commands, manage your Security PIN, and select Location messages sent in reply to Locate command.&lt;br/>Do you want to enable now SMS commands on your device?&lt;/font></string>
+    <string name="device_manager_first_time_use">&lt;font color="#808080">On this screen you can register your device and list other devices registered with the same login. You can click on any device on the list and send command to it.&lt;/font></string>
     <string name="device_tracker_first_time_use">&lt;font color="#808080">On this screen you can enable device tracker which will record your device location and set who should get notified when commands are executed in your device.&lt;/font></string>
-    <string name="permissions_first_time_use">&lt;font color="#808080">On this screen you can grant permissions required to execute commands in your device.&lt;/font></string>
+    <string name="permissions_first_time_use">&lt;font color="#808080">On this screen you can grant permissions required to execute some commands in your device.&lt;/font></string>
     <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and click Permissions button to grant permissions required by some commands."&lt;/font></string>
     <string name="pin_length_error">Security PIN must have at least 4 digits! Reverting to previous value…</string>
     <string name="enter_security_pin">Enter Security PIN</string>
