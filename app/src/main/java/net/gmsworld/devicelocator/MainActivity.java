@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -70,6 +71,7 @@ import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.utilities.Messenger;
@@ -81,18 +83,23 @@ import net.gmsworld.devicelocator.views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.ocpsoft.prettytime.PrettyTime;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import io.nlopez.smartlocation.SmartLocation;
+import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
 public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener,
         SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener {
@@ -1567,10 +1574,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private class DeviceArrayAdapter extends ArrayAdapter<Device> {
 
         private final ArrayList<Device> devices;
+        private Location location;
+        private final PrettyTime pt = new PrettyTime();
+        private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         DeviceArrayAdapter(Context context, int textViewResourceId, ArrayList<Device> devices) {
             super(context, textViewResourceId, devices);
             this.devices = devices;
+            this.location = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
         }
 
         @NonNull
@@ -1595,7 +1606,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 name = devices.get(position).imei;
             }
             viewHolder.deviceName.setText(name);
-            viewHolder.deviceDesc.setText(getString(R.string.last_edited_on, devices.get(position).creationDate.split("T")[0]));
+
+            String desc = getDeviceDesc(devices.get(position));
+            if (desc != null) {
+                viewHolder.deviceDesc.setText(desc);
+            }
 
             viewHolder.deviceName.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -1623,6 +1638,34 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             intent.putExtra("index", selectedPosition);
             intent.putParcelableArrayListExtra("devices", devices);
             MainActivity.this.startActivity(intent);
+        }
+
+        private String getDeviceDesc(Device device) {
+            String message = null;
+            if (StringUtils.isNotEmpty(device.geo)) {
+                String[] tokens = StringUtils.split(device.geo, " ");
+                Location deviceLocation = new Location("");
+                deviceLocation.setLatitude(Location.convert(tokens[0]));
+                deviceLocation.setLongitude(Location.convert(tokens[1]));
+                if (tokens.length > 3) {
+                    deviceLocation.setAccuracy(Float.valueOf(tokens[2]));
+                }
+                long timestamp = Long.valueOf(tokens[tokens.length-1]);
+                message = "Last seen " + pt.format(new Date(timestamp)) + " ";
+                if (location != null) {
+                    float meters = location.distanceTo(deviceLocation);
+                    message += DistanceFormatter.format((int)meters) + " away";
+                } else {
+                    message += "at " + tokens[0] + "," + tokens[1];
+                }
+            } else {
+                try {
+                    message = "Last edited " + pt.format(formatter.parse(device.creationDate));
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+            return message;
         }
 
         private class ViewHolder {

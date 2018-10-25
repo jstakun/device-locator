@@ -27,16 +27,13 @@ import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractCommand;
 import net.gmsworld.devicelocator.utilities.Command;
-import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -53,8 +50,6 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
     private Device device;
 
-    private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,8 +60,6 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         final List<Device> devices = getIntent().getParcelableArrayListExtra("devices");
 
         device = devices.get(getIntent().getIntExtra("index", 0));
-
-        showDeviceGeoToast();
 
         final Spinner commandSpinner = findViewById(R.id.deviceCommand);
         final EditText args = findViewById(R.id.deviceCommandArgs);
@@ -156,7 +149,6 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 device = devices.get(position);
-                showDeviceGeoToast();
                 String savedPin;
                 if (StringUtils.equals(device.imei, Messenger.getDeviceId(CommandActivity.this, false))) {
                     savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
@@ -282,29 +274,6 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                    break;
                 }
             }
-        }
-    }
-
-    private void showDeviceGeoToast() {
-        if (StringUtils.isNotEmpty(device.geo)) {
-            String[] tokens = StringUtils.split(device.geo, " ");
-            Location deviceLocation = new Location("");
-            deviceLocation.setLatitude(Location.convert(tokens[0]));
-            deviceLocation.setLongitude(Location.convert(tokens[1]));
-            if (tokens.length > 3) {
-                deviceLocation.setAccuracy(Float.valueOf(tokens[2]));
-            }
-            String message = "This device has been seen recently ";
-            long timestamp = Long.valueOf(tokens[tokens.length-1]);
-            Location location = SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).getLastLocation();
-            if (location != null) {
-                float meters = location.distanceTo(deviceLocation);
-                message += DistanceFormatter.format((int)meters) + " away";
-            } else {
-                message += "at " + tokens[0] + "," + tokens[1];
-            }
-            message += " on " + formatter.format(new Date(timestamp));
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         }
     }
 }

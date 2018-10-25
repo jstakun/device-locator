@@ -53,7 +53,6 @@
     <string name="Info.about">%1$s (R)\nVersion: %2$s-%3$d built on %4$s\nCopyright © 2010–%5$s GMS World\n%6$s installed on %7$s</string>
     <string name="admin_grant_explanation">Please grant this permissions to enable failed login notification service and lock screen command in Device Locator.</string>
     <string name="test">Test</string>
-    <string name="last_edited_on">Last edited on %1$s</string>
     <string name="notification_tracker">"Device Locator is tracking your device location. Click to open Device Locator"</string>
     <string name="activation_email_title">Email activation</string>
     <string name="activation_telegram_title">Telegram activation</string>
