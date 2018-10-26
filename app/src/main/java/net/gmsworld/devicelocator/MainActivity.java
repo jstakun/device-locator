@@ -1625,7 +1625,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
             String desc = getDeviceDesc(devices.get(position));
             if (desc != null) {
-                viewHolder.deviceDesc.setText(desc);
+                viewHolder.deviceDesc.setText(Html.fromHtml(desc));
+                viewHolder.deviceDesc.setMovementMethod(LinkMovementMethod.getInstance());
             }
 
             viewHolder.deviceName.setOnClickListener(new View.OnClickListener() {
@@ -1634,11 +1635,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             });
 
-            viewHolder.deviceDesc.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    showCommandActivity(position);
-                }
-            });
+            //viewHolder.deviceDesc.setOnClickListener(new View.OnClickListener() {
+            //    public void onClick(View v) {
+            //        showCommandActivity(position);
+            //    }
+            //});
 
             viewHolder.deviceRemove.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -1670,10 +1671,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 message = "Last seen " + pt.format(new Date(timestamp)) + " ";
                 if (location != null) {
                     float meters = location.distanceTo(deviceLocation);
-                    message += DistanceFormatter.format((int)meters) + " away";
-                } else {
-                    message += "at " + tokens[0] + "," + tokens[1];
+                    message += DistanceFormatter.format((int)meters) + " away ";
                 }
+                message += "<a href=\"" + Messenger.MAPS_URL_PREFIX + tokens[0] + "," + tokens[1] + "\">here</a>";
             } else {
                 try {
                     message = "Last edited " + pt.format(formatter.parse(device.creationDate));
