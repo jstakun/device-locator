@@ -187,6 +187,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
+        //register firebase token if has changed and not set to server
+        final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
+        final String newFirebaseToken = settings.getString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN);
+        if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(newFirebaseToken)) {
+            DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), settings.getString(DEVICE_NAME), true);
+        }
+
         //show email or telegram registration dialog if still unverified
         if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
             NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
@@ -1015,7 +1022,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (!StringUtils.equals(telegramId, newTelegramId) && (StringUtils.isEmpty(newTelegramId) || Messenger.isValidTelegramId(newTelegramId))) {
             if (Network.isNetworkAvailable(MainActivity.this)) {
                 Log.d(TAG, "Setting new telegram chat id: " + newTelegramId);
-                telegramId = newTelegramId;
+                if (StringUtils.startsWith(newTelegramId, "100")) {
+                    telegramId = "-" + newTelegramId;
+                } else {
+                    telegramId = newTelegramId;
+                }
                 saveData();
                 //update route tracking service if running
                 if (motionDetectorRunning) {

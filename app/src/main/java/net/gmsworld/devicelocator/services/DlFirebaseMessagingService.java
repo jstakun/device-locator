@@ -37,6 +37,9 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
 
     public static final String FIREBASE_TOKEN = "firebaseToken";
 
+    public static final String NEW_FIREBASE_TOKEN = "newFirebaseToken";
+
+
     private FirebaseAnalytics firebaseAnalytics;
     //private static final int NOTIFICATION_ID = 2;
 
@@ -139,7 +142,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
     public void onNewToken(String token) {
         // Get updated InstanceID token.
         Log.d(TAG, "New Firebase token: " + token);
-        PreferenceManager.getDefaultSharedPreferences(this).edit().remove(FIREBASE_TOKEN).apply();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putString(NEW_FIREBASE_TOKEN, token).remove(FIREBASE_TOKEN).apply();
         final String pin = new PreferencesUtils(this).getEncryptedString(PinActivity.DEVICE_PIN);
         if (StringUtils.isNotEmpty(pin)) {
             sendRegistrationToServer(this, token, null, null);
@@ -201,7 +204,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         if (responseCode == 200) {
                             //save firebase token only if it was successfully registered by the server
                             if (StringUtils.isNotBlank(firebaseToken)) {
-                                settings.edit().putString(FIREBASE_TOKEN, firebaseToken).apply();
+                                settings.edit().putString(FIREBASE_TOKEN, firebaseToken).remove(NEW_FIREBASE_TOKEN).apply();
                                 Log.d(TAG, "Firebase token is set");
                             }
                             if (username != null) {
@@ -244,6 +247,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     if (task.isSuccessful()) {
                         // Task completed successfully
                         InstanceIdResult result = task.getResult();
+                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NEW_FIREBASE_TOKEN, result.getToken()).apply();
                         sendRegistrationToServer(context, result.getToken(), username, deviceName);
                     } else {
                         // Task failed with an exception
@@ -265,5 +269,3 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 }
-
-

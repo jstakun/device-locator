@@ -133,10 +133,10 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         }
     }
 
-    private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils prefs) {
+    private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils settings) {
         if (Network.isNetworkAvailable(this)) {
             commandInProgress = true;
-            String tokenStr = prefs.getString(DeviceLocatorApp.GMS_TOKEN);
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
             headers.put("X-GMS-AppId", "2");
             headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(this)));
@@ -148,6 +148,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         final String n = (StringUtils.isNotEmpty(name) ? name : imei);
                         if (responseCode == 200) {
                             Toast.makeText(CommandService.this, "Command " + StringUtils.capitalize(command) + " has been sent to the device " + n + "!", Toast.LENGTH_SHORT).show();
+                        } else if (responseCode == 404) {
+                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + n + ". Is Device Locator installed on this device?", Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + n + "!", Toast.LENGTH_SHORT).show();
                         }
@@ -161,7 +163,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             Messenger.getToken(CommandService.this, results);
-                            sendCommand(queryString, command, imei, name, prefs);
+                            sendCommand(queryString, command, imei, name, settings);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
