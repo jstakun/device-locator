@@ -1156,7 +1156,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void showFirstTimeUsageDialog(boolean isTrackerShown, boolean isDeviceManagerShown) {
-        //if (!running) {
         if (isTrackerShown) {
             //Device Tracker
             if (!settings.contains("DeviceTrackerFirstTimeUseDialog")) {
@@ -1171,7 +1170,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.device_manager_first_time_use, R.drawable.ic_devices_other_gray);
                 firstTimeUseDialogFragment.show(getFragmentManager(), "DeviceManagerFirstTimeUseDialog");
             }
-        } else {
+        } else if (!running) {
             //SMS Manager
             if (!settings.contains(SmsCommandsInitDialogFragment.TAG)) {
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SmsCommandsInitDialogFragment.TAG, true).apply();
@@ -1179,7 +1178,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 smsCommandsInitDialogFragment.show(getFragmentManager(), SmsCommandsInitDialogFragment.TAG);
             }
         }
-        //}
     }
 
     private void launchMotionDetectorService() {
@@ -1612,21 +1610,34 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 viewHolder.deviceDesc = convertView.findViewById(R.id.deviceDesc);
                 viewHolder.deviceRemove = convertView.findViewById(R.id.deviceRemove);
                 ViewCompat.setBackgroundTintList(viewHolder.deviceRemove, ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+                viewHolder.deviceLocation = convertView.findViewById(R.id.deviceLocation);
+                ViewCompat.setBackgroundTintList(viewHolder.deviceLocation, ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
 
-            String name = devices.get(position).name;
+            Device d = devices.get(position);
+
+            String name = d.name;
             if (StringUtils.isEmpty(name)) {
-                name = devices.get(position).imei;
+                name = d.imei;
             }
             viewHolder.deviceName.setText(name);
 
-            String desc = getDeviceDesc(devices.get(position));
+            String desc = getDeviceDesc(d);
             if (desc != null) {
-                viewHolder.deviceDesc.setText(Html.fromHtml(desc));
-                viewHolder.deviceDesc.setMovementMethod(LinkMovementMethod.getInstance());
+                viewHolder.deviceDesc.setText(desc);
+            }
+
+            if (StringUtils.isEmpty(d.geo)) {
+                viewHolder.deviceLocation.setVisibility(View.GONE);
+            } else {
+                viewHolder.deviceLocation.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        showDeviceLocation(devices.get(position));
+                    }
+                });
             }
 
             viewHolder.deviceName.setOnClickListener(new View.OnClickListener() {
@@ -1635,11 +1646,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             });
 
-            //viewHolder.deviceDesc.setOnClickListener(new View.OnClickListener() {
-            //    public void onClick(View v) {
-            //        showCommandActivity(position);
-            //    }
-            //});
+            viewHolder.deviceDesc.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    showCommandActivity(position);
+                }
+            });
 
             viewHolder.deviceRemove.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
@@ -1648,6 +1659,25 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             });
 
             return convertView;
+        }
+
+        private void showDeviceLocation(Device device) {
+            if (StringUtils.isNotEmpty(device.geo)) {
+                String[] tokens = StringUtils.split(device.geo, " ");
+                String name = "Your+Device";
+                if (StringUtils.isNotEmpty(device.name)) {
+                    name = "Device+" + device.name;
+                }
+                Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + tokens[0] + "," + tokens[1] + "(" + name + ")");
+                Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                gmsIntent.setPackage("com.google.android.apps.maps");
+                if (gmsIntent.resolveActivity(getContext().getPackageManager()) != null) {
+                    getContext().startActivity(gmsIntent);
+                } else {
+                    Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Messenger.MAPS_URL_PREFIX + tokens[0] + "," + tokens[1]));
+                    getContext().startActivity(webIntent);
+                }
+            }
         }
 
         private void showCommandActivity(int selectedPosition) {
@@ -1668,12 +1698,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     deviceLocation.setAccuracy(Float.valueOf(tokens[2]));
                 }
                 long timestamp = Long.valueOf(tokens[tokens.length-1]);
-                message = "Last seen " + pt.format(new Date(timestamp)) + " ";
+                message = "Last seen " + pt.format(new Date(timestamp));
                 if (location != null) {
-                    float meters = location.distanceTo(deviceLocation);
-                    message += DistanceFormatter.format((int)meters) + " away ";
+                    message += " " + DistanceFormatter.format((int)location.distanceTo(deviceLocation)) + " away";
                 }
-                message += "<a href=\"" + Messenger.MAPS_URL_PREFIX + tokens[0] + "," + tokens[1] + "\">here</a>";
             } else {
                 try {
                     message = "Last edited " + pt.format(formatter.parse(device.creationDate));
@@ -1688,6 +1716,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             TextView deviceName;
             TextView deviceDesc;
             ImageButton deviceRemove;
+            ImageButton deviceLocation;
         }
     }
 
