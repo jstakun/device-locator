@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator;
 
 import android.app.KeyguardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
@@ -20,6 +21,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -116,7 +118,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         });
 
         final TextView helpText = findViewById(R.id.verify_pin_text);
-        helpText.setText(Html.fromHtml(getString(R.string.pinLink)));
+        helpText.setText(Html.fromHtml(getString(R.string.pin_link)));
         helpText.setMovementMethod(new TextViewLinkHandler() {
             @Override
             public void onLinkClick(String url) {
@@ -127,9 +129,9 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                     newIntent.putExtra("command", Command.PIN_COMMAND);
                     newIntent.putExtra("phoneNumber", phoneNumber);
                     startService(newIntent);
-                    Toast.makeText(PinActivity.this, "Security PIN has been sent to notifiers", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PinActivity.this, R.string.pin_sent_ok, Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(PinActivity.this, "Notifiers hasn't been set. Unable to send Security PIN.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PinActivity.this, R.string.pin_sent_failed, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -140,6 +142,13 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         super.onResume();
         if (fingerprintHelper != null) {
             fingerprintHelper.startListening();
+        } else {
+            final EditText tokenInput = findViewById(R.id.verify_pin_edit);
+            tokenInput.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.showSoftInput(tokenInput, InputMethodManager.SHOW_IMPLICIT);
+            }
         }
     }
 
@@ -153,6 +162,11 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
 
     @Override
     public void onAuthenticated() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
+        }
+
         Intent intent = new Intent(this, MainActivity.class);
         if (action != null) {
             intent.setAction(action);
@@ -175,9 +189,9 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         int pinFailedCount = settings.getInt("pinFailedCount");
         Log.d(TAG, "Invalid credentials " + authType.name());
         if (authType == FingerprintHelper.AuthType.Fingerprint) {
-            Toast.makeText(this, "Unrecognized fingerprint!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.fingerprint_invalid, Toast.LENGTH_SHORT).show();
         } else if (authType == FingerprintHelper.AuthType.Pin) {
-            Toast.makeText(this, "Invalid pin!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.pin_invalid, Toast.LENGTH_SHORT).show();
         }
         if (pinFailedCount == 2) {
             final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);

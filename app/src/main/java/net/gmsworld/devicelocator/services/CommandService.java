@@ -147,11 +147,11 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                     public void onGetFinish(String results, int responseCode, String url) {
                         final String n = (StringUtils.isNotEmpty(name) ? name : imei);
                         if (responseCode == 200) {
-                            Toast.makeText(CommandService.this, "Command " + StringUtils.capitalize(command) + " has been sent to the device " + n + "!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CommandService.this, "Command " + StringUtils.capitalize(command) + " has been sent to the device " + n + "!", Toast.LENGTH_LONG).show();
                         } else if (responseCode == 404) {
-                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + n + ". Is Device Locator installed on this device?", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + n + ". Is Device Locator installed on this device?", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + n + "!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + n + "!", Toast.LENGTH_LONG).show();
                         }
                         commandInProgress = false;
                     }
