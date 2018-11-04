@@ -79,6 +79,7 @@ public class Messenger {
             status = "Device Locator is unable to send SMS message due to lack of SMS sending permission!";
         }
         if (StringUtils.isNotEmpty(status)) {
+            Log.d(TAG, status);
             Toast.makeText(context, status, Toast.LENGTH_LONG).show();
         }
     }
@@ -501,8 +502,13 @@ public class Messenger {
 
         String deviceId = getDeviceId(context, true);
 
+        int dist = distance;
+        if (dist <= 0) {
+            dist = 1;
+        }
+
         String message = deviceId + " location: " + latAndLongFormat.format(location.getLatitude()) + ", " + latAndLongFormat.format(location.getLongitude()) +
-                " in distance of " + DistanceFormatter.format(distance) + " from previous location with accuracy " + DistanceFormatter.format((int) location.getAccuracy());
+                " in distance of " + DistanceFormatter.format(dist) + " from previous location with accuracy " + DistanceFormatter.format((int) location.getAccuracy());
         if (location.hasSpeed() && location.getSpeed() > 0f) {
             message += " and speed " + getSpeed(context, location.getSpeed());
         }

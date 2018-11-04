@@ -64,7 +64,7 @@ public class DeviceLocatorApp extends Application {
         try {
             ACRAConfiguration config = new ConfigurationBuilder(this)
                     .setFormUri(getString(R.string.crashReportUrl))
-                    .setMode(ReportingInteractionMode.TOAST)
+                    .setReportingInteractionMode(ReportingInteractionMode.TOAST)
                     .setHttpHeaders(headers)
                     .setResToastText(R.string.crash_error)
                     .setSocketTimeout(30000)

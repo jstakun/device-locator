@@ -1711,7 +1711,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 long timestamp = Long.valueOf(tokens[tokens.length-1]);
                 message = "Last seen " + pt.format(new Date(timestamp));
                 if (location != null) {
-                    message += " " + DistanceFormatter.format((int)location.distanceTo(deviceLocation)) + " away";
+                    int dist = (int)location.distanceTo(deviceLocation);
+                    if (dist <= 0) {
+                        dist = 1;
+                    }
+                    message += " " + DistanceFormatter.format(dist) + " away";
                 }
             } else {
                 try {

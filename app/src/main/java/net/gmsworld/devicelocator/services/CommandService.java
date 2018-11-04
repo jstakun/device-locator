@@ -129,7 +129,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             }
             sendCommand(content, command, imei, name, prefs);
         } else {
-            Toast.makeText(this, "Command in progress...", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Previous command in progress...", Toast.LENGTH_LONG).show();
         }
     }
 

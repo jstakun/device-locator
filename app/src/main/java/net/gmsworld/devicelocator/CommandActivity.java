@@ -28,6 +28,7 @@ import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractCommand;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.views.CommandArrayAdapter;
 
@@ -239,7 +240,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             }
             if (!validArgs) {
                 Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
-            } else {
+            } else if (Network.isNetworkAvailable(CommandActivity.this)) {
                 PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(device.imei + "_lastCommand", command).apply();
                 Toast.makeText(CommandActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
                 firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
@@ -255,6 +256,8 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                     newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
                 }
                 startService(newIntent);
+            } else {
+                Toast.makeText(CommandActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
             }
         }
     }
