@@ -96,10 +96,6 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 final boolean pinValid = StringUtils.equals(pin, pinRead);
                 final String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
                 boolean rejected = false;
-                //if (pinValid && correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
-                    //don't send confirmation to correlationId
-                    //Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been received by device " + Messenger.getDeviceId(this, true), 1, new HashMap<String, String>());
-                //}
                 if (pinValid) {
                     command += pinRead;
                     if (message.containsKey("args")) {
@@ -123,8 +119,8 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     rejected = true;
                     Log.e(TAG, "Invalid pin found in cloud message!");
                 }
-                if (rejected && correlationId != null) {
-                    Messenger.sendCloudMessage(this, null, correlationId[0], correlationId[1], "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
+                if (rejected && correlationId != null && correlationId.length == 2) {
+                    Messenger.sendCloudMessage(this, null, correlationId[0].trim(), correlationId[1].trim(), "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
                 }
                 firebaseAnalytics.logEvent("cloud_command_received_" + commandName.toLowerCase(), new Bundle());
             } else {
@@ -136,6 +132,12 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message notification body: " + remoteMessage.getNotification().getBody());
         }
+    }
+
+    @Override
+    public void onDeletedMessages() {
+        super.onDeletedMessages();
+        Log.d(TAG, "Received onDeletedMessages callback from Firebase");
     }
 
     @Override
