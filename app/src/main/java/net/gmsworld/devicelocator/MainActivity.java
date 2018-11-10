@@ -1599,7 +1599,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private class DeviceArrayAdapter extends ArrayAdapter<Device> {
 
         private final ArrayList<Device> devices;
-        private Location location;
+        private final Location location;
         private final PrettyTime pt = new PrettyTime();
         private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 

@@ -52,7 +52,7 @@
     <string name="pin_length_error">Security PIN must have at least 4 digits! Reverting to previous value…</string>
     <string name="enter_security_pin">Enter Security PIN</string>
     <string name="accept_sms_without_pin">Only accept SMS commands with Security PIN</string>
-    <string name="info_about">%1$s (R)\nVersion: %2$s-%3$d built on %4$s\nCopyright © 2010–%5$s GMS World\n%6$s installed on %7$s</string>
+    <string name="info_about">%1$s (R)\nVersion: %2$s-%3$d built on %4$s\nCopyright © 2010–%5$d GMS World\n%6$s installed on %7$s</string>
     <string name="admin_grant_explanation">Please grant this permissions to enable failed login notification service and lock screen command in Device Locator.</string>
     <string name="test">Test</string>
     <string name="notification_tracker">"Device Locator is tracking your device location. Click to open Device Locator"</string>
@@ -125,4 +125,5 @@
     <string name="activation_code">Activation code</string>
     <string name="sms_notification_warning">&lt;font color="#808080">SMS notifications will be sent from this device. This could generate additional costs! Is this ok for you?&lt;/font></string>
     <string name="remove_device_message">&lt;font color="#808080">Remove device %1$s from the list?&lt;/font></string>
+    <string name="enter_pin">Please enter valid PIN!</string>
 </resources>

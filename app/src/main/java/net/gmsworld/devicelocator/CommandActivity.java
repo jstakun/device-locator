@@ -60,6 +60,11 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
         final List<Device> devices = getIntent().getParcelableArrayListExtra("devices");
 
+        if (devices == null || devices.isEmpty()) {
+            Toast.makeText(this, R.string.crash_error, Toast.LENGTH_LONG).show();
+            return;
+        }
+
         device = devices.get(getIntent().getIntExtra("index", 0));
 
         final Spinner commandSpinner = findViewById(R.id.deviceCommand);
@@ -127,22 +132,18 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         //devices list
 
         List<String> deviceNames = new ArrayList<>();
-        if (devices != null) {
-            for (int i = 0; i < devices.size(); i++) {
-                deviceNames.add(StringUtils.isNotEmpty(devices.get(i).name) ? devices.get(i).name : devices.get(i).imei);
-            }
+        for (int i = 0; i < devices.size(); i++) {
+            deviceNames.add(StringUtils.isNotEmpty(devices.get(i).name) ? devices.get(i).name : devices.get(i).imei);
         }
 
         final Spinner deviceSpinner = findViewById(R.id.deviceList);
         final CommandArrayAdapter devicesAdapter = new CommandArrayAdapter(this, R.layout.command_row,  deviceNames);
         deviceSpinner.setAdapter(devicesAdapter);
 
-        if (devices != null) {
-            for (int i = 0; i < devices.size(); i++) {
-                if (StringUtils.equalsIgnoreCase(device.name, devices.get(i).name) || StringUtils.equalsIgnoreCase(device.imei, devices.get(i).imei)) {
-                    deviceSpinner.setSelection(i);
-                    break;
-                }
+        for (int i = 0; i < devices.size(); i++) {
+            if (StringUtils.equalsIgnoreCase(device.name, devices.get(i).name) || StringUtils.equalsIgnoreCase(device.imei, devices.get(i).imei)) {
+                deviceSpinner.setSelection(i);
+                break;
             }
         }
 

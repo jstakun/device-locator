@@ -247,8 +247,10 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     if (task.isSuccessful()) {
                         // Task completed successfully
                         InstanceIdResult result = task.getResult();
-                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NEW_FIREBASE_TOKEN, result.getToken()).apply();
-                        sendRegistrationToServer(context, result.getToken(), username, deviceName);
+                        if (result != null) {
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NEW_FIREBASE_TOKEN, result.getToken()).apply();
+                            sendRegistrationToServer(context, result.getToken(), username, deviceName);
+                        }
                     } else {
                         // Task failed with an exception
                         Exception exception = task.getException();

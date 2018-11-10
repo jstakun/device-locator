@@ -46,6 +46,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
     private FingerprintHelper fingerprintHelper;
     private PreferencesUtils settings;
     private String action;
+    private int failedFingerprint = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -189,7 +190,13 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         int pinFailedCount = settings.getInt("pinFailedCount");
         Log.d(TAG, "Invalid credentials " + authType.name());
         if (authType == FingerprintHelper.AuthType.Fingerprint) {
-            Toast.makeText(this, R.string.fingerprint_invalid, Toast.LENGTH_SHORT).show();
+            failedFingerprint++;
+            if (failedFingerprint == 3) {
+                findViewById(R.id.deviceFingerprintCard).setVisibility(View.GONE);
+                Toast.makeText(this, getString(R.string.enter_pin), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, R.string.fingerprint_invalid, Toast.LENGTH_SHORT).show();
+            }
         } else if (authType == FingerprintHelper.AuthType.Pin) {
             Toast.makeText(this, R.string.pin_invalid, Toast.LENGTH_SHORT).show();
         }
