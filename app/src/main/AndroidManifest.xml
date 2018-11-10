@@ -78,6 +78,12 @@
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_login"
             android:launchMode="singleInstance"/>
+        <activity
+            android:name=".PermissionsActivity"
+            android:label="@string/title_activity_permissions"
+            android:configChanges="orientation|screenSize"
+            android:exported="false"
+            android:launchMode="singleInstance"/>
 
         <service
             android:name=".services.SmsSenderService"
@@ -106,7 +112,6 @@
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
-
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
@@ -153,10 +158,6 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"
             tools:replace="android:value" />
-
-        <activity
-            android:name=".PermissionsActivity"
-            android:label="@string/title_activity_permissions" />
     </application>
 
 </manifest>
