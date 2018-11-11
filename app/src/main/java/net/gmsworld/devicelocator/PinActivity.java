@@ -31,6 +31,7 @@ import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.FingerprintHelper;
+import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -124,13 +125,17 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             @Override
             public void onLinkClick(String url) {
                 if (StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(phoneNumber)) {
-                    Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
-                    newIntent.putExtra("telegramId", telegramId);
-                    newIntent.putExtra("email", email);
-                    newIntent.putExtra("command", Command.PIN_COMMAND);
-                    newIntent.putExtra("phoneNumber", phoneNumber);
-                    startService(newIntent);
-                    Toast.makeText(PinActivity.this, R.string.pin_sent_ok, Toast.LENGTH_SHORT).show();
+                    if (Network.isNetworkAvailable(PinActivity.this)) {
+                        Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
+                        newIntent.putExtra("telegramId", telegramId);
+                        newIntent.putExtra("email", email);
+                        newIntent.putExtra("command", Command.PIN_COMMAND);
+                        newIntent.putExtra("phoneNumber", phoneNumber);
+                        startService(newIntent);
+                        Toast.makeText(PinActivity.this, R.string.pin_sent_ok, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(PinActivity.this, R.string.no_network_error, Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(PinActivity.this, R.string.pin_sent_failed, Toast.LENGTH_SHORT).show();
                 }

@@ -89,7 +89,20 @@ public class Files {
     }
 
     public static void deleteFileFromContextDir(String filename, Context context, boolean external) {
-        File file = getFilesDir(context, filename, external);
+        deleteFile(getFilesDir(context, filename, external));
+    }
+
+    public static final void deleteFileFromCache(String filename, Context context, boolean isExternal) {
+        String cacheDir;
+        if (isExternal) {
+            cacheDir = context.getExternalCacheDir().getAbsolutePath();
+        } else {
+            cacheDir = context.getCacheDir().getAbsolutePath();
+        }
+        deleteFile(new File(cacheDir, filename));
+    }
+
+    private static void deleteFile(File file) {
         if (file.exists()) {
             boolean deleted = file.delete();
             Log.d(TAG, "File " + file.getAbsolutePath() + " deleted: " + deleted);

