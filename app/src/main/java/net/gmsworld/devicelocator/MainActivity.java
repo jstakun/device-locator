@@ -274,11 +274,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SELECT_CONTACT_INTENT && resultCode == RESULT_OK) {
-            phoneNumber = getNumber(data);
-            if (StringUtils.isNotEmpty(phoneNumber)) {
-                initPhoneNumberInput();
+            final String newPhoneNumber = getNumber(data);
+            if (StringUtils.isNotEmpty(newPhoneNumber)) {
+                final TextView phoneNumberInput = this.findViewById(R.id.phoneNumber);
+                phoneNumberInput.setText(newPhoneNumber);
+                registerPhoneNumber(phoneNumberInput);
             } else {
-                Toast.makeText(this, "Please select phone number from contacts list", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "If you want to start receiving sms notifications please select phone number from contacts list", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -339,9 +341,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        //Log.d(TAG, "onPrepareOptionsMenu()");
-        //menu.findItem(R.id.camera).setVisible(settings.getBoolean("loginTracker", false));
-
         final boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
         final boolean isDeviceTrackerShown = settings.getBoolean("isDeviceManagerShown", false);
 
@@ -1053,7 +1052,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private void initPhoneNumberInput() {
         final TextView phoneNumberInput = this.findViewById(R.id.phoneNumber);
-        phoneNumberInput.setText(this.phoneNumber);
+        phoneNumberInput.setText(phoneNumber);
 
         phoneNumberInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
@@ -1093,7 +1092,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     public synchronized void registerPhoneNumber(TextView phoneNumberInput) {
-        String newPhoneNumber = phoneNumberInput.getText().toString();
+        final String newPhoneNumber = phoneNumberInput.getText().toString();
         if (!StringUtils.equals(phoneNumber, newPhoneNumber) && ((StringUtils.isNotEmpty(newPhoneNumber) && Patterns.PHONE.matcher(newPhoneNumber).matches()) || StringUtils.isEmpty(newPhoneNumber))) {
             Log.d(TAG, "Setting new phone number: " + newPhoneNumber);
             phoneNumber = newPhoneNumber;
