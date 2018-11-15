@@ -1105,8 +1105,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 Permissions.requestSendSMSAndLocationPermission(this, 0);
                 Toast.makeText(this, R.string.send_sms_permission, Toast.LENGTH_SHORT).show();
             } else if (StringUtils.isNotEmpty(phoneNumber)) {
-                SmsNotificationWarningDialogFragment smsWarningDialog = SmsNotificationWarningDialogFragment.newInstance(this);
-                smsWarningDialog.show(getFragmentManager(), SmsNotificationWarningDialogFragment.TAG);
+                try {
+                    SmsNotificationWarningDialogFragment smsWarningDialog = SmsNotificationWarningDialogFragment.newInstance(this);
+                    smsWarningDialog.show(getFragmentManager(), SmsNotificationWarningDialogFragment.TAG);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
             } else {
                 Toast.makeText(MainActivity.this, "No SMS notifications will be sent...", Toast.LENGTH_LONG).show();
             }
