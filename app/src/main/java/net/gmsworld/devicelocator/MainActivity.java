@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
                         if (Messenger.isValidTelegramId(pasteData)) {
                             telegramInput.setText(pasteData);
-                            Toast.makeText(getApplicationContext(), "Pasted Telegram chat or channel ID from clipboard!", Toast.LENGTH_SHORT).show();
+                            registerTelegram(telegramInput);
                             break;
                         }
                     }
