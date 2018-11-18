@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- dl -->
     <color name="colorPrimary">#009688</color>
     <color name="colorPrimaryDark">#00796B</color>
     <color name="colorAccent">#FF5252</color>
+    <!-- gp -->
+    <!--color name="colorPrimary">#7E57C2</color>
+    <color name="colorPrimaryDark">#7B1FA2</color>
+    <color name="colorAccent">#FF9100</color-->
+    <!-- common -->
     <color name="gray">#808080</color>
     <color name="lightGray">#D3D3D3</color>
 </resources>
