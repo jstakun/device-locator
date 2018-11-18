@@ -309,7 +309,7 @@ public abstract class AbstractLocationManager {
             if (size > 1) {
                 try {
                     String deviceId = Messenger.getDeviceId(context, true);
-                    String desc = "Route recorded by Device Locator on device: " + deviceId;
+                    String desc = "Route recorded by " + context.getString(R.string.app_name) + " on device: " + deviceId;
                     String content = routeToGeoJson(route, desc, deviceId);
                     String url = context.getString(R.string.routeProviderUrl);
                     final Map<String, String> headers = new HashMap<>();

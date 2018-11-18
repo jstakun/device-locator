@@ -32,6 +32,8 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     private static final String TAG = "FingerprintHelper";
     private static final String KEY_NAME = "dl_key";
 
+    public static final String BIOMETRIC_AUTH = "biometricAuth";
+
     public enum AuthType {Fingerprint, Pin};
 
     private final KeyguardManager keyguardManager;
@@ -50,9 +52,10 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    public boolean init(Context context) {
+    public boolean init(Context context, PreferencesUtils preferencesUtils) {
         if (fingerprintManager != null && keyguardManager != null && fingerprintManager.isHardwareDetected() &&
-                Permissions.haveFingerprintPermission(context) && fingerprintManager.hasEnrolledFingerprints() && keyguardManager.isKeyguardSecure()) {
+                Permissions.haveFingerprintPermission(context) && fingerprintManager.hasEnrolledFingerprints() &&
+                keyguardManager.isKeyguardSecure() && preferencesUtils.getBoolean(BIOMETRIC_AUTH, true)) {
             try {
                 generateKey();
             } catch (Exception e) {

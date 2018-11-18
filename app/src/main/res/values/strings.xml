@@ -63,6 +63,13 @@
     <string name="login_dialog_desc">&lt;font color="#808080">It seems you haven\'t any accounts registered on this device. Do you want to register Device Locator account now?&lt;/font></string>
     <string name="your_devices">Your devices</string>
     <string name="device_manager">Device manager</string>
+    <string name="device_sms_error">Device Locator is unable to send SMS message due to device error!</string>
+    <string name="device_sms_permission_error">Device Locator is unable to send SMS message due to lack of SMS sending permission!</string>
+    <string name="email_unverified_error">Device Locator is unable to sent notification because your email address is unverified. Please check your inbox for registration message from device-locator@gms-world.net</string>
+    <string name="email_internal_error">Oops! Failed to sent email notification. Something went wrong on our side!</string>
+    <string name="telegram_unverified_error">Device Locator is unable to sent notification because your chat or channel is unverified! Please register again your Telegram chat or channel.</string>
+    <string name="telegram_invalid_id">Oops! Your Telegram chat or channel id seems to be wrong. Please register again your Telegram chat or channel!</string>
+    <string name="telegram_internal_error">Oops! Failed to sent Telegram notification. Something went wrong on our side!</string>
 
     <!-- Pin Activity -->
     <string name="pin_link">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a>&lt;/font></string>

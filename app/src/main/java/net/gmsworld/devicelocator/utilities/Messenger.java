@@ -73,10 +73,10 @@ public class Messenger {
                 //status = "SMS message sent";
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
-                status = "Device Locator is unable to send SMS message due to device error!";
+                status = context.getString(R.string.device_sms_error);
             }
         } else {
-            status = "Device Locator is unable to send SMS message due to lack of SMS sending permission!";
+            status = context.getString(R.string.device_sms_permission_error);
         }
         if (StringUtils.isNotEmpty(status)) {
             Log.d(TAG, status);
@@ -224,9 +224,9 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            Toast.makeText(context, "Device Locator is unable to sent notification because your email address is unverified. Please check your inbox for registration message from device-locator@gms-world.net", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, R.string.email_unverified_error, Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(context, "Oops! Failed to sent email notification. Something went wrong on our side!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, R.string.email_internal_error, Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -309,16 +309,16 @@ public class Messenger {
                                 if (telegramInput != null) {
                                     telegramInput.setText("");
                                 }
-                                Toast.makeText(context, "Device Locator is unable to sent notification because your chat or channel is unverified! Please register again your Telegram chat or channel.", Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, R.string.telegram_unverified_error, Toast.LENGTH_LONG).show();
                             } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                                 PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
                                 final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
                                 if (telegramInput != null) {
                                     telegramInput.setText("");
                                 }
-                                Toast.makeText(context, "Oops! Your Telegram chat or channel id seems to be wrong. Please register again your Telegram chat or channel!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, R.string.telegram_invalid_id, Toast.LENGTH_LONG).show();
                             } else {
-                                Toast.makeText(context, "Oops! Failed to sent Telegram notification. Something went wrong on our side!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(context, R.string.telegram_internal_error, Toast.LENGTH_LONG).show();
                             }
                         }
                     }
@@ -572,7 +572,7 @@ public class Messenger {
 
         switch (command) {
             case Command.RESUME_COMMAND:
-                title = "Device Locator resumed location tracking";
+                title = context.getString(R.string.app_name) + " resumed location tracking";
                 if (deviceId != null) {
                     title += " on device " + deviceId;
                 }
@@ -599,13 +599,13 @@ public class Messenger {
                 break;
             case Command.STOP_COMMAND:
                 text = "Device location tracking on device " + deviceId + " has been stopped.\nBattery level: " + getBatteryLevel(context);
-                title = "Device Locator stopped location tracking";
+                title = context.getString(R.string.app_name) + " stopped location tracking";
                 if (deviceId != null) {
                     title += " on device " + deviceId;
                 }
                 break;
             case Command.START_COMMAND:
-                title = "Device Locator started location tracking";
+                title = context.getString(R.string.app_name) + " started location tracking";
                 if (deviceId != null) {
                     title += " on device " + deviceId;
                 }

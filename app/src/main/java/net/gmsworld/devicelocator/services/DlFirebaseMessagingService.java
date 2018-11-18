@@ -258,7 +258,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         Exception exception = task.getException();
                         Log.e(TAG, "Failed to receive Firebase token!", exception);
                         if (!silent) {
-                            Toast.makeText(context, "Failed to synchronize device. Please restart Device Locator and try again!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Failed to synchronize device. Please restart " + context.getString(R.string.app_name) + " and try again!", Toast.LENGTH_LONG).show();
                         }
                     }
                     }

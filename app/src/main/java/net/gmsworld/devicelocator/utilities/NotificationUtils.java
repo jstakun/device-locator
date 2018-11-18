@@ -35,7 +35,6 @@ import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWith
 public class NotificationUtils {
 
     private static final String DEFAULT_CHANNEL_ID = "Device-Locator";
-    private static final String DEFAULT_NOTIFICATION_TITLE = "Device Locator Notification";
     private static final String TAG = NotificationUtils.class.getSimpleName();
     public static final int WORKER_NOTIFICATION_ID = 1234;
     private static final Map<String, Integer> notificationIds = new HashMap<>();
@@ -50,7 +49,7 @@ public class NotificationUtils {
         initChannels(context, Messenger.getDeviceName());
 
         return new NotificationCompat.Builder(context, Messenger.getDeviceName())
-                .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
+                .setContentTitle(context.getString(R.string.app_name) + " Notification")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_location_on_white)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
@@ -59,7 +58,7 @@ public class NotificationUtils {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setCategory(NotificationCompat.CATEGORY_STATUS)
                 .setOngoing(true)
-                .addAction(R.drawable.ic_open_in_browser, "Open Device Locator", contentIntent)
+                .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent)
                 //.setPublicVersion(publicNotification) //API 21
                 .build();
     }
@@ -164,7 +163,7 @@ public class NotificationUtils {
         initChannels(context, channelId);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, channelId)
-                .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
+                .setContentTitle(context.getString(R.string.app_name) + " Notification")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_devices_other_white)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
@@ -263,7 +262,7 @@ public class NotificationUtils {
         return new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_devices_other_white)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
-                    .setContentTitle(DEFAULT_NOTIFICATION_TITLE)
+                    .setContentTitle(context.getString(R.string.app_name) + " Notification")
                     .setContentText(context.getString(R.string.please_wait)).build();
     }
 

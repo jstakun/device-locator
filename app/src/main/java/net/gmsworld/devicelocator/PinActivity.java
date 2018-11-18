@@ -58,6 +58,8 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             action = getIntent().getAction();
         }
 
+        settings = new PreferencesUtils(this);
+
         //fingerprint authentication
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -65,7 +67,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
             if (keyguardManager != null && fingerprintManager != null) {
                 fingerprintHelper = new FingerprintHelper(keyguardManager, fingerprintManager, this);
-                if (fingerprintHelper.init(this)) {
+                if (fingerprintHelper.init(this, settings)) {
                     findViewById(R.id.deviceFingerprintCard).setVisibility(View.VISIBLE);
                 } else {
                     fingerprintHelper = null;
@@ -76,8 +78,6 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         //-----------------------------------------------------------------
 
         final EditText tokenInput = findViewById(R.id.verify_pin_edit);
-
-        settings = new PreferencesUtils(this);
 
         final String pin = settings.getEncryptedString(DEVICE_PIN);
         final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);

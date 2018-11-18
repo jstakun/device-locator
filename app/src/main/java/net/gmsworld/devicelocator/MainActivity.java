@@ -1267,7 +1267,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
                     MainActivity.this.startActivity(intent);
                     PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("telegramPaste", true).apply();
-                    Toast.makeText(MainActivity.this, "In order to get your Chat ID please select Device Locator bot now.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "In order to get your chat id please select " + MainActivity.this.getString(R.string.app_name) + " bot now.", Toast.LENGTH_LONG).show();
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, appName + " not found on this device");
                     Toast.makeText(MainActivity.this, "This function requires installed Telegram Messenger on your device.", Toast.LENGTH_LONG).show();

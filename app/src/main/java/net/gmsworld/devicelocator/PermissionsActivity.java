@@ -23,6 +23,7 @@ import com.androidhiddencamera.HiddenCameraUtils;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
+import net.gmsworld.devicelocator.utilities.FingerprintHelper;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
@@ -169,18 +170,13 @@ public class PermissionsActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
             if (fingerprintManager != null && fingerprintManager.isHardwareDetected()) {
-                if (!Permissions.haveFingerprintPermission(this)) {
-                    useFingerprintPermission.setChecked(false);
-                } else {
-                    useFingerprintPermission.setChecked(true);
-                }
+                useFingerprintPermission.setChecked(Permissions.haveFingerprintPermission(this) && PreferenceManager.getDefaultSharedPreferences(this).getBoolean(FingerprintHelper.BIOMETRIC_AUTH, true));
             } else {
                 useFingerprintPermission.setVisibility(View.GONE);
             }
         } else {
             useFingerprintPermission.setVisibility(View.GONE);
         }
-        useFingerprintPermission.setChecked(Permissions.haveFingerprintPermission(this));
 
         Switch readPhoneStatePermission = findViewById(R.id.read_phone_state_permission);
         readPhoneStatePermission.setChecked(Permissions.haveReadPhoneStatePermission(this));
@@ -279,12 +275,13 @@ public class PermissionsActivity extends AppCompatActivity {
                 break;
             case R.id.use_fingerprint_permission:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(FingerprintHelper.BIOMETRIC_AUTH, checked).apply();
                     FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
                     if (fingerprintManager != null && fingerprintManager.isHardwareDetected() && checked && !Permissions.haveFingerprintPermission(this)) {
                         Permissions.requestCallPhonePermission(this, 0);
                     } else if (!checked && fingerprintManager != null && fingerprintManager.isHardwareDetected() && Permissions.haveFingerprintPermission(this)) {
                         Permissions.startSettingsIntent(this);
-                    } else {
+                    } else if (fingerprintManager == null || !fingerprintManager.isHardwareDetected()) {
                         Toast.makeText(this, "Your device has no fingerprint reader!", Toast.LENGTH_LONG).show();
                     }
                 }
@@ -351,7 +348,7 @@ public class PermissionsActivity extends AppCompatActivity {
     }
 
     private void startCameraTest() {
-        Toast.makeText(this, "Please wait. Device Locator is checking your camera...", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Please wait. I'm checking your camera now...", Toast.LENGTH_LONG).show();
         Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
         cameraIntent.putExtra("test", true);
         startService(cameraIntent);
