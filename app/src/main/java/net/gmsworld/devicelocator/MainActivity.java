@@ -718,13 +718,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             //Log.d(TAG, "GET_ACCOUNTS permission is set");
             Account[] dlAccounts = AccountManager.get(this).getAccountsByType(getString(R.string.account_type));
             for (Account a : dlAccounts) {
-                accountNames.add(a.name);
+                if (!accountNames.contains(a.name)) {
+                    accountNames.add(a.name);
+                }
             }
             Account[] allAccounts = AccountManager.get(this).getAccounts();
             for (Account a : allAccounts) {
-                Log.d(TAG, "Found account " + a.name);
+                //Log.d(TAG, "Found account " + a.name);
                 if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.equalsIgnoreCase(a.name, email)) {
-                    accountNames.add(a.name);
+                    if (!accountNames.contains(a.name)) {
+                        accountNames.add(a.name);
+                    }
                 }
             }
 
