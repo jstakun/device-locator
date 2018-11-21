@@ -128,6 +128,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     public static final String ACTION_DEVICE_MANAGER = "net.gmsworld.devicelocator.ActionDeviceManager";
     public static final String ACTION_SMS_MANAGER = "net.gmsworld.devicelocator.ActionSmsManager";
 
+    private static final String TELEGRAM_PASTE = "telegramPaste";
+
     private Boolean running = null;
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
     private boolean motionDetectorRunning = false;
@@ -228,9 +230,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initDeviceList();
 
         //paste Telegram id
-        boolean telegramPaste = settings.getBoolean("telegramPaste", false);
+        boolean telegramPaste = settings.getBoolean(TELEGRAM_PASTE, false);
         if (telegramPaste) {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("telegramPaste", false).apply();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().remove(TELEGRAM_PASTE).apply();
             final TextView telegramInput = this.findViewById(R.id.telegramId);
             //paste telegram id from clipboard
             try {
@@ -1260,18 +1262,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         telegramButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setData(Uri.parse("http://telegram.me/device_locator_bot"));
-                //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("tg://resolve?domain=device_locator_bot"));
-                intent.setType("text/plain");
-                intent.putExtra(android.content.Intent.EXTRA_TEXT, "/getmyid");
+                //open telegram
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://telegram.me/device_locator_bot"));
+                //Intent intent = new Intent(Intent.ACTION_SEND);
+                //intent.setType("text/plain");
+                //intent.putExtra(Intent.EXTRA_TEXT, "/getmyid");
                 try {
                     MainActivity.this.getPackageManager().getPackageInfo(appName, PackageManager.GET_ACTIVITIES);
                     intent.setPackage(appName);
-                    //MainActivity.this.startActivity(Intent.createChooser(intent, "Get Chat ID"));
                     MainActivity.this.startActivity(intent);
-                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean("telegramPaste", true).apply();
-                    Toast.makeText(MainActivity.this, "In order to get your chat id please select " + MainActivity.this.getString(R.string.app_name) + " bot now.", Toast.LENGTH_LONG).show();
+                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean(TELEGRAM_PASTE, true).apply();
+                    //Toast.makeText(MainActivity.this, "In order to get your chat id please select " + MainActivity.this.getString(R.string.app_name) + " bot now.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Enter command /id", Toast.LENGTH_LONG).show();
                 } catch (PackageManager.NameNotFoundException e) {
                     Log.w(TAG, appName + " not found on this device");
                     Toast.makeText(MainActivity.this, "This function requires installed Telegram Messenger on your device.", Toast.LENGTH_LONG).show();
