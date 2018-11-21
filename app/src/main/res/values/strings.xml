@@ -75,7 +75,7 @@
     <string name="pin_link">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a>&lt;/font></string>
     <string name="pin_sent_ok">Security PIN has been sent to notifiers</string>
     <string name="pin_invalid">Invalid PIN!</string>
-    <string name="pin_recover_ok">Please send this email message to get back in response your Security PIN</string>
+    <string name="pin_recover_ok">Please send this email message and we will send you back your Security PIN</string>
     <string name="pin_recover_fail">Please first install email client on your device and try again!</string>
     <string name="fingerprint_invalid">Unrecognized fingerprint!</string>
 

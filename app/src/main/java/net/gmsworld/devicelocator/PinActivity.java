@@ -143,10 +143,11 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                 } else {
                     //1. send pin to app admin
                     Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
+                    newIntent.putExtra("command", Command.PIN_COMMAND);
                     newIntent.putExtra("email", getString(R.string.app_email));
                     startService(newIntent);
                     //2. send email to app admin
-                    if (Messenger.composeEmail(PinActivity.this, new String[]{getString(R.string.app_email)}, "Please send Security PIN", "Device Id: " + Messenger.getDeviceId(PinActivity.this, true), false )) {
+                    if (Messenger.composeEmail(PinActivity.this, new String[]{getString(R.string.app_email)}, "Security PIN from device " + Messenger.getDeviceId(PinActivity.this, true), "Please send me back Security PIN.", false )) {
                         Toast.makeText(PinActivity.this, R.string.pin_recover_ok, Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(PinActivity.this, R.string.pin_recover_fail, Toast.LENGTH_SHORT).show();

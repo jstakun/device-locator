@@ -762,7 +762,7 @@ public class Messenger {
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;
         }
-        if (StringUtils.isNotEmpty(text)) {
+        if (StringUtils.isNotEmpty(text) && StringUtils.isNotEmpty(command)) {
             if (StringUtils.isNotEmpty(phoneNumber)) {
                 sendSMS(context, phoneNumber, text);
             } else {
