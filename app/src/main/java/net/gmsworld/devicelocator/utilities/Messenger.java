@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -711,7 +712,7 @@ public class Messenger {
                 if (StringUtils.isEmpty(pin)) {
                     text = "No Security PIN is set on device " + deviceId + "!";
                 } else {
-                    text = "Your Security PIN on device " + deviceId + " is " + pin;
+                    text = "Security PIN on device " + deviceId + " is " + pin;
                 }
                 text += "\n" + "Battery level: " + getBatteryLevel(context);
                 break;
@@ -1112,7 +1113,7 @@ public class Messenger {
         return androidDeviceId;
     }
 
-    /*private static void composeEmail(Context context, String[] addresses, String subject, String message, boolean showToast) {
+    public static boolean composeEmail(Context context, String[] addresses, String subject, String message, boolean showToast) {
         Intent intent = new Intent(Intent.ACTION_SENDTO);
         intent.setData(Uri.parse("mailto:")); // only email apps should handle this
         intent.putExtra(Intent.EXTRA_EMAIL, addresses);
@@ -1120,10 +1121,14 @@ public class Messenger {
         intent.putExtra(Intent.EXTRA_TEXT, message);
         if (intent.resolveActivity(context.getPackageManager()) != null) {
             context.startActivity(intent);
-        } else if (showToast) {
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+            return true;
+        } else {
+            if (showToast) {
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+            }
+            return false;
         }
-    }*/
+    }
 
     public static String getToken(Context context, String response) {
         JsonElement reply = new JsonParser().parse(response);

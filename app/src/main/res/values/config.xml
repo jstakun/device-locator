@@ -13,5 +13,5 @@
     <string name="serverUrl">https://www.gms-world.net/</string>
     <string name="authnUrl">https://www.gms-world.net/s/authenticate</string>
     <string name="verifyUrl">https://www.gms-world.net/verify</string>
-
+    <string name="app_email">device-locator@gms-world.net</string>
 </resources>

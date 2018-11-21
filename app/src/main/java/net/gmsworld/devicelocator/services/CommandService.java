@@ -32,6 +32,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     private final static String TAG = CommandService.class.getSimpleName();
 
+    public static final String AUTH_NEEDED = "authNeeded";
+
     private static boolean commandInProgress = false;
 
     public CommandService() {
@@ -58,14 +60,6 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        final PreferencesUtils prefs = new PreferencesUtils(this);
-        final long pinVerificationMillis = prefs.getLong("pinVerificationMillis", System.currentTimeMillis());
-
-        if (System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS) {
-            //TODO open pin activity
-            Log.d(TAG, "User should authenticate again!");
-        }
-
         Bundle extras = intent.getExtras();
 
         if (extras == null) {
@@ -73,63 +67,76 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             return;
         }
 
-        String cmd = extras.getString("command");
-        if (StringUtils.endsWith(cmd, "dl")) {
-            cmd = cmd.substring(0, cmd.length()-2);
-        }
+        final PreferencesUtils prefs = new PreferencesUtils(this);
+        final long pinVerificationMillis = prefs.getLong("pinVerificationMillis", System.currentTimeMillis());
 
-        final String command = cmd;
-        final String imei = extras.getString("imei");
-        final String args = extras.getString("args");
-        final String name = extras.getString(MainActivity.DEVICE_NAME);
-        final String cancelCommand = extras.getString("cancelCommand");
-        final String routeId = extras.getString("routeId");
-
-        if (command == null || imei == null) {
-            Log.e(TAG, "Missing command or imei!");
-            return;
-        }
-
-        Log.d(TAG, "onHandleIntent() with command: " + command);
-
-        String pin = extras.getString("pin");
-        if (pin == null) {
-            pin = prefs.getEncryptedString(CommandActivity.PIN_PREFIX + imei);
-        }
-
-        if (pin == null) {
-            Log.e(TAG, "Missing pin!");
-            return;
-        }
-
-        prefs.setEncryptedString(CommandActivity.PIN_PREFIX + imei, pin);
-
-        final String deviceId = Messenger.getDeviceId(this, false);
-
-        String content = "imei=" + imei;
-        content += "&command=" + command + "dlapp";
-        content += "&pin=" + pin;
-        content += "&correlationId=" + deviceId + "+=+" + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
-        if (StringUtils.isNotEmpty(args)) {
-            try {
-                content += "&args=" + URLEncoder.encode(args, "UTF-8");
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage(), e);
-            }
-        }
-
-        if (!commandInProgress) {
-            if (StringUtils.isNotEmpty(cancelCommand)) {
-                String notificationId = imei + "_" + cancelCommand;
-                Log.d(TAG, "Cancelling command " + cancelCommand);
-                NotificationUtils.cancel(this, notificationId);
-                NotificationUtils.cancel(this, notificationId.substring(0, notificationId.length()-2));
-            } else if (StringUtils.isNotEmpty("routeId")) {
-                NotificationUtils.cancel(this, routeId);
-            }
-            sendCommand(content, command, imei, name, prefs);
+        if (System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS) {
+            Log.d(TAG, "User should authenticate again!");
+            Toast.makeText(this, "Please authenticate once again...", Toast.LENGTH_LONG).show();
+            Intent authIntent = new Intent(this, PinActivity.class);
+            authIntent.putExtras(extras);
+            authIntent.setAction(AUTH_NEEDED);
+            authIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(authIntent);
         } else {
-            Toast.makeText(this, "Previous command in progress...", Toast.LENGTH_LONG).show();
+            String cmd = extras.getString("command");
+            if (StringUtils.endsWith(cmd, "dl")) {
+                cmd = cmd.substring(0, cmd.length() - 2);
+            }
+
+            final String command = cmd;
+            final String imei = extras.getString("imei");
+            final String args = extras.getString("args");
+            final String name = extras.getString(MainActivity.DEVICE_NAME);
+            final String cancelCommand = extras.getString("cancelCommand");
+            final String routeId = extras.getString("routeId");
+
+            if (command == null || imei == null) {
+                Log.e(TAG, "Missing command or imei!");
+                return;
+            }
+
+            Log.d(TAG, "onHandleIntent() with command: " + command);
+
+            String pin = extras.getString("pin");
+            if (pin == null) {
+                pin = prefs.getEncryptedString(CommandActivity.PIN_PREFIX + imei);
+            }
+
+            if (pin == null) {
+                Log.e(TAG, "Missing pin!");
+                return;
+            }
+
+            prefs.setEncryptedString(CommandActivity.PIN_PREFIX + imei, pin);
+
+            final String deviceId = Messenger.getDeviceId(this, false);
+
+            String content = "imei=" + imei;
+            content += "&command=" + command + "dlapp";
+            content += "&pin=" + pin;
+            content += "&correlationId=" + deviceId + "+=+" + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+            if (StringUtils.isNotEmpty(args)) {
+                try {
+                    content += "&args=" + URLEncoder.encode(args, "UTF-8");
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
+            }
+
+            if (!commandInProgress) {
+                if (StringUtils.isNotEmpty(cancelCommand)) {
+                    String notificationId = imei + "_" + cancelCommand;
+                    Log.d(TAG, "Cancelling command " + cancelCommand);
+                    NotificationUtils.cancel(this, notificationId);
+                    NotificationUtils.cancel(this, notificationId.substring(0, notificationId.length() - 2));
+                } else if (StringUtils.isNotEmpty("routeId")) {
+                    NotificationUtils.cancel(this, routeId);
+                }
+                sendCommand(content, command, imei, name, prefs);
+            } else {
+                Toast.makeText(this, "Previous command in progress...", Toast.LENGTH_LONG).show();
+            }
         }
     }
 

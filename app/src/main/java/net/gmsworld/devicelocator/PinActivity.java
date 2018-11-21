@@ -27,10 +27,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
+import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.FingerprintHelper;
+import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
@@ -47,6 +49,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
     private FingerprintHelper fingerprintHelper;
     private PreferencesUtils settings;
     private String action;
+    private Bundle extras;
     private int failedFingerprint = 0;
 
     @Override
@@ -56,6 +59,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
 
         if (getIntent() != null) {
             action = getIntent().getAction();
+            extras = getIntent().getExtras();
         }
 
         settings = new PreferencesUtils(this);
@@ -137,7 +141,16 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                         Toast.makeText(PinActivity.this, R.string.no_network_error, Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(PinActivity.this, R.string.pin_sent_failed, Toast.LENGTH_SHORT).show();
+                    //1. send pin to app admin
+                    Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
+                    newIntent.putExtra("email", getString(R.string.app_email));
+                    startService(newIntent);
+                    //2. send email to app admin
+                    if (Messenger.composeEmail(PinActivity.this, new String[]{getString(R.string.app_email)}, "Please send Security PIN", "Device Id: " + Messenger.getDeviceId(PinActivity.this, true), false )) {
+                        Toast.makeText(PinActivity.this, R.string.pin_recover_ok, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(PinActivity.this, R.string.pin_recover_fail, Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
@@ -173,11 +186,17 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
         }
 
-        Intent intent = new Intent(this, MainActivity.class);
-        if (action != null) {
-            intent.setAction(action);
+        if (StringUtils.equals(action, CommandService.AUTH_NEEDED)) {
+            Intent intent = new Intent(this, CommandService.class);
+            intent.putExtras(extras);
+            startService(intent);
+        } else {
+            Intent intent = new Intent(this, MainActivity.class);
+            if (action != null) {
+                intent.setAction(action);
+            }
+            startActivity(intent);
         }
-        startActivity(intent);
         PreferenceManager.getDefaultSharedPreferences(this).edit()
                 .remove("pinFailedCount")
                 .putLong("pinVerificationMillis", System.currentTimeMillis())
@@ -186,8 +205,8 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
     }
 
     @Override
-    public void onError() {
-
+    public void onError(int errMsgId, CharSequence errString) {
+        Log.e(TAG, "Fingerprint authentication error occurred " + errMsgId + ": " + errString);
     }
 
     @Override

@@ -142,8 +142,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
 
     @Override
     public void onAuthenticationError(int errMsgId, CharSequence errString) {
-        Log.e(TAG, "Fingerprint Authentication error " + errString);
-        callback.onError();
+        callback.onError(errMsgId, errString);
     }
 
     @Override
@@ -164,7 +163,7 @@ public class FingerprintHelper extends FingerprintManager.AuthenticationCallback
 
     public interface AuthenticationCallback {
         void onAuthenticated();
-        void onError();
+        void onError(int errMsgId, CharSequence errString);
         void onFailed(AuthType authType);
     }
 }
