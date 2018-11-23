@@ -26,11 +26,12 @@ public class SmsReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
+        Bundle bundle = intent.getExtras();
+
         boolean proceed = true;
 
         if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("settings_sms_contacts", false)) {
             proceed = false;
-            Bundle bundle = intent.getExtras();
             if (bundle != null) {
                 Object[] pdus = (Object[]) bundle.get("pdus");
                 if (pdus != null) {
@@ -52,11 +53,9 @@ public class SmsReceiver extends BroadcastReceiver {
         }
 
         if (proceed) {
-            String command = Command.findCommandInSms(context, intent);
+            String command = Command.findCommandInSms(context, bundle);
             if (StringUtils.isNotEmpty(command)) {
-                Bundle bundle = new Bundle();
-                //bundle.putString("command", command);
-                FirebaseAnalytics.getInstance(context).logEvent("sms_command_received_" + command.toLowerCase(), bundle);
+                FirebaseAnalytics.getInstance(context).logEvent("sms_command_received_" + command.toLowerCase(), new Bundle());
             }
         }
     }

@@ -14,10 +14,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.telephony.SmsMessage;
 import android.util.Log;
 import android.util.Patterns;
 
 import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
@@ -82,23 +84,47 @@ public class Command {
 
     private static List<AbstractCommand> commands = null;
 
-    public static String findCommandInSms(Context context, Intent intent) {
-        //TODO extract sms body here
-        for (AbstractCommand c : getCommands()) {
-            if (c.findSmsCommand(context, intent)) {
-                Log.d(TAG, "Found matching sms command");
-                return c.getSmsCommand();
+    public static String findCommandInSms(Context context, Bundle extras) {
+        if (extras != null && extras.containsKey("pdus")) {
+            Object[] pdus = (Object[]) extras.get("pdus");
+            if (pdus != null) {
+                final PreferencesUtils prefs = new PreferencesUtils(context);
+                final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+                final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
+                for (int i = 0; i < pdus.length; i++) {
+                    SmsMessage sms;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        String format = extras.getString("format");
+                        sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);
+                    } else {
+                        sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                    }
+                    if (sms != null) {
+                        String smsMessage = sms.getMessageBody();
+                        if (StringUtils.isNotEmpty(smsMessage)) {
+                            for (AbstractCommand c : getCommands()) {
+                                if (c.findSmsCommand(context, smsMessage, sms.getOriginatingAddress(), pin, isPinRequired)) {
+                                    Log.d(TAG, "Found matching sms command");
+                                    return c.getSmsCommand();
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         return null;
     }
 
     public static String findCommandInMessage(Context context, String message, String sender, Location location, Bundle extras) {
+        final PreferencesUtils prefs = new PreferencesUtils(context);
+        final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+        final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
         for (AbstractCommand c : getCommands()) {
-            if (c.findAppCommand(context, message, sender, location, extras)) {
+            if (c.findAppCommand(context, message, sender, location, extras, pin, isPinRequired)) {
                 Log.d(TAG, "Found matching cloud command");
                 return c.getSmsCommand();
-            } else if (c.findSocialCommand(context, message)) {
+            } else if (c.findSocialCommand(context, message, pin, isPinRequired)) {
                 Log.d(TAG, "Found matching social command");
                 return c.getSmsCommand();
             }

@@ -4,20 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.telephony.SmsMessage;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.MainActivity;
-import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 
 /**
  * Created by jstakun on 10/25/17.
@@ -69,26 +65,26 @@ public abstract class AbstractCommand {
 
     public boolean hasOppositeCommand() { return getOppositeCommand() != null; }
 
-    protected boolean findSmsCommand(Context context, Intent intent) {
-        String sender = null;
+    protected boolean findSmsCommand(Context context, String smsMessage, String sender, String pin, boolean isPinRequired) {
+        boolean commandFound = false;
         String suffix = commandTokens != null ? " " + StringUtils.join(commandTokens , ' ') : "";
         if (StringUtils.isNotEmpty(smsCommand)) {
-            sender = getSenderAddress(context, intent, smsCommand);
+            commandFound = findCommandInSmsMessage(context, smsCommand, smsMessage, pin, isPinRequired);
             auditCommand(context, smsCommand + suffix);
         }
-        if (sender == null && StringUtils.isNotEmpty(smsShortCommand)) {
-            sender = getSenderAddress(context, intent, smsShortCommand + suffix);
+        if (!commandFound && StringUtils.isNotEmpty(smsShortCommand)) {
+            commandFound = findCommandInSmsMessage(context, smsShortCommand + suffix, smsMessage, pin, isPinRequired);
             auditCommand(context, smsShortCommand);
         }
-        if (sender != null) {
+        if (commandFound) {
             onSmsCommandFound(sender, context);
             return true;
         } else if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_SOCIAL, "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_EMAIL, "")))) {
-            sender = getSenderAddress(context, intent, smsCommand + "t");
-            if (sender == null && StringUtils.isNotEmpty(smsShortCommand)) {
-                sender = getSenderAddress(context, intent, smsShortCommand + "t");
+            commandFound = findCommandInSmsMessage(context, smsCommand + "t", smsMessage, pin, isPinRequired);
+            if (!commandFound && StringUtils.isNotEmpty(smsShortCommand)) {
+                commandFound = findCommandInSmsMessage(context, smsShortCommand + "t", smsMessage, pin, isPinRequired);
             }
-            if (sender != null) {
+            if (commandFound) {
                 onSocialCommandFound(sender, context);
                 return true;
             }
@@ -96,13 +92,13 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    protected boolean findSocialCommand(Context context, String message) {
+    protected boolean findSocialCommand(Context context, String message, String pin, boolean isPinRequired) {
         if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_SOCIAL, "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_EMAIL, "")))) {
             auditCommand(context, message);
-            if (findKeyword(context, smsCommand + "t", message)) {
+            if (findKeyword(context, smsCommand + "t", message, pin, isPinRequired)) {
                 onSocialCommandFound(null, context);
                 return true;
-            } else if (findKeyword(context, smsShortCommand + "t", message)) {
+            } else if (findKeyword(context, smsShortCommand + "t", message, pin, isPinRequired)) {
                 onSocialCommandFound(null, context);
                 return true;
             }
@@ -110,13 +106,13 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    protected boolean findAppCommand(Context context, String message, String sender, Location location, Bundle extras) {
+    protected boolean findAppCommand(Context context, String message, String sender, Location location, Bundle extras, String pin, boolean isPinRequired) {
         if (StringUtils.isNotEmpty(smsCommand)) {
             auditCommand(context, message);
-            if (findKeyword(context, smsCommand + "app", message)) {
+            if (findKeyword(context, smsCommand + "app", message, pin, isPinRequired)) {
                 onAppCommandFound(sender, context, location, extras);
                 return true;
-            } else if (findKeyword(context, smsShortCommand + "app", message)) {
+            } else if (findKeyword(context, smsShortCommand + "app", message, pin, isPinRequired)) {
                 onAppCommandFound(sender, context, location, extras);
                 return true;
             }
@@ -124,67 +120,40 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    private boolean findKeyword(Context context, String keyword, String message) {
+    private boolean findKeyword(Context context, String keyword, String message, String pin, boolean isPinRequired) {
         if (finder.equals(Finder.EQUALS)) {
-            return findCommandInMessage(context, message, keyword);
+            return findCommandInMessage(context, message, keyword, pin, isPinRequired);
         } else if (finder.equals(Finder.STARTS)) {
-            return findCommandInMessage(context, message, keyword) && validateTokens();
+            return findCommandInMessage(context, message, keyword, pin, isPinRequired) && validateTokens();
         } else {
             return false;
         }
     }
 
-    private ArrayList<SmsMessage> getMessagesWithKeyword(Context context, String keyword, Bundle bundle) {
-        ArrayList<SmsMessage> list = new ArrayList<>();
-        if (bundle != null) {
-            Object[] pdus = (Object[]) bundle.get("pdus");
-            if (pdus != null) {
-                for (int i = 0; i < pdus.length; i++) {
-                    SmsMessage sms;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        String format = bundle.getString("format");
-                        sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);
-                    } else {
-                        sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                    }
-                    if (findCommandInMessage(context, sms.getMessageBody(), keyword) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()))) {
-                        list.add(sms);
-                    }
-                }
-            }
-        }
-        return list;
-    }
-
-    private String getSenderAddress(Context context, Intent intent, String command) {
+    private boolean findCommandInSmsMessage(Context context, String command, String smsMessage, String pin, boolean isPinRequired) {
+        boolean commandFound = false;
         try {
-            ArrayList<SmsMessage> list = null;
             switch (finder) {
                 case EQUALS:
                 case STARTS:
-                    list =  getMessagesWithKeyword(context, command, intent.getExtras());
+                    commandFound = findCommandInMessage(context, smsMessage, command, pin, isPinRequired) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()));
                     break;
                 default:
                     Log.d(TAG, "No command finder set");
                     break;
             }
-            if (list != null && list.size() > 0) {
-                return list.get(0).getOriginatingAddress();
-            }
+
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
         }
-        return null;
+        return commandFound;
     }
 
-    private boolean findCommandInMessage(Context context, String message, String command) {
+    private boolean findCommandInMessage(Context context, String message, String command, String pin, boolean isPinRequired) {
         //<command><pin> <args> or <command> <pin> <args>
-        final PreferencesUtils prefs = new PreferencesUtils(context);
         boolean foundCommand = false;
         commandTokens = message.split(" ");
-        final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
         if (commandTokens.length >= 1) {
-            final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
             foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command + pin);
             if (!foundCommand) {
                 if (commandTokens.length >= 2) {
