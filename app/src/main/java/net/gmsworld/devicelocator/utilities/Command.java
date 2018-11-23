@@ -77,10 +77,13 @@ public class Command {
     public final static String STOPPED_TRACKER = "stopped"; //this is not command
     public final static String LOCK_SCREEN_FAILED = "lockfail"; //this is not command
     public final static String MUTE_FAILED = "mutefail"; //this is not command
+    public final static String INVALID_PIN = "invalidPin";
+    public final static String INVALID_COMMAND = "invalidCommand";
 
     private static List<AbstractCommand> commands = null;
 
     public static String findCommandInSms(Context context, Intent intent) {
+        //TODO extract sms body here
         for (AbstractCommand c : getCommands()) {
             if (c.findSmsCommand(context, intent)) {
                 Log.d(TAG, "Found matching sms command");
@@ -92,11 +95,11 @@ public class Command {
 
     public static String findCommandInMessage(Context context, String message, String sender, Location location, Bundle extras) {
         for (AbstractCommand c : getCommands()) {
-            if (c.findSocialCommand(context, message)) {
-                Log.d(TAG, "Found matching social command");
-                return c.getSmsCommand();
-            } else if (c.findAppCommand(context, message, sender, location, extras)) {
+            if (c.findAppCommand(context, message, sender, location, extras)) {
                 Log.d(TAG, "Found matching cloud command");
+                return c.getSmsCommand();
+            } else if (c.findSocialCommand(context, message)) {
+                Log.d(TAG, "Found matching social command");
                 return c.getSmsCommand();
             }
         }

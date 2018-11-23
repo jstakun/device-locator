@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator.services;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
@@ -57,9 +58,14 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getData().size() > 0) {
             Map<String, String> message = remoteMessage.getData();
             if (message.containsKey("command") && message.containsKey("pin")) {
+                //pin
                 final String pinRead = message.get("pin");
                 final String pin = new PreferencesUtils(this).getEncryptedString(PinActivity.DEVICE_PIN);
+                final boolean pinValid = StringUtils.equals(pin, pinRead);
+                //command
                 String command = message.get("command");
+                final String commandName = command.split("dl")[0];
+                //flex
                 Location location =  null;
                 Bundle extras = new Bundle();
                 if (message.containsKey("flex")) {
@@ -92,9 +98,9 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         Log.e(TAG, e.getMessage(), e);
                     }
                 }
-                final String commandName = command.split("dl")[0];
-                final boolean pinValid = StringUtils.equals(pin, pinRead);
+                //correlationId
                 final String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
+
                 boolean rejected = false;
                 if (pinValid) {
                     command += pinRead;
@@ -109,15 +115,14 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     }
                     String foundCommand = Command.findCommandInMessage(this, command, sender, location, extras);
                     if (foundCommand == null) {
-                        Log.d(TAG, "Invalid command " + commandName + " found!");
+                        Log.d(TAG, "Invalid command " + commandName + " found in message!");
                         rejected = true;
+                        sendSocialNotification(this, Command.INVALID_COMMAND);
                     }
-                } else if (correlationId != null && correlationId.length == 2 && !StringUtils.startsWithIgnoreCase(command, "message")) {
-                    rejected = true;
-                    Log.e(TAG, "Invalid pin found in cloud message!");
                 } else {
                     rejected = true;
-                    Log.e(TAG, "Invalid pin found in cloud message!");
+                    Log.e(TAG, "Invalid pin found in message!");
+                    sendSocialNotification(this, Command.INVALID_PIN);
                 }
                 if (rejected && correlationId != null && correlationId.length == 2) {
                     Messenger.sendCloudMessage(this, null, correlationId[0].trim(), correlationId[1].trim(), "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
@@ -271,5 +276,18 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         } else {
             return false;
         }
+    }
+
+    private static void sendSocialNotification(final Context context, final String command) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+        final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+        Intent newIntent = new Intent(context, SmsSenderService.class);
+        newIntent.putExtra("telegramId", telegramId);
+        newIntent.putExtra("email", email);
+        if (StringUtils.isNotEmpty(command)) {
+            newIntent.putExtra("command", command);
+        }
+        context.startService(newIntent);
     }
 }

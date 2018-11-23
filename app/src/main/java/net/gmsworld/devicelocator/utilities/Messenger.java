@@ -758,6 +758,12 @@ public class Messenger {
             case Command.MUTE_FAILED:
                 text = "Mute failed on device " + deviceId + " due to insufficient privileges!";
                 break;
+            case Command.INVALID_PIN:
+                text = "Command with invalid pin has been sent to device " + deviceId + ".";
+                break;
+            case Command.INVALID_COMMAND:
+                text = "Invalid command has been sent to device " + deviceId + ".";
+                break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);
                 break;

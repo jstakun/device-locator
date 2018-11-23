@@ -69,7 +69,7 @@ public abstract class AbstractCommand {
 
     public boolean hasOppositeCommand() { return getOppositeCommand() != null; }
 
-    public boolean findSmsCommand(Context context, Intent intent) {
+    protected boolean findSmsCommand(Context context, Intent intent) {
         String sender = null;
         String suffix = commandTokens != null ? " " + StringUtils.join(commandTokens , ' ') : "";
         if (StringUtils.isNotEmpty(smsCommand)) {
@@ -96,7 +96,7 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    public boolean findSocialCommand(Context context, String message) {
+    protected boolean findSocialCommand(Context context, String message) {
         if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_SOCIAL, "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_EMAIL, "")))) {
             auditCommand(context, message);
             if (findKeyword(context, smsCommand + "t", message)) {
@@ -110,7 +110,7 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    public boolean findAppCommand(Context context, String message, String sender, Location location, Bundle extras) {
+    protected boolean findAppCommand(Context context, String message, String sender, Location location, Bundle extras) {
         if (StringUtils.isNotEmpty(smsCommand)) {
             auditCommand(context, message);
             if (findKeyword(context, smsCommand + "app", message)) {
@@ -126,9 +126,9 @@ public abstract class AbstractCommand {
 
     private boolean findKeyword(Context context, String keyword, String message) {
         if (finder.equals(Finder.EQUALS)) {
-            return findSmsCommand(context, message, keyword);
+            return findCommandInMessage(context, message, keyword);
         } else if (finder.equals(Finder.STARTS)) {
-            return findSmsCommand(context, message, keyword) && validateTokens();
+            return findCommandInMessage(context, message, keyword) && validateTokens();
         } else {
             return false;
         }
@@ -147,7 +147,7 @@ public abstract class AbstractCommand {
                     } else {
                         sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
                     }
-                    if (findSmsCommand(context, sms.getMessageBody(), keyword) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()))) {
+                    if (findCommandInMessage(context, sms.getMessageBody(), keyword) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()))) {
                         list.add(sms);
                     }
                 }
@@ -177,7 +177,7 @@ public abstract class AbstractCommand {
         return null;
     }
 
-    private boolean findSmsCommand(Context context, String message, String command) {
+    private boolean findCommandInMessage(Context context, String message, String command) {
         //<command><pin> <args> or <command> <pin> <args>
         final PreferencesUtils prefs = new PreferencesUtils(context);
         boolean foundCommand = false;
@@ -192,11 +192,11 @@ public abstract class AbstractCommand {
                 } else if (!isPinRequired) {
                     foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command);
                 } else if (StringUtils.equalsIgnoreCase(commandTokens[0], command)) {
-                    Log.w(TAG, "Command " + commandTokens[0] + " without Security PIN has been received!");
+                    sendSocialNotification(context, Command.INVALID_PIN);
+                    Log.e(TAG, "Command " + commandTokens[0] + " without valid Security PIN received!");
                 }
             }
         }
-        //Log.d(TAG, "Matched " + message + " with " + command + ": " + foundCommand);
         return foundCommand;
     }
 
