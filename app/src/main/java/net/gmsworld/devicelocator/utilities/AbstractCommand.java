@@ -68,20 +68,20 @@ public abstract class AbstractCommand {
     protected boolean findSmsCommand(Context context, final String smsMessage, final String sender, final String pin, final boolean isPinRequired, final boolean hasSocialNotifiers) {
         boolean commandFound = false;
         if (StringUtils.startsWithIgnoreCase(smsMessage, smsCommand)) {
-            commandFound = findCommandInSmsMessage(context, smsCommand, smsMessage, pin, isPinRequired);
+            commandFound = findCommandInMessage(context, smsCommand, smsMessage, pin, isPinRequired);
             auditCommand(context, smsCommand);
         }
         if (!commandFound && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
-            commandFound = findCommandInSmsMessage(context, smsShortCommand, smsMessage, pin, isPinRequired);
+            commandFound = findCommandInMessage(context, smsShortCommand, smsMessage, pin, isPinRequired);
             auditCommand(context, smsShortCommand);
         }
         if (commandFound) {
             onSmsCommandFound(sender, context);
             return true;
         } else if ((StringUtils.startsWithIgnoreCase(smsMessage, smsCommand + "t") || StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand + "t")) && hasSocialNotifiers) {
-            commandFound = findCommandInSmsMessage(context, smsCommand + "t", smsMessage, pin, isPinRequired);
+            commandFound = findCommandInMessage(context, smsCommand + "t", smsMessage, pin, isPinRequired);
             if (!commandFound && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
-                commandFound = findCommandInSmsMessage(context, smsShortCommand + "t", smsMessage, pin, isPinRequired);
+                commandFound = findCommandInMessage(context, smsShortCommand + "t", smsMessage, pin, isPinRequired);
             }
             if (commandFound) {
                 onSocialCommandFound(sender, context);
@@ -91,8 +91,8 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    protected boolean findSocialCommand(Context context, String message, String pin, boolean isPinRequired) {
-        if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_SOCIAL, "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_EMAIL, "")))) {
+    protected boolean findSocialCommand(Context context, String message, String pin, boolean isPinRequired, boolean hasSocialNotifiers) {
+        if ((StringUtils.startsWithIgnoreCase(message, smsCommand + "t") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "t")) && hasSocialNotifiers) {
             auditCommand(context, message);
             if (findKeyword(context, smsCommand + "t", message, pin, isPinRequired)) {
                 onSocialCommandFound(null, context);
@@ -106,7 +106,7 @@ public abstract class AbstractCommand {
     }
 
     protected boolean findAppCommand(Context context, String message, String sender, Location location, Bundle extras, String pin, boolean isPinRequired) {
-        if (StringUtils.isNotEmpty(smsCommand)) {
+        if (StringUtils.startsWithIgnoreCase(message, smsCommand + "app") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "app")) {
             auditCommand(context, message);
             if (findKeyword(context, smsCommand + "app", message, pin, isPinRequired)) {
                 onAppCommandFound(sender, context, location, extras);
@@ -121,15 +121,15 @@ public abstract class AbstractCommand {
 
     private boolean findKeyword(Context context, String keyword, String message, String pin, boolean isPinRequired) {
         if (finder.equals(Finder.EQUALS)) {
-            return findCommandInSmsMessage(context, message, keyword, pin, isPinRequired);
+            return findCommandInMessage(context, keyword, message, pin, isPinRequired);
         } else if (finder.equals(Finder.STARTS)) {
-            return findCommandInSmsMessage(context, message, keyword, pin, isPinRequired) && validateTokens();
+            return findCommandInMessage(context, keyword, message, pin, isPinRequired) && validateTokens();
         } else {
             return false;
         }
     }
 
-    private boolean findCommandInSmsMessage(Context context, String command, String message, String pin, boolean isPinRequired) {
+    private boolean findCommandInMessage(Context context, String command, String message, String pin, boolean isPinRequired) {
         //<command><pin> <args> or <command> <pin> <args>
         boolean foundCommand = false;
         if (finder == Finder.EQUALS || finder == Finder.STARTS) {

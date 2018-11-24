@@ -123,11 +123,12 @@ public class Command {
         final PreferencesUtils prefs = new PreferencesUtils(context);
         final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
         final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
+        final boolean hasSocialNotifiers = StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_SOCIAL)) || StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_EMAIL));
         for (AbstractCommand c : getCommands()) {
             if (c.findAppCommand(context, message, sender, location, extras, pin, isPinRequired)) {
                 Log.d(TAG, "Found matching cloud command");
                 return c.getSmsCommand();
-            } else if (c.findSocialCommand(context, message, pin, isPinRequired)) {
+            } else if (c.findSocialCommand(context, message, pin, isPinRequired, hasSocialNotifiers)) {
                 Log.d(TAG, "Found matching social command");
                 return c.getSmsCommand();
             }
