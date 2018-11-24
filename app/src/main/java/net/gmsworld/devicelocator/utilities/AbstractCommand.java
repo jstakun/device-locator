@@ -65,23 +65,22 @@ public abstract class AbstractCommand {
 
     public boolean hasOppositeCommand() { return getOppositeCommand() != null; }
 
-    protected boolean findSmsCommand(Context context, String smsMessage, String sender, String pin, boolean isPinRequired) {
+    protected boolean findSmsCommand(Context context, final String smsMessage, final String sender, final String pin, final boolean isPinRequired, final boolean hasSocialNotifiers) {
         boolean commandFound = false;
-        String suffix = commandTokens != null ? " " + StringUtils.join(commandTokens , ' ') : "";
-        if (StringUtils.isNotEmpty(smsCommand)) {
+        if (StringUtils.startsWithIgnoreCase(smsMessage, smsCommand)) {
             commandFound = findCommandInSmsMessage(context, smsCommand, smsMessage, pin, isPinRequired);
-            auditCommand(context, smsCommand + suffix);
+            auditCommand(context, smsCommand);
         }
-        if (!commandFound && StringUtils.isNotEmpty(smsShortCommand)) {
-            commandFound = findCommandInSmsMessage(context, smsShortCommand + suffix, smsMessage, pin, isPinRequired);
+        if (!commandFound && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
+            commandFound = findCommandInSmsMessage(context, smsShortCommand, smsMessage, pin, isPinRequired);
             auditCommand(context, smsShortCommand);
         }
         if (commandFound) {
             onSmsCommandFound(sender, context);
             return true;
-        } else if (StringUtils.isNotEmpty(smsCommand) && (StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_SOCIAL, "")) || StringUtils.isNotEmpty(PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_EMAIL, "")))) {
+        } else if ((StringUtils.startsWithIgnoreCase(smsMessage, smsCommand) || StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) && hasSocialNotifiers) {
             commandFound = findCommandInSmsMessage(context, smsCommand + "t", smsMessage, pin, isPinRequired);
-            if (!commandFound && StringUtils.isNotEmpty(smsShortCommand)) {
+            if (!commandFound && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
                 commandFound = findCommandInSmsMessage(context, smsShortCommand + "t", smsMessage, pin, isPinRequired);
             }
             if (commandFound) {
@@ -122,47 +121,30 @@ public abstract class AbstractCommand {
 
     private boolean findKeyword(Context context, String keyword, String message, String pin, boolean isPinRequired) {
         if (finder.equals(Finder.EQUALS)) {
-            return findCommandInMessage(context, message, keyword, pin, isPinRequired);
+            return findCommandInSmsMessage(context, message, keyword, pin, isPinRequired);
         } else if (finder.equals(Finder.STARTS)) {
-            return findCommandInMessage(context, message, keyword, pin, isPinRequired) && validateTokens();
+            return findCommandInSmsMessage(context, message, keyword, pin, isPinRequired) && validateTokens();
         } else {
             return false;
         }
     }
 
-    private boolean findCommandInSmsMessage(Context context, String command, String smsMessage, String pin, boolean isPinRequired) {
-        boolean commandFound = false;
-        try {
-            switch (finder) {
-                case EQUALS:
-                case STARTS:
-                    commandFound = findCommandInMessage(context, smsMessage, command, pin, isPinRequired) && (finder.equals(Finder.EQUALS) || (finder.equals(Finder.STARTS) && validateTokens()));
-                    break;
-                default:
-                    Log.d(TAG, "No command finder set");
-                    break;
-            }
-
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
-        }
-        return commandFound;
-    }
-
-    private boolean findCommandInMessage(Context context, String message, String command, String pin, boolean isPinRequired) {
+    private boolean findCommandInSmsMessage(Context context, String command, String message, String pin, boolean isPinRequired) {
         //<command><pin> <args> or <command> <pin> <args>
         boolean foundCommand = false;
-        commandTokens = message.split(" ");
-        if (commandTokens.length >= 1) {
-            foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command + pin);
-            if (!foundCommand) {
-                if (commandTokens.length >= 2) {
-                    foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command) && (!isPinRequired || StringUtils.equals(commandTokens[1], pin));
-                } else if (!isPinRequired) {
-                    foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command);
-                } else if (StringUtils.equalsIgnoreCase(commandTokens[0], command)) {
-                    sendSocialNotification(context, Command.INVALID_PIN);
-                    Log.e(TAG, "Command " + commandTokens[0] + " without valid Security PIN received!");
+        if (finder == Finder.EQUALS || finder == Finder.STARTS) {
+            commandTokens = message.split(" ");
+            if (commandTokens.length >= 1) {
+                foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command + pin);
+                if (!foundCommand) {
+                    if (commandTokens.length >= 2) {
+                        foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command) && (!isPinRequired || StringUtils.equals(commandTokens[1], pin));
+                    } else if (!isPinRequired) {
+                        foundCommand = StringUtils.equalsIgnoreCase(commandTokens[0], command);
+                    } else if (StringUtils.equalsIgnoreCase(commandTokens[0], command)) {
+                        sendSocialNotification(context, Command.INVALID_PIN);
+                        Log.e(TAG, "Command " + commandTokens[0] + " without valid Security PIN received!");
+                    }
                 }
             }
         }

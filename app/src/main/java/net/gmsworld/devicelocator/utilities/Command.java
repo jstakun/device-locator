@@ -88,9 +88,7 @@ public class Command {
         if (extras != null && extras.containsKey("pdus")) {
             Object[] pdus = (Object[]) extras.get("pdus");
             if (pdus != null) {
-                final PreferencesUtils prefs = new PreferencesUtils(context);
-                final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
-                final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
+                Log.d(TAG, "Found " + pdus.length + " sms messages");
                 for (int i = 0; i < pdus.length; i++) {
                     SmsMessage sms;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -102,9 +100,14 @@ public class Command {
                     if (sms != null) {
                         String smsMessage = sms.getMessageBody();
                         if (StringUtils.isNotEmpty(smsMessage)) {
+                            //Log.d(TAG, "Checking sms message " + smsMessage);
+                            final PreferencesUtils prefs = new PreferencesUtils(context);
+                            final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+                            final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
+                            final boolean hasSocialNotifiers = StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_SOCIAL)) || StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_EMAIL));
                             for (AbstractCommand c : getCommands()) {
-                                if (c.findSmsCommand(context, smsMessage, sms.getOriginatingAddress(), pin, isPinRequired)) {
-                                    Log.d(TAG, "Found matching sms command");
+                                if (c.findSmsCommand(context, smsMessage, sms.getOriginatingAddress(), pin, isPinRequired, hasSocialNotifiers)) {
+                                    Log.d(TAG, "Found matching sms command " + c.getSmsCommand());
                                     return c.getSmsCommand();
                                 }
                             }
