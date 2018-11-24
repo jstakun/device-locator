@@ -78,7 +78,7 @@ public abstract class AbstractCommand {
         if (commandFound) {
             onSmsCommandFound(sender, context);
             return true;
-        } else if ((StringUtils.startsWithIgnoreCase(smsMessage, smsCommand) || StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) && hasSocialNotifiers) {
+        } else if ((StringUtils.startsWithIgnoreCase(smsMessage, smsCommand + "t") || StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand + "t")) && hasSocialNotifiers) {
             commandFound = findCommandInSmsMessage(context, smsCommand + "t", smsMessage, pin, isPinRequired);
             if (!commandFound && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
                 commandFound = findCommandInSmsMessage(context, smsShortCommand + "t", smsMessage, pin, isPinRequired);
