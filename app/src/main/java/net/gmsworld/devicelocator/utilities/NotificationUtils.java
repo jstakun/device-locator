@@ -12,6 +12,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -63,7 +64,7 @@ public class NotificationUtils {
                 .build();
     }
 
-    public static void showMessageNotification(Context context, String message, Location location, Bundle extras) {
+    static void showMessageNotification(Context context, String message, Location location, Bundle extras) {
         int notificationId = (int) System.currentTimeMillis();
         String id = null;
 
@@ -91,18 +92,18 @@ public class NotificationUtils {
         }
     }
 
-    private static Notification buildMessageNotification(Context context, int notificationId, String message, Location location, Bundle extras) {
+    private static Notification buildMessageNotification(Context context, int notificationId, String message, Location deviceLocation, Bundle extras) {
         PendingIntent mapIntent = null, routeIntent = null, webIntent = null;
         String deviceName = extras.getString(MainActivity.DEVICE_NAME);
         String routeId = extras.getString("routeId");
 
-        if (location != null) {
+        if (deviceLocation != null) {
             //message has location
             String device = "Your+Device";
             if (StringUtils.isNotEmpty(deviceName)) {
                 device = "Device+" + deviceName;
             }
-            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + location.getLatitude() + "," + location.getLongitude() + "(" + device + ")");
+            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + deviceLocation.getLatitude() + "," + deviceLocation.getLongitude() + "(" + device + ")");
             Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
             gmsIntent.setPackage("com.google.android.apps.maps");
             if (gmsIntent.resolveActivity(context.getPackageManager()) != null) {
@@ -111,11 +112,28 @@ public class NotificationUtils {
 
             Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
             if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) { //10 min
-                int distance = (int) location.distanceTo(lastLocation); //in meters
+                int distance = (int) deviceLocation.distanceTo(lastLocation); //in meters
                 if (distance <= 0) {
                     distance = 1;
                 }
-                message += "\n" + DistanceFormatter.format(distance) + " away";
+                message += "\n" + DistanceFormatter.format(distance) + " away from you";
+            }
+            if (extras.containsKey("imei")) {
+                float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLatitude", 0f);
+                float lng = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLongitude", 0f);
+                if (lat != 0f && lng != 0f) {
+                    Location l = new Location("");
+                    l.setLatitude((double) lat);
+                    l.setLongitude((double) lng);
+                    int distance = (int) deviceLocation.distanceTo(l);
+                    if (distance <= 0) {
+                        distance = 1;
+                    }
+                    message += "\n" + DistanceFormatter.format(distance) + " away from previous location";
+                }
+                PreferenceManager.getDefaultSharedPreferences(context).edit().
+                        putFloat(extras.getString("imei") + "_previousLatitude", (float)deviceLocation.getLatitude()).
+                        putFloat(extras.getString("imei") + "_previousLongitude", (float)deviceLocation.getLongitude()).apply();
             }
         }
 
