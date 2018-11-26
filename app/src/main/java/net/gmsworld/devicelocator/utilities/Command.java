@@ -98,7 +98,7 @@ public class Command {
                         sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
                     }
                     if (sms != null) {
-                        String smsMessage = sms.getMessageBody();
+                        String smsMessage = StringUtils.trim(sms.getMessageBody());
                         if (StringUtils.isNotEmpty(smsMessage)) {
                             //Log.d(TAG, "Checking sms message " + smsMessage);
                             final PreferencesUtils prefs = new PreferencesUtils(context);
@@ -125,10 +125,10 @@ public class Command {
         final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
         final boolean hasSocialNotifiers = StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_SOCIAL)) || StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_EMAIL));
         for (AbstractCommand c : getCommands()) {
-            if (c.findAppCommand(context, message, sender, location, extras, pin, isPinRequired)) {
+            if (c.findAppCommand(context, StringUtils.trim(message), sender, location, extras, pin, isPinRequired)) {
                 Log.d(TAG, "Found matching cloud command");
                 return c.getSmsCommand();
-            } else if (c.findSocialCommand(context, message, pin, isPinRequired, hasSocialNotifiers)) {
+            } else if (c.findSocialCommand(context, StringUtils.trim(message), pin, isPinRequired, hasSocialNotifiers)) {
                 Log.d(TAG, "Found matching social command");
                 return c.getSmsCommand();
             }
