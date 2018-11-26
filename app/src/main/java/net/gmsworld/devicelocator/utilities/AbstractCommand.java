@@ -67,6 +67,7 @@ public abstract class AbstractCommand {
 
     protected boolean findSmsCommand(Context context, final String smsMessage, final String sender, final String pin, final boolean isPinRequired, final boolean hasSocialNotifiers) {
         boolean commandFound = false;
+        //sms with sms notification
         if (StringUtils.startsWithIgnoreCase(smsMessage, smsCommand)) {
             commandFound = findCommandInMessage(context, smsCommand, smsMessage, pin, isPinRequired);
             auditCommand(context, smsCommand);
@@ -79,6 +80,7 @@ public abstract class AbstractCommand {
             onSmsCommandFound(sender, context);
             return true;
         } else if ((StringUtils.startsWithIgnoreCase(smsMessage, smsCommand + "t") || StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand + "t")) && hasSocialNotifiers) {
+            //sms with social notification
             commandFound = findCommandInMessage(context, smsCommand + "t", smsMessage, pin, isPinRequired);
             if (!commandFound && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
                 commandFound = findCommandInMessage(context, smsShortCommand + "t", smsMessage, pin, isPinRequired);

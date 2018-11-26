@@ -119,9 +119,9 @@ public class NotificationUtils {
                 message += "\n" + DistanceFormatter.format(distance) + " away from you";
             }
             if (extras.containsKey("imei")) {
-                float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLatitude", 0f);
-                float lng = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLongitude", 0f);
-                if (lat != 0f && lng != 0f) {
+                float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLatitude", Float.NaN);
+                float lng = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLongitude", Float.NaN);
+                if (lat != Float.NaN && lng != Float.NaN) {
                     Location l = new Location("");
                     l.setLatitude((double) lat);
                     l.setLongitude((double) lng);
