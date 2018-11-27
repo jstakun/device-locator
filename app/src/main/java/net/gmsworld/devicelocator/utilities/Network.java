@@ -191,6 +191,7 @@ public class Network {
                 response = total.toString();
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
+                responseCode = 500;
             }
             return responseCode;
         }
@@ -288,6 +289,7 @@ public class Network {
                 }
             } catch (Throwable e) {
                 Log.d(TAG, ".uploadScreenshot() exception: " + e.getMessage(), e);
+                responseCode = 500;
             } finally {
                 try {
                     if (is != null) {
@@ -373,6 +375,7 @@ public class Network {
 
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
+                responseCode = 500;
             }
 
             return responseCode;
