@@ -18,11 +18,11 @@ public class SmsCommandsEnabledDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        //builder.setNegativeButton("Show PIN", new DialogInterface.OnClickListener() {
-        //    public void onClick(DialogInterface dialog, int id) {
-        //        Toast.makeText(getActivity(), "Your Security PIN is " + settings.getEncryptedString(PinActivity.DEVICE_PIN), Toast.LENGTH_LONG).show();
-        //    }
-        //});
+        builder.setNegativeButton("Later", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                //Toast.makeText(getActivity(), "Your Security PIN is " + settings.getEncryptedString(PinActivity.DEVICE_PIN), Toast.LENGTH_LONG).show();
+            }
+        });
         builder.setPositiveButton("Permissions", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Intent intent = new Intent(getActivity(), PermissionsActivity.class);

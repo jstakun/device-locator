@@ -82,6 +82,8 @@ public class PermissionsActivity extends AppCompatActivity {
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
                 onCameraPermissionChecked(true);
             }
+        } else if (requestCode == DEVICE_ADMIN && resultCode == RESULT_CANCELED) {
+            Toast.makeText(this, "It seems you have manually revoked this permission. Please grant it again!", Toast.LENGTH_LONG).show();
         }
     }
 
