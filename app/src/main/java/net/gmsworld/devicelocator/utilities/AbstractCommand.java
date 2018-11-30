@@ -194,6 +194,6 @@ public abstract class AbstractCommand {
 
     private void auditCommand(Context context, String command) {
         File auditFile = Files.getFilesDir(context, AUDIT_FILE, false);
-        Files.appendLineToFileFromContextDir(auditFile, System.currentTimeMillis() + " " + command);
+        Files.appendLineToFileFromContextDir(auditFile, System.currentTimeMillis() + " " + command, 100, 10);
     }
 }

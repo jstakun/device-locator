@@ -111,14 +111,14 @@ public class Files {
         }
     }
 
-    public static void appendLineToFileFromContextDir(File fc, String line) {
+    public static void appendLineToFileFromContextDir(File fc, String line, int maxLines, int removeLines) {
         QueueFile queueFile = null;
 
         try {
             queueFile = new QueueFile.Builder(fc).build();
             queueFile.add(line.getBytes());
-            if (queueFile.size() > 20000) {
-                queueFile.remove(1000);
+            if (maxLines > 0 && removeLines > 0 && queueFile.size() > maxLines) {
+                queueFile.remove(removeLines);
             }
         } catch(Exception e){
             Log.d(TAG, e.getMessage(), e);

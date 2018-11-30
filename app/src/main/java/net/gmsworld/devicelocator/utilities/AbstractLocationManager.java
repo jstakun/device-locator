@@ -148,7 +148,7 @@ public abstract class AbstractLocationManager {
             Log.d(TAG, "Route point will be added to data store");
             if (routeFile != null) {
                 String line = location.getLatitude() + "," + location.getLongitude() + "," + System.currentTimeMillis();
-                Files.appendLineToFileFromContextDir(routeFile, line);
+                Files.appendLineToFileFromContextDir(routeFile, line, 10000, 1000);
             } else {
                 Log.e(TAG, "Route file object is null. I'm unable to persist route point!");
             }
