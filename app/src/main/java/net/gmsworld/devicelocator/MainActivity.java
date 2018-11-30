@@ -181,7 +181,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
-        toggleBroadcastReceiver(); //set sms broadcast receiver
+        //TODO hide sms_notification view
+        toggleSmsBroadcastReceiver();
 
         if (motionDetectorRunning) {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null, false, RouteTrackingService.Mode.Normal);
@@ -518,7 +519,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         this.running = !this.running;
         saveData();
         updateUI();
-        toggleBroadcastReceiver();
+        toggleSmsBroadcastReceiver();
 
         Bundle bundle = new Bundle();
         bundle.putBoolean("running", this.running);
@@ -574,7 +575,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     }
 
-    private void toggleBroadcastReceiver() {
+    private void toggleSmsBroadcastReceiver() {
         ComponentName receiver = new ComponentName(getApplicationContext(), SmsReceiver.class);
         PackageManager pm = getApplicationContext().getPackageManager();
 
@@ -1197,6 +1198,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = SmsCommandsInitDialogFragment.newInstance(this);
                 smsCommandsInitDialogFragment.show(getFragmentManager(), SmsCommandsInitDialogFragment.TAG);
             }
+            //TODO show sms info
         }
     }
 
@@ -1213,6 +1215,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //TODO show sms info
                 MainActivity.this.toggleRunning();
                 MainActivity.this.clearFocus();
             }

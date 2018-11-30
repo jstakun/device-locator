@@ -96,12 +96,14 @@ public class NotificationUtils {
         PendingIntent mapIntent = null, routeIntent = null, webIntent = null;
         String deviceName = extras.getString(MainActivity.DEVICE_NAME);
         String routeId = extras.getString("routeId");
+        String title = context.getString(R.string.app_name) + " Notification";
 
         if (deviceLocation != null) {
             //message has location
             String device = "Your+Device";
             if (StringUtils.isNotEmpty(deviceName)) {
                 device = "Device+" + deviceName;
+                title = deviceName.replace('-',' ') + " Notification";
             }
             Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + deviceLocation.getLatitude() + "," + deviceLocation.getLongitude() + "(" + device + ")");
             Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
@@ -109,14 +111,14 @@ public class NotificationUtils {
             if (gmsIntent.resolveActivity(context.getPackageManager()) != null) {
                 mapIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             }
-
             Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
             if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) { //10 min
                 int distance = (int) deviceLocation.distanceTo(lastLocation); //in meters
-                if (distance <= 0) {
-                    distance = 1;
+                if (distance <= 2) {
+                    message += "\n" + "Next to you";
+                } else {
+                    message += "\n" + DistanceFormatter.format(distance) + " away from you";
                 }
-                message += "\n" + DistanceFormatter.format(distance) + " away from you";
             }
             if (extras.containsKey("imei")) {
                 float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLatitude", Float.NaN);
@@ -126,10 +128,11 @@ public class NotificationUtils {
                     l.setLatitude((double) lat);
                     l.setLongitude((double) lng);
                     int distance = (int) deviceLocation.distanceTo(l);
-                    if (distance <= 0) {
-                        distance = 1;
+                    if (distance <= 5) {
+                        message += "\n" + "In the same location";
+                    } else {
+                        message += "\n" + DistanceFormatter.format(distance) + " away from previous location";
                     }
-                    message += "\n" + DistanceFormatter.format(distance) + " away from previous location";
                 }
                 PreferenceManager.getDefaultSharedPreferences(context).edit().
                         putFloat(extras.getString("imei") + "_previousLatitude", (float)deviceLocation.getLatitude()).
@@ -181,7 +184,7 @@ public class NotificationUtils {
         initChannels(context, channelId);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, channelId)
-                .setContentTitle(context.getString(R.string.app_name) + " Notification")
+                .setContentTitle(title)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_devices_other_white)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))

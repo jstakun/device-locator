@@ -243,7 +243,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:paddingBottom="8dp"
-                        android:paddingTop="15dp">
+                        android:paddingTop="15dp"
+                        android:id="@+id/sms_notification">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -285,7 +286,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:paddingBottom="8dp"
-                        android:paddingTop="15dp">
+                        android:paddingTop="15dp"
+                        android:id="@+id/email_notification">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -309,7 +311,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:paddingBottom="8dp"
-                        android:paddingTop="15dp">
+                        android:paddingTop="15dp"
+                        android:id="@+id/telegram_notification">
 
                         <TextView
                             android:layout_width="wrap_content"
