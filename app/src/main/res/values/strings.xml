@@ -54,6 +54,7 @@
     <string name="accept_sms_without_pin">Only accept SMS commands with Security PIN</string>
     <string name="info_about">%1$s (R)\nVersion: %2$s-%3$d built on %4$s\nCopyright © 2010–%5$d GMS World\n%6$s installed on %7$s</string>
     <string name="admin_grant_explanation">Please grant this permissions to enable failed login notification service and lock screen command in Device Locator.</string>
+    <string name="admin_grant_description">Device Locator can notify you on failed login and lock device screen when prompted</string>
     <string name="test">Test</string>
     <string name="notification_tracker">"Device Locator is tracking your device location. Click to open Device Locator"</string>
     <string name="activation_email_title">Email activation</string>

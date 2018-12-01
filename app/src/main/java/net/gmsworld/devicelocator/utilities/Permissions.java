@@ -132,9 +132,9 @@ public class Permissions {
     }
 
     public static void startSettingsIntent(Context context) {
+        Toast.makeText(context, "Click on Permissions", Toast.LENGTH_LONG).show();
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + context.getPackageName()));
-        //TODO open permissions fragment
-        //intent.addCategory(Intent.CATEGORY_DEFAULT);
+        //https://stackoverflow.com/questions/31955872/how-to-jump-to-the-manage-permission-page-in-settings-app-with-code
         //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }

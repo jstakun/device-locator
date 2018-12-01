@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator;
 
 import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
@@ -83,7 +84,12 @@ public class PermissionsActivity extends AppCompatActivity {
                 onCameraPermissionChecked(true);
             }
         } else if (requestCode == DEVICE_ADMIN && resultCode == RESULT_CANCELED) {
-            Toast.makeText(this, "It seems you have manually revoked this permission. Please grant it again!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Select checkbox next to " + getString(R.string.app_name), Toast.LENGTH_LONG).show();
+            try {
+                startActivity(new Intent().setComponent(new ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings")));
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
         }
     }
 
