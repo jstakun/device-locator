@@ -191,6 +191,9 @@ public class PermissionsActivity extends AppCompatActivity {
 
         Switch getAccountsPermission = findViewById(R.id.get_accounts_permission);
         getAccountsPermission.setChecked(Permissions.haveGetAccountsPermission(this));
+
+        Switch resetPermission = findViewById(R.id.reset_permission);
+        resetPermission.setChecked(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowReset", false));
     }
 
     @Override
@@ -316,6 +319,9 @@ public class PermissionsActivity extends AppCompatActivity {
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this);
                 }
+                break;
+            case R.id.reset_permission:
+                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("allowReset", checked).apply();
                 break;
             default:
                 break;

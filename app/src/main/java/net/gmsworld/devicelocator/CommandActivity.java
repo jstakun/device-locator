@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import net.gmsworld.devicelocator.fragments.SendCommandDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractCommand;
@@ -41,7 +42,7 @@ import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
-public class CommandActivity extends AppCompatActivity implements OnLocationUpdatedListener {
+public class CommandActivity extends AppCompatActivity implements OnLocationUpdatedListener, SendCommandDialogFragment.SendCommandDialogListener {
 
     private static final String TAG = CommandActivity.class.getSimpleName();
 
@@ -242,9 +243,6 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             if (!validArgs) {
                 Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
             } else if (Network.isNetworkAvailable(CommandActivity.this)) {
-                PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(device.imei + "_lastCommand", command).apply();
-                Toast.makeText(CommandActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
-                firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
                 prefs.setEncryptedString(PIN_PREFIX + device.imei, pin);
                 Intent newIntent = new Intent(CommandActivity.this, CommandService.class);
                 if (needArgs && StringUtils.isNotEmpty(commandArgs)) {
@@ -256,11 +254,24 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 if (StringUtils.isNotEmpty(device.name)) {
                     newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
                 }
-                startService(newIntent);
+                String confirmation = c.getConfirmation();
+                if (StringUtils.isNotEmpty(confirmation)) {
+                    SendCommandDialogFragment sendCommandDialogFragment = SendCommandDialogFragment.newInstance(confirmation, command, newIntent, this);
+                    sendCommandDialogFragment.show(getFragmentManager(), SendCommandDialogFragment.TAG);
+                } else {
+                    sendCommand(command, newIntent);
+                }
             } else {
                 Toast.makeText(CommandActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    public void sendCommand(String command, Intent intent) {
+        PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(device.imei + "_lastCommand", command).apply();
+        Toast.makeText(CommandActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
+        firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
+        startService(intent);
     }
 
     private void setSelectedCommand(PreferencesUtils prefs, Spinner commandSpinner) {

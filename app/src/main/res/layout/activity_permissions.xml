@@ -37,7 +37,7 @@
 
             <Switch
                 android:id="@+id/device_admin_permission"
-                android:text="@string/DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN"
+                android:text="@string/DevicePolicyManager_ACTION_ADD_DEVICE_ADMIN"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
 
             <Switch
                 android:id="@+id/manage_overlay_permission"
-                android:text="@string/Settings.ACTION_MANAGE_OVERLAY_PERMISSION"
+                android:text="@string/Settings_ACTION_MANAGE_OVERLAY_PERMISSION"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
 
             <Switch
                 android:id="@+id/notification_policy_access_permission"
-                android:text="@string/Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS"
+                android:text="@string/Settings_ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
 
             <Switch
                 android:id="@+id/access_fine_location_permission"
-                android:text="@string/Manifest.permission.ACCESS_FINE_LOCATION"
+                android:text="@string/Manifest_permission_ACCESS_FINE_LOCATION"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -90,7 +90,7 @@
 
             <Switch
                 android:id="@+id/sms_permission"
-                android:text="@string/Manifest.permission.SEND_SMS"
+                android:text="@string/Manifest_permission_SEND_SMS"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -101,7 +101,7 @@
 
             <Switch
                 android:id="@+id/camera_permission"
-                android:text="@string/Manifest.permission.CAMERA"
+                android:text="@string/Manifest_permission_CAMERA"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -112,7 +112,7 @@
 
             <Switch
                 android:id="@+id/read_contacts_permission"
-                android:text="@string/Manifest.permission.READ_CONTACTS"
+                android:text="@string/Manifest_permission_READ_CONTACTS"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -123,7 +123,18 @@
 
             <Switch
                 android:id="@+id/call_phone_permission"
-                android:text="@string/Manifest.permission.CALL_PHONE"
+                android:text="@string/Manifest_permission_CALL_PHONE"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
+                android:id="@+id/reset_permission"
+                android:text="@string/reset_permission"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -143,7 +154,7 @@
 
             <Switch
                 android:id="@+id/use_fingerprint_permission"
-                android:text="@string/Manifest.permission.USE_FINGERPRINT"
+                android:text="@string/Manifest_permission_USE_FINGERPRINT"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -154,7 +165,7 @@
 
             <Switch
                 android:id="@+id/get_accounts_permission"
-                android:text="@string/Manifest.permission.GET_ACCOUNTS"
+                android:text="@string/Manifest_permission_GET_ACCOUNTS"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -165,7 +176,7 @@
 
             <Switch
                 android:id="@+id/read_phone_state_permission"
-                android:text="@string/Manifest.permission.READ_PHONE_STATE"
+                android:text="@string/Manifest_permission_READ_PHONE_STATE"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

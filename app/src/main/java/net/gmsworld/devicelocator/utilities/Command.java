@@ -67,7 +67,8 @@ public class Command {
     public final static String LOCK_SCREEN_COMMAND = "lockdl"; //ls lock screen now
     public final static String ABOUT_COMMAND = "aboutdl"; //ab send app version info
     public final static String CONFIG_COMMAND = "configdl"; //cf change app configuration
-    public final static String PERIMETER_COMMAND = "perimeterdl"; //perimeter cloud message
+    public final static String PERIMETER_COMMAND = "perimeterdl"; //pm perimeter cloud message
+    public final static String RESET_COMMAND = "resetdl"; //rt reset device to factory settings
 
     //private
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
@@ -78,6 +79,7 @@ public class Command {
     //not a command
     public final static String STOPPED_TRACKER = "stopped"; //this is not command
     public final static String LOCK_SCREEN_FAILED = "lockfail"; //this is not command
+    public final static String RESET_FAILED = "resetfail"; //this is not command
     public final static String MUTE_FAILED = "mutefail"; //this is not command
     public final static String INVALID_PIN = "invalidPin";
     public final static String INVALID_COMMAND = "invalidCommand";
@@ -1445,6 +1447,59 @@ public class Command {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private static final class ResetDeviceCommand extends AbstractCommand {
+
+        public ResetDeviceCommand() { super(RESET_COMMAND, "rt", Finder.EQUALS); }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            if (resetNow(context)) {
+                sendSmsNotification(context, sender, LOCK_SCREEN_COMMAND);
+            } else {
+                sendSmsNotification(context, sender, LOCK_SCREEN_FAILED);
+            }
+        }
+
+        @Override
+        protected void onSocialCommandFound(String sender, Context context) {
+            if (resetNow(context)) {
+                sendSocialNotification(context, RESET_COMMAND);
+            } else {
+                sendSocialNotification(context, RESET_FAILED);
+            }
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
+            if (resetNow(context)) {
+                sendAppNotification(context, RESET_COMMAND, sender);
+            } else {
+                sendAppNotification(context, RESET_FAILED, sender);
+            }
+        }
+
+        @Override
+        public String getConfirmation() {
+            return "This command will reset your device to factory settings and will wipe all you data! Are you sure?";
+        }
+
+        private boolean resetNow(Context context) {
+            DevicePolicyManager deviceManger = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            final ComponentName compName = new ComponentName(context, DeviceAdminEventReceiver.class);
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("allowReset", false) && deviceManger != null && deviceManger.isAdminActive(compName)) {
+                try {
+                    deviceManger.wipeData(0);
+                    return true;
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    return false;
+                }
+            } else {
+                return false;
             }
         }
     }

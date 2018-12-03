@@ -61,6 +61,8 @@ public abstract class AbstractCommand {
 
     public String getDefaultArgs() { return ""; }
 
+    public String getConfirmation() { return ""; }
+
     public boolean canResend() { return false; }
 
     public boolean hasOppositeCommand() { return getOppositeCommand() != null; }
