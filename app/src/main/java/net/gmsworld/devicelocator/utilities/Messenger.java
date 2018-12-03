@@ -765,10 +765,10 @@ public class Messenger {
                 text = "Invalid command has been sent to device " + deviceId + ".";
                 break;
             case Command.RESET_COMMAND:
-                text = "Reset to factory settings on device " + deviceId + " has been started.";
+                text = "Reset to factory defaults on device " + deviceId + " has been started.";
                 break;
             case Command.RESET_FAILED:
-                text = "Reset to factory settings on device " + deviceId + " has failed.";
+                text = "Reset to factory defaults on device " + deviceId + " has failed.";
                 break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);

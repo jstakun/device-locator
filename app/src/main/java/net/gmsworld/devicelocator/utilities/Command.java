@@ -1484,7 +1484,7 @@ public class Command {
 
         @Override
         public String getConfirmation() {
-            return "This command will reset your device to factory settings and will wipe all you data! Are you sure?";
+            return "This command will reset device to factory defaults and will wipe all data and applications from the device! Are you sure?";
         }
 
         private boolean resetNow(Context context) {
