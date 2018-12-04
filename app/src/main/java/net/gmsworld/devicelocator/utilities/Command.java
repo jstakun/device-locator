@@ -20,6 +20,7 @@ import android.util.Patterns;
 
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
@@ -77,10 +78,10 @@ public class Command {
     public final static String AUDIO_OFF_COMMAND = "noaudiodl"; //na disable audio transmitter
 
     //not a command
-    public final static String STOPPED_TRACKER = "stopped"; //this is not command
     public final static String LOCK_SCREEN_FAILED = "lockfail"; //this is not command
     public final static String RESET_FAILED = "resetfail"; //this is not command
     public final static String MUTE_FAILED = "mutefail"; //this is not command
+    public final static String STOPPED_TRACKER = "stopped"; //this is not command
     public final static String INVALID_PIN = "invalidPin";
     public final static String INVALID_COMMAND = "invalidCommand";
 
@@ -1457,17 +1458,33 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            if (resetNow(context)) {
-                sendSmsNotification(context, sender, LOCK_SCREEN_COMMAND);
+            DevicePolicyManager deviceManger = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            final ComponentName compName = new ComponentName(context, DeviceAdminEventReceiver.class);
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("allowReset", false) && deviceManger != null && deviceManger.isAdminActive(compName)) {
+                try {
+                    sendSmsNotification(context, sender, RESET_COMMAND);
+                    deviceManger.wipeData(0);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    sendSmsNotification(context, sender, RESET_FAILED);
+                }
             } else {
-                sendSmsNotification(context, sender, LOCK_SCREEN_FAILED);
+                sendSmsNotification(context, sender, RESET_FAILED);
             }
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            if (resetNow(context)) {
-                sendSocialNotification(context, RESET_COMMAND);
+            DevicePolicyManager deviceManger = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            final ComponentName compName = new ComponentName(context, DeviceAdminEventReceiver.class);
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("allowReset", false) && deviceManger != null && deviceManger.isAdminActive(compName)) {
+                try {
+                    sendSocialNotification(context, RESET_COMMAND);
+                    deviceManger.wipeData(0);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    sendSocialNotification(context, RESET_FAILED);
+                }
             } else {
                 sendSocialNotification(context, RESET_FAILED);
             }
@@ -1475,32 +1492,27 @@ public class Command {
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            if (resetNow(context)) {
-                sendAppNotification(context, RESET_COMMAND, sender);
+            DevicePolicyManager deviceManger = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            final ComponentName compName = new ComponentName(context, DeviceAdminEventReceiver.class);
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("allowReset", false) && deviceManger != null && deviceManger.isAdminActive(compName)) {
+                try {
+                    sendAppNotification(context, RESET_COMMAND, sender);
+                    deviceManger.wipeData(0);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    sendAppNotification(context, RESET_FAILED, sender);
+                }
             } else {
                 sendAppNotification(context, RESET_FAILED, sender);
             }
         }
 
         @Override
-        public String getConfirmation() {
-            return "This command will reset device to factory defaults and will wipe all data and applications from the device! Are you sure?";
+        public int getConfirmation() {
+            return R.string.reset_confirmation;
         }
 
-        private boolean resetNow(Context context) {
-            DevicePolicyManager deviceManger = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
-            final ComponentName compName = new ComponentName(context, DeviceAdminEventReceiver.class);
-            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("allowReset", false) && deviceManger != null && deviceManger.isAdminActive(compName)) {
-                try {
-                    deviceManger.wipeData(0);
-                    return true;
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage(), e);
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
+        @Override
+        public boolean canResend() { return true; }
     }
 }

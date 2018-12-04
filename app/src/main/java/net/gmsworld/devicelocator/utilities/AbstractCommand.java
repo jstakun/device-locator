@@ -55,19 +55,28 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    public boolean hasParameters() {
-        return finder.equals(Finder.STARTS);
-    }
-
     public String getDefaultArgs() { return ""; }
 
-    public String getConfirmation() { return ""; }
+    public int getConfirmation() { return -1; }
 
     public boolean canResend() { return false; }
 
-    public boolean hasOppositeCommand() { return getOppositeCommand() != null; }
+    public final boolean hasParameters() {
+        return finder.equals(Finder.STARTS);
+    }
 
-    protected boolean findSmsCommand(Context context, final String smsMessage, final String sender, final String pin, final boolean isPinRequired, final boolean hasSocialNotifiers) {
+    public final boolean hasOppositeCommand() { return getOppositeCommand() != null; }
+
+    public final String getSmsCommand() {
+        return smsCommand;
+    }
+
+    public final void setCommandTokens(String[] commandTokens) {
+        this.commandTokens = commandTokens;
+    }
+
+
+    protected final boolean findSmsCommand(Context context, final String smsMessage, final String sender, final String pin, final boolean isPinRequired, final boolean hasSocialNotifiers) {
         boolean commandFound = false;
         //sms with sms notification
         if (StringUtils.startsWithIgnoreCase(smsMessage, smsCommand)) {
@@ -95,7 +104,7 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    protected boolean findSocialCommand(Context context, String message, String pin, boolean isPinRequired, boolean hasSocialNotifiers) {
+    protected final boolean findSocialCommand(Context context, String message, String pin, boolean isPinRequired, boolean hasSocialNotifiers) {
         if ((StringUtils.startsWithIgnoreCase(message, smsCommand + "t") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "t")) && hasSocialNotifiers) {
             auditCommand(context, message);
             if (findKeyword(context, smsCommand + "t", message, pin, isPinRequired)) {
@@ -109,7 +118,7 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    protected boolean findAppCommand(Context context, String message, String sender, Location location, Bundle extras, String pin, boolean isPinRequired) {
+    protected final boolean findAppCommand(Context context, String message, String sender, Location location, Bundle extras, String pin, boolean isPinRequired) {
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "app") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "app")) {
             auditCommand(context, message);
             if (findKeyword(context, smsCommand + "app", message, pin, isPinRequired)) {
@@ -184,14 +193,6 @@ public abstract class AbstractCommand {
             newIntent.putExtra("command", command);
         }
         context.startService(newIntent);
-    }
-
-    public String getSmsCommand() {
-        return smsCommand;
-    }
-
-    public void setCommandTokens(String[] commandTokens) {
-        this.commandTokens = commandTokens;
     }
 
     private void auditCommand(Context context, String command) {

@@ -148,6 +148,7 @@ public class PermissionsActivity extends AppCompatActivity {
         Switch accessFineLocationPermission = findViewById(R.id.access_fine_location_permission);
         accessFineLocationPermission.setChecked(Permissions.haveLocationPermission(this));
 
+        //TODO hide sms permissions switch
         Switch smsPermission = findViewById(R.id.sms_permission);
         smsPermission.setChecked(Permissions.haveSendSMSPermission(this));
 
@@ -159,6 +160,7 @@ public class PermissionsActivity extends AppCompatActivity {
             cameraPermission.setChecked(true);
         }
 
+        //TODO hide read contacts permissions switch
         Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
         boolean perm = Permissions.haveReadContactsPermission(this);
         readContactsPermission.setChecked(perm);

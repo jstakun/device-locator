@@ -14,7 +14,8 @@ public class SendCommandDialogFragment extends DialogFragment {
 
     public static final String TAG = "SendCommandDialogFragment";
 
-    private String message, command;
+    private int message;
+    private String command;
     private Intent intent;
     private SendCommandDialogListener listener;
 
@@ -22,7 +23,7 @@ public class SendCommandDialogFragment extends DialogFragment {
         void sendCommand(String command, Intent intent);
     }
 
-    public static SendCommandDialogFragment newInstance(String message, String command, Intent intent, SendCommandDialogListener listener) {
+    public static SendCommandDialogFragment newInstance(int message, String command, Intent intent, SendCommandDialogListener listener) {
         SendCommandDialogFragment sendCommandDialogFragment = new SendCommandDialogFragment();
         sendCommandDialogFragment.message = message;
         sendCommandDialogFragment.command = command;
@@ -43,7 +44,7 @@ public class SendCommandDialogFragment extends DialogFragment {
                 listener.sendCommand(command, intent);
             }
         });
-        builder.setMessage(Html.fromHtml("<font color=\"#808080\">" + message + "</font>"));
+        builder.setMessage(Html.fromHtml("<font color=\"#808080\">" + getActivity().getString(message) + "</font>"));
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
         builder.setIcon(R.drawable.ic_warning_gray);
         return builder.create();

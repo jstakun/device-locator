@@ -748,6 +748,7 @@ public class Messenger {
                 break;
             case Command.LOCK_SCREEN_FAILED:
                 text = "Screen lock failed on device " + deviceId + " due to insufficient privileges!";
+                command = Command.LOCK_SCREEN_COMMAND;
                 break;
             case Command.CONFIG_COMMAND:
                 text = "Configuration change on device " + deviceId + " has been applied.";
@@ -757,6 +758,7 @@ public class Messenger {
                 break;
             case Command.MUTE_FAILED:
                 text = "Mute failed on device " + deviceId + " due to insufficient privileges!";
+                command = Command.MUTE_COMMAND;
                 break;
             case Command.INVALID_PIN:
                 text = "Command with invalid pin has been sent to device " + deviceId + ".";
@@ -769,6 +771,7 @@ public class Messenger {
                 break;
             case Command.RESET_FAILED:
                 text = "Reset to factory defaults on device " + deviceId + " has failed.";
+                command = Command.RESET_COMMAND;
                 break;
             default:
                 Log.e(TAG, "Messenger received wrong command: " + command);

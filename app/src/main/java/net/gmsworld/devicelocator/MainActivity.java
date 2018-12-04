@@ -181,8 +181,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
-        //TODO hide sms_notification view
+        //TODO hide sms_notification and sms_control_card views
         toggleSmsBroadcastReceiver();
+        //
 
         if (motionDetectorRunning) {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null, false, RouteTrackingService.Mode.Normal);
