@@ -174,7 +174,7 @@ public class PermissionsActivity extends AppCompatActivity {
         callPhonePermission.setChecked(Permissions.haveCallPhonePermission(this));
 
         Switch resetPermission = findViewById(R.id.reset_permission);
-        resetPermission.setChecked(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowReset", false));
+        resetPermission.setChecked(settings.getBoolean("allowReset", false));
 
         //other permissions
 
