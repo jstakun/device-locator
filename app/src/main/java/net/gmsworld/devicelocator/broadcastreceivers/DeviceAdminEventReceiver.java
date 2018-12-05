@@ -24,18 +24,20 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
 
     public static final String SOURCE = "LoginFailed";
 
+    public static final String DEVICE_ADMIN_ENABLED = "loginTracker";
+
     @Override
     public void onEnabled(Context context, Intent intent) {
         super.onEnabled(context, intent);
         Log.d(TAG, "Device admin enabled");
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("loginTracker", true).apply();
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(DEVICE_ADMIN_ENABLED, true).putBoolean("allowReset", true).apply();
     }
 
     @Override
     public void onDisabled(Context context, Intent intent) {
         super.onDisabled(context, intent);
         Log.d(TAG, "Device admin disabled");
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("loginTracker", false).apply();
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(DEVICE_ADMIN_ENABLED, false).putBoolean("allowReset", false).apply();
     }
 
     @Override

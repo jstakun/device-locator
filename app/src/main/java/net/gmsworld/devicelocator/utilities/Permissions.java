@@ -12,6 +12,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import net.gmsworld.devicelocator.R;
@@ -162,8 +163,12 @@ public class Permissions {
     }
 
     public static void startDeviceAdminIntent(Context context) {
-        Intent intent = new Intent();
-        intent.setComponent(new ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings"));
-        context.startActivity(intent);
+        try {
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings"));
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Log.e(Permissions.class.getSimpleName(), e.getMessage(), e);
+        }
     }
 }

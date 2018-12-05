@@ -1,7 +1,6 @@
 package net.gmsworld.devicelocator;
 
 import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
@@ -35,6 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+import static net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver.DEVICE_ADMIN_ENABLED;
+
 public class PermissionsActivity extends AppCompatActivity {
 
     private static final String TAG = PermissionsActivity.class.getSimpleName();
@@ -44,6 +45,7 @@ public class PermissionsActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION = 3;
     private static final int MANAGE_OVERLAY_WITH_CAMERA = 4;
     private static final int CONTACTS_PERMISSION = 5;
+    private static final int RESET_PERMISSION = 6;
 
     private static final String CURRENT_DEVICE_ID = "currentDeviceId";
 
@@ -83,13 +85,9 @@ public class PermissionsActivity extends AppCompatActivity {
             if (HiddenCameraUtils.canOverDrawOtherApps(this)) {
                 onCameraPermissionChecked(true);
             }
-        } else if (requestCode == DEVICE_ADMIN && resultCode == RESULT_CANCELED) {
+        } else if ((requestCode == DEVICE_ADMIN || requestCode == RESET_PERMISSION) && resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Select checkbox next to " + getString(R.string.app_name), Toast.LENGTH_LONG).show();
-            try {
-                startActivity(new Intent().setComponent(new ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings")));
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage(), e);
-            }
+            Permissions.startDeviceAdminIntent(this);
         }
     }
 
@@ -120,11 +118,12 @@ public class PermissionsActivity extends AppCompatActivity {
             //device name has changed because READ_PHONE_STATE permission was revoked
             registerDevice();
         }
+
         // device permissions
 
         //device admin
         Switch deviceAdminPermission = findViewById(R.id.device_admin_permission);
-        deviceAdminPermission.setChecked(settings.getBoolean("loginTracker", false));
+        deviceAdminPermission.setChecked(settings.getBoolean(DEVICE_ADMIN_ENABLED, false));
 
         //manage overlay
         Switch manageOverlayPermission = findViewById(R.id.manage_overlay_permission);
@@ -174,6 +173,9 @@ public class PermissionsActivity extends AppCompatActivity {
         Switch callPhonePermission = findViewById(R.id.call_phone_permission);
         callPhonePermission.setChecked(Permissions.haveCallPhonePermission(this));
 
+        Switch resetPermission = findViewById(R.id.reset_permission);
+        resetPermission.setChecked(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowReset", false));
+
         //other permissions
 
         Switch useFingerprintPermission = findViewById(R.id.use_fingerprint_permission);
@@ -194,8 +196,6 @@ public class PermissionsActivity extends AppCompatActivity {
         Switch getAccountsPermission = findViewById(R.id.get_accounts_permission);
         getAccountsPermission.setChecked(Permissions.haveGetAccountsPermission(this));
 
-        Switch resetPermission = findViewById(R.id.reset_permission);
-        resetPermission.setChecked(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowReset", false));
     }
 
     @Override
@@ -242,7 +242,7 @@ public class PermissionsActivity extends AppCompatActivity {
 
         switch (view.getId()) {
             case R.id.device_admin_permission:
-                if (checked && !settings.getBoolean("loginTracker", false)) {
+                if (checked && !settings.getBoolean(DEVICE_ADMIN_ENABLED, false)) {
                     Permissions.startAddDeviceAdminIntent(this, DEVICE_ADMIN);
                 } else if (!checked) {
                     Permissions.startDeviceAdminIntent(this);
@@ -323,7 +323,11 @@ public class PermissionsActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.reset_permission:
-                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("allowReset", checked).apply();
+                if (checked && !settings.getBoolean(DEVICE_ADMIN_ENABLED, false)) {
+                    Permissions.startAddDeviceAdminIntent(this, RESET_PERMISSION);
+                } else {
+                    PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("allowReset", checked).apply();
+                }
                 break;
             default:
                 break;
