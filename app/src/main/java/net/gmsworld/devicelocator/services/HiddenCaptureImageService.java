@@ -163,6 +163,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
 
                     headers.put("X-GMS-AppId", "2");
                     headers.put("X-GMS-Scope", "dl");
+                    headers.put("X-GMS-DeviceName", Messenger.getDeviceId(this, true));
 
                     if (location != null) {
                         headers.put(Messenger.LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
