@@ -285,7 +285,7 @@ public class Network {
                 if (is != null) {
                     //Read response
                     response = IOUtils.toString(is, "UTF-8");
-                    Log.d(TAG, "Received following server response: " + response);
+                    //Log.d(TAG, "Received following server response: " + response);
                 }
             } catch (Throwable e) {
                 Log.d(TAG, ".uploadScreenshot() exception: " + e.getMessage(), e);

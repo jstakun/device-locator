@@ -174,36 +174,40 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                     Network.uploadScreenshot(this, uploadUrl, out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String imageUrl, int responseCode, String url) {
-                        if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {
-                            //send notification with image url
-                            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-                            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-                            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+                            if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {
+                                //send notification with image url
+                                String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+                                String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
+                                String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
-                            if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(sender) || StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email)) {
-                                Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
-                                newIntent.putExtra("command", Command.TAKE_PHOTO_COMMAND);
-                                newIntent.putExtra("imageUrl", imageUrl);
-                                if (StringUtils.isNotEmpty(app)) {
-                                    newIntent.putExtra("app", app);
-                                } else {
-                                    newIntent.putExtra("email", email);
-                                    newIntent.putExtra("telegramId", telegramId);
-                                    if (StringUtils.isNotEmpty(sender)) {
-                                        newIntent.putExtra("phoneNumber", sender);
+                                if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(sender) || StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email)) {
+                                    Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
+                                    newIntent.putExtra("command", Command.TAKE_PHOTO_COMMAND);
+                                    newIntent.putExtra("imageUrl", imageUrl);
+                                    if (StringUtils.isNotEmpty(app)) {
+                                        newIntent.putExtra("app", app);
                                     } else {
-                                        newIntent.putExtra("phoneNumber", phoneNumber);
+                                        newIntent.putExtra("email", email);
+                                        newIntent.putExtra("telegramId", telegramId);
+                                        if (StringUtils.isNotEmpty(sender)) {
+                                            newIntent.putExtra("phoneNumber", sender);
+                                        } else {
+                                            newIntent.putExtra("phoneNumber", phoneNumber);
+                                        }
                                     }
+                                    try {
+                                        HiddenCaptureImageService.this.startService(newIntent);
+                                    } catch (Exception e) {
+                                        Log.e(TAG, e.getMessage(), e);
+                                    }
+                                } else {
+                                    Log.d(TAG, "Unable to send notification. No notifiers are set.");
                                 }
-                                HiddenCaptureImageService.this.startService(newIntent);
+                                Files.deleteFileFromCache(imageFile.getName(), HiddenCaptureImageService.this, true);
                             } else {
-                                Log.d(TAG, "Unable to send notification. No notifiers are set.");
+                                Log.e(TAG, "Received error response: " + imageUrl);
+                                Log.d(TAG, "Image will be saved to local storage: " + imageFile.getAbsolutePath());
                             }
-                            Files.deleteFileFromCache(imageFile.getName(), HiddenCaptureImageService.this, true);
-                        } else {
-                            Log.e(TAG, "Received error response: " + imageUrl);
-                            Log.d(TAG, "Image will be saved to local storage: " + imageFile.getAbsolutePath());
-                        }
                         }
                     });
                 } else {

@@ -413,22 +413,21 @@ public class Messenger {
 
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
-        } else {
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(telegramId)) {
+            sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(email)) {
+            String title = context.getString(R.string.message);
+            if (StringUtils.isNotEmpty(deviceId)) {
+                title += " installed on device " + deviceId + " - current location";
+                text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
             }
-            if (StringUtils.isNotEmpty(email)) {
-                String title = context.getString(R.string.message);
-                if (deviceId != null) {
-                    title += " installed on device " + deviceId + " - current location";
-                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-                }
-                sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
-            }
-            if (StringUtils.isNotEmpty(app)) {
-                String[] tokens = StringUtils.split(app, "+=+");
-                sendCloudMessage(context, location, tokens[0], tokens[1], text, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
-            }
+            sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(app)) {
+            String[] tokens = StringUtils.split(app, "+=+");
+            sendCloudMessage(context, location, tokens[0], tokens[1], text, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
         }
     }
 
@@ -445,7 +444,7 @@ public class Messenger {
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message);
-            if (deviceId != null) {
+            if (StringUtils.isNotEmpty(deviceId)) {
                 title += " installed on device " + deviceId + " - location map link";
                 text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
             }
@@ -477,7 +476,7 @@ public class Messenger {
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message);
-            if (deviceId != null) {
+            if (StringUtils.isNotEmpty(deviceId)) {
                 title += " installed on device " + deviceId + " - location request";
                 text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
             }
@@ -780,29 +779,28 @@ public class Messenger {
         if (StringUtils.isNotEmpty(text) && StringUtils.isNotEmpty(command)) {
             if (StringUtils.isNotEmpty(phoneNumber)) {
                 sendSMS(context, phoneNumber, text);
-            } else {
-                try {
-                    text = URLEncoder.encode(text, "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    Log.e(TAG, e.getMessage(), e);
-                }
-                if (StringUtils.isNotEmpty(telegramId)) {
-                    sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
-                }
-                if (StringUtils.isNotEmpty(email)) {
-                    if (title == null) {
-                        title = context.getString(R.string.message);
-                        if (deviceId != null) {
-                            title += " installed on device " + deviceId;
-                        }
+            }
+            try {
+                text = URLEncoder.encode(text, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+            if (StringUtils.isNotEmpty(telegramId)) {
+                sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
+            }
+            if (StringUtils.isNotEmpty(email)) {
+                if (StringUtils.isEmpty(title)) {
+                    title = context.getString(R.string.message);
+                    if (StringUtils.isNotEmpty(deviceId)) {
+                        title += " installed on device " + deviceId;
                     }
-                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-                    sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
                 }
-                if (StringUtils.isNotEmpty(app)) {
-                    String[] tokens = StringUtils.split(app, "+=+");
-                    sendCloudMessage(context, null, tokens[0], tokens[1], text, command, 1, new HashMap<String, String>());
-                }
+                text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
+                sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
+            }
+            if (StringUtils.isNotEmpty(app)) {
+                String[] tokens = StringUtils.split(app, "+=+");
+                sendCloudMessage(context, null, tokens[0], tokens[1], text, command, 1, new HashMap<String, String>());
             }
         }
     }
@@ -819,7 +817,7 @@ public class Messenger {
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message);
-            if (deviceId != null) {
+            if (StringUtils.isNotEmpty(deviceId)) {
                 title += " installed on device " + deviceId + " - current location";
             }
             message += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
@@ -838,22 +836,21 @@ public class Messenger {
                 + "\n" + "Battery level: " + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
-        } else {
-            if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(telegramId)) {
+            sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(email)) {
+            String title = context.getString(R.string.message);
+            if (StringUtils.isNotEmpty(deviceId)) {
+                title += " installed on device " + deviceId + " - failed login";
+                text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
             }
-            if (StringUtils.isNotEmpty(email)) {
-                String title = context.getString(R.string.message);
-                if (deviceId != null) {
-                    title += " installed on device " + deviceId + " - failed login";
-                    text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-                }
-                sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
-            }
-            if (StringUtils.isNotEmpty(app)) {
-                String[] tokens = StringUtils.split(app, "+=+");
-                sendCloudMessage(context, null, tokens[0], tokens[1], text, null,1, new HashMap<String, String>());
-            }
+            sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
+        }
+        if (StringUtils.isNotEmpty(app)) {
+            String[] tokens = StringUtils.split(app, "+=+");
+            sendCloudMessage(context, null, tokens[0], tokens[1], text, null,1, new HashMap<String, String>());
         }
     }
 
