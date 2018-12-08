@@ -119,7 +119,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         if (correlationId != null && correlationId.length == 2) {
                             Messenger.sendCloudMessage(this, null, correlationId[0].trim(), correlationId[1].trim(), "Invalid command " + commandName + " sent to device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
                         } else {
-                            sendNotification(this, Command.INVALID_COMMAND);
+                            sendNotification(Command.INVALID_COMMAND);
                         }
                     }
                 } else {
@@ -127,7 +127,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     if (correlationId != null && correlationId.length == 2) {
                         Messenger.sendCloudMessage(this, null, correlationId[0].trim(), correlationId[1].trim(), "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
                     } else {
-                        sendNotification(this, Command.INVALID_PIN);
+                        sendNotification(Command.INVALID_PIN);
                     }
                 }
                 firebaseAnalytics.logEvent("cloud_command_received_" + commandName.toLowerCase(), new Bundle());
@@ -281,18 +281,18 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private static void sendNotification(final Context context, final String command) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+    private void sendNotification(final String command) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
         final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
         final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-        Intent newIntent = new Intent(context, SmsSenderService.class);
+        Intent newIntent = new Intent(this, SmsSenderService.class);
         newIntent.putExtra("telegramId", telegramId);
         newIntent.putExtra("email", email);
         newIntent.putExtra("phoneNumber", phoneNumber);
         if (StringUtils.isNotEmpty(command)) {
             newIntent.putExtra("command", command);
         }
-        context.startService(newIntent);
+        startService(newIntent);
     }
 }

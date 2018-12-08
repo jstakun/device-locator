@@ -168,9 +168,11 @@ public abstract class AbstractCommand {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
         final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+        final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
         Intent newIntent = new Intent(context, SmsSenderService.class);
         newIntent.putExtra("telegramId", telegramId);
         newIntent.putExtra("email", email);
+        newIntent.putExtra("phoneNumber", phoneNumber);
         if (StringUtils.isNotEmpty(command)) {
             newIntent.putExtra("command", command);
         }

@@ -565,10 +565,11 @@ public class Messenger {
             phoneNumber = extras.getString("phoneNumber");
             telegramId = extras.getString("telegramId");
             email = extras.getString("email");
-            //notificationNumber = extras.getString("notificationNumber");
             command = extras.getString("command");
             app = extras.getString("app");
         }
+
+        //Log.d(TAG, "sendCommandMessage params: " + phoneNumber + " " + telegramId + " " + email + " " + app + " " + command);
 
         switch (command) {
             case Command.RESUME_COMMAND:
