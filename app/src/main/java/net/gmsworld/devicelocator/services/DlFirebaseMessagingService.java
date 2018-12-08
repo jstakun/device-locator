@@ -62,7 +62,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 //pin
                 final String pinRead = message.get("pin");
                 final String pin = new PreferencesUtils(this).getEncryptedString(PinActivity.DEVICE_PIN);
-                final boolean pinValid = StringUtils.equals(pin, pinRead);
+                final boolean isPinValid = StringUtils.equals(pin, pinRead);
                 //command
                 String command = message.get("command");
                 final String commandName = command.split("dl")[0];
@@ -102,8 +102,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 //correlationId
                 final String[] correlationId = StringUtils.split(message.get("correlationId"), "+=+");
 
-                boolean rejected = false;
-                if (pinValid) {
+                if (isPinValid) {
                     command += pinRead;
                     if (message.containsKey("args")) {
                         String args = message.get("args");
@@ -117,16 +116,19 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     String foundCommand = Command.findCommandInMessage(this, command, sender, location, extras);
                     if (foundCommand == null) {
                         Log.d(TAG, "Invalid command " + commandName + " found in message!");
-                        rejected = true;
-                        sendSocialNotification(this, Command.INVALID_COMMAND);
+                        if (correlationId != null && correlationId.length == 2) {
+                            Messenger.sendCloudMessage(this, null, correlationId[0].trim(), correlationId[1].trim(), "Invalid command " + commandName + " sent to device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
+                        } else {
+                            sendNotification(this, Command.INVALID_COMMAND);
+                        }
                     }
                 } else {
-                    rejected = true;
                     Log.e(TAG, "Invalid pin found in message!");
-                    sendSocialNotification(this, Command.INVALID_PIN);
-                }
-                if (rejected && correlationId != null && correlationId.length == 2) {
-                    Messenger.sendCloudMessage(this, null, correlationId[0].trim(), correlationId[1].trim(), "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
+                    if (correlationId != null && correlationId.length == 2) {
+                        Messenger.sendCloudMessage(this, null, correlationId[0].trim(), correlationId[1].trim(), "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
+                    } else {
+                        sendNotification(this, Command.INVALID_PIN);
+                    }
                 }
                 firebaseAnalytics.logEvent("cloud_command_received_" + commandName.toLowerCase(), new Bundle());
             } else {
@@ -279,13 +281,15 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private static void sendSocialNotification(final Context context, final String command) {
+    private static void sendNotification(final Context context, final String command) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
         final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+        final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
         Intent newIntent = new Intent(context, SmsSenderService.class);
         newIntent.putExtra("telegramId", telegramId);
         newIntent.putExtra("email", email);
+        newIntent.putExtra("phoneNumber", phoneNumber);
         if (StringUtils.isNotEmpty(command)) {
             newIntent.putExtra("command", command);
         }
