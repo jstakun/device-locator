@@ -85,7 +85,7 @@
                 android:paddingBottom="8dp"
                 android:onClick="resetPassword"
                 android:clickable="true"
-                />
+                android:focusable="true" />
 
             <Button
                 android:id="@+id/email_sign_in_button"

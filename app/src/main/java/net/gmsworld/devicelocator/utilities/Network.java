@@ -135,7 +135,7 @@ public class Network {
 
         @Override
         protected Integer doInBackground(Void... params) {
-            int responseCode = -1;
+            int responseCode;
 
             try {
                 URL url = new URL(urlString);
@@ -227,7 +227,7 @@ public class Network {
         @Override
         protected Integer doInBackground(Void... params) {
             InputStream is = null;
-            int responseCode = -1;
+            int responseCode;
 
             final String attachmentName = "screenshot";
             final String crlf = "\r\n";
@@ -341,7 +341,8 @@ public class Network {
         @Override
         protected Integer doInBackground(Void... params) {
             HttpURLConnection urlConnection;
-            int responseCode = -1;
+            int responseCode;
+
             try {
                 URL url = new URL(urlString);
                 urlConnection = (HttpURLConnection) url.openConnection();

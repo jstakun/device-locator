@@ -3,7 +3,7 @@
     <item
         android:id="@+id/tracker"
         android:title="@string/device_tracker"
-        android:icon="@drawable/ic_location_on_white"
+        android:icon="@drawable/ic_place_white"
         app:showAsAction="ifRoom|withText"/>
     <item
         android:id="@+id/sms"

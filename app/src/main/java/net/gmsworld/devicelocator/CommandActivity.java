@@ -254,9 +254,8 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 if (StringUtils.isNotEmpty(device.name)) {
                     newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
                 }
-                int confirmation = c.getConfirmation();
-                if (confirmation > 0) {
-                    SendCommandDialogFragment sendCommandDialogFragment = SendCommandDialogFragment.newInstance(confirmation, command, newIntent, this);
+                if (c != null && c.getConfirmation() > 0) {
+                    SendCommandDialogFragment sendCommandDialogFragment = SendCommandDialogFragment.newInstance(c.getConfirmation(), command, newIntent, this);
                     sendCommandDialogFragment.show(getFragmentManager(), SendCommandDialogFragment.TAG);
                 } else {
                     sendCommand(command, newIntent);

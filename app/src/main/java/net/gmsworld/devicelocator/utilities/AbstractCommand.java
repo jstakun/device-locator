@@ -67,7 +67,7 @@ public abstract class AbstractCommand {
 
     public final boolean hasOppositeCommand() { return getOppositeCommand() != null; }
 
-    public final String getSmsCommand() {
+    protected final String getSmsCommand() {
         return smsCommand;
     }
 

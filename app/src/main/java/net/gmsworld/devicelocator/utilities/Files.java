@@ -92,7 +92,7 @@ public class Files {
         deleteFile(getFilesDir(context, filename, external));
     }
 
-    public static final void deleteFileFromCache(String filename, Context context, boolean isExternal) {
+    public static void deleteFileFromCache(String filename, Context context, boolean isExternal) {
         String cacheDir;
         if (isExternal) {
             cacheDir = context.getExternalCacheDir().getAbsolutePath();

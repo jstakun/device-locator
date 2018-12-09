@@ -14,7 +14,7 @@ import java.util.Locale;
  * </ul>
  */
 public final class DistanceFormatter {
-    public static final double METERS_IN_ONE_MILE = 1609.0;
+    private static final double METERS_IN_ONE_MILE = 1609.0;
     public static final double METERS_IN_ONE_FOOT = 0.3048;
     public static final double FEET_IN_ONE_MILE = 5280;
 

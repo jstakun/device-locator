@@ -52,7 +52,7 @@ public class NotificationUtils {
         return new NotificationCompat.Builder(context, Messenger.getDeviceName())
                 .setContentTitle(context.getString(R.string.app_name) + " Notification")
                 .setContentText(message)
-                .setSmallIcon(R.drawable.ic_location_on_white)
+                .setSmallIcon(R.drawable.ic_place_white)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setContentIntent(contentIntent)

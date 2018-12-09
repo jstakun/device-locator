@@ -571,14 +571,107 @@ public class Messenger {
 
         //Log.d(TAG, "sendCommandMessage params: " + phoneNumber + " " + telegramId + " " + email + " " + app + " " + command);
 
-        switch (command) {
-            case Command.RESUME_COMMAND:
-                title = context.getString(R.string.app_name) + " resumed location tracking";
-                if (deviceId != null) {
-                    title += " on device " + deviceId;
-                }
-                if (GmsSmartLocationManager.isLocationEnabled(context) && settings.getBoolean("motionDetectorRunning", false)) {
-                    text = "Device location tracking has been resumed. ";
+        if (command != null) {
+            switch (command) {
+                case Command.RESUME_COMMAND:
+                    title = context.getString(R.string.app_name) + " resumed location tracking";
+                    if (deviceId != null) {
+                        title += " on device " + deviceId;
+                    }
+                    if (GmsSmartLocationManager.isLocationEnabled(context) && settings.getBoolean("motionDetectorRunning", false)) {
+                        text = "Device location tracking has been resumed. ";
+                        if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
+                            notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER));
+                        }
+                        if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL))) {
+                            notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL));
+                        }
+                        if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL))) {
+                            notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL)));
+                        }
+                        if (notifications.isEmpty()) {
+                            text += "No notifications will be sent!";
+                        } else {
+                            text += "Notifications will be sent to " + StringUtils.join(notifications, ',');
+                        }
+                    } else {
+                        text = "Location service is not available. No notifications will be sent. Check permissions and device configuration!";
+                    }
+                    text += "\nBattery level: " + getBatteryLevel(context);
+                    break;
+                case Command.STOP_COMMAND:
+                    text = "Device location tracking on device " + deviceId + " has been stopped.\nBattery level: " + getBatteryLevel(context);
+                    title = context.getString(R.string.app_name) + " stopped location tracking";
+                    if (deviceId != null) {
+                        title += " on device " + deviceId;
+                    }
+                    break;
+                case Command.START_COMMAND:
+                    title = context.getString(R.string.app_name) + " started location tracking";
+                    if (deviceId != null) {
+                        title += " on device " + deviceId;
+                    }
+                    if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean("motionDetectorRunning", false)) {
+                        text = "Device location tracking on device " + deviceId + " is running. " +
+                                "Track route live " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
+                        if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
+                            notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER));
+                        }
+                        if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL))) {
+                            notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL));
+                        }
+                        if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL))) {
+                            notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL)));
+                        }
+                        if (notifications.isEmpty()) {
+                            text += "\nNo notifications will be sent!";
+                        } else {
+                            text += "\nNotifications will be sent to " + StringUtils.join(notifications, ',');
+                        }
+                    } else {
+                        text = "Location service is not available. No notifications will be sent. Check permissions and device configuration!";
+                    }
+                    text += "\nBattery level: " + getBatteryLevel(context);
+                    break;
+                case Command.MUTE_COMMAND:
+                    text = deviceId + " has been muted.";
+                    break;
+                case Command.UNMUTE_COMMAND:
+                    text = deviceId + " has been unmuted.";
+                    break;
+                case Command.RADIUS_COMMAND:
+                    int radius = settings.getInt("radius");
+                    if (radius > 0) {
+                        text = "Device location tracking radius on device " + deviceId + " has been changed to " + radius + " meters.";
+                    } else {
+                        text = "Device location tracking radius for device " + deviceId + " is incorrect. Please try again.";
+                    }
+                    break;
+                case Command.ROUTE_COMMAND:
+                    title = context.getString(R.string.message);
+                    if (deviceId != null) {
+                        title += " installed on device " + deviceId + " - route map link";
+                    }
+                    int size = 0;
+                    if (extras != null) {
+                        size = extras.getInt("size", 0);
+                    }
+                    if (size > 1) {
+                        text = "Check your route from device " + deviceId + " at " + RouteTrackingServiceUtils.getRouteUrl(context);
+                    } else if (size == 0) {
+                        text = "No route points has been recorded on device " + deviceId + ". Try again later.";
+                    } else if (size < 0) {
+                        text = "No route points has been uploaded from device " + deviceId + ". Try again later.";
+                    }
+                    break;
+                case Command.GPS_HIGH_COMMAND:
+                    text = "GPS settings on " + deviceId + " has been changed to high accuracy.";
+                    break;
+                case Command.GPS_BALANCED_COMMAND:
+                    text = "GPS settings on " + deviceId + " has been changed to balanced accuracy.";
+                    break;
+                case Command.NOTIFY_COMMAND:
+                    text = "";
                     if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
                         notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER));
                     }
@@ -589,193 +682,102 @@ public class Messenger {
                         notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL)));
                     }
                     if (notifications.isEmpty()) {
-                        text += "No notifications will be sent!";
+                        text += "No notifications will be sent from device " + deviceId + "! Please specify valid email, phone number or Telegram chat or channel.";
                     } else {
-                        text += "Notifications will be sent to " + StringUtils.join(notifications, ',');
+                        text += "Notifications from device " + deviceId + " will be sent to " + StringUtils.join(notifications, ", ");
                     }
-                } else {
-                    text = "Location service is not available. No notifications will be sent. Check permissions and device configuration!";
-                }
-                text += "\nBattery level: " + getBatteryLevel(context);
-                break;
-            case Command.STOP_COMMAND:
-                text = "Device location tracking on device " + deviceId + " has been stopped.\nBattery level: " + getBatteryLevel(context);
-                title = context.getString(R.string.app_name) + " stopped location tracking";
-                if (deviceId != null) {
-                    title += " on device " + deviceId;
-                }
-                break;
-            case Command.START_COMMAND:
-                title = context.getString(R.string.app_name) + " started location tracking";
-                if (deviceId != null) {
-                    title += " on device " + deviceId;
-                }
-                if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean("motionDetectorRunning", false)) {
-                    text = "Device location tracking on device " + deviceId + " is running. " +
-                            "Track route live " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
-                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
-                        notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER));
+                    break;
+                case Command.AUDIO_COMMAND:
+                    text = "Audio transmitter on device " + deviceId + " has been started.";
+                    break;
+                case Command.AUDIO_OFF_COMMAND:
+                    text = "Audio transmitter on device " + deviceId + " has been stopped.";
+                    break;
+                case Command.TAKE_PHOTO_COMMAND:
+                    boolean hiddenCamera = settings.getBoolean("hiddenCamera", false);
+                    String imageUrl = null;
+                    if (extras != null) {
+                        imageUrl = extras.getString("imageUrl");
                     }
-                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL))) {
-                        notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL));
-                    }
-                    if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL))) {
-                        notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL)));
-                    }
-                    if (notifications.isEmpty()) {
-                        text += "\nNo notifications will be sent!";
+                    if (StringUtils.isEmpty(imageUrl) && hiddenCamera) {
+                        text = "Front camera photo will be taken on device " + deviceId + ". You should receive link soon.";
+                    } else if (StringUtils.isEmpty(imageUrl) && !hiddenCamera) {
+                        text = "Front camera is disabled on device " + deviceId + "! No photo will be taken.";
                     } else {
-                        text += "\nNotifications will be sent to " + StringUtils.join(notifications, ',');
+                        text = "Front camera on device " + deviceId + " photo: " + imageUrl;
                     }
-                } else {
-                    text = "Location service is not available. No notifications will be sent. Check permissions and device configuration!";
-                }
-                text += "\nBattery level: " + getBatteryLevel(context);
-                break;
-            case Command.MUTE_COMMAND:
-                text = deviceId + " has been muted.";
-                break;
-            case Command.UNMUTE_COMMAND:
-                text = deviceId + " has been unmuted.";
-                break;
-            case Command.RADIUS_COMMAND:
-                int radius = settings.getInt("radius");
-                if (radius > 0) {
-                    text = "Device location tracking radius on device " + deviceId + " has been changed to " + radius + " meters.";
-                } else {
-                    text = "Device location tracking radius for device " + deviceId + " is incorrect. Please try again.";
-                }
-                break;
-            case Command.ROUTE_COMMAND:
-                title = context.getString(R.string.message);
-                if (deviceId != null) {
-                    title += " installed on device " + deviceId + " - route map link";
-                }
-                int size = 0;
-                if (extras != null) {
-                    size = extras.getInt("size", 0);
-                }
-                if (size > 1) {
-                    text = "Check your route from device " + deviceId + " at " + RouteTrackingServiceUtils.getRouteUrl(context);
-                } else if (size == 0) {
-                    text = "No route points has been recorded on device " + deviceId + ". Try again later.";
-                } else if (size < 0) {
-                    text = "No route points has been uploaded from device " + deviceId + ". Try again later.";
-                }
-                break;
-            case Command.GPS_HIGH_COMMAND:
-                text = "GPS settings on " + deviceId + " has been changed to high accuracy.";
-                break;
-            case Command.GPS_BALANCED_COMMAND:
-                text = "GPS settings on " + deviceId + " has been changed to balanced accuracy.";
-                break;
-            case Command.NOTIFY_COMMAND:
-                text = "";
-                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
-                    notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER));
-                }
-                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL))) {
-                    notifications.add(settings.getString(MainActivity.NOTIFICATION_EMAIL));
-                }
-                if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL))) {
-                    notifications.add(printTelegram(settings.getString(MainActivity.NOTIFICATION_SOCIAL)));
-                }
-                if (notifications.isEmpty()) {
-                    text += "No notifications will be sent from device " + deviceId + "! Please specify valid email, phone number or Telegram chat or channel.";
-                } else {
-                    text += "Notifications from device " + deviceId + " will be sent to " + StringUtils.join(notifications, ", ");
-                }
-                break;
-            case Command.AUDIO_COMMAND:
-                text = "Audio transmitter on device " + deviceId + " has been started.";
-                break;
-            case Command.AUDIO_OFF_COMMAND:
-                text = "Audio transmitter on device " + deviceId + " has been stopped.";
-                break;
-            case Command.TAKE_PHOTO_COMMAND:
-                boolean hiddenCamera = settings.getBoolean("hiddenCamera", false);
-                String imageUrl = null;
-                if (extras != null) {
-                    imageUrl = extras.getString("imageUrl");
-                }
-                if (StringUtils.isEmpty(imageUrl) && hiddenCamera) {
-                    text = "Front camera photo will be taken on device " + deviceId + ". You should receive link soon.";
-                } else if (StringUtils.isEmpty(imageUrl) && !hiddenCamera) {
-                    text = "Front camera is disabled on device " + deviceId + "! No photo will be taken.";
-                } else {
-                    text = "Front camera on device " + deviceId + " photo: " + imageUrl;
-                }
-                text += "\n" + "Battery level: " + getBatteryLevel(context);
-                break;
-            case Command.PIN_COMMAND:
-                final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
-                if (StringUtils.isEmpty(pin)) {
-                    text = "No Security PIN is set on device " + deviceId + "!";
-                } else {
-                    text = "Security PIN on device " + deviceId + " is " + pin;
-                }
-                text += "\n" + "Battery level: " + getBatteryLevel(context);
-                break;
-            case Command.PING_COMMAND:
-                text = "Pong from " + deviceId;
-                text += "\n" + "Battery level: " + getBatteryLevel(context);
-                break;
-            case Command.HELLO_COMMAND:
-                text = "Hello from " + deviceId;
-                text += "\n" + "Battery level: " + getBatteryLevel(context);
-                break;
-            case Command.RING_COMMAND:
-                text = "You should now hear ringtone from your device " + deviceId;
-                text += "\n" + "Battery level: " + getBatteryLevel(context);
-                break;
-            case Command.RING_OFF_COMMAND:
-                text = "You should now stop hearing ringtone from your device " + deviceId;
-                text += "\n" + "Battery level: " + getBatteryLevel(context);
-                break;
-            case Command.CALL_COMMAND:
-                text = "Failed to initiate phone call from device " + deviceId + "!";
-                break;
-            case Command.SHARE_COMMAND:
-                text = "Unable to share location from device " + deviceId + ". Required permissions are not granted!";
-                break;
-            case Command.ABOUT_COMMAND:
-                text = AppUtils.getInstance().getAboutMessage(context) +
-                        "\n" + "Battery level: " + getBatteryLevel(context);
-                break;
-            case Command.LOCK_SCREEN_COMMAND:
-                text = "Screen locked successfully on device " + deviceId + "!" +
-                        "\n" + "Battery level: " + getBatteryLevel(context);
-                break;
-            case Command.LOCK_SCREEN_FAILED:
-                text = "Screen lock failed on device " + deviceId + " due to insufficient privileges!";
-                command = Command.LOCK_SCREEN_COMMAND;
-                break;
-            case Command.CONFIG_COMMAND:
-                text = "Configuration change on device " + deviceId + " has been applied.";
-                break;
-            case Command.STOPPED_TRACKER:
-                text = "Device location tracking on device " + deviceId + " is stopped.\nBattery level: " + getBatteryLevel(context);
-                break;
-            case Command.MUTE_FAILED:
-                text = "Mute failed on device " + deviceId + " due to insufficient privileges!";
-                command = Command.MUTE_COMMAND;
-                break;
-            case Command.INVALID_PIN:
-                text = "Command with invalid pin has been sent to device " + deviceId + ".";
-                break;
-            case Command.INVALID_COMMAND:
-                text = "Invalid command has been sent to device " + deviceId + ".";
-                break;
-            case Command.RESET_COMMAND:
-                text = "Reset to factory defaults on device " + deviceId + " has been started.";
-                break;
-            case Command.RESET_FAILED:
-                text = "Reset to factory defaults on device " + deviceId + " has failed.";
-                command = Command.RESET_COMMAND;
-                break;
-            default:
-                Log.e(TAG, "Messenger received wrong command: " + command);
-                break;
+                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    break;
+                case Command.PIN_COMMAND:
+                    final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
+                    if (StringUtils.isEmpty(pin)) {
+                        text = "No Security PIN is set on device " + deviceId + "!";
+                    } else {
+                        text = "Security PIN on device " + deviceId + " is " + pin;
+                    }
+                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    break;
+                case Command.PING_COMMAND:
+                    text = "Pong from " + deviceId;
+                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    break;
+                case Command.HELLO_COMMAND:
+                    text = "Hello from " + deviceId;
+                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    break;
+                case Command.RING_COMMAND:
+                    text = "You should now hear ringtone from your device " + deviceId;
+                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    break;
+                case Command.RING_OFF_COMMAND:
+                    text = "You should now stop hearing ringtone from your device " + deviceId;
+                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    break;
+                case Command.CALL_COMMAND:
+                    text = "Failed to initiate phone call from device " + deviceId + "!";
+                    break;
+                case Command.SHARE_COMMAND:
+                    text = "Unable to share location from device " + deviceId + ". Required permissions are not granted!";
+                    break;
+                case Command.ABOUT_COMMAND:
+                    text = AppUtils.getInstance().getAboutMessage(context) +
+                            "\n" + "Battery level: " + getBatteryLevel(context);
+                    break;
+                case Command.LOCK_SCREEN_COMMAND:
+                    text = "Screen locked successfully on device " + deviceId + "!" +
+                            "\n" + "Battery level: " + getBatteryLevel(context);
+                    break;
+                case Command.LOCK_SCREEN_FAILED:
+                    text = "Screen lock failed on device " + deviceId + " due to insufficient privileges!";
+                    command = Command.LOCK_SCREEN_COMMAND;
+                    break;
+                case Command.CONFIG_COMMAND:
+                    text = "Configuration change on device " + deviceId + " has been applied.";
+                    break;
+                case Command.STOPPED_TRACKER:
+                    text = "Device location tracking on device " + deviceId + " is stopped.\nBattery level: " + getBatteryLevel(context);
+                    break;
+                case Command.MUTE_FAILED:
+                    text = "Mute failed on device " + deviceId + " due to insufficient privileges!";
+                    command = Command.MUTE_COMMAND;
+                    break;
+                case Command.INVALID_PIN:
+                    text = "Command with invalid pin has been sent to device " + deviceId + ".";
+                    break;
+                case Command.INVALID_COMMAND:
+                    text = "Invalid command has been sent to device " + deviceId + ".";
+                    break;
+                case Command.RESET_COMMAND:
+                    text = "Reset to factory defaults on device " + deviceId + " has been started.";
+                    break;
+                case Command.RESET_FAILED:
+                    text = "Reset to factory defaults on device " + deviceId + " has failed.";
+                    command = Command.RESET_COMMAND;
+                    break;
+                default:
+                    Log.e(TAG, "Messenger received wrong command: " + command);
+                    break;
+            }
         }
         if (StringUtils.isNotEmpty(text) && StringUtils.isNotEmpty(command)) {
             if (StringUtils.isNotEmpty(phoneNumber)) {

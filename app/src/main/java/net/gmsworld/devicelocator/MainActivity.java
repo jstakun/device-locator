@@ -370,28 +370,35 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         boolean isDeviceManagerShown = settings.getBoolean("isDeviceManagerShown", false);
 
         if (action != null) {
-            if (action.equals(ACTION_DEVICE_TRACKER)) {
-                isTrackerShown = true;
-                PreferenceManager.getDefaultSharedPreferences(this).edit()
+            switch (action) {
+                case ACTION_DEVICE_TRACKER:
+                    isTrackerShown = true;
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
                             .putBoolean("isTrackerShown", true)
                             .putBoolean("isDeviceManagerShown", false).apply();
-            } else if (action.equals(ACTION_DEVICE_TRACKER_NOTIFICATION)) {
-                isTrackerShown = true;
-                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                    break;
+                case ACTION_DEVICE_TRACKER_NOTIFICATION:
+                    isTrackerShown = true;
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
                             .putBoolean("isTrackerShown", true)
                             .putBoolean("isDeviceManagerShown", false).apply();
-                findViewById(R.id.email).requestFocus();
-            } else if (action.equals(ACTION_DEVICE_MANAGER)) {
-                isDeviceManagerShown = true;
-                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                    findViewById(R.id.email).requestFocus();
+                    break;
+                case ACTION_DEVICE_MANAGER:
+                    isDeviceManagerShown = true;
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
                             .putBoolean("isTrackerShown", false)
                             .putBoolean("isDeviceManagerShown", true).apply();
-            } else if (action.equals(ACTION_SMS_MANAGER)) {
-                isTrackerShown = false;
-                isDeviceManagerShown = false;
-                PreferenceManager.getDefaultSharedPreferences(this).edit()
+                    break;
+                case ACTION_SMS_MANAGER:
+                    isTrackerShown = false;
+                    isDeviceManagerShown = false;
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
                             .putBoolean("isTrackerShown", false)
                             .putBoolean("isDeviceManagerShown", false).apply();
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -1167,6 +1174,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     if (c != null && c.moveToFirst()) {
                         number = c.getString(0);
                     }
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
                 } finally {
                     if (c != null) {
                         c.close();

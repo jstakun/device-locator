@@ -113,7 +113,7 @@
     <string name="map_button">Map view</string>
     <string name="browser_button">Open in browser</string>
     <string name="resend_command">Send again</string>
-    <string name="please_wait">Please wait...</string>
+    <string name="please_wait">Please wait…</string>
 
     <!-- Permissions Activity -->
     <string name="title_activity_permissions">Permissions</string>
@@ -136,7 +136,8 @@
     <string name="forget_me">Forget me</string>
     <string name="send_code_again">Send code again</string>
     <string name="activation_code">Activation code</string>
-    <string name="sms_notification_warning">&lt;font color="#808080">SMS notifications will be sent from this device. This could generate additional costs! Is this ok for you?&lt;/font></string>
+    <string name="sms_notification_warning">&lt;font color="#808080">SMS notifications will be sent from this device. This could generate additional costs! Is this OK for you?&lt;/font></string>
     <string name="remove_device_message">&lt;font color="#808080">Remove device %1$s from the list?&lt;/font></string>
     <string name="enter_pin">Please enter valid PIN!</string>
+    <string name="telegram_hint">\@telegram_id or number id</string>
 </resources>
