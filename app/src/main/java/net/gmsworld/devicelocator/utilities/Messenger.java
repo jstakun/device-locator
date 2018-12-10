@@ -85,8 +85,8 @@ public class Messenger {
         }
     }
 
-    public static void sendCloudMessage(final Context context, final Location location, final String imei, final String pin, final String message, final String replyToCommand, final int retryCount, final Map<String, String> headers) {
-        if (StringUtils.isNotEmpty(imei) && StringUtils.isNotEmpty(pin) && StringUtils.isNotEmpty(message)) {
+    public static void sendCloudMessage(final Context context, final Location location, final String replyTo, final String message, final String replyToCommand, final int retryCount, final Map<String, String> headers) {
+        if (StringUtils.isNotEmpty(replyTo) && StringUtils.isNotEmpty(message)) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
@@ -108,7 +108,7 @@ public class Messenger {
                     if (StringUtils.equalsAnyIgnoreCase(replyToCommand, Command.START_COMMAND, Command.STOP_COMMAND, Command.RESUME_COMMAND, Command.PERIMETER_COMMAND, Command.ROUTE_COMMAND)) {
                         headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
                     }
-                    sendCloudMessage(context, imei, pin, message, replyToCommand, 1, headers);
+                    sendCloudMessage(context, replyTo, message, replyToCommand, 1, headers);
                 } else {
                     String queryString = "scope=dl&user=" + deviceId;
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
@@ -116,12 +116,12 @@ public class Messenger {
                         public void onGetFinish(String results, int responseCode, String url) {
                             if (responseCode == 200) {
                                 if (StringUtils.isNotEmpty(getToken(context, results))) {
-                                    sendCloudMessage(context, location, imei, pin, message, replyToCommand, 1, headers);
+                                    sendCloudMessage(context, location, replyTo, message, replyToCommand, 1, headers);
                                 } else {
                                     Log.e(TAG, "Failed to parse token!");
                                 }
                             } else if (responseCode == 500 && retryCount > 0) {
-                                sendCloudMessage(context, location, imei, pin, message, replyToCommand, retryCount - 1, headers);
+                                sendCloudMessage(context, location, replyTo, message, replyToCommand, retryCount - 1, headers);
                             } else {
                                 Log.d(TAG, "Failed to receive token: " + results);
                             }
@@ -134,29 +134,34 @@ public class Messenger {
         }
     }
 
-    private static void sendCloudMessage(final Context context, final String imei, final String pin, final String message, final String replyToCommand, final int retryCount, final Map<String, String> headers) {
-        String content = "imei=" + imei;
-        content += "&command=" + Command.MESSAGE_COMMAND + "app";
-        content += "&pin=" + pin;
-        if (StringUtils.isNotEmpty(replyToCommand)) {
-            content += "&replyToCommand=" + StringUtils.remove(replyToCommand, "dl");
-        }
-        try {
-            content += "&args=" + URLEncoder.encode(message, "UTF-8");
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage(), e);
-        }
-        Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
-            @Override
-            public void onGetFinish(String results, int responseCode, String url) {
-                if (responseCode == 200) {
-                    //Toast.makeText(context, "Command has been sent!", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "Message has been sent to the cloud!");
-                } else if (responseCode == 500 && retryCount > 0) {
-                    sendCloudMessage(context, imei, pin, message, replyToCommand, retryCount - 1, headers);
-                }
+    private static void sendCloudMessage(final Context context, final String replyTo, final String message, final String replyToCommand, final int retryCount, final Map<String, String> headers) {
+        String[] tokens = StringUtils.split(replyTo, "+=+");
+        if (tokens.length >= 2) {
+            String content = "imei=" + tokens[0].trim();
+            content += "&command=" + Command.MESSAGE_COMMAND + "app";
+            content += "&pin=" + tokens[1].trim();
+            if (StringUtils.isNotEmpty(replyToCommand)) {
+                content += "&replyToCommand=" + StringUtils.remove(replyToCommand, "dl");
             }
-        });
+            try {
+                content += "&args=" + URLEncoder.encode(message, "UTF-8");
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+            Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    if (responseCode == 200) {
+                        //Toast.makeText(context, "Command has been sent!", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Message has been sent to the cloud!");
+                    } else if (responseCode == 500 && retryCount > 0) {
+                        sendCloudMessage(context, replyTo, message, replyToCommand, retryCount - 1, headers);
+                    }
+                }
+            });
+        } else {
+            Log.e(TAG, "Invalid replyTo: " + replyTo);
+        }
     }
 
     private static void sendEmail(final Context context, final Location location, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
@@ -426,8 +431,7 @@ public class Messenger {
             sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
-            String[] tokens = StringUtils.split(app, "+=+");
-            sendCloudMessage(context, location, tokens[0], tokens[1], text, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
+            sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
         }
     }
 
@@ -451,8 +455,7 @@ public class Messenger {
             sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
-            String[] tokens = StringUtils.split(app, "+=+");
-            sendCloudMessage(context, location, tokens[0], tokens[1], text, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
+            sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
         }
     }
 
@@ -483,8 +486,7 @@ public class Messenger {
             sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
-            String[] tokens = StringUtils.split(app, "+=+");
-            sendCloudMessage(context, null, tokens[0], tokens[1], text, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
+            sendCloudMessage(context, null, app, text, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
         }
     }
 
@@ -533,8 +535,7 @@ public class Messenger {
         }
         //send notification to cloud if tracking has been initiated with cloud message
         if (StringUtils.isNotEmpty(app)) {
-            String[] tokens = StringUtils.split(app, "+=+");
-            sendCloudMessage(context, location, tokens[0], tokens[1], message, null,1, headers);
+            sendCloudMessage(context, location, app, message, null, 1, headers);
         }
     }
 
@@ -551,7 +552,7 @@ public class Messenger {
                              "\n" + "Battery level: " + getBatteryLevel(context) +
                              "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
                              "\n" + perimeter;
-            sendCloudMessage(context, location, tokens[0], tokens[1], message, null, 1, headers);
+            sendCloudMessage(context, location, app, message, null, 1, headers);
         }
     }
 
@@ -802,8 +803,7 @@ public class Messenger {
                 sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(app)) {
-                String[] tokens = StringUtils.split(app, "+=+");
-                sendCloudMessage(context, null, tokens[0], tokens[1], text, command, 1, new HashMap<String, String>());
+                sendCloudMessage(context, null, app, text, command, 1, new HashMap<String, String>());
             }
         }
     }
@@ -827,8 +827,7 @@ public class Messenger {
             sendEmail(context, null, email, message, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
-            String[] tokens = StringUtils.split(app, "+=+");
-            sendCloudMessage(context, null, tokens[0], tokens[1], message, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
+            sendCloudMessage(context, null, app, message, Command.SHARE_COMMAND, 1, new HashMap<String, String>());
         }
     }
 
@@ -852,8 +851,7 @@ public class Messenger {
             sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
-            String[] tokens = StringUtils.split(app, "+=+");
-            sendCloudMessage(context, null, tokens[0], tokens[1], text, null,1, new HashMap<String, String>());
+            sendCloudMessage(context, null, app, text, null,1, new HashMap<String, String>());
         }
     }
 
