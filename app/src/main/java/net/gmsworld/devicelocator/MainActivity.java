@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     public static final String ACTION_DEVICE_MANAGER = "net.gmsworld.devicelocator.ActionDeviceManager";
     public static final String ACTION_SMS_MANAGER = "net.gmsworld.devicelocator.ActionSmsManager";
 
-    private static final String TELEGRAM_PASTE = "telegramPaste";
+    public static final String TELEGRAM_PASTE = "telegramPaste";
 
     private Boolean running = null;
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
@@ -1270,27 +1270,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private void initTelegramButton() {
         ImageButton telegramButton = this.findViewById(R.id.telegram_button);
-        final String appName = "org.telegram.messenger";
 
         telegramButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //open telegram
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://telegram.me/device_locator_bot"));
-                //Intent intent = new Intent(Intent.ACTION_SEND);
-                //intent.setType("text/plain");
-                //intent.putExtra(Intent.EXTRA_TEXT, "/getmyid");
-                try {
-                    MainActivity.this.getPackageManager().getPackageInfo(appName, PackageManager.GET_ACTIVITIES);
-                    intent.setPackage(appName);
-                    MainActivity.this.startActivity(intent);
-                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putBoolean(TELEGRAM_PASTE, true).apply();
-                    //Toast.makeText(MainActivity.this, "In order to get your chat id please select " + MainActivity.this.getString(R.string.app_name) + " bot now.", Toast.LENGTH_LONG).show();
-                    Toast.makeText(MainActivity.this, "Enter /id", Toast.LENGTH_LONG).show();
-                } catch (PackageManager.NameNotFoundException e) {
-                    Log.w(TAG, appName + " not found on this device");
-                    Toast.makeText(MainActivity.this, "This function requires installed Telegram Messenger on your device.", Toast.LENGTH_LONG).show();
-                }
+                Messenger.getMyTelegramId(MainActivity.this);
             }
         });
     }

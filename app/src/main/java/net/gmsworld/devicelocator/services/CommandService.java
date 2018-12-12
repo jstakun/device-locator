@@ -116,7 +116,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             String content = "imei=" + imei;
             content += "&command=" + command + "dlapp";
             content += "&pin=" + pin;
-            content += "&correlationId=" + deviceId + "+=+" + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+            content += "&correlationId=" + deviceId + Messenger.CID_SEPARATOR + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
             if (StringUtils.isNotEmpty(args)) {
                 try {
                     content += "&args=" + URLEncoder.encode(args, "UTF-8");

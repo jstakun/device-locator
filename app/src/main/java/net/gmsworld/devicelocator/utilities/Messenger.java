@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -59,6 +60,7 @@ public class Messenger {
     public static final String LNG_HEADER = "X-GMS-Lng";
     public static final String ACC_HEADER = "X-GMS-Acc";
 
+    public static final String CID_SEPARATOR = "+=+";
 
     private static void sendSMS(final Context context, final String phoneNumber, final String message) {
         String status = null;
@@ -135,7 +137,7 @@ public class Messenger {
     }
 
     private static void sendCloudMessage(final Context context, final String replyTo, final String message, final String replyToCommand, final int retryCount, final Map<String, String> headers) {
-        String[] tokens = StringUtils.split(replyTo, "+=+");
+        String[] tokens = StringUtils.split(replyTo, CID_SEPARATOR);
         if (tokens.length >= 2) {
             String content = "imei=" + tokens[0].trim();
             content += "&command=" + Command.MESSAGE_COMMAND + "app";
@@ -546,7 +548,6 @@ public class Messenger {
         sendRoutePoint(context, location, 1, headers);
         final int perimeter = settings.getInt("perimeter", RouteTrackingService.DEFAULT_PERIMETER);
         if (StringUtils.isNotEmpty(app)) {
-            String[] tokens = StringUtils.split(app, "+=+");
             final String deviceId = getDeviceId(context, true);
             final String message = deviceId + " is in perimeter " + DistanceFormatter.format(perimeter) +
                              "\n" + "Battery level: " + getBatteryLevel(context) +
@@ -995,6 +996,7 @@ public class Messenger {
                     } else if (responseCode == 403) {
                         onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
                     } else if (responseCode == 400) {
+                        //TODO show dialog to send /id command
                         onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
                     } else if (responseCode != 200 && retryCount > 0) {
                         sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
@@ -1188,6 +1190,40 @@ public class Messenger {
             return model;
         }
         return StringUtils.replaceAll(manufacturer + " " + model, " ", "-");
+    }
+
+    public static void getMyTelegramId(Context context) {
+        final String appName = "org.telegram.messenger";
+        final boolean appInstalled = isAppInstalled(context, appName);
+        Intent intent;
+        if (appInstalled) {
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://telegram.me/device_locator_bot"));
+            //intent = new Intent(Intent.ACTION_SEND);
+            //intent.setType("text/plain");
+            //intent.putExtra(Intent.EXTRA_TEXT, "/getmyid");
+        } else {
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/#/im?p=@device_locator_bot"));
+        }
+        try {
+            if (appInstalled) {
+                context.getPackageManager().getPackageInfo(appName, PackageManager.GET_ACTIVITIES);
+                intent.setPackage(appName);
+            }
+            context.startActivity(intent);
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(MainActivity.TELEGRAM_PASTE, true).apply();
+            Toast.makeText(context, "Enter message /id", Toast.LENGTH_LONG).show();
+        } catch (PackageManager.NameNotFoundException e) {
+            Toast.makeText(context, "This function requires installed Telegram Messenger or Web Browser on your device.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private static boolean isAppInstalled(Context context, String packageName) {
+        try {
+            return context.getPackageManager().getApplicationInfo(packageName, 0).enabled;
+        }
+        catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     private static int getLocationMode(Context context) {

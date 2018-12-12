@@ -38,7 +38,7 @@
     <string name="motion_confirm_empty">Please setup Notification settings to receive notification every time device will move %1$d meters from present location</string>
     <string name="phone_number">Phone number</string>
     <string name="email_address">Email address</string>
-    <string name="telegram_chat_id">Telegram chat or channel id</string>
+    <string name="telegram_chat_id">Telegram id</string>
     <string name="share_route">Share route</string>
     <string name="device_tracker">Device tracker</string>
     <string name="sms_control">SMS commands</string>
