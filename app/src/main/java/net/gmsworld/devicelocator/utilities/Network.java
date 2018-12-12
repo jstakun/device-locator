@@ -135,7 +135,7 @@ public class Network {
 
         @Override
         protected Integer doInBackground(Void... params) {
-            int responseCode;
+            int responseCode = -1;
 
             try {
                 URL url = new URL(urlString);
@@ -179,19 +179,30 @@ public class Network {
 
                 responseCode = urlConnection.getResponseCode();
 
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                if (urlConnection.getContentLength() > 0) {
 
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                StringBuilder total = new StringBuilder();
-                String line;
-                while ((line = r.readLine()) != null) {
-                    total.append(line).append('\n');
+                    InputStream in;
+
+                    if (responseCode < 400) {
+                        in = new BufferedInputStream(urlConnection.getInputStream());
+                    } else {
+                        in = new BufferedInputStream(urlConnection.getErrorStream());
+                    }
+
+                    BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder total = new StringBuilder();
+                    String line;
+                    while ((line = r.readLine()) != null) {
+                        total.append(line).append('\n');
+                    }
+
+                    response = total.toString();
                 }
-
-                response = total.toString();
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
-                responseCode = 500;
+                if (responseCode == -1) {
+                    responseCode = 500;
+                }
             }
             return responseCode;
         }
@@ -227,7 +238,7 @@ public class Network {
         @Override
         protected Integer doInBackground(Void... params) {
             InputStream is = null;
-            int responseCode;
+            int responseCode = -1;
 
             final String attachmentName = "screenshot";
             final String crlf = "\r\n";
@@ -271,25 +282,30 @@ public class Network {
 
                 responseCode = conn.getResponseCode();
 
-                if (responseCode == HttpURLConnection.HTTP_OK) {
-                    if (conn.getContentType().contains("gzip")) {
-                        is = new GZIPInputStream(conn.getInputStream());
-                    } else {
-                        is = conn.getInputStream();
-                    }
-                } else {
-                    is = conn.getErrorStream();
-                    Log.e(TAG, urlString + " loading error: " + responseCode);
-                }
+                if (conn.getContentLength() > 0) {
 
-                if (is != null) {
-                    //Read response
-                    response = IOUtils.toString(is, "UTF-8");
-                    //Log.d(TAG, "Received following server response: " + response);
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        if (conn.getContentType().contains("gzip")) {
+                            is = new GZIPInputStream(conn.getInputStream());
+                        } else {
+                            is = conn.getInputStream();
+                        }
+                    } else {
+                        is = conn.getErrorStream();
+                        Log.e(TAG, urlString + " loading error: " + responseCode);
+                    }
+
+                    if (is != null) {
+                        //Read response
+                        response = IOUtils.toString(is, "UTF-8");
+                        //Log.d(TAG, "Received following server response: " + response);
+                    }
                 }
             } catch (Throwable e) {
                 Log.d(TAG, ".uploadScreenshot() exception: " + e.getMessage(), e);
-                responseCode = 500;
+                if (responseCode == -1) {
+                    responseCode = 500;
+                }
             } finally {
                 try {
                     if (is != null) {
@@ -341,7 +357,7 @@ public class Network {
         @Override
         protected Integer doInBackground(Void... params) {
             HttpURLConnection urlConnection;
-            int responseCode;
+            int responseCode = -1;
 
             try {
                 URL url = new URL(urlString);
@@ -363,20 +379,31 @@ public class Network {
 
                 responseCode = urlConnection.getResponseCode();
 
-                InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+                InputStream in;
 
-                BufferedReader r = new BufferedReader(new InputStreamReader(in));
-                StringBuilder total = new StringBuilder();
-                String line;
-                while ((line = r.readLine()) != null) {
-                    total.append(line).append('\n');
+                if (urlConnection.getContentLength() > 0) {
+
+                    if (responseCode < 400) {
+                        in = new BufferedInputStream(urlConnection.getInputStream());
+                    } else {
+                        in = new BufferedInputStream(urlConnection.getErrorStream());
+                    }
+
+                    BufferedReader r = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder total = new StringBuilder();
+                    String line;
+                    while ((line = r.readLine()) != null) {
+                        total.append(line).append('\n');
+                    }
+
+                    response = total.toString();
                 }
-
-                response = total.toString();
 
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
-                responseCode = 500;
+                if (responseCode == -1) {
+                    responseCode = 500;
+                }
             }
 
             return responseCode;

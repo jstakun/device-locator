@@ -29,6 +29,7 @@ import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
+import net.gmsworld.devicelocator.fragments.TelegramSetupDialogFragment;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
@@ -927,7 +928,7 @@ public class Messenger {
         }
     }
 
-    public static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final int retryCount) {
+    public static void sendTelegramRegistrationRequest(final Activity context, final String telegramId, final int retryCount) {
         if (isValidTelegramId(telegramId)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
@@ -951,7 +952,7 @@ public class Messenger {
         }
     }
 
-    private static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final String tokenStr, final int retryCount) {
+    private static void sendTelegramRegistrationRequest(final Activity context, final String telegramId, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
         headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
@@ -981,23 +982,25 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
-                                if (!((Activity) context).isFinishing()) {
+                                if (!context.isFinishing()) {
                                     NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
-                                    notificationActivationDialogFragment.show(((Activity) context).getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                    notificationActivationDialogFragment.show(context.getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                 }
                             } else {
                                 onFailedTelegramRegistration(context, "Failed to send activation code to your Telegram chat or channel. Please register again your Telegram chat or channel!", true);
                             }
-                        } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                            onFailedTelegramRegistration(context, "Oops! Failed to send activation code to your Telegram channel or chat. Please register again your Telegram chat or channel!", true);
                         } else {
                             onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                         }
                     } else if (responseCode == 403) {
                         onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
                     } else if (responseCode == 400) {
-                        //TODO show dialog to send /id command
-                        onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
+                        if (!context.isFinishing()) {
+                            TelegramSetupDialogFragment telegramSetupDialogFragment = TelegramSetupDialogFragment.newInstance();
+                            telegramSetupDialogFragment.show(context.getFragmentManager(), TelegramSetupDialogFragment.TAG);
+                        } else {
+                            onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
+                        }
                     } else if (responseCode != 200 && retryCount > 0) {
                         sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
                     } else {
@@ -1010,14 +1013,16 @@ public class Messenger {
         }
     }
 
-    private static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
+    public static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
         final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
         if (clearTextInput) {
             telegramInput.setText("");
         }
         telegramInput.requestFocus();
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+        if (StringUtils.isNotEmpty(message)) {
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+        }
 
     }
 
@@ -1193,6 +1198,7 @@ public class Messenger {
     }
 
     public static void getMyTelegramId(Context context) {
+        onFailedTelegramRegistration(context, null, true);
         final String appName = "org.telegram.messenger";
         final boolean appInstalled = isAppInstalled(context, appName);
         Intent intent;
