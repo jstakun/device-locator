@@ -872,7 +872,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         String newDeviceName = deviceNameInput.getText().toString();
         String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
-            String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-');
+            String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-').replace(',','-');
             if (DlFirebaseMessagingService.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName, false)) {
                 if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
                     EditText deviceNameEdit = findViewById(R.id.deviceName);
@@ -1708,20 +1708,22 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             String message = null;
             if (StringUtils.isNotEmpty(device.geo)) {
                 String[] tokens = StringUtils.split(device.geo, " ");
-                Location deviceLocation = new Location("");
-                deviceLocation.setLatitude(Location.convert(tokens[0]));
-                deviceLocation.setLongitude(Location.convert(tokens[1]));
-                if (tokens.length > 3) {
-                    deviceLocation.setAccuracy(Float.valueOf(tokens[2]));
-                }
-                long timestamp = Long.valueOf(tokens[tokens.length-1]);
-                message = "Last seen " + pt.format(new Date(timestamp));
-                if (location != null) {
-                    int dist = (int)location.distanceTo(deviceLocation);
-                    if (dist <= 0) {
-                        dist = 1;
+                if (tokens.length >= 3) { //lat lng (acc) timestamp
+                    Location deviceLocation = new Location("");
+                    deviceLocation.setLatitude(Location.convert(tokens[0]));
+                    deviceLocation.setLongitude(Location.convert(tokens[1]));
+                    if (tokens.length > 3) {
+                        deviceLocation.setAccuracy(Float.valueOf(tokens[2]));
                     }
-                    message += " " + DistanceFormatter.format(dist) + " away";
+                    long timestamp = Long.valueOf(tokens[tokens.length - 1]);
+                    message = "Last seen " + pt.format(new Date(timestamp));
+                    if (location != null) {
+                        int dist = (int) location.distanceTo(deviceLocation);
+                        if (dist <= 0) {
+                            dist = 1;
+                        }
+                        message += " " + DistanceFormatter.format(dist) + " away";
+                    }
                 }
             } else {
                 try {
