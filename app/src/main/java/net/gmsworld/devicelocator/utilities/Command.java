@@ -136,7 +136,7 @@ public class Command {
                 return c.getSmsCommand();
             }
         }
-        Log.w(TAG, "Didn't found matching command");
+        Log.w(TAG, "Didn't found matching command " + message);
         return null;
     }
 
