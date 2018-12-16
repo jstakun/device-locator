@@ -16,3 +16,4 @@
 #   public *;
 #}
 -keep class org.ocpsoft.prettytime.i18n.**
+-keep class net.gmsworld.devicelocator.utilities.Command.**
