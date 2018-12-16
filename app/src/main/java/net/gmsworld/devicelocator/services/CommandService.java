@@ -68,10 +68,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         }
 
         final PreferencesUtils prefs = new PreferencesUtils(this);
-        final long pinVerificationMillis = prefs.getLong("pinVerificationMillis", System.currentTimeMillis());
-        final boolean settingsVerifyPin = prefs.getBoolean("settings_verify_pin", false);
 
-        if (settingsVerifyPin && (System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS)) {
+        if (PinActivity.isAuthRequired(prefs)) {
             Log.d(TAG, "User should authenticate again!");
             Toast.makeText(this, "Please authenticate before sending command", Toast.LENGTH_LONG).show();
             Intent authIntent = new Intent(this, PinActivity.class);

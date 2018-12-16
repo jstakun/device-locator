@@ -43,7 +43,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
     private static final String TAG = PinActivity.class.getSimpleName();
 
     public static final int PIN_MIN_LENGTH = 4;
-    public static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
+    private static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
     public static final String DEVICE_PIN = "token";
 
     private FingerprintHelper fingerprintHelper;
@@ -277,5 +277,12 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         }
 
         protected abstract void onLinkClick(String url);
+    }
+
+    public static boolean isAuthRequired(PreferencesUtils prefs) {
+        final String pin =  prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+        final long pinVerificationMillis =  prefs.getLong("pinVerificationMillis");
+        final boolean settingsVerifyPin =  prefs.getBoolean("settings_verify_pin", false);
+        return (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS);
     }
 }
