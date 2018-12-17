@@ -190,10 +190,10 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
-        if (Messenger.isAppInstalled(this, "com.facebook.orca")) {
+        if (Messenger.isAppInstalled(this, "org.telegram.messenger")) {
             TextView socialLink = findViewById(R.id.social_link);
             socialLink.setVisibility(View.VISIBLE);
-            socialLink.setText(Html.fromHtml("<a href=#>Send with Facebook Messenger</a>"));
+            socialLink.setText(Html.fromHtml("<a href=#>Send with Telegram Messenger</a>"));
             socialLink.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -206,7 +206,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                         if (StringUtils.isNotEmpty(argStr)) {
                             message += " -p " + argStr;
                         }
-                        Messenger.sendMessengerMessage(CommandActivity.this, message);
+                        Messenger.sendTelegramMessage(CommandActivity.this, message);
                     }
                 }
             });

@@ -1223,6 +1223,15 @@ public class Messenger {
         }
     }
 
+    public static void sendTelegramMessage(Context context, String message) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, message);
+        intent.setPackage("org.telegram.messenger");
+        context.startActivity(intent);
+        Toast.makeText(context, "Find Device Locator bot", Toast.LENGTH_LONG).show();
+    }
+
     public static void sendMessengerMessage(Context context, String message) {
         //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("fb-messenger://user/252112178789066"));
 
