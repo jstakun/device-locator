@@ -170,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initPhoneNumberInput();
         initEmailInput();
         initTelegramInput();
-        initContactButton();
+        initContactsButton();
         initTelegramButton();
         initTokenInput();
         initPingButton();
@@ -1249,23 +1249,27 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         });
     }
 
-    private void initContactButton() {
+    private void initContactsButton() {
         ImageButton contactButton = this.findViewById(R.id.contact_button);
 
         contactButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!Permissions.haveReadContactsPermission(MainActivity.this)) {
-                    Permissions.requestContactsPermission(MainActivity.this, 0);
-                    Toast.makeText(getApplicationContext(), R.string.read_contacts_permission, Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-                startActivityForResult(intent, SELECT_CONTACT_INTENT);
-                MainActivity.this.clearFocus();
+                selectContact();
             }
         });
+    }
+
+    private void selectContact() {
+        if (!Permissions.haveReadContactsPermission(MainActivity.this)) {
+            Permissions.requestContactsPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_CONTACTS);
+            //Toast.makeText(getApplicationContext(), R.string.read_contacts_permission, Toast.LENGTH_SHORT).show();
+        } else {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+            startActivityForResult(intent, SELECT_CONTACT_INTENT);
+            MainActivity.this.clearFocus();
+        }
     }
 
     private void initTelegramButton() {
@@ -1548,6 +1552,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             case Permissions.PERMISSIONS_REQUEST_CALL:
                 if (!Permissions.haveCallPhonePermission(this)) {
                     Toast.makeText(this, "Call command won't work without this permission!", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case Permissions.PERMISSIONS_REQUEST_CONTACTS:
+                if (Permissions.haveReadContactsPermission(this)) {
+                   selectContact();
                 }
                 break;
             default:

@@ -116,7 +116,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    Toast.makeText(PinActivity.this, "No valid pin entered", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PinActivity.this, "Invalid pin entered", Toast.LENGTH_SHORT).show();
                     tokenInput.setText("");
                 }
                 return false;

@@ -190,6 +190,28 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
+        if (Messenger.isAppInstalled(this, "com.facebook.orca")) {
+            TextView socialLink = findViewById(R.id.social_link);
+            socialLink.setVisibility(View.VISIBLE);
+            socialLink.setText(Html.fromHtml("<a href=#>Send with Facebook Messenger</a>"));
+            socialLink.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    final String command = commandSpinner.getSelectedItem().toString();
+                    final String pin = pinEdit.getText().toString();
+                    final String argStr = args.getText().toString();
+                    if (isValidCommand(pin, command, argStr)) {
+                        //command pin imei -p args
+                        String message = command + " " + pin + " " + device.imei;
+                        if (StringUtils.isNotEmpty(argStr)) {
+                            message += " -p " + argStr;
+                        }
+                        Messenger.sendMessengerMessage(CommandActivity.this, message);
+                    }
+                }
+            });
+        }
+
         findViewById(R.id.commandView).requestFocus();
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
@@ -219,7 +241,60 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         Log.d(TAG, "Location found with accuracy " + location.getAccuracy() + " m");
     }
 
+    private boolean isValidCommand(String pin, String command, String commandArgs) {
+        if (pin.length() == 0) {
+            Toast.makeText(CommandActivity.this, "Please enter PIN!", Toast.LENGTH_SHORT).show();
+            return false;
+        } else if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
+            Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
+            return false;
+        } else if (StringUtils.isNotEmpty(device.name) || StringUtils.isNotEmpty(device.imei)) {
+            //check if command requires args and validate args
+            AbstractCommand c = Command.getCommandByName(command);
+            if (c != null) {
+                if (StringUtils.isNotEmpty(commandArgs)) {
+                    c.setCommandTokens(StringUtils.split(command + " " + commandArgs, " "));
+                }
+                if (c.hasParameters() && !c.validateTokens()) {
+                    Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            Toast.makeText(this, "No device selected!", Toast.LENGTH_LONG).show();
+            return false;
+        }
+    }
+
     private void sendCommand(PreferencesUtils prefs, String pin, String command, String commandArgs) {
+        if (isValidCommand(pin, command, commandArgs)) {
+            if (Network.isNetworkAvailable(CommandActivity.this)) {
+                prefs.setEncryptedString(PIN_PREFIX + device.imei, pin);
+                Intent newIntent = new Intent(this, CommandService.class);
+                AbstractCommand c = Command.getCommandByName(command);
+                if ((c == null || (c != null && c.hasParameters())) && StringUtils.isNotEmpty(commandArgs)) {
+                    newIntent.putExtra("args", commandArgs);
+                }
+                newIntent.putExtra("command", command);
+                newIntent.putExtra("imei", device.imei);
+                newIntent.putExtra("pin", pin);
+                if (StringUtils.isNotEmpty(device.name)) {
+                    newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
+                }
+                if (c != null && c.getConfirmation() > 0) {
+                    SendCommandDialogFragment sendCommandDialogFragment = SendCommandDialogFragment.newInstance(c.getConfirmation(), command, newIntent, this);
+                    sendCommandDialogFragment.show(getFragmentManager(), SendCommandDialogFragment.TAG);
+                } else {
+                    sendCommand(command, newIntent);
+                }
+            } else {
+                Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    /*private void sendCommand(PreferencesUtils prefs, String pin, String command, String commandArgs) {
         if (pin.length() == 0) {
             Toast.makeText(CommandActivity.this, "Please enter PIN!", Toast.LENGTH_SHORT).show();
         } else if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
@@ -244,7 +319,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
             } else if (Network.isNetworkAvailable(CommandActivity.this)) {
                 prefs.setEncryptedString(PIN_PREFIX + device.imei, pin);
-                Intent newIntent = new Intent(CommandActivity.this, CommandService.class);
+                Intent newIntent = new Intent(this, CommandService.class);
                 if (needArgs && StringUtils.isNotEmpty(commandArgs)) {
                     newIntent.putExtra("args", commandArgs);
                 }
@@ -261,10 +336,12 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                     sendCommand(command, newIntent);
                 }
             } else {
-                Toast.makeText(CommandActivity.this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
             }
+        } else {
+            Toast.makeText(this, "No device selected!", Toast.LENGTH_LONG).show();
         }
-    }
+    }*/
 
     public void sendCommand(String command, Intent intent) {
         PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(device.imei + "_lastCommand", command).apply();

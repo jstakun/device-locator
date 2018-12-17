@@ -117,6 +117,15 @@
                 android:text="@string/send"
                 android:textColor="@android:color/white" />
 
+            <TextView
+                android:id="@+id/social_link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:visibility="gone"/>
+
         </net.gmsworld.devicelocator.views.LDCard>
 
         </ScrollView>

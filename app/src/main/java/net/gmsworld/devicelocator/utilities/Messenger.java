@@ -1223,7 +1223,22 @@ public class Messenger {
         }
     }
 
-    private static boolean isAppInstalled(Context context, String packageName) {
+    public static void sendMessengerMessage(Context context, String message) {
+        //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("fb-messenger://user/252112178789066"));
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.putExtra(Intent.EXTRA_TEXT, message);
+        intent.setType("text/plain");
+        intent.setPackage("com.facebook.orca");
+        try {
+            context.startActivity(intent);
+        }
+        catch (Exception ex) {
+            Log.e(TAG, ex.getMessage(), ex);
+        }
+    }
+
+    public static boolean isAppInstalled(Context context, String packageName) {
         try {
             return context.getPackageManager().getApplicationInfo(packageName, 0).enabled;
         }

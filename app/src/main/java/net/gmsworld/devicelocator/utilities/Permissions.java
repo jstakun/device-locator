@@ -26,7 +26,7 @@ public class Permissions {
 
     public static final int PERMISSIONS_REQUEST_TRACKER_CONTROL = 1003;
 
-    //public static final int PERMISSIONS_REQUEST_SMS_CONTACTS = 1004;
+    public static final int PERMISSIONS_REQUEST_CONTACTS = 1004;
 
     public static final int PERMISSIONS_REQUEST_CALL = 1005;
 
