@@ -61,6 +61,9 @@ public class Messenger {
     public static final String LNG_HEADER = "X-GMS-Lng";
     public static final String ACC_HEADER = "X-GMS-Acc";
 
+    public static final String TELGRAM_PACKAGE = "org.telegram.messenger";
+    public static final String FACEBOOK_MESSENGER_PACKAGE = "com.facebook.orca";
+
     public static final String CID_SEPARATOR = "+=+";
 
     private static void sendSMS(final Context context, final String phoneNumber, final String message) {
@@ -1199,8 +1202,7 @@ public class Messenger {
 
     public static void getMyTelegramId(Context context) {
         onFailedTelegramRegistration(context, null, true);
-        final String appName = "org.telegram.messenger";
-        final boolean appInstalled = isAppInstalled(context, appName);
+        final boolean appInstalled = isAppInstalled(context, TELGRAM_PACKAGE);
         Intent intent;
         if (appInstalled) {
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://telegram.me/device_locator_bot"));
@@ -1212,8 +1214,8 @@ public class Messenger {
         }
         try {
             if (appInstalled) {
-                context.getPackageManager().getPackageInfo(appName, PackageManager.GET_ACTIVITIES);
-                intent.setPackage(appName);
+                context.getPackageManager().getPackageInfo(TELGRAM_PACKAGE, PackageManager.GET_ACTIVITIES);
+                intent.setPackage(TELGRAM_PACKAGE);
             }
             context.startActivity(intent);
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(MainActivity.TELEGRAM_PASTE, true).apply();
@@ -1227,7 +1229,7 @@ public class Messenger {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, message);
-        intent.setPackage("org.telegram.messenger");
+        intent.setPackage(TELGRAM_PACKAGE);
         context.startActivity(intent);
         Toast.makeText(context, "Find Device Locator bot", Toast.LENGTH_LONG).show();
     }
@@ -1238,7 +1240,7 @@ public class Messenger {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_TEXT, message);
         intent.setType("text/plain");
-        intent.setPackage("com.facebook.orca");
+        intent.setPackage(FACEBOOK_MESSENGER_PACKAGE);
         try {
             context.startActivity(intent);
         }
