@@ -931,7 +931,7 @@ public class Messenger {
         }
     }
 
-    public static void sendTelegramRegistrationRequest(final Activity context, final String telegramId, final int retryCount) {
+    public static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final int retryCount) {
         if (isValidTelegramId(telegramId)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
@@ -955,7 +955,7 @@ public class Messenger {
         }
     }
 
-    private static void sendTelegramRegistrationRequest(final Activity context, final String telegramId, final String tokenStr, final int retryCount) {
+    private static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
         headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
@@ -985,9 +985,12 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
-                                if (!context.isFinishing()) {
-                                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
-                                    notificationActivationDialogFragment.show(context.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                if (context instanceof Activity) {
+                                    Activity activity = (Activity)context;
+                                    if (!activity.isFinishing()) {
+                                        NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                                        notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                    }
                                 }
                             } else {
                                 onFailedTelegramRegistration(context, "Failed to send activation code to your Telegram chat or channel. Please register again your Telegram chat or channel!", true);
@@ -998,11 +1001,14 @@ public class Messenger {
                     } else if (responseCode == 403) {
                         onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
                     } else if (responseCode == 400) {
-                        if (!context.isFinishing()) {
-                            TelegramSetupDialogFragment telegramSetupDialogFragment = TelegramSetupDialogFragment.newInstance();
-                            telegramSetupDialogFragment.show(context.getFragmentManager(), TelegramSetupDialogFragment.TAG);
-                        } else {
-                            onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
+                        if (context instanceof Activity) {
+                            Activity activity = (Activity)context;
+                            if (!activity.isFinishing()) {
+                                TelegramSetupDialogFragment telegramSetupDialogFragment = TelegramSetupDialogFragment.newInstance();
+                                telegramSetupDialogFragment.show(activity.getFragmentManager(), TelegramSetupDialogFragment.TAG);
+                            } else {
+                                onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
+                            }
                         }
                     } else if (responseCode != 200 && retryCount > 0) {
                         sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
@@ -1018,15 +1024,16 @@ public class Messenger {
 
     public static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
-        final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-        if (clearTextInput) {
-            telegramInput.setText("");
+        if (context instanceof Activity) {
+            final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
+            if (clearTextInput) {
+                telegramInput.setText("");
+            }
+            telegramInput.requestFocus();
+            if (StringUtils.isNotEmpty(message)) {
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+            }
         }
-        telegramInput.requestFocus();
-        if (StringUtils.isNotEmpty(message)) {
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-        }
-
     }
 
     private static void sendEmailRegistrationRequest(final Context context, final String email, final String tokenStr, final int retryCount) {
@@ -1059,9 +1066,12 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
-                                if (!((Activity) context).isFinishing()) {
-                                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
-                                    notificationActivationDialogFragment.show(((Activity) context).getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                if (context instanceof Activity) {
+                                    Activity activity = (Activity) context;
+                                    if (!activity.isFinishing()) {
+                                        NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
+                                        notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                    }
                                 }
                             } else {
                                 onFailedEmailRegistration(context, "Failed to send activation email to your inbox. Please register your email address again!", true);
@@ -1085,12 +1095,14 @@ public class Messenger {
 
     private static void onFailedEmailRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
-        final TextView emailInput = ((Activity) context).findViewById(R.id.email);
-        if (clearTextInput) {
-            emailInput.setText("");
+        if (context instanceof Activity) {
+            final TextView emailInput = ((Activity) context).findViewById(R.id.email);
+            if (clearTextInput) {
+                emailInput.setText("");
+            }
+            emailInput.requestFocus();
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         }
-        emailInput.requestFocus();
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
     @SuppressLint("MissingPermission")

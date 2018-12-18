@@ -29,7 +29,6 @@ import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 
 import java.lang.reflect.Constructor;
 import java.net.URLDecoder;
@@ -847,28 +846,38 @@ public class Command {
         @Override
         public boolean validateTokens() {
             if (commandTokens != null && commandTokens.length > 1) {
+                boolean hasValidToken = false;
                 for (String token : commandTokens) {
+                    Log.d(TAG, "Validating token " + token);
                     if (token.startsWith("m:")) {
                         String newEmailAddress = token.substring(2);
                         if (StringUtils.isNotEmpty(newEmailAddress) && !Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) {
+                            Log.d(TAG, "Invalid email");
                             return false;
+                        } else {
+                            hasValidToken = true;
                         }
                     } else if (token.startsWith("p:")) {
                         String newPhoneNumber = token.substring(2);
                         if (StringUtils.isNotEmpty(newPhoneNumber) && !Patterns.PHONE.matcher(newPhoneNumber).matches()) {
+                            Log.d(TAG, "Invalid phone");
                             return false;
+                        } else {
+                            hasValidToken = true;
                         }
                     } else if (token.startsWith("t:")) {
                         String newTelegramId = token.substring(2);
-                        if (StringUtils.isNotEmpty(newTelegramId) && !NumberUtils.isCreatable(newTelegramId)) {
+                        if (StringUtils.isNotEmpty(newTelegramId) && !Messenger.isValidTelegramId(newTelegramId)) {
+                            Log.d(TAG, "Invalid telegram");
                             return false;
+                        } else {
+                            hasValidToken = true;
                         }
                     } else {
-                        //invalid token
-                        return false;
+                        //skip token
                     }
                 }
-                return true;
+                return hasValidToken;
             } else {
                 return false;
             }
@@ -895,6 +904,7 @@ public class Command {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
                     editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
+                    Messenger.sendEmailRegistrationRequest(context, email, 1);
                 } else {
                     email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
@@ -905,6 +915,7 @@ public class Command {
                 }
                 if (telegramId != null) {
                     editor.putString(MainActivity.NOTIFICATION_SOCIAL, telegramId);
+                    Messenger.sendTelegramRegistrationRequest(context, telegramId, 1);
                 } else {
                     telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 }
@@ -914,13 +925,7 @@ public class Command {
 
                 RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
 
-                Intent newIntent = new Intent(context, SmsSenderService.class);
-                newIntent.putExtra("phoneNumber", sender);
-                newIntent.putExtra("notificationNumber", phoneNumber);
-                newIntent.putExtra("email", email);
-                newIntent.putExtra("telegramId", telegramId);
-                newIntent.putExtra("command", NOTIFY_COMMAND);
-                context.startService(newIntent);
+                sendSmsNotification(context, sender, NOTIFY_COMMAND);
             }
         }
 
@@ -945,6 +950,7 @@ public class Command {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
                     editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
+                    Messenger.sendEmailRegistrationRequest(context, email, 1);
                 } else {
                     email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
@@ -955,6 +961,7 @@ public class Command {
                 }
                 if (telegramId != null) {
                     editor.putString(MainActivity.NOTIFICATION_SOCIAL, telegramId);
+                    Messenger.sendTelegramRegistrationRequest(context, telegramId, 1);
                 } else {
                     telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 }
@@ -964,12 +971,7 @@ public class Command {
 
                 RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
 
-                Intent newIntent = new Intent(context, SmsSenderService.class);
-                newIntent.putExtra("notificationNumber", phoneNumber);
-                newIntent.putExtra("email", email);
-                newIntent.putExtra("telegramId", telegramId);
-                newIntent.putExtra("command", NOTIFY_COMMAND);
-                context.startService(newIntent);
+                sendSocialNotification(context, NOTIFY_COMMAND);
             }
         }
 
@@ -994,29 +996,22 @@ public class Command {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
                     editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
-                } else {
-                    email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
+                    Messenger.sendEmailRegistrationRequest(context, email, 1);
                 }
                 if (phoneNumber != null) {
                     editor.putString(MainActivity.NOTIFICATION_PHONE_NUMBER, phoneNumber);
-                } else {
-                    phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
                 }
                 if (telegramId != null) {
                     editor.putString(MainActivity.NOTIFICATION_SOCIAL, telegramId);
-                } else {
-                    telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+                    Messenger.sendTelegramRegistrationRequest(context, telegramId, 1);
                 }
                 editor.apply();
 
                 int radius = settings.getInt("radius", 100);
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, sender);
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
 
-                Intent newIntent = new Intent(context, SmsSenderService.class);
-                newIntent.putExtra("app", "app");
-                newIntent.putExtra("command", NOTIFY_COMMAND);
-                context.startService(newIntent);
+                sendAppNotification(context, NOTIFY_COMMAND, sender);
             }
         }
     }

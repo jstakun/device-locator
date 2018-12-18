@@ -973,7 +973,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
                 if (StringUtils.isNotEmpty(email)) {
                     Toast.makeText(MainActivity.this, "Email verification in progress...", Toast.LENGTH_SHORT).show();
-                    net.gmsworld.devicelocator.utilities.Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
+                    Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
                 } else {
                     Toast.makeText(MainActivity.this, "No email notifications will be sent...", Toast.LENGTH_LONG).show();
                 }
@@ -1049,7 +1049,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
                 if (StringUtils.isNotEmpty(telegramId)) {
                     Toast.makeText(MainActivity.this, "Telegram verification in progress...", Toast.LENGTH_LONG).show();
-                    net.gmsworld.devicelocator.utilities.Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
+                    Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
                 } else {
                     Toast.makeText(MainActivity.this, "No Telegram notifications will be sent...", Toast.LENGTH_LONG).show();
                 }
