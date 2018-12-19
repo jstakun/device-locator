@@ -1009,7 +1009,7 @@ public class Command {
 
                 int radius = settings.getInt("radius", 100);
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, sender);
 
                 sendAppNotification(context, NOTIFY_COMMAND, sender);
             }
