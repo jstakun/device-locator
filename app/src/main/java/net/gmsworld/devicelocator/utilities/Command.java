@@ -129,6 +129,11 @@ public class Command {
         for (AbstractCommand c : getCommands()) {
             if (c.findAppCommand(context, StringUtils.trim(message), sender, location, extras, pin, isPinRequired)) {
                 Log.d(TAG, "Found matching cloud command");
+
+
+
+
+
                 return c.getSmsCommand();
             } else if (c.findSocialCommand(context, StringUtils.trim(message), pin, isPinRequired, hasSocialNotifiers)) {
                 Log.d(TAG, "Found matching social command");

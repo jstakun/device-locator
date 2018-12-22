@@ -273,7 +273,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 prefs.setEncryptedString(PIN_PREFIX + device.imei, pin);
                 Intent newIntent = new Intent(this, CommandService.class);
                 AbstractCommand c = Command.getCommandByName(command);
-                if ((c == null || (c != null && c.hasParameters())) && StringUtils.isNotEmpty(commandArgs)) {
+                if ((c == null || c.hasParameters()) && StringUtils.isNotEmpty(commandArgs)) {
                     newIntent.putExtra("args", commandArgs);
                 }
                 newIntent.putExtra("command", command);
