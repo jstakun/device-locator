@@ -432,11 +432,8 @@ public class Messenger {
             sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(email)) {
-            String title = context.getString(R.string.message);
-            if (StringUtils.isNotEmpty(deviceId)) {
-                title += " installed on device " + deviceId + " - current location";
-                text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-            }
+            String title = context.getString(R.string.message, deviceId) + " - current location";
+            text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
             sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
@@ -456,11 +453,8 @@ public class Messenger {
             sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(email)) {
-            String title = context.getString(R.string.message);
-            if (StringUtils.isNotEmpty(deviceId)) {
-                title += " installed on device " + deviceId + " - location map link";
-                text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-            }
+            String title = context.getString(R.string.message, deviceId) + " - location map link";
+            text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
             sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
@@ -487,11 +481,8 @@ public class Messenger {
             sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(email)) {
-            String title = context.getString(R.string.message);
-            if (StringUtils.isNotEmpty(deviceId)) {
-                title += " installed on device " + deviceId + " - location request";
-                text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-            }
+            String title = context.getString(R.string.message, deviceId) + " - location request";
+            text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
             sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
@@ -533,10 +524,8 @@ public class Messenger {
         if (StringUtils.isNotEmpty(telegramId)) {
             sendTelegram(context, location, telegramId, message, 1, headers);
         } else if (StringUtils.isNotEmpty(email)) {
-            String title = context.getString(R.string.message);
-            if (deviceId != null) {
-                title += " installed on device " + deviceId + " - location change";
-            }
+            String title = context.getString(R.string.message, deviceId) + " - location change";
+            message += "\n\n" + "We recommend to use Telegram Messenger for route tracking notifications!";
             sendEmail(context, location, email, message, title, 1, headers);
         } else {
             //send route point for online route tracking
@@ -583,10 +572,7 @@ public class Messenger {
         if (command != null) {
             switch (command) {
                 case Command.RESUME_COMMAND:
-                    title = context.getString(R.string.app_name) + " resumed location tracking";
-                    if (deviceId != null) {
-                        title += " on device " + deviceId;
-                    }
+                    title = context.getString(R.string.app_name) + " resumed location tracking on device " + deviceId;
                     if (GmsSmartLocationManager.isLocationEnabled(context) && settings.getBoolean("motionDetectorRunning", false)) {
                         text = "Device location tracking has been resumed. ";
                         if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
@@ -609,17 +595,11 @@ public class Messenger {
                     text += "\nBattery level: " + getBatteryLevel(context);
                     break;
                 case Command.STOP_COMMAND:
+                    title = context.getString(R.string.app_name) + " stopped location tracking on device " + deviceId;
                     text = "Device location tracking on device " + deviceId + " has been stopped.\nBattery level: " + getBatteryLevel(context);
-                    title = context.getString(R.string.app_name) + " stopped location tracking";
-                    if (deviceId != null) {
-                        title += " on device " + deviceId;
-                    }
                     break;
                 case Command.START_COMMAND:
-                    title = context.getString(R.string.app_name) + " started location tracking";
-                    if (deviceId != null) {
-                        title += " on device " + deviceId;
-                    }
+                    title = context.getString(R.string.app_name) + " started location tracking on device " + deviceId;
                     if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean("motionDetectorRunning", false)) {
                         text = "Device location tracking on device " + deviceId + " is running. " +
                                 "Track route live " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
@@ -657,10 +637,7 @@ public class Messenger {
                     }
                     break;
                 case Command.ROUTE_COMMAND:
-                    title = context.getString(R.string.message);
-                    if (deviceId != null) {
-                        title += " installed on device " + deviceId + " - route map link";
-                    }
+                    title = context.getString(R.string.message, deviceId) + " - route map link";
                     int size = 0;
                     if (extras != null) {
                         size = extras.getInt("size", 0);
@@ -703,6 +680,7 @@ public class Messenger {
                     text = "Audio transmitter on device " + deviceId + " has been stopped.";
                     break;
                 case Command.TAKE_PHOTO_COMMAND:
+                    title = context.getString(R.string.message, deviceId) + " - front camera photo";
                     boolean hiddenCamera = settings.getBoolean("hiddenCamera", false);
                     String imageUrl = null;
                     if (extras != null) {
@@ -731,6 +709,7 @@ public class Messenger {
                     text += "\n" + "Battery level: " + getBatteryLevel(context);
                     break;
                 case Command.HELLO_COMMAND:
+                    title = "Greetings from " + context.getString(R.string.app_name)  + " installed on device " + deviceId;
                     text = "Hello from " + deviceId;
                     text += "\n" + "Battery level: " + getBatteryLevel(context);
                     break;
@@ -802,10 +781,7 @@ public class Messenger {
             }
             if (StringUtils.isNotEmpty(email)) {
                 if (StringUtils.isEmpty(title)) {
-                    title = context.getString(R.string.message);
-                    if (StringUtils.isNotEmpty(deviceId)) {
-                        title += " installed on device " + deviceId;
-                    }
+                    title = context.getString(R.string.message, deviceId);
                 }
                 text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
                 sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
@@ -827,10 +803,7 @@ public class Messenger {
             sendTelegram(context, null, telegramId, message, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(email)) {
-            String title = context.getString(R.string.message);
-            if (StringUtils.isNotEmpty(deviceId)) {
-                title += " installed on device " + deviceId + " - current location";
-            }
+            String title = context.getString(R.string.message, deviceId) + " - current location";
             message += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
             sendEmail(context, null, email, message, title, 1, new HashMap<String, String>());
         }
@@ -851,11 +824,8 @@ public class Messenger {
             sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(email)) {
-            String title = context.getString(R.string.message);
-            if (StringUtils.isNotEmpty(deviceId)) {
-                title += " installed on device " + deviceId + " - failed login";
-                text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-            }
+            String title = context.getString(R.string.message, deviceId) + " - failed login";
+            text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
             sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
