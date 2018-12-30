@@ -2,7 +2,7 @@
     <string name="app_name">Device Locator</string>
     <string name="account_type">net.gmsworld</string>
     <string name="app_name_html">&lt;font color="#808080">Device Locator&lt;/font></string>
-    <string name="message">Message from Device Locator installed oin device %1$s</string>
+    <string name="message">Message from Device Locator installed on device %1$s</string>
     <string name="settings_card_title">Notification settings</string>
     <string name="detected_message_summary">Acknowledge that location command was received and send mobile data and GPS status.</string>
     <string name="gps_message_summary">GPS information - Accuracy, Latitude, Longitude, Speed, Altitude.</string>
