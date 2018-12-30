@@ -524,9 +524,9 @@ public class Messenger {
         if (StringUtils.isNotEmpty(telegramId)) {
             sendTelegram(context, location, telegramId, message, 1, headers);
         } else if (StringUtils.isNotEmpty(email)) {
-            String title = context.getString(R.string.message, deviceId) + " - location change";
-            message += "\n\n" + "We recommend to use Telegram Messenger for route tracking notifications!";
-            sendEmail(context, location, email, message, title, 1, headers);
+            final String title = context.getString(R.string.message, deviceId) + " - location change";
+            final String mailMessage = message + "\n\n" + "We recommend to use Telegram Messenger for route tracking notifications!";
+            sendEmail(context, location, email, mailMessage, title, 1, headers);
         } else {
             //send route point for online route tracking
             sendRoutePoint(context, location, 1, headers);
