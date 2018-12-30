@@ -160,6 +160,9 @@ public class Messenger {
                     if (responseCode == 200) {
                         //Toast.makeText(context, "Command has been sent!", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "Message has been sent to the cloud!");
+                    } else if (responseCode >= 400 && responseCode < 500) {
+                        Toast.makeText(context, "Command has been rejected! Please try again after some time.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Message has been rejected by server!");
                     } else if (responseCode == 500 && retryCount > 0) {
                         sendCloudMessage(context, replyTo, message, replyToCommand, retryCount - 1, headers);
                     }

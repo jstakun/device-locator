@@ -108,9 +108,9 @@ public class Network {
                 Log.e(TAG, "GMS Token is invalid but can't be deleted from device!");
             }
         } else if (responseCode >= 400) {
-            Log.e(TAG, "Received following error response " + responseCode + ": " + response + " from " + urlString);
+            Log.e(TAG, "Received error response " + responseCode + ": " + response + " from " + urlString);
         } else {
-            Log.d(TAG, "Received following response " + responseCode + ": " + response + " from " + urlString);
+            Log.d(TAG, "Received response " + responseCode + ": " + response + " from " + urlString);
         }
     }
 
