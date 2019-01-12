@@ -1155,8 +1155,8 @@ public class Messenger {
     }
 
     public static boolean isValidTelegramId(String telegramId) {
-        //channel id could be negative number starting from -100 or string starting with @
-        //chat id must be positive integer
+        //channel id could be negative number starting from -100 and length > 13 or string starting with @
+        //chat id must be positive integer with length > 5
         if (StringUtils.startsWith(telegramId, "@") && telegramId.length() > 1 && !StringUtils.containsWhitespace(telegramId)) {
             return true;
         } else {
@@ -1164,9 +1164,9 @@ public class Messenger {
                 try {
                     long id = Long.parseLong(telegramId);
                     if (id < 0) {
-                        return StringUtils.startsWith(telegramId, "-100") && telegramId.length() > 4;
+                        return StringUtils.startsWith(telegramId, "-100") && telegramId.length() > 13;
                     } else {
-                        return true;
+                        return telegramId.length() > 5;
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Invalid telegram chat or channel id " + telegramId);
@@ -1190,7 +1190,7 @@ public class Messenger {
         final boolean appInstalled = isAppInstalled(context, TELGRAM_PACKAGE);
         Intent intent;
         if (appInstalled) {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://telegram.me/device_locator_bot"));
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://telegram.me/device_locator_bot?start="+getDeviceId(context, false)));
             //intent = new Intent(Intent.ACTION_SEND);
             //intent.setType("text/plain");
             //intent.putExtra(Intent.EXTRA_TEXT, "/getmyid");
