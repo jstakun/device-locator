@@ -1480,7 +1480,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                         Log.e(TAG, "Invalid chat id received: " + chatId);
                                     }
                                 } else {
-                                    Log.e(TAG, "Invalid json: " + results);
+                                    Log.e(TAG, "Failed to find: " + telegramSecret + " in " + results);
                                 }
                             } else {
                                 Log.e(TAG, "Invalid response: " + results);
