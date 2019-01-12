@@ -17,6 +17,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
+import android.util.Base64;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -1192,7 +1193,9 @@ public class Messenger {
         final boolean appInstalled = isAppInstalled(context, TELGRAM_PACKAGE);
         Intent intent;
         if (appInstalled) {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/device_locator_bot?start=device-"+getDeviceId(context, false)));
+            final String deviceId = "device:"+getDeviceId(context, false);
+            final String enc = Base64.encodeToString(deviceId.getBytes(), Base64.URL_SAFE);
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/device_locator_bot?start=" + enc));
         } else {
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/#/im?p=@device_locator_bot"));
         }
