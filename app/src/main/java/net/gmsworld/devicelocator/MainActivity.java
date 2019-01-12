@@ -1479,11 +1479,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     } else {
                                         Log.e(TAG, "Invalid chat id received: " + chatId);
                                     }
+                                } else {
+                                    Log.e(TAG, "Invalid json: " + results);
                                 }
+                            } else {
+                                Log.e(TAG, "Invalid response: " + results);
                             }
                         }
                         if (!registered) {
-                            Log.e(TAG, "Received server response " + responseCode + ": " + results);
                             Toast.makeText(MainActivity.this, "Failed to register Telegram chat id. Please try again!", Toast.LENGTH_SHORT).show();
                         }
                     }
