@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         //check for Telegram registration
         final String telegramSecret = settings.getString(TELEGRAM_SECRET);
         if (telegramSecret.length() > 0 && !StringUtils.equals(telegramSecret, "none")) {
-            getTelegramChatId();
+            getTelegramChatId(telegramSecret.trim());
         }
     }
 
@@ -1451,14 +1451,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
     }
 
-    private void getTelegramChatId() {
+    private void getTelegramChatId(final String telegramSecret) {
         if (Network.isNetworkAvailable(this)) {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             final Map<String, String> headers = new HashMap<>();
             headers.put("X-GMS-AppId", "2");
             headers.put("X-GMS-Scope", "dl");
             if (StringUtils.isNotEmpty(tokenStr)) {
-                final String telegramSecret = settings.getString(TELEGRAM_SECRET);
                 final String queryString = "type=getTelegramChatId&telegramSecret=" + telegramSecret;
                 Network.get(this, getString(R.string.telegramUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
@@ -1498,7 +1497,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             Messenger.getToken(MainActivity.this, results);
-                            getTelegramChatId();
+                            getTelegramChatId(telegramSecret);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
