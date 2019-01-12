@@ -1476,12 +1476,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                         PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(MainActivity.TELEGRAM_SECRET).apply();
                                         registerTelegram(telegramInput);
                                         registered = true;
+                                    } else {
+                                        Log.e(TAG, "Invalid chat id received: " + chatId);
                                     }
                                 }
                             }
                         }
                         if (!registered) {
-                            Toast.makeText(MainActivity.this, "Failed to register Telegram chat id!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "Failed to register Telegram chat id. Please try again!", Toast.LENGTH_SHORT).show();
+                            Log.e(TAG, "Received server response " + responseCode + ": " + results);
                         }
                     }
                 });
