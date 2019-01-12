@@ -1463,6 +1463,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 Network.get(this, getString(R.string.telegramUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
+                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(MainActivity.TELEGRAM_SECRET).apply();
                         boolean registered = false;
                         if (responseCode == 200 && results.startsWith("{")) {
                             JsonElement reply = new JsonParser().parse(results);
@@ -1473,7 +1474,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     if (Messenger.isValidTelegramId(Long.toString(chatId))) {
                                         final TextView telegramInput = MainActivity.this.findViewById(R.id.telegramId);
                                         telegramInput.setText(Long.toString(chatId));
-                                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(MainActivity.TELEGRAM_SECRET).apply();
                                         registerTelegram(telegramInput);
                                         registered = true;
                                     } else {
@@ -1483,8 +1483,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                             }
                         }
                         if (!registered) {
-                            Toast.makeText(MainActivity.this, "Failed to register Telegram chat id. Please try again!", Toast.LENGTH_SHORT).show();
                             Log.e(TAG, "Received server response " + responseCode + ": " + results);
+                            Toast.makeText(MainActivity.this, "Failed to register Telegram chat id. Please try again!", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
