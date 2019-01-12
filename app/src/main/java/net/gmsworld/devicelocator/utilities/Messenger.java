@@ -336,6 +336,8 @@ public class Messenger {
                                 Toast.makeText(context, R.string.telegram_internal_error, Toast.LENGTH_LONG).show();
                             }
                         }
+                    } else if (responseCode >= 400) {
+                        //TODO handle failed request
                     }
                 }
             });
@@ -1190,10 +1192,7 @@ public class Messenger {
         final boolean appInstalled = isAppInstalled(context, TELGRAM_PACKAGE);
         Intent intent;
         if (appInstalled) {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://telegram.me/device_locator_bot?start="+getDeviceId(context, false)));
-            //intent = new Intent(Intent.ACTION_SEND);
-            //intent.setType("text/plain");
-            //intent.putExtra(Intent.EXTRA_TEXT, "/getmyid");
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/device_locator_bot?start=device:"+getDeviceId(context, false)));
         } else {
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/#/im?p=@device_locator_bot"));
         }
@@ -1204,7 +1203,11 @@ public class Messenger {
             }
             context.startActivity(intent);
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(MainActivity.TELEGRAM_PASTE, true).apply();
-            Toast.makeText(context, "Enter message /id", Toast.LENGTH_LONG).show();
+            if (appInstalled) {
+                Toast.makeText(context, "Push Start button", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(context, "Enter command /id", Toast.LENGTH_LONG).show();
+            }
         } catch (PackageManager.NameNotFoundException e) {
             Toast.makeText(context, "This function requires installed Telegram Messenger or Web Browser on your device.", Toast.LENGTH_LONG).show();
         }
