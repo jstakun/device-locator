@@ -1192,7 +1192,7 @@ public class Messenger {
         final boolean appInstalled = isAppInstalled(context, TELGRAM_PACKAGE);
         Intent intent;
         if (appInstalled) {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/device_locator_bot?start=device:"+getDeviceId(context, false)));
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/device_locator_bot?start=device-"+getDeviceId(context, false)));
         } else {
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/#/im?p=@device_locator_bot"));
         }
