@@ -63,7 +63,7 @@ public class Messenger {
     public static final String ACC_HEADER = "X-GMS-Acc";
 
     public static final String TELGRAM_PACKAGE = "org.telegram.messenger";
-    public static final String FACEBOOK_MESSENGER_PACKAGE = "com.facebook.orca";
+    private static final String FACEBOOK_MESSENGER_PACKAGE = "com.facebook.orca";
 
     public static final String CID_SEPARATOR = "+=+";
 
@@ -1191,11 +1191,12 @@ public class Messenger {
     public static void getMyTelegramId(Context context) {
         onFailedTelegramRegistration(context, null, true);
         final boolean appInstalled = isAppInstalled(context, TELGRAM_PACKAGE);
+        String deviceSecret = "none";
         Intent intent;
         if (appInstalled) {
             final String deviceId = "device:"+getDeviceId(context, false);
-            final String enc = Base64.encodeToString(deviceId.getBytes(), Base64.URL_SAFE);
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/device_locator_bot?start=" + enc));
+            deviceSecret = Base64.encodeToString(deviceId.getBytes(), Base64.URL_SAFE);
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/device_locator_bot?start=" + deviceSecret));
         } else {
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/#/im?p=@device_locator_bot"));
         }
@@ -1205,9 +1206,9 @@ public class Messenger {
                 intent.setPackage(TELGRAM_PACKAGE);
             }
             context.startActivity(intent);
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(MainActivity.TELEGRAM_PASTE, true).apply();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.TELEGRAM_SECRET, deviceSecret).apply();
             if (appInstalled) {
-                Toast.makeText(context, "Push Start button", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Please push Start button", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(context, "Enter command /id", Toast.LENGTH_LONG).show();
             }

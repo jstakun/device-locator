@@ -6,6 +6,7 @@
     <string name="crashReportUrl">https://www.gms-world.net/s/crashReport</string>
     <string name="notificationUrl">https://www.gms-world.net/s/notifications</string>
     <string name="tokenUrl">https://www.gms-world.net/token</string>
+    <string name="telegramUrl">https://www.gms-world.net/telegram</string>
     <string name="deviceManagerUrl">https://www.gms-world.net/s/deviceManager</string>
     <string name="photoUploadUrl">https://www.gms-world.net/imageUpload</string>
     <string name="securePhotoUploadUrl">https://www.gms-world.net/s/imageUpload</string>

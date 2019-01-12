@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     public static final String ACTION_DEVICE_MANAGER = "net.gmsworld.devicelocator.ActionDeviceManager";
     public static final String ACTION_SMS_MANAGER = "net.gmsworld.devicelocator.ActionSmsManager";
 
-    public static final String TELEGRAM_PASTE = "telegramPaste";
+    public static final String TELEGRAM_SECRET = "telegramSecret";
 
     private Boolean running = null;
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
@@ -231,30 +231,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         updateUI();
         initDeviceList();
 
-        //paste Telegram id
-        boolean telegramPaste = settings.getBoolean(TELEGRAM_PASTE, false);
-        if (telegramPaste) {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().remove(TELEGRAM_PASTE).apply();
-            final TextView telegramInput = this.findViewById(R.id.telegramId);
-            //paste telegram id from clipboard
-            try {
-                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                if (clipboard != null && clipboard.hasPrimaryClip()) {
-                    int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
-                    for (int i = 0; i < clipboardItemCount; i++) {
-                        ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
-                        String pasteData = item.getText().toString();
-                        Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
-                        if (Messenger.isValidTelegramId(pasteData)) {
-                            telegramInput.setText(pasteData);
-                            registerTelegram(telegramInput);
-                            break;
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to paste text from clipboard", e);
-            }
+        //check for Telegram registration
+        final String telegramSecret = settings.getString(TELEGRAM_SECRET);
+        if (telegramSecret.length() > 0 && !StringUtils.equals(telegramSecret, "none")) {
+            getTelegramChatId();
         }
     }
 
@@ -1468,6 +1448,59 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             });
         } else {
             Toast.makeText(MainActivity.this, "No network available. Failed to remove device!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void getTelegramChatId() {
+        if (Network.isNetworkAvailable(this)) {
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+            final Map<String, String> headers = new HashMap<>();
+            headers.put("X-GMS-AppId", "2");
+            headers.put("X-GMS-Scope", "dl");
+            if (StringUtils.isNotEmpty(tokenStr)) {
+                final String telegramSecret = settings.getString(TELEGRAM_SECRET);
+                final String queryString = "type=getTelegramChatId&telegramSecret=" + telegramSecret;
+                Network.get(this, getString(R.string.telegramUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        boolean registered = false;
+                        if (responseCode == 200 && results.startsWith("{")) {
+                            JsonElement reply = new JsonParser().parse(results);
+                            if (reply != null) {
+                                JsonElement se = reply.getAsJsonObject().get(telegramSecret);
+                                if (se != null) {
+                                    final Long chatId = se.getAsLong();
+                                    if (Messenger.isValidTelegramId(Long.toString(chatId))) {
+                                        final TextView telegramInput = MainActivity.this.findViewById(R.id.telegramId);
+                                        telegramInput.setText(Long.toString(chatId));
+                                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(MainActivity.TELEGRAM_SECRET).apply();
+                                        registerTelegram(telegramInput);
+                                        registered = true;
+                                    }
+                                }
+                            }
+                        }
+                        if (!registered) {
+                            Toast.makeText(MainActivity.this, "Failed to register Telegram chat id!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            } else {
+                String queryString = "scope=dl&user=" + Messenger.getDeviceId(this, false);
+                Network.get(this, getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        if (responseCode == 200) {
+                            Messenger.getToken(MainActivity.this, results);
+                            getTelegramChatId();
+                        } else {
+                            Log.d(TAG, "Failed to receive token: " + results);
+                        }
+                    }
+                });
+            }
+        } else {
+            Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
         }
     }
 
