@@ -936,66 +936,71 @@ public class Messenger {
         headers.put("Authorization", "Bearer " + tokenStr);
         headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
 
-        try {
-            String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context, false);
-            Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String results, int responseCode, String url) {
-                    if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                        JsonElement reply = new JsonParser().parse(results);
-                        String status = null, secret = null;
-                        if (reply != null) {
-                            JsonElement st = reply.getAsJsonObject().get("status");
-                            if (st != null) {
-                                status = st.getAsString();
-                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
-                            }
-                            JsonElement se = reply.getAsJsonObject().get("secret");
-                            if (se != null) {
-                                secret = se.getAsString();
-                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret).apply();
-                            }
+        final String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context, false);
+        Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
+            @Override
+            public void onGetFinish(String results, int responseCode, String url) {
+                if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
+                    JsonElement reply = new JsonParser().parse(results);
+                    String status = null, secret = null;
+                    if (reply != null) {
+                        JsonElement st = reply.getAsJsonObject().get("status");
+                        if (st != null) {
+                            status = st.getAsString();
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
                         }
-                        if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
-                            Toast.makeText(context, "Your Telegram chat or channel is already verified.", Toast.LENGTH_LONG).show();
-                        } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            //show dialog to enter activation code sent to user
-                            if (StringUtils.isNotEmpty(secret)) {
-                                if (context instanceof Activity) {
-                                    Activity activity = (Activity)context;
-                                    if (!activity.isFinishing()) {
+                        JsonElement se = reply.getAsJsonObject().get("secret");
+                        if (se != null) {
+                            secret = se.getAsString();
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret).apply();
+                        }
+                    }
+                    if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
+                        Toast.makeText(context, "Your Telegram chat or channel is already verified.", Toast.LENGTH_LONG).show();
+                    } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
+                        //show dialog to enter activation code sent to user
+                        if (StringUtils.isNotEmpty(secret)) {
+                            if (context instanceof Activity) {
+                                Activity activity = (Activity)context;
+                                if (!activity.isFinishing()) {
+                                    try {
                                         NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
                                         notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                    } catch (Exception e) {
+                                        Log.e(TAG, e.getMessage(), e);
                                     }
                                 }
-                            } else {
-                                onFailedTelegramRegistration(context, "Failed to send activation code to your Telegram chat or channel. Please register again your Telegram chat or channel!", true);
                             }
                         } else {
-                            onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
+                            onFailedTelegramRegistration(context, "Failed to send activation code to your Telegram chat or channel. Please register again your Telegram chat or channel!", true);
                         }
-                    } else if (responseCode == 403) {
-                        onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
-                    } else if (responseCode == 400) {
-                        if (context instanceof Activity) {
-                            Activity activity = (Activity)context;
-                            if (!activity.isFinishing()) {
-                                TelegramSetupDialogFragment telegramSetupDialogFragment = TelegramSetupDialogFragment.newInstance();
-                                telegramSetupDialogFragment.show(activity.getFragmentManager(), TelegramSetupDialogFragment.TAG);
-                            } else {
-                                onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
-                            }
-                        }
-                    } else if (responseCode != 200 && retryCount > 0) {
-                        sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
                     } else {
                         onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                     }
+                } else if (responseCode == 403) {
+                    onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
+                } else if (responseCode == 400) {
+                    if (context instanceof Activity) {
+                        Activity activity = (Activity)context;
+                        if (!activity.isFinishing()) {
+                            try {
+                                TelegramSetupDialogFragment telegramSetupDialogFragment = TelegramSetupDialogFragment.newInstance();
+                                telegramSetupDialogFragment.show(activity.getFragmentManager(), TelegramSetupDialogFragment.TAG);
+                            } catch (Exception e) {
+                                Log.e(TAG, e.getMessage(), e);
+                                onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
+                            }
+                        } else {
+                            onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
+                        }
+                    }
+                } else if (responseCode != 200 && retryCount > 0) {
+                    sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
+                } else {
+                    onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                 }
-            });
-        } catch (Exception e) {
-            Log.d(TAG, e.getMessage(), e);
-        }
+            }
+        });
     }
 
     public static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
