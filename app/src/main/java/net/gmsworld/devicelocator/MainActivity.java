@@ -1463,30 +1463,46 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(MainActivity.TELEGRAM_SECRET).apply();
-                        boolean registered = false;
                         if (responseCode == 200 && results.startsWith("{")) {
+                            String secret = null, status = null;
                             JsonElement reply = new JsonParser().parse(results);
                             if (reply != null) {
-                                JsonElement se = reply.getAsJsonObject().get(telegramSecret);
+                                JsonElement st = reply.getAsJsonObject().get("status");
+                                if (st != null) {
+                                    status = st.getAsString();
+                                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
+                                }
+                                JsonElement se = reply.getAsJsonObject().get("secret");
                                 if (se != null) {
-                                    final Long chatId = se.getAsLong();
-                                    if (Messenger.isValidTelegramId(Long.toString(chatId))) {
-                                        final TextView telegramInput = MainActivity.this.findViewById(R.id.telegramId);
-                                        telegramInput.setText(Long.toString(chatId));
-                                        registerTelegram(telegramInput);
-                                        registered = true;
-                                    } else {
-                                        Log.e(TAG, "Invalid chat id received: " + chatId);
+                                    secret = se.getAsString();
+                                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret).apply();
+                                }
+                                JsonElement cid = reply.getAsJsonObject().get("chatId");
+                                if (cid != null) {
+                                    Long chatId = cid.getAsLong();
+                                    final TextView telegramInput = MainActivity.this.findViewById(R.id.telegramId);
+                                    telegramInput.setText(Long.toString(chatId));
+                                    telegramId = Long.toString(chatId);
+                                    saveData();
+                                }
+                            }
+                            if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
+                                Toast.makeText(MainActivity.this, "Your Telegram chat or channel is already verified.", Toast.LENGTH_LONG).show();
+                            } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
+                                //show dialog to enter activation code sent to user
+                                if (StringUtils.isNotEmpty(secret)) {
+                                    if (!MainActivity.this.isFinishing()) {
+                                        NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                                        notificationActivationDialogFragment.show(MainActivity.this.getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                     }
                                 } else {
-                                    Log.e(TAG, "Failed to find: " + telegramSecret + " in " + results);
+                                    Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                                 }
                             } else {
-                                Log.e(TAG, "Invalid response: " + results);
+                                Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                             }
-                        }
-                        if (!registered) {
-                            Toast.makeText(MainActivity.this, "Failed to register Telegram chat id. Please try again!", Toast.LENGTH_SHORT).show();
+                        } else if (responseCode >= 400) {
+                            Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                         }
                     }
                 });

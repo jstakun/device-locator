@@ -190,7 +190,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
-        if (Messenger.isAppInstalled(this, Messenger.TELGRAM_PACKAGE)) {
+        if (Messenger.isAppInstalled(this, Messenger.TELEGRAM_PACKAGE)) {
             TextView socialLink = findViewById(R.id.social_link);
             socialLink.setVisibility(View.VISIBLE);
             socialLink.setText(Html.fromHtml("<a href=#>Send with Telegram Messenger</a>"));

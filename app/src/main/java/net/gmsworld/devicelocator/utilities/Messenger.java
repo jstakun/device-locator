@@ -62,7 +62,7 @@ public class Messenger {
     public static final String LNG_HEADER = "X-GMS-Lng";
     public static final String ACC_HEADER = "X-GMS-Acc";
 
-    public static final String TELGRAM_PACKAGE = "org.telegram.messenger";
+    public static final String TELEGRAM_PACKAGE = "org.telegram.messenger";
     private static final String FACEBOOK_MESSENGER_PACKAGE = "com.facebook.orca";
 
     public static final String CID_SEPARATOR = "+=+";
@@ -948,6 +948,7 @@ public class Messenger {
                             JsonElement st = reply.getAsJsonObject().get("status");
                             if (st != null) {
                                 status = st.getAsString();
+                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
                             }
                             JsonElement se = reply.getAsJsonObject().get("secret");
                             if (se != null) {
@@ -955,7 +956,6 @@ public class Messenger {
                                 PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret).apply();
                             }
                         }
-                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             Toast.makeText(context, "Your Telegram chat or channel is already verified.", Toast.LENGTH_LONG).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
@@ -1190,20 +1190,20 @@ public class Messenger {
 
     public static void getMyTelegramId(Context context) {
         onFailedTelegramRegistration(context, null, true);
-        final boolean appInstalled = isAppInstalled(context, TELGRAM_PACKAGE);
+        final boolean appInstalled = isAppInstalled(context, TELEGRAM_PACKAGE);
         String deviceSecret = "none";
         Intent intent;
         if (appInstalled) {
             final String deviceId = "device:"+getDeviceId(context, false);
-            deviceSecret = Base64.encodeToString(deviceId.getBytes(), Base64.URL_SAFE);
+            deviceSecret = Base64.encodeToString(deviceId.getBytes(), Base64.URL_SAFE).trim();
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/device_locator_bot?start=" + deviceSecret));
         } else {
             intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/#/im?p=@device_locator_bot"));
         }
         try {
             if (appInstalled) {
-                context.getPackageManager().getPackageInfo(TELGRAM_PACKAGE, PackageManager.GET_ACTIVITIES);
-                intent.setPackage(TELGRAM_PACKAGE);
+                context.getPackageManager().getPackageInfo(TELEGRAM_PACKAGE, PackageManager.GET_ACTIVITIES);
+                intent.setPackage(TELEGRAM_PACKAGE);
             }
             context.startActivity(intent);
             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.TELEGRAM_SECRET, deviceSecret).apply();
@@ -1221,7 +1221,7 @@ public class Messenger {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, message);
-        intent.setPackage(TELGRAM_PACKAGE);
+        intent.setPackage(TELEGRAM_PACKAGE);
         context.startActivity(intent);
         Toast.makeText(context, "Find Device Locator bot", Toast.LENGTH_LONG).show();
     }
