@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -71,6 +72,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         final Spinner commandSpinner = findViewById(R.id.deviceCommand);
         final EditText args = findViewById(R.id.deviceCommandArgs);
         final EditText pinEdit = findViewById(R.id.devicePin);
+        final CheckBox socialSend = findViewById(R.id.social_send);
 
         //commands list
 
@@ -78,7 +80,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
-                    sendCommand(prefs, pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString());
+                    sendCommand(prefs, pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString(), socialSend.isChecked());
                 }
                 return false;
             }
@@ -172,6 +174,12 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             }
         });
 
+        //social checkbox
+
+        if (Messenger.isAppInstalled(this, Messenger.TELEGRAM_PACKAGE)) {
+            socialSend.setVisibility(View.VISIBLE);
+        }
+
         //send button
 
         final Button send = findViewById(R.id.sendDeviceCommand);
@@ -180,37 +188,15 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendCommand(prefs, pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString());
+                sendCommand(prefs, pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString(), socialSend.isChecked());
             }
         });
 
-        //
+        //docs link
 
         TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
-
-        if (Messenger.isAppInstalled(this, Messenger.TELEGRAM_PACKAGE)) {
-            TextView socialLink = findViewById(R.id.social_link);
-            socialLink.setVisibility(View.VISIBLE);
-            socialLink.setText(Html.fromHtml("<a href=#>Send with Telegram Messenger</a>"));
-            socialLink.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    final String command = commandSpinner.getSelectedItem().toString();
-                    final String pin = pinEdit.getText().toString();
-                    final String argStr = args.getText().toString();
-                    if (isValidCommand(pin, command, argStr)) {
-                        //command pin imei -p args
-                        String message = command + " " + pin + " " + device.imei;
-                        if (StringUtils.isNotEmpty(argStr)) {
-                            message += " -p " + argStr;
-                        }
-                        Messenger.sendTelegramMessage(CommandActivity.this, message);
-                    }
-                }
-            });
-        }
 
         findViewById(R.id.commandView).requestFocus();
 
@@ -267,9 +253,16 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         }
     }
 
-    private void sendCommand(PreferencesUtils prefs, String pin, String command, String commandArgs) {
+    private void sendCommand(PreferencesUtils prefs, String pin, String command, String commandArgs, boolean sendSocial) {
         if (isValidCommand(pin, command, commandArgs)) {
-            if (Network.isNetworkAvailable(CommandActivity.this)) {
+            if (sendSocial) {
+                //command pin imei -p args
+                String message = command + " " + pin + " " + device.imei;
+                if (StringUtils.isNotEmpty(commandArgs)) {
+                    message += " -p " + commandArgs;
+                }
+                Messenger.sendTelegramMessage(CommandActivity.this, message);
+            } else if (Network.isNetworkAvailable(CommandActivity.this)) {
                 prefs.setEncryptedString(PIN_PREFIX + device.imei, pin);
                 Intent newIntent = new Intent(this, CommandService.class);
                 AbstractCommand c = Command.getCommandByName(command);
@@ -293,55 +286,6 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             }
         }
     }
-
-    /*private void sendCommand(PreferencesUtils prefs, String pin, String command, String commandArgs) {
-        if (pin.length() == 0) {
-            Toast.makeText(CommandActivity.this, "Please enter PIN!", Toast.LENGTH_SHORT).show();
-        } else if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
-            Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
-        } else if (StringUtils.isNotEmpty(device.name) || StringUtils.isNotEmpty(device.imei)) {
-            //check if command requires args and validate args
-            boolean validArgs = true, needArgs = false;
-            AbstractCommand c = Command.getCommandByName(command);
-            if (c != null) {
-                if (StringUtils.isNotEmpty(commandArgs)) {
-                    c.setCommandTokens(StringUtils.split(command + " " + commandArgs, " "));
-                }
-
-                if (c.hasParameters()) {
-                    needArgs = true;
-                    if (!c.validateTokens()) {
-                        validArgs = false;
-                    }
-                }
-            }
-            if (!validArgs) {
-                Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
-            } else if (Network.isNetworkAvailable(CommandActivity.this)) {
-                prefs.setEncryptedString(PIN_PREFIX + device.imei, pin);
-                Intent newIntent = new Intent(this, CommandService.class);
-                if (needArgs && StringUtils.isNotEmpty(commandArgs)) {
-                    newIntent.putExtra("args", commandArgs);
-                }
-                newIntent.putExtra("command", command);
-                newIntent.putExtra("imei", device.imei);
-                newIntent.putExtra("pin", pin);
-                if (StringUtils.isNotEmpty(device.name)) {
-                    newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
-                }
-                if (c != null && c.getConfirmation() > 0) {
-                    SendCommandDialogFragment sendCommandDialogFragment = SendCommandDialogFragment.newInstance(c.getConfirmation(), command, newIntent, this);
-                    sendCommandDialogFragment.show(getFragmentManager(), SendCommandDialogFragment.TAG);
-                } else {
-                    sendCommand(command, newIntent);
-                }
-            } else {
-                Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
-            }
-        } else {
-            Toast.makeText(this, "No device selected!", Toast.LENGTH_LONG).show();
-        }
-    }*/
 
     public void sendCommand(String command, Intent intent) {
         PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(device.imei + "_lastCommand", command).apply();

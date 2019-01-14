@@ -105,6 +105,18 @@
                 android:hint="@string/params_no_hint"
                 android:textColor="@color/gray"/>
 
+            <CheckBox
+                android:id="@+id/social_send"
+                android:text="@string/social_link"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:layout_marginTop="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:visibility="gone"/>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="16dp"/>
@@ -116,15 +128,6 @@
                 android:backgroundTint="@color/colorPrimary"
                 android:text="@string/send"
                 android:textColor="@android:color/white" />
-
-            <TextView
-                android:id="@+id/social_link"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:visibility="gone"/>
 
         </net.gmsworld.devicelocator.views.LDCard>
 

@@ -99,6 +99,7 @@
     <string name="params_yes_hint">Enter parameter(s)</string>
     <string name="title_activity_login">Sign in</string>
     <string name="reset_confirmation">This command will reset device to factory defaults and will wipe all data and applications from the device! Are you sure?</string>
+    <string name="social_link">Send using Telegram Messenger</string>
 
     <!-- Login Activity -->
     <string name="error_invalid_email">This login is invalid</string>
