@@ -2,6 +2,7 @@ package net.gmsworld.devicelocator;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
@@ -1243,12 +1244,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private void selectContact() {
         if (!Permissions.haveReadContactsPermission(MainActivity.this)) {
             Permissions.requestContactsPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_CONTACTS);
-            //Toast.makeText(getApplicationContext(), R.string.read_contacts_permission, Toast.LENGTH_SHORT).show();
         } else {
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-            startActivityForResult(intent, SELECT_CONTACT_INTENT);
-            MainActivity.this.clearFocus();
+            try {
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+                startActivityForResult(intent, SELECT_CONTACT_INTENT);
+                MainActivity.this.clearFocus();
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(this, "Failed to open Contacts list!", Toast.LENGTH_LONG).show();
+            }
         }
     }
 
