@@ -338,7 +338,7 @@ public class Messenger {
                             }
                         }
                     } else if (responseCode >= 400) {
-                        //TODO handle failed request
+                        Toast.makeText(context, R.string.telegram_internal_error, Toast.LENGTH_LONG).show();
                     }
                 }
             });
@@ -1211,7 +1211,7 @@ public class Messenger {
                 intent.setPackage(TELEGRAM_PACKAGE);
             }
             context.startActivity(intent);
-            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.TELEGRAM_SECRET, deviceSecret).apply();
+            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, deviceSecret).apply();
             if (appInstalled) {
                 Toast.makeText(context, "Please push Start button", Toast.LENGTH_SHORT).show();
             } else {

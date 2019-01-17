@@ -59,7 +59,7 @@ public class Device implements Parcelable{
             d = new Device();
             d.imei = tokens[0];
             d.creationDate = tokens[1];
-            if (StringUtils.isNotEmpty(tokens[2])) {
+            if (tokens.length > 2 && StringUtils.isNotEmpty(tokens[2])) {
                 d.name = tokens[2];
             }
             if (tokens.length > 3 && StringUtils.isNotEmpty(tokens[3])) {

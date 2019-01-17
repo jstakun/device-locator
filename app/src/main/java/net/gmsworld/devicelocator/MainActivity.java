@@ -129,8 +129,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     public static final String ACTION_DEVICE_MANAGER = "net.gmsworld.devicelocator.ActionDeviceManager";
     public static final String ACTION_SMS_MANAGER = "net.gmsworld.devicelocator.ActionSmsManager";
 
-    public static final String TELEGRAM_SECRET = "telegramSecret";
-
     private Boolean running = null;
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
     private boolean motionDetectorRunning = false;
@@ -210,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     @Override
-    public void onNewIntent (Intent intent) {
+    public void onNewIntent(Intent intent) {
         //show tracker view
         Log.d(TAG, "onNewIntent()");
         if (intent != null) {
@@ -232,10 +230,34 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         updateUI();
         initDeviceList();
 
-        //check for Telegram registration
-        final String telegramSecret = settings.getString(TELEGRAM_SECRET);
-        if (telegramSecret.length() > 0 && !StringUtils.equals(telegramSecret, "none")) {
-            getTelegramChatId(telegramSecret.trim());
+        //check for active Telegram registration
+        if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
+            final String telegramSecret = settings.getString(NotificationActivationDialogFragment.TELEGRAM_SECRET);
+            if (StringUtils.equals(telegramSecret, "none")) {
+                PreferenceManager.getDefaultSharedPreferences(this).edit().remove(NotificationActivationDialogFragment.TELEGRAM_SECRET).apply();
+                final TextView telegramInput = this.findViewById(R.id.telegramId);
+                //paste telegram id from clipboard
+                try {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (clipboard != null && clipboard.hasPrimaryClip()) {
+                        int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
+                        for (int i = 0; i < clipboardItemCount; i++) {
+                            ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
+                            String pasteData = item.getText().toString();
+                            Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
+                            if (Messenger.isValidTelegramId(pasteData)) {
+                                telegramInput.setText(pasteData);
+                                registerTelegram(telegramInput);
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to paste text from clipboard", e);
+                }
+            } else if (StringUtils.isEmpty(telegramId) && StringUtils.isNotEmpty(telegramSecret)) {
+                getTelegramChatId(telegramSecret.trim());
+            }
         }
     }
 
@@ -853,7 +875,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         String newDeviceName = deviceNameInput.getText().toString();
         String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
-            String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-').replace(',','-');
+            String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-').replace(',', '-');
             if (DlFirebaseMessagingService.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName, false)) {
                 if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
                     EditText deviceNameEdit = findViewById(R.id.deviceName);
@@ -870,7 +892,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (!silent) {
                     Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
                 }
-           }
+            }
         }
     }
 
@@ -1274,27 +1296,41 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             @Override
             public void onClick(View view) {
                 if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
-                    if (Network.isNetworkAvailable(MainActivity.this)) {
-                        Toast.makeText(MainActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
-                        registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
-                        registerEmail((TextView) findViewById(R.id.email), false);
-                        registerTelegram((TextView) findViewById(R.id.telegramId));
+                    Toast.makeText(MainActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
+                    registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
+                    registerEmail((TextView) findViewById(R.id.email), false);
+                    registerTelegram((TextView) findViewById(R.id.telegramId));
 
-                        if (StringUtils.isNotEmpty(phoneNumber)) {
-                            Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
-                            newIntent.putExtra("phoneNumber", phoneNumber);
-                            newIntent.putExtra("command", Command.HELLO_COMMAND);
-                            MainActivity.this.startService(newIntent);
-                        }
-                        if (StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
-                            Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
-                            newIntent.putExtra("telegramId", telegramId);
-                            newIntent.putExtra("email", email);
-                            newIntent.putExtra("command", Command.HELLO_COMMAND);
-                            MainActivity.this.startService(newIntent);
-                        }
+                    if (StringUtils.isNotEmpty(phoneNumber)) {
+                        Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
+                        newIntent.putExtra("phoneNumber", phoneNumber);
+                        newIntent.putExtra("command", Command.HELLO_COMMAND);
+                        MainActivity.this.startService(newIntent);
+                    }
+
+                    String testEmail = null, testTelegram = null;
+                    if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified")) {
+                        Toast.makeText(MainActivity.this, "Your email address is still unverified! No email notifications will be sent...", Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(MainActivity.this, getString(R.string.no_network_error), Toast.LENGTH_LONG).show();
+                        testEmail = email;
+                    }
+
+                    if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified")) {
+                        Toast.makeText(MainActivity.this, "Your Telgram char or channel is still unverified! No Telegram notifications will be sent...", Toast.LENGTH_LONG).show();
+                    } else {
+                        testTelegram = telegramId;
+                    }
+
+                    if (StringUtils.isNotEmpty(testEmail) || StringUtils.isNotEmpty(testTelegram)) {
+                        if (Network.isNetworkAvailable(MainActivity.this)) {
+                            Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
+                            newIntent.putExtra("telegramId", testTelegram);
+                            newIntent.putExtra("email", testEmail);
+                            newIntent.putExtra("command", Command.HELLO_COMMAND);
+                            MainActivity.this.startService(newIntent);
+                        } else {
+                            Toast.makeText(MainActivity.this, getString(R.string.no_network_error), Toast.LENGTH_LONG).show();
+                        }
                     }
                 } else {
                     Toast.makeText(MainActivity.this, "Please provide notification settings above.", Toast.LENGTH_LONG).show();
@@ -1434,18 +1470,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     if (responseCode == 200) {
-                        if (! silent) {
+                        if (!silent) {
                             Toast.makeText(MainActivity.this, "Device has been removed!", Toast.LENGTH_SHORT).show();
                         }
                         //current device has been removed
                         if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
                             PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(USER_LOGIN).remove(USER_DEVICES).apply();
-                            if (! silent) {
+                            if (!silent) {
                                 initUserLoginInput(true, false);
                             }
                         }
                         initDeviceList();
-                    } else if (! silent) {
+                    } else if (!silent) {
                         Toast.makeText(MainActivity.this, "Failed to remove device!", Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -1466,47 +1502,51 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 Network.get(this, getString(R.string.telegramUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
-                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(MainActivity.TELEGRAM_SECRET).apply();
-                        if (responseCode == 200 && results.startsWith("{")) {
-                            String secret = null, status = null;
-                            JsonElement reply = new JsonParser().parse(results);
-                            if (reply != null) {
-                                JsonElement st = reply.getAsJsonObject().get("status");
-                                if (st != null) {
-                                    status = st.getAsString();
-                                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
+                        if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
+                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(NotificationActivationDialogFragment.TELEGRAM_SECRET).apply();
+                            if (responseCode == 200 && results.startsWith("{")) {
+                                String secret = null, status = null;
+                                JsonElement reply = new JsonParser().parse(results);
+                                if (reply != null) {
+                                    JsonElement st = reply.getAsJsonObject().get("status");
+                                    if (st != null) {
+                                        status = st.getAsString();
+                                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
+                                    }
+                                    JsonElement se = reply.getAsJsonObject().get("secret");
+                                    if (se != null) {
+                                        secret = se.getAsString();
+                                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret).apply();
+                                    }
+                                    JsonElement cid = reply.getAsJsonObject().get("chatId");
+                                    if (cid != null) {
+                                        Long chatId = cid.getAsLong();
+                                        final TextView telegramInput = MainActivity.this.findViewById(R.id.telegramId);
+                                        telegramId = Long.toString(chatId);
+                                        telegramInput.setText(telegramId);
+                                        saveData();
+                                    }
                                 }
-                                JsonElement se = reply.getAsJsonObject().get("secret");
-                                if (se != null) {
-                                    secret = se.getAsString();
-                                    PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret).apply();
-                                }
-                                JsonElement cid = reply.getAsJsonObject().get("chatId");
-                                if (cid != null) {
-                                    Long chatId = cid.getAsLong();
-                                    final TextView telegramInput = MainActivity.this.findViewById(R.id.telegramId);
-                                    telegramInput.setText(Long.toString(chatId));
-                                    telegramId = Long.toString(chatId);
-                                    saveData();
-                                }
-                            }
-                            if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
-                                Toast.makeText(MainActivity.this, "Your Telegram chat or channel is already verified.", Toast.LENGTH_LONG).show();
-                            } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                                //show dialog to enter activation code sent to user
-                                if (StringUtils.isNotEmpty(secret)) {
-                                    if (!MainActivity.this.isFinishing()) {
-                                        NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
-                                        notificationActivationDialogFragment.show(MainActivity.this.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
+                                    Toast.makeText(MainActivity.this, "Your Telegram chat or channel is already verified.", Toast.LENGTH_LONG).show();
+                                } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
+                                    //show dialog to enter activation code sent to user
+                                    if (StringUtils.isNotEmpty(secret)) {
+                                        if (!MainActivity.this.isFinishing()) {
+                                            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                                            notificationActivationDialogFragment.show(MainActivity.this.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                        }
+                                    } else {
+                                        Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                                     }
                                 } else {
                                     Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                                 }
-                            } else {
+                            } else if (responseCode >= 400) {
                                 Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
                             }
-                        } else if (responseCode >= 400) {
-                            Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
+                        } else {
+                            Log.d(TAG, "User has canceled Telegram registration!");
                         }
                     }
                 });
@@ -1614,7 +1654,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 break;
             case Permissions.PERMISSIONS_REQUEST_CONTACTS:
                 if (Permissions.haveReadContactsPermission(this)) {
-                   selectContact();
+                    selectContact();
                 }
                 break;
             default:

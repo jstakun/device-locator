@@ -22,7 +22,7 @@ public class TelegramSetupDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setNegativeButton("Later", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Not now", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Messenger.onFailedTelegramRegistration(getActivity(), null, true);
             }
