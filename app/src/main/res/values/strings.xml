@@ -30,7 +30,8 @@
     <string name="read_contacts_permission">Can\'t select a contact without Read Contacts permission.</string>
     <string name="send_sms_permission">SMS permission is required to receive SMS notifications.</string>
     <string name="send_location_permission">Location permission is required to receive location notifications.</string>
-    <string name="docsLink">Check all available commands &lt;a href="http://www.gms-world.net/dl">here&lt;a></string>
+    <string name="docsLink">Check all available commands &lt;a href="http://www.gms-world.net/dl">here&lt;/a></string>
+    <string name="deviceIdText">Your device id: &lt;a href=\"https://www.gms-world.net/showDevice/%1$s\">%1$s&lt;/a></string>
     <string name="crash_error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
     <string name="security_pin">Your Security PIN</string>
     <string name="motion_radius">Notify me when device will move %1$d meters from present location</string>
@@ -75,7 +76,7 @@
     <string name="internal_error">Oops! Something went wrong on our side. Please try again!</string>
 
     <!-- Pin Activity -->
-    <string name="pin_link">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;a>&lt;/font></string>
+    <string name="pin_link">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;/a>&lt;/font></string>
     <string name="pin_sent_ok">Security PIN has been sent to notifiers</string>
     <string name="pin_invalid">Invalid PIN!</string>
     <string name="pin_recover_ok">Please send this email message and we will send you back your Security PIN</string>
@@ -108,8 +109,8 @@
     <string name="error_field_required">This field is required</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
-    <string name="registerLink">In order to register click &lt;a href="https://www.gms-world.net/m/register.jsp">here&lt;a></string>
-    <string name="resetLink">&lt;a href="#">Reset password&lt;a></string>
+    <string name="registerLink">In order to register click &lt;a href="https://www.gms-world.net/m/register.jsp">here&lt;/a></string>
+    <string name="resetLink">&lt;a href="#">Reset password&lt;/a></string>
     <string name="unlock_with_fingerprint">Unlock with Fingerprint</string>
     <string name="route_button">Route view</string>
     <string name="map_button">Map view</string>

@@ -438,6 +438,14 @@
 
                     </LinearLayout>
 
+                    <TextView
+                        android:id="@+id/device_id_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="left"
+                        android:paddingTop="15dp"
+                        android:paddingBottom="8dp"/>
+
                 </net.gmsworld.devicelocator.views.LDCard>
 
                 <net.gmsworld.devicelocator.views.LDCard

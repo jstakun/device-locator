@@ -180,6 +180,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
+        TextView deviceId = findViewById(R.id.device_id_text);
+        deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
+        deviceId.setMovementMethod(LinkMovementMethod.getInstance());
+
         //TODO hide sms_notification and sms_control_card views
         toggleSmsBroadcastReceiver();
         //
