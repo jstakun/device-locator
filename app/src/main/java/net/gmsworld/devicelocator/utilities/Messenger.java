@@ -1050,8 +1050,12 @@ public class Messenger {
                                 if (context instanceof Activity) {
                                     Activity activity = (Activity) context;
                                     if (!activity.isFinishing()) {
-                                        NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
-                                        notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                        try {
+                                            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
+                                            notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                        } catch (Exception e) {
+                                            Log.e(TAG, e.getMessage(), e);
+                                        }
                                     }
                                 }
                             } else {

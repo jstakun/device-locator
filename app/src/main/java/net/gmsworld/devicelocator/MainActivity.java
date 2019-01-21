@@ -1537,8 +1537,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     //show dialog to enter activation code sent to user
                                     if (StringUtils.isNotEmpty(secret)) {
                                         if (!MainActivity.this.isFinishing()) {
-                                            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
-                                            notificationActivationDialogFragment.show(MainActivity.this.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                            try {
+                                                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                                                notificationActivationDialogFragment.show(MainActivity.this.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                            } catch (Exception e) {
+                                                Log.e(TAG, e.getMessage(), e);
+                                            }
                                         }
                                     } else {
                                         Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
