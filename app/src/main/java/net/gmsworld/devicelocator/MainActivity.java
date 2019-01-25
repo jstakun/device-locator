@@ -180,10 +180,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
-        TextView deviceId = findViewById(R.id.device_id_text);
-        deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
-        deviceId.setMovementMethod(LinkMovementMethod.getInstance());
-
         //TODO hide sms_notification and sms_control_card views
         toggleSmsBroadcastReceiver();
         //
@@ -233,6 +229,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initLocationSMSCheckbox();
         updateUI();
         initDeviceList();
+
+        TextView deviceId = findViewById(R.id.device_id_text);
+        deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
+        deviceId.setMovementMethod(LinkMovementMethod.getInstance());
 
         //check for active Telegram registration
         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
@@ -462,6 +462,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 editor.putBoolean("settings_verify_pin", checked);
                 if (checked && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email) && StringUtils.isNotEmpty(phoneNumber)) {
                     Toast.makeText(this, "Please remember your Security PIN and set Notification settings in order to be able to recover forgotten Security PIN.", Toast.LENGTH_LONG).show();
+                } else if (checked) {
+                    Toast.makeText(this, "Please remember your Security PIN", Toast.LENGTH_LONG).show();
                 }
                 break;
             case R.id.settings_sms_without_pin:

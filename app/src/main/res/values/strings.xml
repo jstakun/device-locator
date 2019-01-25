@@ -31,7 +31,7 @@
     <string name="send_sms_permission">SMS permission is required to receive SMS notifications.</string>
     <string name="send_location_permission">Location permission is required to receive location notifications.</string>
     <string name="docsLink">Check all available commands &lt;a href="http://www.gms-world.net/dl">here&lt;/a></string>
-    <string name="deviceIdText">This device id &lt;a href=\"https://www.gms-world.net/showDevice/%1$s\">%1$s&lt;/a></string>
+    <string name="deviceIdText">Device id &lt;a href=\"https://www.gms-world.net/showDevice/%1$s\">%1$s&lt;/a></string>
     <string name="crash_error">An unexpected error occurred. Crash report has been sent to developer and the issue will be fixed soon!</string>
     <string name="security_pin">Your Security PIN</string>
     <string name="motion_radius">Notify me when device will move %1$d meters from present location</string>
@@ -44,10 +44,10 @@
     <string name="device_tracker">Device tracker</string>
     <string name="sms_control">SMS commands</string>
     <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
-    <string name="verify_security_pin">From time to time authenticate me at application startup</string>
+    <string name="verify_security_pin">Authenticate me at application startup using Security PIN</string>
     <string name="sms_manager_first_time_use">&lt;font color="#808080">On this screen you can enable SMS commands, manage your Security PIN, and select Location messages sent in reply to Locate command.&lt;br/>Do you want to enable now SMS commands on your device?&lt;/font></string>
     <string name="device_manager_first_time_use">&lt;font color="#808080">On this screen you can register this device and list other devices registered with the same login. You can click on any device on the list and send command to it.&lt;/font></string>
-    <string name="device_tracker_first_time_use">&lt;font color="#808080">On this screen you can enable device tracker which will record your device location and set who should get notified when commands are executed on this device.&lt;/font></string>
+    <string name="device_tracker_first_time_use">&lt;font color="#808080">On this screen you can enable device tracker which will record this device location and set who should get notified when commands are executed on this device.&lt;/font></string>
     <string name="permissions_first_time_use">&lt;font color="#808080">On this screen you can grant permissions required to execute some commands on this device.&lt;/font></string>
     <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and click Permissions button to grant permissions required by some commands."&lt;/font></string>
     <string name="telegram_init_prompt">&lt;font color="#808080">Telegram id you provided seems to be wrong. Please click <b>OK</b> to find your Telegram id.&lt;/font></string>
@@ -89,7 +89,7 @@
     <string name="devices_list_loading">Synchronizing your devices…</string>
     <string name="devices_list_loading_failed">Device synchronization failed!</string>
     <string name="devices">Devices</string>
-    <string name="device_name">This device name</string>
+    <string name="device_name">Device name</string>
     <string name="your_login">Your login</string>
     <string name="send_command_title">Send Command to Device</string>
     <string name="command">Command</string>
