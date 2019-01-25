@@ -1205,9 +1205,9 @@ public class Messenger {
         if (appInstalled) {
             final String deviceId = "device:"+getDeviceId(context, false);
             deviceSecret = Base64.encodeToString(deviceId.getBytes(), Base64.URL_SAFE).trim();
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://telegram.me/device_locator_bot?start=" + deviceSecret));
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.telegramStartUrl, deviceSecret)));
         } else {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://web.telegram.org/#/im?p=@device_locator_bot"));
+            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.telegramWebUrl)));
         }
         try {
             if (appInstalled) {

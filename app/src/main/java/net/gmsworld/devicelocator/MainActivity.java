@@ -62,6 +62,7 @@ import com.google.gson.JsonParser;
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
 import net.gmsworld.devicelocator.fragments.LoginDialogFragment;
+import net.gmsworld.devicelocator.fragments.NewVersionDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.RemoveDeviceDialogFragment;
 import net.gmsworld.devicelocator.fragments.SmsCommandsEnabledDialogFragment;
@@ -72,6 +73,7 @@ import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
+import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Files;
@@ -234,6 +236,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
         deviceId.setMovementMethod(LinkMovementMethod.getInstance());
 
+        checkForNewVersion();
+
         //check for active Telegram registration
         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
             final String telegramSecret = settings.getString(NotificationActivationDialogFragment.TELEGRAM_SECRET);
@@ -370,6 +374,41 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
 
         return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS:
+                initUserLoginInput(false, true);
+                break;
+            case Permissions.PERMISSIONS_REQUEST_SMS_CONTROL:
+                if (Permissions.haveSendSMSPermission(this)) {
+                    toggleRunning();
+                } else {
+                    Toast.makeText(this, R.string.send_sms_permission, Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL:
+                if (Permissions.haveLocationPermission(this)) {
+                    toggleMotionDetectorRunning();
+                } else {
+                    Toast.makeText(this, R.string.send_location_permission, Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case Permissions.PERMISSIONS_REQUEST_CALL:
+                if (!Permissions.haveCallPhonePermission(this)) {
+                    Toast.makeText(this, "Call command won't work without this permission!", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case Permissions.PERMISSIONS_REQUEST_CONTACTS:
+                if (Permissions.haveReadContactsPermission(this)) {
+                    selectContact();
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     private void showCard(String action) {
@@ -1637,40 +1676,39 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         listView.requestLayout();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS:
-                initUserLoginInput(false, true);
-                break;
-            case Permissions.PERMISSIONS_REQUEST_SMS_CONTROL:
-                if (Permissions.haveSendSMSPermission(this)) {
-                    toggleRunning();
-                } else {
-                    Toast.makeText(this, R.string.send_sms_permission, Toast.LENGTH_SHORT).show();
+    private void checkForNewVersion() {
+        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+        if (StringUtils.isNotEmpty(tokenStr)) {
+            final Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer " + tokenStr);
+            Network.get(this, getString(R.string.notificationUrl) + "?type=v", headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
+                        JsonElement reply = new JsonParser().parse(results);
+                        final int version = reply.getAsJsonObject().get("value").getAsInt();
+                        final int versionCode = AppUtils.getInstance().getVersionCode(MainActivity.this);
+                        if (version > versionCode) {
+                            Log.d(TAG, "New version is available");
+                            try {
+                                NewVersionDialogFragment newVersionDialogFragment = NewVersionDialogFragment.newInstance();
+                                newVersionDialogFragment.show(getFragmentManager(), NewVersionDialogFragment.TAG);
+                            } catch (Exception e) {
+                                Log.e(TAG, e.getMessage(), e);
+                            }
+                        } else {
+                            Log.d(TAG, "No new version is available");
+                        }
+                    }
                 }
-                break;
-            case Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL:
-                if (Permissions.haveLocationPermission(this)) {
-                    toggleMotionDetectorRunning();
-                } else {
-                    Toast.makeText(this, R.string.send_location_permission, Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case Permissions.PERMISSIONS_REQUEST_CALL:
-                if (!Permissions.haveCallPhonePermission(this)) {
-                    Toast.makeText(this, "Call command won't work without this permission!", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case Permissions.PERMISSIONS_REQUEST_CONTACTS:
-                if (Permissions.haveReadContactsPermission(this)) {
-                    selectContact();
-                }
-                break;
-            default:
-                break;
+            });
+        } else {
+            Log.e(TAG, "Can't check for new version");
         }
     }
+
+
+    // -----------------------------------------------------------------------------------
 
     private static class UIHandler extends Handler {
 
