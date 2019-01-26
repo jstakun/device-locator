@@ -1151,18 +1151,24 @@ public class Messenger {
     }
 
     public static String getToken(Context context, String response) {
-        JsonElement reply = new JsonParser().parse(response);
         String tokenStr = null;
-        if (reply != null) {
-            JsonElement t = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN);
-            if (t != null) {
-                tokenStr = t.getAsString();
+
+        try {
+            JsonElement reply = new JsonParser().parse(response);
+            if (reply != null) {
+                JsonElement t = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN);
+                if (t != null) {
+                    tokenStr = t.getAsString();
+                }
             }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
         }
-        //Log.d(TAG, "Received following token: " + tokenStr);
+
         if (StringUtils.isNotEmpty(tokenStr)) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DeviceLocatorApp.GMS_TOKEN, tokenStr).apply();
         }
+
         return tokenStr;
     }
 

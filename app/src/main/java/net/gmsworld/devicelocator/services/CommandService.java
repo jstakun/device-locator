@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import net.gmsworld.devicelocator.CommandActivity;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
@@ -151,13 +154,17 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 Network.post(this, getString(R.string.deviceManagerUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
-                        final String n = (StringUtils.isNotEmpty(name) ? name : imei);
+                        final String deviceName = (StringUtils.isNotEmpty(name) ? name : imei);
                         if (responseCode == 200) {
-                            Toast.makeText(CommandService.this, "Command " + StringUtils.capitalize(command) + " has been sent to the device " + n + "!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(CommandService.this, "Command " + StringUtils.capitalize(command) + " has been sent to the device " + deviceName + "!", Toast.LENGTH_LONG).show();
                         } else if (responseCode == 404) {
-                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + n + ". Is " + CommandService.this.getString(R.string.app_name) + " installed on this device?", Toast.LENGTH_LONG).show();
+                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + ". Is " + CommandService.this.getString(R.string.app_name) + " installed on this device?", Toast.LENGTH_LONG).show();
+                        } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
+                            JsonElement reply = new JsonParser().parse(results);
+                            final int count = reply.getAsJsonObject().get("count").getAsInt();
+                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + " after " + count + " attempts!", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + n + "!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + "!", Toast.LENGTH_LONG).show();
                         }
                         commandInProgress = false;
                     }

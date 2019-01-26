@@ -161,7 +161,7 @@ public class LoginActivity extends AppCompatActivity  {
                     Network.post(this, getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
-                            if (responseCode == 200) {
+                            if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                                 JsonElement reply = new JsonParser().parse(results);
                                 String status = null;
                                 if (reply != null) {
@@ -266,7 +266,7 @@ public class LoginActivity extends AppCompatActivity  {
                     if (activity != null) {
                         activity.showProgress(false);
                         activity.mAuthTask = null;
-                        if (responseCode == 200) {
+                        if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                             JsonElement reply = new JsonParser().parse(results);
                             String gmsToken = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN).getAsString();
                             if (StringUtils.isNotEmpty(gmsToken)) {
