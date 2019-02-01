@@ -97,7 +97,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     }
 
     private void initSending(String source) {
-        Log.d(TAG, "initSending()");
+        Log.d(TAG, "initSending() " + source);
 
         readSettings();
 

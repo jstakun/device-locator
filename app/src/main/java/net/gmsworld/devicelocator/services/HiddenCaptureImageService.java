@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -196,7 +197,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                                         }
                                     }
                                     try {
-                                        HiddenCaptureImageService.this.startService(newIntent);
+                                        ContextCompat.startForegroundService(HiddenCaptureImageService.this, newIntent);
                                     } catch (Exception e) {
                                         Log.e(TAG, e.getMessage(), e);
                                     }
