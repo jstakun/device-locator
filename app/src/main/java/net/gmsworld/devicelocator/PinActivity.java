@@ -238,7 +238,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             newIntent.putExtra("telegramId", telegramId);
             newIntent.putExtra("source", DeviceAdminEventReceiver.SOURCE);
             startService(newIntent);
-            if (settings.getBoolean("hiddenCamera", false)) {
+            if (settings.getBoolean("hiddenCamera", false) && !HiddenCaptureImageService.isBusy()) {
                 Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
                 startService(cameraIntent);
             } else {

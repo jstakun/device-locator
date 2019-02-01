@@ -81,13 +81,13 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
         sender = intent.getStringExtra("sender");
         app = intent.getStringExtra("app");
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForeground(NotificationUtils.WORKER_NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this));
+        }
+
         if (Permissions.haveCameraPermission(this)) {
 
             if (HiddenCameraUtils.canOverDrawOtherApps(this) && !isRunning) {
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForeground(NotificationUtils.WORKER_NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this));
-                }
 
                 isRunning = true;
 
@@ -270,5 +270,9 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
     public void onLocationUpdated(Location location) {
         Log.d(TAG, "Location found with accuracy " + location.getAccuracy() + " m");
         this.location = location;
+    }
+
+    public static boolean isBusy() {
+        return isRunning;
     }
 }
