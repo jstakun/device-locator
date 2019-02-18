@@ -30,6 +30,8 @@ public class Permissions {
 
     public static final int PERMISSIONS_REQUEST_CALL = 1005;
 
+    private static final String TAG = Permissions.class.getSimpleName();
+
     /*public static void checkAndRequestPermissionsAtStartup(Activity activity) {
         ArrayList<String> permissions = new ArrayList<>();
         permissions.add(0, Manifest.permission.SEND_SMS);
@@ -133,11 +135,16 @@ public class Permissions {
     }
 
     public static void startSettingsIntent(Context context) {
-        Toast.makeText(context, "Click on Permissions", Toast.LENGTH_LONG).show();
-        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + context.getPackageName()));
-        //https://stackoverflow.com/questions/31955872/how-to-jump-to-the-manage-permission-page-in-settings-app-with-code
-        //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        try {
+            Toast.makeText(context, "Click on Permissions", Toast.LENGTH_LONG).show();
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + context.getPackageName()));
+            //https://stackoverflow.com/questions/31955872/how-to-jump-to-the-manage-permission-page-in-settings-app-with-code
+            //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(context, "Unable to open Application Settings on your device!", Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     public static void startAddDeviceAdminIntent(Activity context, int requestCode) {

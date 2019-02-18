@@ -24,7 +24,9 @@ public class FirstTimeUseDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setPositiveButton("Ok", null);
-        builder.setMessage(Html.fromHtml(getString(messageId)));
+        if (messageId > 0) {
+            builder.setMessage(Html.fromHtml(getString(messageId)));
+        }
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
         if (iconId > 0) {
             builder.setIcon(iconId);
