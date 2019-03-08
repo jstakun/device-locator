@@ -1229,6 +1229,9 @@ public class Messenger {
             }
         } catch (PackageManager.NameNotFoundException e) {
             Toast.makeText(context, "This function requires installed Telegram Messenger or Web Browser on your device.", Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+            Toast.makeText(context, "Failed ot start Telegram Messenger.", Toast.LENGTH_LONG).show();
         }
     }
 

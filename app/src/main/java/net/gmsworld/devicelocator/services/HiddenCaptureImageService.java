@@ -207,7 +207,6 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                                 Files.deleteFileFromCache(imageFile.getName(), HiddenCaptureImageService.this, true);
                             } else {
                                 Log.e(TAG, "Received error response: " + imageUrl);
-                                Log.d(TAG, "Image will be saved to local storage: " + imageFile.getAbsolutePath());
                             }
                         }
                     });
