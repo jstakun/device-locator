@@ -144,4 +144,8 @@
     <string name="remove_device_message">&lt;font color="#808080">Remove device %1$s from the list?&lt;/font></string>
     <string name="enter_pin">Please enter valid PIN!</string>
     <string name="telegram_hint">\@telegram_id or number id</string>
+
+    <string name="title_activity_ringing">RingingActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

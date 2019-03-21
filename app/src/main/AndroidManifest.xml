@@ -17,8 +17,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
     <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
-    <!--uses-permission android:name="android.permission.USE_BIOMETRIC" /-->
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" /> <!-- uses-permission android:name="android.permission.USE_BIOMETRIC" / -->
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -43,6 +42,12 @@
         android:resizeableActivity="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity
+            android:name=".RingingActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_ringing"
+            android:launchMode="singleInstance"
+            android:theme="@style/FullscreenTheme"></activity>
         <activity
             android:name=".LauncherActivity"
             android:launchMode="singleInstance">
@@ -72,19 +77,18 @@
             android:name=".PinActivity"
             android:configChanges="orientation|screenSize"
             android:exported="false"
-            android:launchMode="singleInstance"/>
+            android:launchMode="singleInstance" />
         <activity
             android:name=".LoginActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/title_activity_login"
-            android:launchMode="singleInstance"/>
+            android:launchMode="singleInstance" />
         <activity
             android:name=".PermissionsActivity"
-            android:label="@string/title_activity_permissions"
             android:configChanges="orientation|screenSize"
             android:exported="false"
-            android:launchMode="singleInstance"/>
-
+            android:label="@string/title_activity_permissions"
+            android:launchMode="singleInstance" />
         <service
             android:name=".services.SmsSenderService"
             android:exported="false" />
@@ -112,6 +116,7 @@
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
@@ -142,8 +147,8 @@
         </receiver>
         <receiver
             android:name=".broadcastreceivers.DeviceAdminEventReceiver"
-            android:label="@string/app_name"
             android:description="@string/admin_grant_description"
+            android:label="@string/app_name"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <intent-filter>
 

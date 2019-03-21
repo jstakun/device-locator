@@ -180,12 +180,14 @@ public abstract class AbstractCommand {
     }
 
     void sendAppNotification(final Context context, final String command, final String sender) {
-        Intent newIntent = new Intent(context, SmsSenderService.class);
-        if (StringUtils.isNotEmpty(command)) {
-            newIntent.putExtra("command", command);
+        if (sender != null) {
+            Intent newIntent = new Intent(context, SmsSenderService.class);
+            if (StringUtils.isNotEmpty(command)) {
+                newIntent.putExtra("command", command);
+            }
+            newIntent.putExtra("app", sender);
+            context.startService(newIntent);
         }
-        newIntent.putExtra("app", sender);
-        context.startService(newIntent);
     }
 
     void sendSmsNotification(final Context context, final String sender, final String command) {

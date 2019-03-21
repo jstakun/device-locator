@@ -21,6 +21,7 @@ import android.util.Patterns;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.RingingActivity;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
@@ -129,11 +130,6 @@ public class Command {
         for (AbstractCommand c : getCommands()) {
             if (c.findAppCommand(context, StringUtils.trim(message), sender, location, extras, pin, isPinRequired)) {
                 Log.d(TAG, "Found matching cloud command");
-
-
-
-
-
                 return c.getSmsCommand();
             } else if (c.findSocialCommand(context, StringUtils.trim(message), pin, isPinRequired, hasSocialNotifiers)) {
                 Log.d(TAG, "Found matching social command");
@@ -1222,6 +1218,15 @@ public class Command {
                         currentVolume = -1;
                     }
                 }
+                //TODO show/hide ringing activity
+                Intent ringIntent = new Intent(context, RingingActivity.class);
+                if (ringtone != null) {
+                    ringIntent.setAction(RING_COMMAND);
+                } else {
+                    ringIntent.setAction(RING_OFF_COMMAND);
+                }
+                ringIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(ringIntent);
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
             }
