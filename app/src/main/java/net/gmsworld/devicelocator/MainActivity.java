@@ -17,6 +17,7 @@ import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -25,6 +26,7 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -111,7 +113,7 @@ import java.util.Set;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
-public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener,
+public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener, NewVersionDialogFragment.NewVersionDialogListener,
         SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener, DownloadFullApplicationDialogFragment.DownloadFullApplicationDialogListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -1714,7 +1716,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         if (version > versionCode) {
                             Log.d(TAG, "New version is available");
                             try {
-                                NewVersionDialogFragment newVersionDialogFragment = NewVersionDialogFragment.newInstance();
+                                NewVersionDialogFragment newVersionDialogFragment = NewVersionDialogFragment.newInstance(MainActivity.this);
                                 newVersionDialogFragment.show(getFragmentManager(), NewVersionDialogFragment.TAG);
                             } catch (Exception e) {
                                 Log.e(TAG, e.getMessage(), e);
@@ -1733,9 +1735,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     public void downloadApk() {
 
         final String fileName = "app-release.apk";
-        String destination = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
-        destination += fileName;
-        final Uri uri = Uri.parse("file://" + destination);
+        final String destination = "file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + fileName;
+        final Uri contentUri = Uri.parse(destination);
 
         //Delete update file if exists
         final File file = new File(destination);
@@ -1748,11 +1749,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         //set downloadmanager
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
-        request.setDescription(getString(R.string.app_name));
-        request.setTitle(getString(R.string.app_name));
-
+        //request.setDescription(getString(R.string.app_name));
+        request.setTitle("device-locator.apk");
+        request.setMimeType("application/vnd.android.package-archive");
         //set destination
-        request.setDestinationUri(uri);
+        request.setDestinationUri(contentUri);
 
         // get download service and enqueue file
         final DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
@@ -1765,14 +1766,24 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             public void onReceive(Context context, Intent intent) {
                 unregisterReceiver(this);
                 try {
-                    Intent install = new Intent(Intent.ACTION_VIEW);
-                    install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    install.setDataAndType(uri, manager.getMimeTypeForDownloadedFile(downloadId));
+                    Intent install = null;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        install = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                        //install = new Intent(Intent.ACTION_VIEW);
+                        install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        Uri uri = FileProvider.getUriForFile(MainActivity.this, "net.gmsworld.devicelocator.provider", new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName));
+                        Log.d(TAG, "Downloaded file mime type " + manager.getMimeTypeForDownloadedFile(downloadId));
+                        intent.setDataAndType(uri, manager.getMimeTypeForDownloadedFile(downloadId));
+                        //intent.setData(uri);
+                    } else {
+                        install = new Intent(Intent.ACTION_VIEW);
+                        install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        install.setDataAndType(contentUri, manager.getMimeTypeForDownloadedFile(downloadId));
+                    }
                     startActivity(install);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
-                    Toast.makeText(MainActivity.this, "Application has been downloaded to your device \"Download\" directory. Please install it manually.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, getString (R.string.app_name) + " has been downloaded to your device \"Downloads\" directory. Please uninstall current version and install new one manually.", Toast.LENGTH_LONG).show();
                 }
             }
         };

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <external-path name="external_files" path="."/>
+    <external-files-path name="ext_files_path" path="/storage/emulated/0/Download/." />
+    <cache-path name="cached_files" path="." />
+    <external-cache-path name="ext_cached_files" path="." />
+</paths>
