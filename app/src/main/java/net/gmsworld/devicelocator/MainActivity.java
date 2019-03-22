@@ -2,12 +2,15 @@ package net.gmsworld.devicelocator;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -15,6 +18,7 @@ import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
@@ -60,6 +64,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
+import net.gmsworld.devicelocator.fragments.DownloadFullApplicationDialogFragment;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
 import net.gmsworld.devicelocator.fragments.LoginDialogFragment;
 import net.gmsworld.devicelocator.fragments.NewVersionDialogFragment;
@@ -89,6 +94,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ocpsoft.prettytime.PrettyTime;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -106,7 +112,7 @@ import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
 public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener,
-        SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener {
+        SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener, DownloadFullApplicationDialogFragment.DownloadFullApplicationDialogListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -182,8 +188,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
-        //TODO hide sms_notification and sms_control_card views
-        toggleSmsBroadcastReceiver();
+        //TODO hide sms_notification views
+        if (BuildConfig.APP_TYPE.equals("Full")) {
+            toggleSmsBroadcastReceiver();
+        } else {
+            findViewById(R.id.sms_notification).setVisibility(View.GONE);
+        }
         //
 
         if (motionDetectorRunning) {
@@ -406,6 +416,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     selectContact();
                 }
                 break;
+            case Permissions.PERMISSIONS_WRITE_STORAGE:
+                if (Permissions.haveWriteStoragePermission(this)) {
+                    downloadApk();
+                }
             default:
                 break;
         }
@@ -475,7 +489,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false));
         ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, true));
         ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
-        ((Switch) findViewById(R.id.settings_sms_without_pin)).setChecked(settings.getBoolean("settings_sms_without_pin", true));
         //check if READ_CONTACTS permission is set
         if (settings.getBoolean("settings_sms_contacts", false) && !Permissions.haveReadContactsPermission(this)) {
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("settings_sms_contacts", false).apply();
@@ -505,12 +518,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     Toast.makeText(this, "Please remember your Security PIN", Toast.LENGTH_LONG).show();
                 }
                 break;
-            case R.id.settings_sms_without_pin:
-                editor.putBoolean("settings_sms_without_pin", checked);
-                if (!checked) {
-                    Toast.makeText(this, "Be careful. From now on Security PIN is not required when sending SMS command!", Toast.LENGTH_LONG).show();
-                }
-                break;
             default:
                 break;
         }
@@ -531,11 +538,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void updateUI() {
-        //check if sms permission is present
-        if (running && !Permissions.haveSendSMSPermission(this)) {
-            toggleRunning();
+        if (BuildConfig.APP_TYPE.equals("Full")) {
+            //check if sms permission is present
+            if (running && !Permissions.haveSendSMSPermission(this)) {
+                toggleRunning();
+            }
+            ((Switch) this.findViewById(R.id.dlSmsSwitch)).setChecked(running);
+        } else {
+            ((Switch) this.findViewById(R.id.dlSmsSwitch)).setChecked(false);
         }
-        ((Switch) this.findViewById(R.id.dlSmsSwitch)).setChecked(running);
 
         ((Switch) this.findViewById(R.id.dlTrackerSwitch)).setChecked(motionDetectorRunning);
 
@@ -1251,12 +1262,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
         } else if (!running) {
             //SMS Manager
-            if (!settings.contains(SmsCommandsInitDialogFragment.TAG)) {
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SmsCommandsInitDialogFragment.TAG, true).apply();
-                SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = SmsCommandsInitDialogFragment.newInstance(this);
-                smsCommandsInitDialogFragment.show(getFragmentManager(), SmsCommandsInitDialogFragment.TAG);
-            }
             //TODO show sms info
+            if (BuildConfig.APP_TYPE.equals("Full")) {
+                if (!settings.contains(SmsCommandsInitDialogFragment.TAG)) {
+                    PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SmsCommandsInitDialogFragment.TAG, true).apply();
+                    SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = SmsCommandsInitDialogFragment.newInstance(this);
+                    smsCommandsInitDialogFragment.show(getFragmentManager(), SmsCommandsInitDialogFragment.TAG);
+                }
+            } else {
+                DownloadFullApplicationDialogFragment downloadFullApplicationDialogFragment = DownloadFullApplicationDialogFragment.newInstance(this);
+                downloadFullApplicationDialogFragment.show(getFragmentManager(), DownloadFullApplicationDialogFragment.TAG);
+            }
+            //
         }
     }
 
@@ -1268,14 +1285,20 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void initRunningButton() {
-        Switch title = this.findViewById(R.id.dlSmsSwitch);
-
+        final Switch title = findViewById(R.id.dlSmsSwitch);
         title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //TODO show sms info
-                MainActivity.this.toggleRunning();
-                MainActivity.this.clearFocus();
+                if (BuildConfig.APP_TYPE.equals("Full")) {
+                    MainActivity.this.toggleRunning();
+                    MainActivity.this.clearFocus();
+                } else {
+                    title.setChecked(false);
+                    DownloadFullApplicationDialogFragment downloadFullApplicationDialogFragment = DownloadFullApplicationDialogFragment.newInstance(MainActivity.this);
+                    downloadFullApplicationDialogFragment.show(getFragmentManager(), DownloadFullApplicationDialogFragment.TAG);
+                }
+                //
             }
         });
     }
@@ -1707,6 +1730,55 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
     }
 
+    public void downloadApk() {
+
+        final String fileName = "app-release.apk";
+        String destination = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/";
+        destination += fileName;
+        final Uri uri = Uri.parse("file://" + destination);
+
+        //Delete update file if exists
+        final File file = new File(destination);
+        if (file.exists()) {
+            file.delete();
+        }
+
+        //get url of app on server
+        final String downloadUrl = getString(R.string.downloadUrl);
+
+        //set downloadmanager
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
+        request.setDescription(getString(R.string.app_name));
+        request.setTitle(getString(R.string.app_name));
+
+        //set destination
+        request.setDestinationUri(uri);
+
+        // get download service and enqueue file
+        final DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+        final long downloadId = manager.enqueue(request);
+
+        Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
+
+        //set BroadcastReceiver to install app when .apk is downloaded
+        BroadcastReceiver onComplete = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                unregisterReceiver(this);
+                try {
+                    Intent install = new Intent(Intent.ACTION_VIEW);
+                    install.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    install.setDataAndType(uri, manager.getMimeTypeForDownloadedFile(downloadId));
+                    startActivity(install);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    Toast.makeText(MainActivity.this, "Application has been downloaded to your device \"Download\" directory. Please install it manually.", Toast.LENGTH_LONG).show();
+                }
+            }
+        };
+        //register receiver for when .apk download is compete
+        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+    }
 
     // -----------------------------------------------------------------------------------
 

@@ -149,7 +149,12 @@ public class PermissionsActivity extends AppCompatActivity {
 
         //TODO hide sms permissions switch
         Switch smsPermission = findViewById(R.id.sms_permission);
-        smsPermission.setChecked(Permissions.haveSendSMSPermission(this));
+        if (BuildConfig.APP_TYPE.equals("Full")) {
+            smsPermission.setChecked(Permissions.haveSendSMSPermission(this));
+        } else {
+            smsPermission.setVisibility(View.GONE);
+        }
+        //
 
         Switch cameraPermission = findViewById(R.id.camera_permission);
         if (!Permissions.haveCameraPermission(this) || !HiddenCameraUtils.canOverDrawOtherApps(this)) {
@@ -161,20 +166,27 @@ public class PermissionsActivity extends AppCompatActivity {
 
         //TODO hide read contacts permissions switch
         Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
-        boolean perm = Permissions.haveReadContactsPermission(this);
-        readContactsPermission.setChecked(perm);
-        PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", perm).apply();
-        if (!perm && settings.contains(MainActivity.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
-            //READ_CONTACTS permission has been revoked: remove devices data
-            PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(MainActivity.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
-            deleteDevice(deviceId);
+        if (BuildConfig.APP_TYPE.equals("Full")) {
+            boolean perm = Permissions.haveReadContactsPermission(this);
+            readContactsPermission.setChecked(perm);
+            PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", perm).apply();
+            if (!perm && settings.contains(MainActivity.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
+                //READ_CONTACTS permission has been revoked: remove devices data
+                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(MainActivity.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
+                deleteDevice(deviceId);
+            }
+        } else {
+            readContactsPermission.setVisibility(View.GONE);
         }
+        //
 
         Switch callPhonePermission = findViewById(R.id.call_phone_permission);
         callPhonePermission.setChecked(Permissions.haveCallPhonePermission(this));
 
         Switch resetPermission = findViewById(R.id.reset_permission);
         resetPermission.setChecked(settings.getBoolean("allowReset", false));
+
+        ((Switch) findViewById(R.id.settings_sms_without_pin)).setChecked(settings.getBoolean("settings_sms_without_pin", true));
 
         //other permissions
 
@@ -329,6 +341,13 @@ public class PermissionsActivity extends AppCompatActivity {
                     PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("allowReset", checked).apply();
                 }
                 break;
+            case R.id.settings_sms_without_pin:
+                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_without_pin", checked).apply();
+                if (!checked) {
+                    Toast.makeText(this, "Be careful. From now on Security PIN is not required to send command to your device!", Toast.LENGTH_LONG).show();
+                }
+                break;
+
             default:
                 break;
         }

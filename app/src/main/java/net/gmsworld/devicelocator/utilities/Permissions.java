@@ -30,6 +30,8 @@ public class Permissions {
 
     public static final int PERMISSIONS_REQUEST_CALL = 1005;
 
+    public static final int PERMISSIONS_WRITE_STORAGE = 1006;
+
     private static final String TAG = Permissions.class.getSimpleName();
 
     /*public static void checkAndRequestPermissionsAtStartup(Activity activity) {
@@ -132,6 +134,14 @@ public class Permissions {
 
     public static boolean haveFingerprintPermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static boolean haveWriteStoragePermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static void requestWriteStoragePermission(Activity activity, int requestCode) {
+        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, requestCode);
     }
 
     public static void startSettingsIntent(Context context) {

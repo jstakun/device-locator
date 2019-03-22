@@ -55,17 +55,6 @@
                         android:gravity="left"
                         android:paddingBottom="8dp"/>
 
-                    <Switch
-                        android:id="@+id/settings_sms_without_pin"
-                        android:text="@string/accept_sms_without_pin"
-                        android:textColor="@color/gray"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:paddingTop="8dp"
-                        android:paddingBottom="8dp"
-                        android:onClick="onLocationSMSCheckboxClicked"/>
-
                 </LinearLayout>
 
               </net.gmsworld.devicelocator.views.DLSMSControlCard>

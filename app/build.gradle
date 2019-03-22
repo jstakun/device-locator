@@ -10,7 +10,7 @@ android {
         versionCode 49
         versionName "0.4"
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
-        buildConfigField "String", "APP_TYPE", "\"Full\"" //"\"NoSms\""
+        buildConfigField "String", "APP_TYPE", "\"Full\"" //"\"GP\""   "\"Full\""
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
