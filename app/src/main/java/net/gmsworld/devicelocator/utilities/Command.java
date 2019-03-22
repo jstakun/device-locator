@@ -32,6 +32,7 @@ import net.gmsworld.devicelocator.services.SmsSenderService;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -147,11 +148,14 @@ public class Command {
             try {
                 Class<?>[] commandClasses = Command.class.getDeclaredClasses();
                 for (Class<?> command : commandClasses) {
-                    Constructor<?> constructor = command.getDeclaredConstructors()[0];
-                    constructor.setAccessible(true);
-                    AbstractCommand c = (AbstractCommand) constructor.newInstance();
-                    Log.d(TAG, "Initialized command " + c.getClass().getName());
-                    commands.add(c);
+                    //filter out abstract classes
+                    if (!Modifier.isAbstract(command.getModifiers())) {
+                        Constructor<?> constructor = command.getDeclaredConstructors()[0];
+                        constructor.setAccessible(true);
+                        AbstractCommand c = (AbstractCommand) constructor.newInstance();
+                        Log.d(TAG, "Initialized command " + c.getClass().getName());
+                        commands.add(c);
+                    }
                 }
                 Log.d(TAG, "Done");
             } catch (Exception e) {
