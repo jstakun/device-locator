@@ -30,14 +30,9 @@ public class RingingActivity extends AppCompatActivity {
         stopRingingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //if (AUTO_HIDE) {
-                //    delayedHide(AUTO_HIDE_DELAY_MILLIS);
-                //}
-                //TODO stop ringing command
-                //need to emulate app command
                 final PreferencesUtils prefs = new PreferencesUtils(RingingActivity.this);
                 final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
-                Command.findCommandInMessage(RingingActivity.this, Command.RING_COMMAND + "app" + pin, null, null, null);
+                Command.findCommandInMessage(RingingActivity.this, Command.RING_OFF_COMMAND + "app" + pin, null, null, null);
                 finish();
              }
         });

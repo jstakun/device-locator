@@ -63,7 +63,7 @@ public class Command {
     public final static String TAKE_PHOTO_COMMAND = "photodl"; //p if all permissions set take photo and send link
     public final static String PING_COMMAND = "pingdl"; //pg send ping to test connectivity
     public final static String HELLO_COMMAND = "hellodl"; //hl send ping to test connectivity
-    public final static String RING_COMMAND = "ringdl"; //rn play ringtone
+    public final static String RING_COMMAND = "ringdl"; //ro play ringtone
     public final static String RING_OFF_COMMAND = "ringoffdl"; //rn stop playing ringtone
     public final static String LOCK_SCREEN_COMMAND = "lockdl"; //ls lock screen now
     public final static String ABOUT_COMMAND = "aboutdl"; //ab send app version info
@@ -1136,13 +1136,94 @@ public class Command {
         }
     }
 
-    private static final class RingCommand extends AbstractCommand {
+    private static abstract class AbstractRingCommand extends AbstractCommand {
 
-        Ringtone ringtone = null;
-        int currentMode = -1;
-        int currentVolume = -1;
+        private static Ringtone ringtone = null;
+
+        AbstractRingCommand(String smsCommand, String smsShortCommand, Finder finder) {
+            super(smsCommand, smsShortCommand, finder);
+        }
+
+        protected static boolean playBeep(Context context) {
+            try {
+                if (ringtone == null) {
+                    final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+                    final Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+                    ringtone = RingtoneManager.getRingtone(context, ringtoneUri);
+                    if (!ringtone.isPlaying()) {
+                        audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                        audioMode.setStreamVolume(AudioManager.STREAM_RING, audioMode.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_SHOW_UI);
+                        ringtone.play();
+                        Log.d(TAG, "Ringtone " + ringtoneUri.toString() + " should be playing now");
+                    }
+                    final Intent ringIntent = new Intent(context, RingingActivity.class);
+                    ringIntent.setAction(RING_COMMAND);
+                    ringIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(ringIntent);
+                }
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+                return false;
+            }
+        }
+
+        protected static boolean stopBeep(Context context) {
+            try {
+                if (ringtone != null) {
+                    if (ringtone.isPlaying()) {
+                        ringtone.stop();
+                        ringtone = null;
+                        Log.d(TAG, "Ringtone should stop playing now");
+                    }
+                    final Intent ringIntent = new Intent(context, RingingActivity.class);
+                    ringIntent.setAction(RING_OFF_COMMAND);
+                    ringIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(ringIntent);
+                }
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+                return false;
+            }
+        }
+    }
+
+    private static final class RingCommand extends AbstractRingCommand {
 
         public RingCommand() { super(RING_COMMAND, "rn", Finder.EQUALS); }
+
+        @Override
+        public String getOppositeCommand() {
+            return RING_OFF_COMMAND;
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            if (playBeep(context)) {
+                sendSmsNotification(context, sender, RING_COMMAND);
+            }
+        }
+
+        @Override
+        protected void onSocialCommandFound(String sender, Context context) {
+            if (playBeep(context)) {
+                sendSocialNotification(context, RING_COMMAND);
+            }
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
+            if (playBeep(context)) {
+                sendAppNotification(context, RING_COMMAND, sender);
+            }
+        }
+    }
+
+
+    private static final class RingOffCommand extends AbstractRingCommand {
+
+        public RingOffCommand() { super(RING_OFF_COMMAND, "ro", Finder.EQUALS); }
 
         @Override
         public String getOppositeCommand() {
@@ -1150,85 +1231,28 @@ public class Command {
         }
 
         @Override
-        public String getLabel() {
-            if (ringtone != null) {
-                return "Stop ringing";
-            } else {
-                return super.getLabel();
-            }
-        }
-
-        @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            playBeep(context);
-            if (ringtone != null) {
-                sendSmsNotification(context, sender, RING_COMMAND);
-            } else {
+            if (stopBeep(context)) {
                 sendSmsNotification(context, sender, RING_OFF_COMMAND);
             }
         }
 
         @Override
+        public String getLabel() {
+            return "Stop ringing";
+        }
+
+        @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            playBeep(context);
-            if (ringtone != null) {
-                sendSocialNotification(context, RING_COMMAND);
-            } else {
+            if (stopBeep(context)) {
                 sendSocialNotification(context, RING_OFF_COMMAND);
             }
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            playBeep(context);
-            if (ringtone != null) {
-                sendAppNotification(context, RING_COMMAND, sender);
-            } else {
+            if (stopBeep(context)) {
                 sendAppNotification(context, RING_OFF_COMMAND, sender);
-            }
-        }
-
-        private void playBeep(Context context) {
-            try {
-                final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-                if (ringtone == null && audioMode != null) {
-                    currentMode = audioMode.getRingerMode();
-                    if (currentMode != AudioManager.RINGER_MODE_NORMAL) {
-                        audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-                    }
-                    currentVolume = audioMode.getStreamVolume(AudioManager.STREAM_RING);
-                    if (currentVolume < audioMode.getStreamMaxVolume(AudioManager.STREAM_RING)) {
-                        audioMode.setStreamVolume(AudioManager.STREAM_RING, audioMode.getStreamMaxVolume(AudioManager.STREAM_RING), AudioManager.FLAG_SHOW_UI);
-                    }
-                    //RingtoneManager.TYPE_ALARM    RingtoneManager.TYPE_RINGTONE
-                    Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
-                    ringtone = RingtoneManager.getRingtone(context, ringtoneUri);
-                    ringtone.play();
-                    Log.d(TAG, "Ringtone " + ringtoneUri.toString() + " should be playing now");
-                } else if (audioMode != null) {
-                    ringtone.stop();
-                    ringtone = null;
-                    Log.d(TAG, "Ringtone should stop playing now");
-                    if (currentMode != audioMode.getMode() && currentMode != -1) {
-                        audioMode.setRingerMode(currentMode);
-                        currentMode = -1;
-                    }
-                    if (currentVolume != audioMode.getStreamVolume(AudioManager.STREAM_RING) && currentVolume != -1) {
-                        audioMode.setStreamVolume(AudioManager.STREAM_RING, currentVolume, AudioManager.FLAG_SHOW_UI);
-                        currentVolume = -1;
-                    }
-                }
-                //TODO show/hide ringing activity
-                Intent ringIntent = new Intent(context, RingingActivity.class);
-                if (ringtone != null) {
-                    ringIntent.setAction(RING_COMMAND);
-                } else {
-                    ringIntent.setAction(RING_OFF_COMMAND);
-                }
-                ringIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(ringIntent);
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage(), e);
             }
         }
     }

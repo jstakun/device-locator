@@ -214,11 +214,8 @@ public class NotificationUtils {
         if (routeIntent != null && !extras.containsKey("command")) {
             extras.putString("command", Command.START_COMMAND);
         } else if (extras.containsKey("command")) {
-            String commandName = extras.getString("command");
-            if (StringUtils.equals(commandName + "dl", Command.RING_OFF_COMMAND)) {
-                cancelCommand = Command.RING_OFF_COMMAND;
-                extras.putString("command", Command.RING_COMMAND);
-            } else if (StringUtils.equals(commandName, Command.MUTE_FAILED)) {
+            final String commandName = extras.getString("command");
+            if (StringUtils.equals(commandName, Command.MUTE_FAILED)) {
                 cancelCommand = Command.MUTE_FAILED;
                 extras.putString("command", Command.UNMUTE_COMMAND);
             }
