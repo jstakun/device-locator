@@ -23,6 +23,7 @@ import com.androidhiddencamera.HiddenCameraUtils;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
+import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.FingerprintHelper;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
@@ -149,7 +150,7 @@ public class PermissionsActivity extends AppCompatActivity {
 
         //TODO hide sms permissions switch
         Switch smsPermission = findViewById(R.id.sms_permission);
-        if (BuildConfig.APP_TYPE.equals("Full")) {
+        if (AppUtils.getInstance().isFullVersion()) {
             smsPermission.setChecked(Permissions.haveSendSMSPermission(this));
         } else {
             smsPermission.setVisibility(View.GONE);
@@ -166,7 +167,7 @@ public class PermissionsActivity extends AppCompatActivity {
 
         //TODO hide read contacts permissions switch
         Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
-        if (BuildConfig.APP_TYPE.equals("Full")) {
+        if (AppUtils.getInstance().isFullVersion()) {
             boolean perm = Permissions.haveReadContactsPermission(this);
             readContactsPermission.setChecked(perm);
             PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", perm).apply();

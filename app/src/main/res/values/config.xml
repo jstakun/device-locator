@@ -16,7 +16,6 @@
     <string name="verifyUrl">https://www.gms-world.net/verify</string>
     <string name="app_email">device-locator@gms-world.net</string>
     <string name="downloadUrl">https://github.com/jstakun/device-locator/raw/master/app/app-release.apk</string>
-    <!--string name="downloadUrl">https://play.google.com/store/apps/details?id=net.gmsworld.devicelocator</string-->
     <string name="telegramStartUrl">https://telegram.me/device_locator_bot?start=%1$s</string>
     <string name="telegramWebUrl">https://web.telegram.org/#/im?p=@device_locator_bot</string>
 </resources>

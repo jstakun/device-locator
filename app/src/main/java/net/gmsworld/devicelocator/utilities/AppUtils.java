@@ -94,6 +94,10 @@ public class AppUtils {
         return getPackageInfo(c).versionCode;
     }
 
+    public boolean isFullVersion() {
+        return BuildConfig.APP_TYPE.equalsIgnoreCase("FULL");
+    }
+
     //private ApplicationInfo getApplicationInfo(Context c) throws PackageManager.NameNotFoundException {
     //    PackageManager pm = c.getPackageManager();
     //    ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), 0);

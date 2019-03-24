@@ -17,7 +17,6 @@ import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -26,7 +25,6 @@ import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -96,7 +94,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ocpsoft.prettytime.PrettyTime;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -191,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
         //TODO hide sms_notification views
-        if (BuildConfig.APP_TYPE.equals("Full")) {
+        if (AppUtils.getInstance().isFullVersion()) {
             toggleSmsBroadcastReceiver();
         } else {
             findViewById(R.id.sms_notification).setVisibility(View.GONE);
@@ -248,7 +245,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
         deviceId.setMovementMethod(LinkMovementMethod.getInstance());
 
-        checkForNewVersion();
+        if (AppUtils.getInstance().isFullVersion()) {
+            checkForNewVersion();
+        }
 
         //check for active Telegram registration
         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
@@ -540,7 +539,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void updateUI() {
-        if (BuildConfig.APP_TYPE.equals("Full")) {
+        if (AppUtils.getInstance().isFullVersion()) {
             //check if sms permission is present
             if (running && !Permissions.haveSendSMSPermission(this)) {
                 toggleRunning();
@@ -1265,7 +1264,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         } else if (!running) {
             //SMS Manager
             //TODO show sms info
-            if (BuildConfig.APP_TYPE.equals("Full")) {
+            if (AppUtils.getInstance().isFullVersion()) {
                 if (!settings.contains(SmsCommandsInitDialogFragment.TAG)) {
                     PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SmsCommandsInitDialogFragment.TAG, true).apply();
                     SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = SmsCommandsInitDialogFragment.newInstance(this);
@@ -1292,7 +1291,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             @Override
             public void onClick(View view) {
                 //TODO show sms info
-                if (BuildConfig.APP_TYPE.equals("Full")) {
+                if (AppUtils.getInstance().isFullVersion()) {
                     MainActivity.this.toggleRunning();
                     MainActivity.this.clearFocus();
                 } else {
@@ -1734,22 +1733,22 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     public void downloadApk() {
 
-        final String fileName = "app-release.apk";
+        final String fileName = "device-locator.apk";
         final String destination = "file://" + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + "/" + fileName;
         final Uri contentUri = Uri.parse(destination);
 
         //Delete update file if exists
-        final File file = new File(destination);
-        if (file.exists()) {
-            file.delete();
-        }
+        //final File file = new File(destination);
+        //if (file.exists()) {
+        //    file.delete();
+        //}
 
         //get url of app on server
         final String downloadUrl = getString(R.string.downloadUrl);
 
-        //set downloadmanager
+        //set download manager
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
-        //request.setDescription(getString(R.string.app_name));
+        request.setDescription(getString(R.string.app_name));
         request.setTitle("device-locator.apk");
         request.setMimeType("application/vnd.android.package-archive");
         //set destination
@@ -1766,24 +1765,52 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             public void onReceive(Context context, Intent intent) {
                 unregisterReceiver(this);
                 try {
-                    Intent install = null;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        install = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-                        //install = new Intent(Intent.ACTION_VIEW);
-                        install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        Uri uri = FileProvider.getUriForFile(MainActivity.this, "net.gmsworld.devicelocator.provider", new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName));
-                        Log.d(TAG, "Downloaded file mime type " + manager.getMimeTypeForDownloadedFile(downloadId));
-                        intent.setDataAndType(uri, manager.getMimeTypeForDownloadedFile(downloadId));
-                        //intent.setData(uri);
+                    if (!AppUtils.getInstance().isFullVersion()) {
+                        //uninstall GP version and install FULL version
+                        startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                        /*try {
+                            Intent install = new Intent(Intent.ACTION_VIEW);
+                            install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            install.setDataAndType(contentUri, manager.getMimeTypeForDownloadedFile(downloadId));
+                            startActivity(install);
+                        } catch (Exception e) {
+                            Log.e(TAG, e.getMessage(), e);
+                            startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                        }*/
+
+                        //if (settings.getBoolean(DEVICE_ADMIN_ENABLED, false)) {
+                            Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
+                            myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
+                            myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(myAppSettings);
+                        //}
+
+                        Uri packageURI = Uri.parse("package:" + getPackageName());
+                        Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageURI);
+                        startActivity(uninstallIntent);
+                        Toast.makeText(MainActivity.this, "Please uninstall Google Play " + getString(R.string.app_name) + " version and install Full version...", Toast.LENGTH_LONG).show();
                     } else {
+                        //upgrade FULL version
+                        Intent install = null;
+                        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        //    install = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+                        //    //install = new Intent(Intent.ACTION_VIEW);
+                        //    install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        //    Uri uri = FileProvider.getUriForFile(MainActivity.this, "net.gmsworld.devicelocator.provider", new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName));
+                        //    Log.d(TAG, "Downloaded file mime type " + manager.getMimeTypeForDownloadedFile(downloadId));
+                        //    intent.setDataAndType(uri, manager.getMimeTypeForDownloadedFile(downloadId));
+                        //} else {
                         install = new Intent(Intent.ACTION_VIEW);
                         install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         install.setDataAndType(contentUri, manager.getMimeTypeForDownloadedFile(downloadId));
+                        //}
+                        startActivity(install);
+                        Toast.makeText(MainActivity.this, "Please upgrade " + getString(R.string.app_name) + " to latest version...", Toast.LENGTH_LONG).show();
                     }
-                    startActivity(install);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
-                    Toast.makeText(MainActivity.this, getString (R.string.app_name) + " has been downloaded to your device \"Downloads\" directory. Please uninstall current version and install new one manually.", Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                    Toast.makeText(MainActivity.this, "Please first uninstall manually current " + getString(R.string.app_name) + " version and install new one from \"Downloads\" directory.", Toast.LENGTH_LONG).show();
                 }
             }
         };
