@@ -1767,9 +1767,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         BroadcastReceiver onComplete = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 try {
-                    if (!AppUtils.getInstance().isFullVersion()) {
+                    //if (!AppUtils.getInstance().isFullVersion()) {
                         //uninstall GP version and install FULL version
-                        startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                        //startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
                         /*try {
                             Intent install = new Intent(Intent.ACTION_VIEW);
                             install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1781,17 +1781,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         }*/
 
                         //if (settings.getBoolean(DEVICE_ADMIN_ENABLED, false)) {
-                            Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
-                            myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
-                            myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(myAppSettings);
+                        //    Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
+                        //    myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
+                        //    myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        //    startActivity(myAppSettings);
                         //}
 
-                        Uri packageURI = Uri.parse("package:" + getPackageName());
-                        Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageURI);
-                        startActivity(uninstallIntent);
-                        Toast.makeText(MainActivity.this, "Please uninstall Google Play " + getString(R.string.app_name) + " version and install Full version...", Toast.LENGTH_LONG).show();
-                    } else {
+                        //Uri packageURI = Uri.parse("package:" + getPackageName());
+                        //Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageURI);
+                        //startActivity(uninstallIntent);
+                        //Toast.makeText(MainActivity.this, "Please uninstall Google Play " + getString(R.string.app_name) + " version and install Full version...", Toast.LENGTH_LONG).show();
+                    //} else {
                         //upgrade FULL version
                         Intent install = null;
                         //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -1807,8 +1807,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         install.setDataAndType(contentUri, manager.getMimeTypeForDownloadedFile(downloadId));
                         //}
                         startActivity(install);
-                        Toast.makeText(MainActivity.this, "Please upgrade " + getString(R.string.app_name) + " to latest version...", Toast.LENGTH_LONG).show();
-                    }
+                        Toast.makeText(MainActivity.this, "Please upgrade " + getString(R.string.app_name) + " to latest Full version...", Toast.LENGTH_LONG).show();
+                    //}
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
                     startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
