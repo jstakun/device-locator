@@ -1767,53 +1767,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         BroadcastReceiver onComplete = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 try {
-                    //if (!AppUtils.getInstance().isFullVersion()) {
-                        //uninstall GP version and install FULL version
-                        //startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
-                        /*try {
-                            Intent install = new Intent(Intent.ACTION_VIEW);
-                            install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            install.setDataAndType(contentUri, manager.getMimeTypeForDownloadedFile(downloadId));
-                            startActivity(install);
-                        } catch (Exception e) {
-                            Log.e(TAG, e.getMessage(), e);
-                            startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
-                        }*/
-
-                        //if (settings.getBoolean(DEVICE_ADMIN_ENABLED, false)) {
-                        //    Intent myAppSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + getPackageName()));
-                        //    myAppSettings.addCategory(Intent.CATEGORY_DEFAULT);
-                        //    myAppSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        //    startActivity(myAppSettings);
-                        //}
-
-                        //Uri packageURI = Uri.parse("package:" + getPackageName());
-                        //Intent uninstallIntent = new Intent(Intent.ACTION_DELETE, packageURI);
-                        //startActivity(uninstallIntent);
-                        //Toast.makeText(MainActivity.this, "Please uninstall Google Play " + getString(R.string.app_name) + " version and install Full version...", Toast.LENGTH_LONG).show();
-                    //} else {
-                        //upgrade FULL version
-                        Intent install = null;
-                        //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        //    install = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-                        //    //install = new Intent(Intent.ACTION_VIEW);
-                        //    install.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        //    Uri uri = FileProvider.getUriForFile(MainActivity.this, "net.gmsworld.devicelocator.provider", new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName));
-                        //    Log.d(TAG, "Downloaded file mime type " + manager.getMimeTypeForDownloadedFile(downloadId));
-                        //    intent.setDataAndType(uri, manager.getMimeTypeForDownloadedFile(downloadId));
-                        //} else {
-                        install = new Intent(Intent.ACTION_VIEW);
-                        install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        install.setDataAndType(contentUri, manager.getMimeTypeForDownloadedFile(downloadId));
-                        //}
-                        startActivity(install);
-                        Toast.makeText(MainActivity.this, "Please upgrade " + getString(R.string.app_name) + " to latest Full version...", Toast.LENGTH_LONG).show();
-                    //}
+                    Intent install = new Intent(Intent.ACTION_VIEW);
+                    install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    install.setDataAndType(contentUri, manager.getMimeTypeForDownloadedFile(downloadId));
+                    startActivity(install);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
                     startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
-                    Toast.makeText(MainActivity.this, "Please first uninstall manually current " + getString(R.string.app_name) + " version and install new one from \"Downloads\" directory.", Toast.LENGTH_LONG).show();
                 }
+                Toast.makeText(MainActivity.this, "Please upgrade " + getString(R.string.app_name) + " to latest Full version...", Toast.LENGTH_LONG).show();
                 unregisterReceiver(this);
             }
         };
