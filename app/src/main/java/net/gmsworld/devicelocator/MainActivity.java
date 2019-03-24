@@ -1749,10 +1749,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         //set download manager
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
         request.setDescription(getString(R.string.app_name));
-        request.setTitle("device-locator.apk");
+        request.setTitle(fileName);
         request.setMimeType("application/vnd.android.package-archive");
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         //set destination
         request.setDestinationUri(contentUri);
+
 
         // get download service and enqueue file
         final DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
@@ -1763,7 +1766,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         //set BroadcastReceiver to install app when .apk is downloaded
         BroadcastReceiver onComplete = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
-                unregisterReceiver(this);
                 try {
                     if (!AppUtils.getInstance().isFullVersion()) {
                         //uninstall GP version and install FULL version
@@ -1812,6 +1814,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
                     Toast.makeText(MainActivity.this, "Please first uninstall manually current " + getString(R.string.app_name) + " version and install new one from \"Downloads\" directory.", Toast.LENGTH_LONG).show();
                 }
+                unregisterReceiver(this);
             }
         };
         //register receiver for when .apk download is compete
