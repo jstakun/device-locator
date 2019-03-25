@@ -1713,7 +1713,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         final int version = reply.getAsJsonObject().get("value").getAsInt();
                         final int versionCode = AppUtils.getInstance().getVersionCode(MainActivity.this);
                         if (version > versionCode) {
-                            Log.d(TAG, "New version is available");
+                            Log.d(TAG, "New version " + version + " is available");
                             try {
                                 NewVersionDialogFragment newVersionDialogFragment = NewVersionDialogFragment.newInstance(MainActivity.this);
                                 newVersionDialogFragment.show(getFragmentManager(), NewVersionDialogFragment.TAG);
