@@ -1263,7 +1263,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
         } else if (!running) {
             //SMS Manager
-            //TODO show sms info
+            //Full version
             if (AppUtils.getInstance().isFullVersion()) {
                 if (!settings.contains(SmsCommandsInitDialogFragment.TAG)) {
                     PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SmsCommandsInitDialogFragment.TAG, true).apply();
@@ -1271,8 +1271,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     smsCommandsInitDialogFragment.show(getFragmentManager(), SmsCommandsInitDialogFragment.TAG);
                 }
             } else {
-                DownloadFullApplicationDialogFragment downloadFullApplicationDialogFragment = DownloadFullApplicationDialogFragment.newInstance(this);
-                downloadFullApplicationDialogFragment.show(getFragmentManager(), DownloadFullApplicationDialogFragment.TAG);
+                //GP version
+                //DownloadFullApplicationDialogFragment downloadFullApplicationDialogFragment = DownloadFullApplicationDialogFragment.newInstance(this);
+                //downloadFullApplicationDialogFragment.show(getFragmentManager(), DownloadFullApplicationDialogFragment.TAG);
+                if (!settings.contains("SmsManagerFirstTimeUseDialog")) {
+                    PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("SmsManagerFirstTimeUseDialog", true).apply();
+                    FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.sms_manager_first_time_use_gp, R.drawable.ic_devices_other_gray);
+                    firstTimeUseDialogFragment.show(getFragmentManager(), "SmsManagerFirstTimeUseDialog");
+                }
             }
             //
         }
