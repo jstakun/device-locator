@@ -123,7 +123,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     Log.e(TAG, "Invalid pin found in message!");
                     if (StringUtils.isNotEmpty(replyTo)) {
                         Messenger.sendCloudMessage(this, null, replyTo, "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
-                    } else {
+                        //TODO add to invalid pin command from and command
                         sendNotification(Command.INVALID_PIN);
                     }
                 }
