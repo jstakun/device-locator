@@ -98,9 +98,12 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     }
                 }
                 //correlationId
-                String replyTo = null;
+                String replyTo = null, deviceId = null;
                 if (message.containsKey("correlationId")) {
                     replyTo = message.get("correlationId");
+                    if (replyTo != null) {
+                        deviceId = StringUtils.split(replyTo, Messenger.CID_SEPARATOR)[0];
+                    }
                 }
 
                 if (isPinValid) {
@@ -116,14 +119,15 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         if (StringUtils.isNotEmpty(replyTo)) {
                             Messenger.sendCloudMessage(this, null, replyTo, "Invalid command " + commandName + " sent to device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
                         }
-                        sendNotification(Command.INVALID_COMMAND, replyTo, commandName);
+
+                        sendNotification(Command.INVALID_COMMAND, deviceId, commandName);
                     }
                 } else {
                     Log.e(TAG, "Invalid pin found in message!");
                     if (StringUtils.isNotEmpty(replyTo)) {
                         Messenger.sendCloudMessage(this, null, replyTo, "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
                     }
-                    sendNotification(Command.INVALID_PIN, replyTo, commandName);
+                    sendNotification(Command.INVALID_PIN, deviceId, commandName);
                 }
                 firebaseAnalytics.logEvent("cloud_command_received_" + commandName.toLowerCase(), new Bundle());
             } else {
