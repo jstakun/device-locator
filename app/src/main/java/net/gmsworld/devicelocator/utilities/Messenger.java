@@ -753,10 +753,24 @@ public class Messenger {
                     command = Command.MUTE_COMMAND;
                     break;
                 case Command.INVALID_PIN:
-                    text = "Command with invalid pin has been sent to device " + deviceId + ".";
+                    if (extras != null) {
+                        String sender = extras.getString("sender", "unknown");
+                        String source = extras.getString("source");
+                        String invalidCommand = extras.getString("invalidCommand");
+                        text = "Command " + invalidCommand + " with invalid pin has been sent to device " + deviceId + " from " + source + " " + sender + ".";
+                    } else {
+                        text = "Command with invalid pin has been sent to device " + deviceId + ".";
+                    }
                     break;
                 case Command.INVALID_COMMAND:
-                    text = "Invalid command has been sent to device " + deviceId + ".";
+                    if (extras != null) {
+                        String sender = extras.getString("sender", "unknown");
+                        String source = extras.getString("source");
+                        String invalidCommand = extras.getString("invalidCommand");
+                        text = "Invalid command " + invalidCommand + " has been sent to device " + deviceId + " from " + source + " " + sender + ".";
+                    } else {
+                        text = "Invalid command has been sent to device " + deviceId + ".";
+                    }
                     break;
                 case Command.RESET_COMMAND:
                     text = "Reset to factory defaults on device " + deviceId + " has been started.";

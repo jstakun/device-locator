@@ -115,17 +115,15 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         Log.d(TAG, "Invalid command " + commandName + " found in message!");
                         if (StringUtils.isNotEmpty(replyTo)) {
                             Messenger.sendCloudMessage(this, null, replyTo, "Invalid command " + commandName + " sent to device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
-                        } else {
-                            sendNotification(Command.INVALID_COMMAND);
                         }
+                        sendNotification(Command.INVALID_COMMAND, replyTo, commandName);
                     }
                 } else {
                     Log.e(TAG, "Invalid pin found in message!");
                     if (StringUtils.isNotEmpty(replyTo)) {
                         Messenger.sendCloudMessage(this, null, replyTo, "Command " + commandName + " has been rejected by device " + Messenger.getDeviceId(this, true), commandName,1, new HashMap<String, String>());
-                        //TODO add to invalid pin command from and command
-                        sendNotification(Command.INVALID_PIN);
                     }
+                    sendNotification(Command.INVALID_PIN, replyTo, commandName);
                 }
                 firebaseAnalytics.logEvent("cloud_command_received_" + commandName.toLowerCase(), new Bundle());
             } else {
@@ -278,7 +276,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void sendNotification(final String command) {
+    private void sendNotification(final String command, final String sender, final String invalidCommand) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
         final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
@@ -290,6 +288,11 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
         if (StringUtils.isNotEmpty(command)) {
             newIntent.putExtra("command", command);
         }
+        if (StringUtils.isNotEmpty(sender)) {
+            newIntent.putExtra("sender", sender);
+        }
+        newIntent.putExtra("source", "device");
+        newIntent.putExtra("invalidCommand", invalidCommand);
         startService(newIntent);
     }
 }

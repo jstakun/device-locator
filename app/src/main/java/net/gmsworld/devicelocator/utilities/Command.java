@@ -132,7 +132,7 @@ public class Command {
             if (c.findAppCommand(context, StringUtils.trim(message), sender, location, extras, pin, isPinRequired)) {
                 Log.d(TAG, "Found matching cloud command");
                 return c.getSmsCommand();
-            } else if (c.findSocialCommand(context, StringUtils.trim(message), pin, isPinRequired, hasSocialNotifiers)) {
+            } else if (c.findSocialCommand(context, StringUtils.trim(message), pin, sender, isPinRequired, hasSocialNotifiers)) {
                 Log.d(TAG, "Found matching social command");
                 return c.getSmsCommand();
             }
@@ -235,7 +235,7 @@ public class Command {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
 
-            sendSocialNotification(context, START_COMMAND);
+            sendSocialNotification(context, START_COMMAND, sender, null);
         }
 
         @Override
@@ -302,7 +302,7 @@ public class Command {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
 
-            sendSocialNotification(context, RESUME_COMMAND);
+            sendSocialNotification(context, RESUME_COMMAND, sender, null);
         }
 
         @Override
@@ -381,9 +381,9 @@ public class Command {
             }
             if (settings.getBoolean("motionDetectorRunning", false)) {
                 settings.edit().putBoolean("motionDetectorRunning", false).apply();
-                sendSocialNotification(context, STOP_COMMAND);
+                sendSocialNotification(context, STOP_COMMAND, sender, null);
             } else {
-                sendSocialNotification(context, STOPPED_TRACKER);
+                sendSocialNotification(context, STOPPED_TRACKER, sender, null);
             }
         }
 
@@ -433,9 +433,9 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             if (!Permissions.haveLocationPermission(context)) {
-                sendSocialNotification(context, SHARE_COMMAND);
+                sendSocialNotification(context, SHARE_COMMAND, sender, null);
             } else {
-                sendSocialNotification(context, null); //don't set SHARE_COMMAND here!
+                sendSocialNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
             }
         }
 
@@ -514,9 +514,9 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             if (mute(context)) {
-                sendSocialNotification(context, MUTE_COMMAND);
+                sendSocialNotification(context, MUTE_COMMAND, sender, null);
             } else {
-                sendSocialNotification(context, MUTE_FAILED);
+                sendSocialNotification(context, MUTE_FAILED, sender, null);
             }
         }
 
@@ -571,7 +571,7 @@ public class Command {
             final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             if (audioMode != null) {
                 audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-                sendSocialNotification(context, UNMUTE_COMMAND);
+                sendSocialNotification(context, UNMUTE_COMMAND, sender, null);
             }
         }
 
@@ -605,7 +605,7 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            sendSocialNotification(context, CALL_COMMAND);
+            sendSocialNotification(context, CALL_COMMAND, sender, null);
         }
 
         @Override
@@ -686,7 +686,7 @@ public class Command {
             String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
             settings.edit().putInt("radius", radius).apply();
-            sendSocialNotification(context, RADIUS_COMMAND);
+            sendSocialNotification(context, RADIUS_COMMAND, sender, null);
         }
 
         @Override
@@ -717,13 +717,13 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).apply();
-            sendSocialNotification(context, AUDIO_COMMAND);
+            sendSocialNotification(context, AUDIO_COMMAND, sender, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).apply();
-            sendSocialNotification(context, AUDIO_COMMAND);
+            sendAppNotification(context, AUDIO_COMMAND, sender);
         }
     }
 
@@ -742,13 +742,13 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).apply();
-            sendSocialNotification(context, AUDIO_OFF_COMMAND);
+            sendSocialNotification(context, AUDIO_OFF_COMMAND, sender, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).apply();
-            sendSocialNotification(context, AUDIO_OFF_COMMAND);
+            sendAppNotification(context, AUDIO_OFF_COMMAND, sender);
         }
     }
 
@@ -769,7 +769,7 @@ public class Command {
         protected void onSocialCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 1).apply();
             RouteTrackingServiceUtils.setGpsAccuracy(context, RouteTrackingService.COMMAND_GPS_HIGH);
-            sendSocialNotification(context, GPS_HIGH_COMMAND);
+            sendSocialNotification(context, GPS_HIGH_COMMAND, sender, null);
         }
 
         @Override
@@ -795,7 +795,7 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 0).apply();
-            sendSocialNotification(context, GPS_BALANCED_COMMAND);
+            sendSocialNotification(context, GPS_BALANCED_COMMAND, sender, null);
         }
 
         @Override
@@ -830,7 +830,7 @@ public class Command {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
                 context.startService(cameraIntent);
             }
-            sendSocialNotification(context, TAKE_PHOTO_COMMAND);
+            sendSocialNotification(context, TAKE_PHOTO_COMMAND, sender, null);
         }
 
         @Override
@@ -976,7 +976,7 @@ public class Command {
 
                 RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
 
-                sendSocialNotification(context, NOTIFY_COMMAND);
+                sendSocialNotification(context, NOTIFY_COMMAND, sender, null);
             }
         }
 
@@ -1032,7 +1032,7 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            sendSocialNotification(context, PING_COMMAND);
+            sendSocialNotification(context, PING_COMMAND, sender, null);
         }
 
         @Override
@@ -1057,7 +1057,7 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            sendSocialNotification(context, HELLO_COMMAND);
+            sendSocialNotification(context, HELLO_COMMAND, sender, null);
         }
 
         @Override
@@ -1077,7 +1077,7 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            sendSocialNotification(context, ABOUT_COMMAND);
+            sendSocialNotification(context, ABOUT_COMMAND, sender, null);
         }
 
         @Override
@@ -1107,9 +1107,9 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             if (lockScreenNow(context)) {
-                sendSocialNotification(context, LOCK_SCREEN_COMMAND);
+                sendSocialNotification(context, LOCK_SCREEN_COMMAND, sender, null);
             } else {
-                sendSocialNotification(context, LOCK_SCREEN_FAILED);
+                sendSocialNotification(context, LOCK_SCREEN_FAILED, sender, null);
             }
         }
 
@@ -1212,7 +1212,7 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             if (playBeep(context)) {
-                sendSocialNotification(context, RING_COMMAND);
+                sendSocialNotification(context, RING_COMMAND, sender, null);
             }
         }
 
@@ -1249,7 +1249,7 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             if (stopBeep(context)) {
-                sendSocialNotification(context, RING_OFF_COMMAND);
+                sendSocialNotification(context, RING_OFF_COMMAND, sender, null);
             }
         }
 
@@ -1406,7 +1406,7 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             applyConfigChange(context);
-            sendSocialNotification(context, CONFIG_COMMAND);
+            sendSocialNotification(context, CONFIG_COMMAND, sender, null);
         }
 
         @Override
@@ -1513,14 +1513,14 @@ public class Command {
             final ComponentName compName = new ComponentName(context, DeviceAdminEventReceiver.class);
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("allowReset", false) && deviceManger != null && deviceManger.isAdminActive(compName)) {
                 try {
-                    sendSocialNotification(context, RESET_COMMAND);
+                    sendSocialNotification(context, RESET_COMMAND, sender, null);
                     deviceManger.wipeData(0);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
-                    sendSocialNotification(context, RESET_FAILED);
+                    sendSocialNotification(context, RESET_FAILED, sender, null);
                 }
             } else {
-                sendSocialNotification(context, RESET_FAILED);
+                sendSocialNotification(context, RESET_FAILED, sender, null);
             }
         }
 

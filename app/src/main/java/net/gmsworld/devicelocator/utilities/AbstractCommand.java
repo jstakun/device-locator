@@ -80,11 +80,11 @@ public abstract class AbstractCommand {
         int status = 0;
         //sms with sms notification
         if (StringUtils.startsWithIgnoreCase(smsMessage, smsCommand)) {
-            status = findCommandInMessage(context, smsCommand, smsMessage, pin, isPinRequired);
+            status = findCommandInMessage(context, smsCommand, smsMessage, pin, sender, isPinRequired);
             auditCommand(context, smsCommand);
         }
         if (status == 0 && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
-            status = findCommandInMessage(context, smsShortCommand, smsMessage, pin, isPinRequired);
+            status = findCommandInMessage(context, smsShortCommand, smsMessage, pin, sender, isPinRequired);
             auditCommand(context, smsShortCommand);
         }
         if (status == 1) {
@@ -92,25 +92,26 @@ public abstract class AbstractCommand {
             return true;
         } else if ((StringUtils.startsWithIgnoreCase(smsMessage, smsCommand + "t") || StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand + "t")) && hasSocialNotifiers) {
             //sms with social notification
-            status = findCommandInMessage(context, smsCommand + "t", smsMessage, pin, isPinRequired);
+            status = findCommandInMessage(context, smsCommand + "t", smsMessage, pin, sender, isPinRequired);
             if (status == 0 && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
-                status = findCommandInMessage(context, smsShortCommand + "t", smsMessage, pin, isPinRequired);
+                status = findCommandInMessage(context, smsShortCommand + "t", smsMessage, pin, sender, isPinRequired);
             }
             if (status == 1) {
                 onSocialCommandFound(sender, context);
                 return true;
             }
         }
+        Log.d(TAG, "No valid command found in sms message " + smsMessage);
         return false;
     }
 
-    protected final boolean findSocialCommand(Context context, String message, String pin, boolean isPinRequired, boolean hasSocialNotifiers) {
+    protected final boolean findSocialCommand(Context context, String message, String pin, String sender, boolean isPinRequired, boolean hasSocialNotifiers) {
         if ((StringUtils.startsWithIgnoreCase(message, smsCommand + "t") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "t")) && hasSocialNotifiers) {
             auditCommand(context, message);
-            if (findKeyword(context, smsCommand + "t", message, pin, isPinRequired)) {
+            if (findKeyword(context, smsCommand + "t", message, pin, sender, isPinRequired)) {
                 onSocialCommandFound(null, context);
                 return true;
-            } else if (findKeyword(context, smsShortCommand + "t", message, pin, isPinRequired)) {
+            } else if (findKeyword(context, smsShortCommand + "t", message, pin, sender, isPinRequired)) {
                 onSocialCommandFound(null, context);
                 return true;
             }
@@ -121,10 +122,10 @@ public abstract class AbstractCommand {
     protected final boolean findAppCommand(Context context, String message, String sender, Location location, Bundle extras, String pin, boolean isPinRequired) {
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "app") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "app")) {
             auditCommand(context, message);
-            if (findKeyword(context, smsCommand + "app", message, pin, isPinRequired)) {
+            if (findKeyword(context, smsCommand + "app", message, pin, sender, isPinRequired)) {
                 onAppCommandFound(sender, context, location, extras);
                 return true;
-            } else if (findKeyword(context, smsShortCommand + "app", message, pin, isPinRequired)) {
+            } else if (findKeyword(context, smsShortCommand + "app", message, pin, sender, isPinRequired)) {
                 onAppCommandFound(sender, context, location, extras);
                 return true;
             }
@@ -132,17 +133,17 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    private boolean findKeyword(Context context, String keyword, String message, String pin, boolean isPinRequired) {
+    private boolean findKeyword(Context context, String keyword, String message, String pin, String sender, boolean isPinRequired) {
         if (finder.equals(Finder.EQUALS)) {
-            return (findCommandInMessage(context, keyword, message, pin, isPinRequired) == 1);
+            return (findCommandInMessage(context, keyword, message, pin, sender, isPinRequired) == 1);
         } else if (finder.equals(Finder.STARTS)) {
-            return (findCommandInMessage(context, keyword, message, pin, isPinRequired) == 1 && validateTokens());
+            return (findCommandInMessage(context, keyword, message, pin, sender, isPinRequired) == 1 && validateTokens());
         } else {
             return false;
         }
     }
 
-    private int findCommandInMessage(Context context, String command, String message, String pin, boolean isPinRequired) {
+    private int findCommandInMessage(Context context, String command, String message, String pin, String sender, boolean isPinRequired) {
         //<command><pin> <args> or <command> <pin> <args>
         Log.d(TAG, "Checking " + message + " with " + command + " and " + pin);
         int foundCommand = 0;
@@ -158,13 +159,11 @@ public abstract class AbstractCommand {
                     }
                 }
                 if (foundCommand == 0 && StringUtils.equalsIgnoreCase(commandTokens[0], command)) {
-                    sendSocialNotification(context, Command.INVALID_PIN);
-                    //TODO add to invalid pin command notification from and command
+                    sendSocialNotification(context, Command.INVALID_PIN, sender, command);
                     Log.e(TAG, "Command " + commandTokens[0] + " with invalid Security PIN received!");
                     foundCommand = -1;
                 } else if (foundCommand == 0 && StringUtils.startsWithIgnoreCase(commandTokens[0], command) && StringUtils.isNumeric(StringUtils.substring(commandTokens[0], commandTokens[0].length() - pin.length()))) {
-                    sendSocialNotification(context, Command.INVALID_PIN);
-                    //TODO add to invalid pin command notification from and command
+                    sendSocialNotification(context, Command.INVALID_PIN, sender, command);
                     Log.e(TAG, "Command " + commandTokens[0] + " with invalid Security PIN received!");
                     foundCommand = -1;
                 }
@@ -173,7 +172,7 @@ public abstract class AbstractCommand {
         return foundCommand;
     }
 
-    void sendSocialNotification(final Context context, final String command) {
+    void sendSocialNotification(final Context context, final String command, final String sender, final String invalidCommand) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
         final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
@@ -184,6 +183,13 @@ public abstract class AbstractCommand {
         newIntent.putExtra("phoneNumber", phoneNumber);
         if (StringUtils.isNotEmpty(command)) {
             newIntent.putExtra("command", command);
+        }
+        if (StringUtils.isNotEmpty(sender)) {
+            newIntent.putExtra("sender", sender);
+        }
+        newIntent.putExtra("source", "mobile");
+        if (StringUtils.isNotEmpty(invalidCommand)) {
+            newIntent.putExtra("invalidCommand", invalidCommand);
         }
         context.startService(newIntent);
     }
