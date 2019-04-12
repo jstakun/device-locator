@@ -159,6 +159,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                             Toast.makeText(CommandService.this, "Command " + StringUtils.capitalize(command) + " has been sent to the device " + deviceName + "!", Toast.LENGTH_LONG).show();
                         } else if (responseCode == 404) {
                             Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + ". Is " + CommandService.this.getString(R.string.app_name) + " installed on this device?", Toast.LENGTH_LONG).show();
+                        } else if (responseCode == 410) {
+                            Toast.makeText(CommandService.this, "It seems device " + deviceName + " is unavailable at the moment!", Toast.LENGTH_LONG).show();
                         } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
                             JsonElement reply = new JsonParser().parse(results);
                             final int count = reply.getAsJsonObject().get("count").getAsInt();
