@@ -72,6 +72,9 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
         final PreferencesUtils prefs = new PreferencesUtils(this);
 
+        //hide notification dialogs
+        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+
         if (PinActivity.isAuthRequired(prefs)) {
             Log.d(TAG, "User should authenticate again!");
             Toast.makeText(this, "Please authenticate before sending command", Toast.LENGTH_LONG).show();
@@ -160,7 +163,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         } else if (responseCode == 404) {
                             Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + ". Is " + CommandService.this.getString(R.string.app_name) + " installed on this device?", Toast.LENGTH_LONG).show();
                         } else if (responseCode == 410) {
-                            Toast.makeText(CommandService.this, "It seems device " + deviceName + " is unavailable at the moment!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(CommandService.this, "It seems device " + deviceName + " has been offline recently. Retry if no reply soon!", Toast.LENGTH_LONG).show();
                         } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
                             JsonElement reply = new JsonParser().parse(results);
                             final int count = reply.getAsJsonObject().get("count").getAsInt();

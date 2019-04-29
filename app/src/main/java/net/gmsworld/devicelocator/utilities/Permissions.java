@@ -63,37 +63,86 @@ public class Permissions {
     }*/
 
     public static void requestSendSMSAndLocationPermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
+        try {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS, Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
+        } catch (Throwable e) {
+            Toast.makeText(activity, R.string.internal_error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     public static void requestSendSMSPermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS}, requestCode);
+        try {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.RECEIVE_SMS}, requestCode);
+        } catch (Throwable e) {
+            Toast.makeText(activity, R.string.internal_error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     public static void requestLocationPermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
+        try {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
+        } catch (Throwable e) {
+            Toast.makeText(activity, R.string.internal_error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     public static void requestContactsPermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, requestCode);
+        try {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, requestCode);
+        } catch (Throwable e) {
+            Toast.makeText(activity, R.string.internal_error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     public static void requestCallPhonePermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, requestCode);
+        try {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, requestCode);
+        } catch (Throwable e) {
+            Toast.makeText(activity, R.string.internal_error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     public static void requestCameraPermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, requestCode);
+        try {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA}, requestCode);
+        } catch (Throwable e) {
+            Toast.makeText(activity, R.string.internal_error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     public static void requestGetAccountsPermission(Activity activity, int requestCode) {
-        //READ_CONTACTS permission is needed to GET_ACCOUNT
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, requestCode);
-        //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.GET_ACCOUNTS}, requestCode);
+        try {
+            //READ_CONTACTS permission is needed to GET_ACCOUNT
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_CONTACTS}, requestCode);
+            //ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.GET_ACCOUNTS}, requestCode);
+        } catch (Throwable e) {
+            Toast.makeText(activity, R.string.internal_error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     public static void requestReadPhoneStatePermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_PHONE_STATE}, requestCode);
+        try {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_PHONE_STATE}, requestCode);
+        } catch (Throwable e) {
+            Toast.makeText(activity, R.string.internal_error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.getMessage(), e);
+        }
+    }
+
+    public static void requestWriteStoragePermission(Activity activity, int requestCode) {
+        try {
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, requestCode);
+        } catch (Throwable e) {
+            Toast.makeText(activity, R.string.internal_error, Toast.LENGTH_LONG).show();
+            Log.e(TAG, e.getMessage(), e);
+        }
     }
 
     public static boolean haveSendSMSAndLocationPermission(Context context) {
@@ -138,10 +187,6 @@ public class Permissions {
 
     public static boolean haveWriteStoragePermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    public static void requestWriteStoragePermission(Activity activity, int requestCode) {
-        ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, requestCode);
     }
 
     public static void startSettingsIntent(Context context) {
