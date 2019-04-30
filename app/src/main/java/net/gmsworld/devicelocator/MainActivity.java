@@ -187,13 +187,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethod.getInstance());
 
-        //TODO hide sms_notification views
         if (AppUtils.getInstance().isFullVersion()) {
             toggleSmsBroadcastReceiver();
         } else {
             findViewById(R.id.sms_notification).setVisibility(View.GONE);
         }
-        //
 
         if (motionDetectorRunning) {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, phoneNumber, email, telegramId, null, false, RouteTrackingService.Mode.Normal);
@@ -1296,7 +1294,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO show sms info
                 if (AppUtils.getInstance().isFullVersion()) {
                     MainActivity.this.toggleRunning();
                     MainActivity.this.clearFocus();
@@ -1305,7 +1302,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     DownloadFullApplicationDialogFragment downloadFullApplicationDialogFragment = DownloadFullApplicationDialogFragment.newInstance(MainActivity.this);
                     downloadFullApplicationDialogFragment.show(getFragmentManager(), DownloadFullApplicationDialogFragment.TAG);
                 }
-                //
             }
         });
     }

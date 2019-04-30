@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -139,6 +140,24 @@ public abstract class AbstractCommand {
         return foundCommand;
     }
 
+    protected final int findAdmCommand(Context context, String message, String sender, Location location, Bundle extras, String otp) {
+        int foundCommand = 0;
+        //Log.d(TAG, "Matching " + message + " with " + smsCommand + "adminapp");
+        if (StringUtils.startsWithIgnoreCase(message, smsCommand + "admindlt") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "admindlt")) {
+            auditCommand(context, message);
+            foundCommand = findKeyword(context, smsCommand + "admindlt", message, otp, sender, false);
+            if (foundCommand == 1) {
+                sendAdmNotification(context, smsCommand.equals(Command.SHARE_COMMAND) ? null : smsCommand); //for locate command set null
+            } else if (foundCommand == 0) {
+                foundCommand = findKeyword(context, smsShortCommand + "admindlt", message, otp, sender, false);
+                if (foundCommand == 1) {
+                    sendAdmNotification(context, smsCommand.equals(Command.SHARE_COMMAND) ? null : smsCommand); //for locate command set null
+                }
+            }
+        }
+        return foundCommand;
+    }
+
     private int findKeyword(Context context, String keyword, String message, String pin, String sender, boolean isPinRequired) {
         if (finder.equals(Finder.STARTS)) {
             int foundCommand = findCommandInMessage(context, keyword, message, pin, sender, isPinRequired);
@@ -155,7 +174,7 @@ public abstract class AbstractCommand {
 
     private int findCommandInMessage(Context context, String command, String message, String pin, String sender, boolean isPinRequired) {
         //<command><pin> <args> or <command> <pin> <args>
-        Log.d(TAG, "Checking " + message + " with " + command + " and " + pin);
+        Log.d(TAG, "Matching " + message + " with " + command + " and " + pin);
         int foundCommand = 0;
         if (finder == Finder.EQUALS || finder == Finder.STARTS) {
             commandTokens = message.split(" ");
@@ -180,6 +199,17 @@ public abstract class AbstractCommand {
             }
         }
         return foundCommand;
+    }
+
+    private void sendAdmNotification(final Context context, final String command) {
+        Intent newIntent = new Intent(context, SmsSenderService.class);
+        newIntent.putExtra("telegramId", context.getString(R.string.app_telegram));
+        newIntent.putExtra("email", context.getString(R.string.app_email));
+        if (StringUtils.isNotEmpty(command)) {
+            newIntent.putExtra("command", command);
+        }
+        newIntent.putExtra("source", "mobile");
+        context.startService(newIntent);
     }
 
     static void sendSocialNotification(final Context context, final String command, final String sender, final String invalidCommand) {

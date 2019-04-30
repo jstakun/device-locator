@@ -148,14 +148,12 @@ public class PermissionsActivity extends AppCompatActivity {
         Switch accessFineLocationPermission = findViewById(R.id.access_fine_location_permission);
         accessFineLocationPermission.setChecked(Permissions.haveLocationPermission(this));
 
-        //TODO hide sms permissions switch
         Switch smsPermission = findViewById(R.id.sms_permission);
         if (AppUtils.getInstance().isFullVersion()) {
             smsPermission.setChecked(Permissions.haveSendSMSPermission(this));
         } else {
             smsPermission.setVisibility(View.GONE);
         }
-        //
 
         Switch cameraPermission = findViewById(R.id.camera_permission);
         if (!Permissions.haveCameraPermission(this) || !HiddenCameraUtils.canOverDrawOtherApps(this)) {
@@ -165,7 +163,6 @@ public class PermissionsActivity extends AppCompatActivity {
             cameraPermission.setChecked(true);
         }
 
-        //TODO hide read contacts permissions switch
         Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
         if (AppUtils.getInstance().isFullVersion()) {
             boolean perm = Permissions.haveReadContactsPermission(this);
@@ -179,7 +176,6 @@ public class PermissionsActivity extends AppCompatActivity {
         } else {
             readContactsPermission.setVisibility(View.GONE);
         }
-        //
 
         Switch callPhonePermission = findViewById(R.id.call_phone_permission);
         callPhonePermission.setChecked(Permissions.haveCallPhonePermission(this));

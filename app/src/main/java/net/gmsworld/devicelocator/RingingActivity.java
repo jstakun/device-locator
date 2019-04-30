@@ -32,7 +32,7 @@ public class RingingActivity extends AppCompatActivity {
             public void onClick(View view) {
                 final PreferencesUtils prefs = new PreferencesUtils(RingingActivity.this);
                 final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
-                Command.findCommandInMessage(RingingActivity.this, Command.RING_OFF_COMMAND + "app" + pin, null, null, null);
+                Command.findCommandInMessage(RingingActivity.this, Command.RING_OFF_COMMAND + "app" + pin, null, null, null, null);
                 finish();
              }
         });

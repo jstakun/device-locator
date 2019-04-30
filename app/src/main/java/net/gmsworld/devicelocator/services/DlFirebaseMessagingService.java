@@ -31,6 +31,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+import static net.gmsworld.devicelocator.utilities.Messenger.CID_SEPARATOR;
+
 public class DlFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "DlFirebaseMsgService";
@@ -103,14 +105,18 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 String replyTo = null;
                 if (message.containsKey("correlationId")) {
                     replyTo = message.get("correlationId");
+                    if (StringUtils.split(replyTo, CID_SEPARATOR).length < 2) {
+                        Log.e(TAG, "Invalid replyTo: " + replyTo);
+                        replyTo = null;
+                    }
                 }
 
-                String foundCommand = Command.findCommandInMessage(this, command, replyTo, location, extras);
+                String foundCommand = Command.findCommandInMessage(this, command, replyTo, location, extras, pinRead);
                 if (StringUtils.isNotEmpty(foundCommand)) {
                     firebaseAnalytics.logEvent("cloud_command_received_" + foundCommand.toLowerCase(), new Bundle());
                 }
             } else {
-                Log.e(TAG, "Invalid data payload!");
+                Log.e(TAG, "Invalid data payload " + message.toString());
             }
         }
 

@@ -124,40 +124,66 @@ public class Command {
         return null;
     }
 
-    public static String findCommandInMessage(Context context, String message, String sender, Location location, Bundle extras) {
-        final PreferencesUtils prefs = new PreferencesUtils(context);
-        final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
-        final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
-        final boolean hasSocialNotifiers = StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_SOCIAL)) || StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_EMAIL));
-        int foundCommand;
-        for (AbstractCommand c : getCommands()) {
-            foundCommand = c.findAppCommand(context, StringUtils.trim(message), sender, location, extras, pin, isPinRequired);
-            if (foundCommand == 1) {
-                Log.d(TAG, "Found matching cloud command");
-                return c.getSmsCommand();
-            } else if (foundCommand == -1) {
-                //invalid pin
-                return null;
-            } else {
-                foundCommand = c.findSocialCommand(context, StringUtils.trim(message), pin, sender, isPinRequired, hasSocialNotifiers);
+    public static String findCommandInMessage(Context context, String message, String sender, Location location, Bundle extras, String pinRead) {
+        if (StringUtils.containsIgnoreCase(message, "admindlt")) {
+            //adm command
+            Log.d(TAG, "Looking for adm command...");
+            findAdmCommandInMessage(context, message, sender, location, extras, pinRead);
+        } else {
+            final PreferencesUtils prefs = new PreferencesUtils(context);
+            final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+            final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
+            final boolean hasSocialNotifiers = StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_SOCIAL)) || StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_EMAIL));
+            int foundCommand;
+            for (AbstractCommand c : getCommands()) {
+                foundCommand = c.findAppCommand(context, StringUtils.trim(message), sender, location, extras, pin, isPinRequired);
                 if (foundCommand == 1) {
-                    Log.d(TAG, "Found matching social command");
+                    Log.d(TAG, "Found matching cloud command");
                     return c.getSmsCommand();
                 } else if (foundCommand == -1) {
                     //invalid pin
                     return null;
+                } else {
+                    foundCommand = c.findSocialCommand(context, StringUtils.trim(message), pin, sender, isPinRequired, hasSocialNotifiers);
+                    if (foundCommand == 1) {
+                        Log.d(TAG, "Found matching social command");
+                        return c.getSmsCommand();
+                    } else if (foundCommand == -1) {
+                        //invalid pin
+                        return null;
+                    }
                 }
             }
+            //invalid command
+            final String commandName = message.split("dl")[0];
+            Log.d(TAG, "Invalid command " + commandName + " found in message!");
+            if (StringUtils.isNotEmpty(sender)) {
+                Messenger.sendCloudMessage(context, null, sender, "Invalid command " + commandName + " sent to device " + Messenger.getDeviceId(context, true), commandName, 1, new HashMap<String, String>());
+            }
+            AbstractCommand.sendSocialNotification(context, INVALID_COMMAND, sender, commandName);
         }
-        //invalid command
-        final String commandName = message.split("dl")[0];
-        Log.d(TAG, "Invalid command " + commandName + " found in message!");
-        if (StringUtils.isNotEmpty(sender)) {
-            Messenger.sendCloudMessage(context, null, sender, "Invalid command " + commandName + " sent to device " + Messenger.getDeviceId(context, true), commandName,1, new HashMap<String, String>());
-        }
-        AbstractCommand.sendSocialNotification(context, INVALID_COMMAND, sender, commandName);
         return null;
     }
+
+    private static void findAdmCommandInMessage(final Context context, final String message, final String sender, final Location location, final Bundle extras, final String otp) {
+        final String deviceId = Messenger.getDeviceId(context, false);
+        final String content = "key=" + deviceId + "&value=" + otp;
+        Network.post(context, context.getString(R.string.otpUrl), content, null, null, new Network.OnGetFinishListener() {
+            @Override
+            public void onGetFinish(String results, int responseCode, String url) {
+                if (responseCode == 200) {
+                    Log.d(TAG, "Otp has been verified successfully!");
+                    for (AbstractCommand c : getCommands()) {
+                        if (c.findAdmCommand(context, StringUtils.trim(message), sender, location, extras, otp) == 1) {
+                            Log.d(TAG, "Found matching adm command");
+                            break;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
 
     private static List<AbstractCommand> getCommands() {
         if (commands == null) {
@@ -451,6 +477,7 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             if (!Permissions.haveLocationPermission(context)) {
+                Log.e(TAG, "Missing Location permission");
                 sendSocialNotification(context, SHARE_COMMAND, sender, null);
             } else {
                 sendSocialNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
@@ -460,6 +487,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (!Permissions.haveLocationPermission(context)) {
+                Log.e(TAG, "Missing Location permission");
                 sendAppNotification(context, SHARE_COMMAND, sender);
             } else {
                 sendAppNotification(context, null, sender); //don't set SHARE_COMMAND here!
