@@ -35,6 +35,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import io.nlopez.smartlocation.SmartLocation;
@@ -83,8 +84,8 @@ public class Command {
     public final static String RESET_FAILED = "resetfail"; //this is not command
     public final static String MUTE_FAILED = "mutefail"; //this is not command
     public final static String STOPPED_TRACKER = "stopped"; //this is not command
-    public final static String INVALID_PIN = "invalidPin";
-    public final static String INVALID_COMMAND = "invalidCommand";
+    protected final static String INVALID_PIN = "invalidPin";
+    protected final static String INVALID_COMMAND = "invalidCommand";
 
     private static List<AbstractCommand> commands = null;
 
@@ -128,16 +129,33 @@ public class Command {
         final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
         final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
         final boolean hasSocialNotifiers = StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_SOCIAL)) || StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_EMAIL));
+        int foundCommand;
         for (AbstractCommand c : getCommands()) {
-            if (c.findAppCommand(context, StringUtils.trim(message), sender, location, extras, pin, isPinRequired)) {
+            foundCommand = c.findAppCommand(context, StringUtils.trim(message), sender, location, extras, pin, isPinRequired);
+            if (foundCommand == 1) {
                 Log.d(TAG, "Found matching cloud command");
                 return c.getSmsCommand();
-            } else if (c.findSocialCommand(context, StringUtils.trim(message), pin, sender, isPinRequired, hasSocialNotifiers)) {
-                Log.d(TAG, "Found matching social command");
-                return c.getSmsCommand();
+            } else if (foundCommand == -1) {
+                //invalid pin
+                return null;
+            } else {
+                foundCommand = c.findSocialCommand(context, StringUtils.trim(message), pin, sender, isPinRequired, hasSocialNotifiers);
+                if (foundCommand == 1) {
+                    Log.d(TAG, "Found matching social command");
+                    return c.getSmsCommand();
+                } else if (foundCommand == -1) {
+                    //invalid pin
+                    return null;
+                }
             }
         }
-        Log.w(TAG, "Didn't found matching command " + message);
+        //invalid command
+        final String commandName = message.split("dl")[0];
+        Log.d(TAG, "Invalid command " + commandName + " found in message!");
+        if (StringUtils.isNotEmpty(sender)) {
+            Messenger.sendCloudMessage(context, null, sender, "Invalid command " + commandName + " sent to device " + Messenger.getDeviceId(context, true), commandName,1, new HashMap<String, String>());
+        }
+        AbstractCommand.sendSocialNotification(context, INVALID_COMMAND, sender, commandName);
         return null;
     }
 
