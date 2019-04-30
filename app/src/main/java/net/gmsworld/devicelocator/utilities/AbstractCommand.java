@@ -48,6 +48,8 @@ public abstract class AbstractCommand {
 
     protected abstract void onAppCommandFound(String sender, Context context, Location location, Bundle extras);
 
+    protected abstract void onAdmCommandFound(String sender, Context context);
+
     public String getOppositeCommand() { return null; }
 
     public String getLabel() { return StringUtils.capitalize(getSmsCommand().substring(0, getSmsCommand().length()-2)); }
@@ -147,11 +149,11 @@ public abstract class AbstractCommand {
             auditCommand(context, message);
             foundCommand = findKeyword(context, smsCommand + "admindlt", message, otp, sender, false);
             if (foundCommand == 1) {
-                sendAdmNotification(context, smsCommand.equals(Command.SHARE_COMMAND) ? null : smsCommand); //for locate command set null
+                onAdmCommandFound(sender, context);
             } else if (foundCommand == 0) {
                 foundCommand = findKeyword(context, smsShortCommand + "admindlt", message, otp, sender, false);
                 if (foundCommand == 1) {
-                    sendAdmNotification(context, smsCommand.equals(Command.SHARE_COMMAND) ? null : smsCommand); //for locate command set null
+                    onAdmCommandFound(sender, context);
                 }
             }
         }
@@ -201,17 +203,6 @@ public abstract class AbstractCommand {
         return foundCommand;
     }
 
-    private void sendAdmNotification(final Context context, final String command) {
-        Intent newIntent = new Intent(context, SmsSenderService.class);
-        newIntent.putExtra("telegramId", context.getString(R.string.app_telegram));
-        newIntent.putExtra("email", context.getString(R.string.app_email));
-        if (StringUtils.isNotEmpty(command)) {
-            newIntent.putExtra("command", command);
-        }
-        newIntent.putExtra("source", "mobile");
-        context.startService(newIntent);
-    }
-
     static void sendSocialNotification(final Context context, final String command, final String sender, final String invalidCommand) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
@@ -250,6 +241,25 @@ public abstract class AbstractCommand {
         newIntent.putExtra("phoneNumber", sender);
         if (StringUtils.isNotEmpty(command)) {
             newIntent.putExtra("command", command);
+        }
+        context.startService(newIntent);
+    }
+
+    void sendAdmNotification(final Context context, final String command, final String sender, final String invalidCommand) {
+        final String email = context.getString(R.string.app_email);
+        final String telegramId = context.getString(R.string.app_telegram);
+        Intent newIntent = new Intent(context, SmsSenderService.class);
+        newIntent.putExtra("telegramId", telegramId);
+        newIntent.putExtra("email", email);
+        if (StringUtils.isNotEmpty(command)) {
+            newIntent.putExtra("command", command);
+        }
+        if (StringUtils.isNotEmpty(sender)) {
+            newIntent.putExtra("sender", sender);
+        }
+        newIntent.putExtra("source", "mobile");
+        if (StringUtils.isNotEmpty(invalidCommand)) {
+            newIntent.putExtra("invalidCommand", invalidCommand);
         }
         context.startService(newIntent);
     }
