@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -39,6 +40,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     private static boolean commandInProgress = false;
 
+    private Handler toastHandler;
+
     public CommandService() {
         super(TAG);
     }
@@ -47,6 +50,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate()");
+        toastHandler = new Handler(getMainLooper());
         SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).oneFix().start(this);
     }
 
@@ -63,21 +67,25 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.d(TAG, "onHandleIntent()");
         Bundle extras = intent.getExtras();
+
+        //hide notification dialogs
+        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
         if (extras == null) {
             Log.e(TAG, "Missing command details!");
+            showToast(R.string.internal_error);
             return;
         }
 
         final PreferencesUtils prefs = new PreferencesUtils(this);
 
-        //hide notification dialogs
-        sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        showToast(R.string.please_wait);
 
         if (PinActivity.isAuthRequired(prefs)) {
             Log.d(TAG, "User should authenticate again!");
-            Toast.makeText(this, "Please authenticate before sending command", Toast.LENGTH_LONG).show();
+            showToast("Please authenticate before sending command");
             Intent authIntent = new Intent(this, PinActivity.class);
             authIntent.putExtras(extras);
             authIntent.setAction(AUTH_NEEDED);
@@ -88,6 +96,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             if (StringUtils.endsWith(cmd, "dl")) {
                 cmd = cmd.substring(0, cmd.length() - 2);
             }
+            Log.d(TAG, "Command " + cmd + " will be executed...");
 
             final String command = cmd;
             final String imei = extras.getString("imei");
@@ -100,8 +109,6 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 Log.e(TAG, "Missing command or imei!");
                 return;
             }
-
-            Log.d(TAG, "onHandleIntent() with command: " + command);
 
             String pin = extras.getString("pin");
             if (pin == null) {
@@ -140,7 +147,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 }
                 sendCommand(content, command, imei, name, prefs);
             } else {
-                Toast.makeText(this, "Previous command in progress...", Toast.LENGTH_LONG).show();
+                showToast("Previous command in progress...");
             }
         }
     }
@@ -159,17 +166,17 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                     public void onGetFinish(String results, int responseCode, String url) {
                         final String deviceName = (StringUtils.isNotEmpty(name) ? name : imei);
                         if (responseCode == 200) {
-                            Toast.makeText(CommandService.this, "Command " + StringUtils.capitalize(command) + " has been sent to the device " + deviceName + "!", Toast.LENGTH_LONG).show();
+                            showToast("Command " + StringUtils.capitalize(command) + " has been sent to the device " + deviceName + "!");
                         } else if (responseCode == 404) {
-                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + ". Is " + CommandService.this.getString(R.string.app_name) + " installed on this device?", Toast.LENGTH_LONG).show();
+                            showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + ". Is " + CommandService.this.getString(R.string.app_name) + " installed on this device?");
                         } else if (responseCode == 410) {
-                            Toast.makeText(CommandService.this, "It seems device " + deviceName + " has been offline recently. Retry if no reply soon!", Toast.LENGTH_LONG).show();
+                            showToast("It seems device " + deviceName + " has been offline recently. Retry if no reply soon!");
                         } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
                             JsonElement reply = new JsonParser().parse(results);
                             final int count = reply.getAsJsonObject().get("count").getAsInt();
-                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + " after " + count + " attempts!", Toast.LENGTH_LONG).show();
+                            showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + " after " + count + " attempts!");
                         } else {
-                            Toast.makeText(CommandService.this, "Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + "!", Toast.LENGTH_LONG).show();
+                            showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + "!");
                         }
                         commandInProgress = false;
                     }
@@ -190,7 +197,25 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 });
             }
         } else {
-            Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+            showToast(R.string.no_network_error);
         }
+    }
+
+    private void showToast(final String message) {
+        toastHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void showToast(final int messageId) {
+        toastHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), messageId, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }
