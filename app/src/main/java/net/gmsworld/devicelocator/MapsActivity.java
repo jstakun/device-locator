@@ -108,14 +108,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String[] geo = d.geo.split(" ");
                     LatLng deviceMarker = new LatLng(Double.valueOf(geo[0]), Double.valueOf(geo[1]));
                     devicesBounds.include(deviceMarker);
-                    Marker m = mMap.addMarker(new MarkerOptions().position(deviceMarker).title("Click to send command to " + d.name).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_small)));
-                    m.setTag(i);
-                    i++;
+                    MarkerOptions mo = null;
                     if (d.imei.equals(deviceImei)) {
                         center = deviceMarker;
+                        mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Click to send command to " + d.name).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_small_red));
+                    } else {
+                        mo = new MarkerOptions().zIndex(0.0f).position(deviceMarker).title("Click to send command to " + d.name).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_small));
                     }
+                    Marker m = mMap.addMarker(mo);
+                    m.setTag(i);
+                    i++;
                 }
             }
+
             LatLngBounds bounds = devicesBounds.build();
             int width = getResources().getDisplayMetrics().widthPixels;
             int height = getResources().getDisplayMetrics().heightPixels;
