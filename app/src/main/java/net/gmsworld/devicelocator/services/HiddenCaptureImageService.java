@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -102,7 +103,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                 try {
                     startCamera(cameraConfig);
 
-                    new android.os.Handler().postDelayed(new Runnable() {
+                    new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -217,10 +218,11 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                 Log.w(TAG, getString(R.string.no_network_error));
             }
         } else {
-            Toast.makeText(this, "Camera enabled", Toast.LENGTH_LONG).show();
             PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).apply();
             boolean deleted = imageFile.delete();
             Log.d(TAG, "Camera photo deleted: " + deleted);
+            //TODO user handler like in CommandService
+            Toast.makeText(this, "Camera enabled!", Toast.LENGTH_LONG).show();
         }
 
         isRunning = false;
@@ -233,8 +235,9 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
             case CameraError.ERROR_CAMERA_OPEN_FAILED:
                 //Camera open failed. Probably because another application is using the camera
                 Log.e(TAG, "Cannot open camera.");
-                Toast.makeText(this, "Camera opening failed.", Toast.LENGTH_LONG).show();
                 PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", false).apply();
+                //TODO user handler like in CommandService
+                Toast.makeText(this, "Camera opening failed.", Toast.LENGTH_LONG).show();
                 break;
             case CameraError.ERROR_IMAGE_WRITE_FAILED:
                 //Image write failed. Please check if you have provided WRITE_EXTERNAL_STORAGE permission

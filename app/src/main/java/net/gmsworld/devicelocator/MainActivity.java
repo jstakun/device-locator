@@ -57,6 +57,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -357,6 +359,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 return true;
             case R.id.permissions:
                 startActivity(new Intent(this, PermissionsActivity.class));
+                return true;
+            case R.id.map:
+                startActivity(new Intent(this, MapsActivity.class));
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -1912,19 +1917,25 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         private void showDeviceLocation(Device device) {
             if (StringUtils.isNotEmpty(device.geo)) {
-                String[] tokens = StringUtils.split(device.geo, " ");
-                String name = "Your+Device";
-                if (StringUtils.isNotEmpty(device.name)) {
-                    name = "Device+" + device.name;
-                }
-                Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + tokens[0] + "," + tokens[1] + "(" + name + ")");
-                Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                gmsIntent.setPackage("com.google.android.apps.maps");
-                if (gmsIntent.resolveActivity(getContext().getPackageManager()) != null) {
-                    getContext().startActivity(gmsIntent);
+                if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext()) == ConnectionResult.SUCCESS) {
+                    Intent mapIntent = new Intent(MainActivity.this, MapsActivity.class);
+                    mapIntent.putExtra("imei", device.imei);
+                    startActivity(mapIntent);
                 } else {
-                    Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Messenger.MAPS_URL_PREFIX + tokens[0] + "," + tokens[1]));
-                    getContext().startActivity(webIntent);
+                    String[] tokens = StringUtils.split(device.geo, " ");
+                    String name = "Your+Device";
+                    if (StringUtils.isNotEmpty(device.name)) {
+                        name = "Device+" + device.name;
+                    }
+                    Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + tokens[0] + "," + tokens[1] + "(" + name + ")");
+                    Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                    gmsIntent.setPackage("com.google.android.apps.maps");
+                    if (gmsIntent.resolveActivity(getContext().getPackageManager()) != null) {
+                        getContext().startActivity(gmsIntent);
+                    } else {
+                        Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Messenger.MAPS_URL_PREFIX + tokens[0] + "," + tokens[1]));
+                        getContext().startActivity(webIntent);
+                    }
                 }
             }
         }

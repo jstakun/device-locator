@@ -216,6 +216,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                                 }
                             }
                         } else {
+                            //TODO user handler like in CommandService
                             Toast.makeText(context, "Device registration failed! Please restart Device Manager and try again.", Toast.LENGTH_LONG).show();
                         }
                     }
@@ -250,6 +251,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         Exception exception = task.getException();
                         Log.e(TAG, "Failed to receive Firebase token!", exception);
                         if (!silent) {
+                            //TODO user handler like in CommandService
                             Toast.makeText(context, "Failed to synchronize device. Please restart " + context.getString(R.string.app_name) + " and try again!", Toast.LENGTH_LONG).show();
                         }
                     }

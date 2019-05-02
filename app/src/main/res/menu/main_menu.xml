@@ -16,6 +16,11 @@
         android:icon="@drawable/ic_devices_other_white"
         app:showAsAction="ifRoom|withText"/>
     <item
+        android:id="@+id/map"
+        android:title="@string/device_map"
+        android:icon="@drawable/ic_map_white"
+        app:showAsAction="ifRoom|withText"/>
+    <item
         android:id="@+id/permissions"
         android:title="@string/title_activity_permissions"
         android:icon="@drawable/ic_settings_cell_white"
