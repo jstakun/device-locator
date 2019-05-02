@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator;
 
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -18,12 +19,19 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import net.gmsworld.devicelocator.model.Device;
+import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
+import org.ocpsoft.prettytime.PrettyTime;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Set;
+
+import io.nlopez.smartlocation.SmartLocation;
+import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
 
@@ -37,6 +45,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private String deviceImei = null;
     private int zoom = -1;
+
+    private final PrettyTime pt = new PrettyTime();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,12 +118,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     String[] geo = d.geo.split(" ");
                     LatLng deviceMarker = new LatLng(Double.valueOf(geo[0]), Double.valueOf(geo[1]));
                     devicesBounds.include(deviceMarker);
+
+                    long timestamp = Long.valueOf(geo[geo.length - 1]);
+                    String snippet = "Last seen " + pt.format(new Date(timestamp));
+                    Location location = SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).getLastLocation();
+                    if (location != null) {
+                        Location deviceLocation = new Location("");
+                        deviceLocation.setLatitude(Location.convert(geo[0]));
+                        deviceLocation.setLongitude(Location.convert(geo[1]));
+
+                        int dist = (int) location.distanceTo(deviceLocation);
+                        if (dist <= 0) {
+                            dist = 1;
+                        }
+                        snippet += " " + DistanceFormatter.format(dist) + " away";
+                    }
+
                     MarkerOptions mo = null;
                     if (d.imei.equals(deviceImei)) {
                         center = deviceMarker;
-                        mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Click to send command to " + d.name).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_small_red));
+                        mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_small_red));
                     } else {
-                        mo = new MarkerOptions().zIndex(0.0f).position(deviceMarker).title("Click to send command to " + d.name).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_small));
+                        mo = new MarkerOptions().zIndex(0.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_small));
                     }
                     Marker m = mMap.addMarker(mo);
                     m.setTag(i);

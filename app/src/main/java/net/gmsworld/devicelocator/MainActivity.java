@@ -1952,15 +1952,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             if (StringUtils.isNotEmpty(device.geo)) {
                 String[] tokens = StringUtils.split(device.geo, " ");
                 if (tokens.length >= 3) { //lat lng (acc) timestamp
-                    Location deviceLocation = new Location("");
-                    deviceLocation.setLatitude(Location.convert(tokens[0]));
-                    deviceLocation.setLongitude(Location.convert(tokens[1]));
-                    if (tokens.length > 3) {
-                        deviceLocation.setAccuracy(Float.valueOf(tokens[2]));
-                    }
                     long timestamp = Long.valueOf(tokens[tokens.length - 1]);
                     message = "Last seen " + pt.format(new Date(timestamp));
                     if (location != null) {
+                        Location deviceLocation = new Location("");
+                        deviceLocation.setLatitude(Location.convert(tokens[0]));
+                        deviceLocation.setLongitude(Location.convert(tokens[1]));
+                        if (tokens.length > 3) {
+                            deviceLocation.setAccuracy(Float.valueOf(tokens[2]));
+                        }
                         int dist = (int) location.distanceTo(deviceLocation);
                         if (dist <= 0) {
                             dist = 1;
