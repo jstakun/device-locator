@@ -16,8 +16,12 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+
 import net.gmsworld.devicelocator.LauncherActivity;
 import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.MapsActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.services.CommandService;
 
@@ -100,16 +104,22 @@ public class NotificationUtils {
 
         if (deviceLocation != null) {
             //message has location
-            String device = "Your+Device";
-            if (StringUtils.isNotEmpty(deviceName)) {
-                device = "Device+" + deviceName;
-                title = deviceName.replace('-',' ') + " Notification";
-            }
-            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + deviceLocation.getLatitude() + "," + deviceLocation.getLongitude() + "(" + device + ")");
-            Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-            gmsIntent.setPackage("com.google.android.apps.maps");
-            if (gmsIntent.resolveActivity(context.getPackageManager()) != null) {
+            if (extras.containsKey("imei") && GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
+                Intent gmsIntent = new Intent(context, MapsActivity.class);
+                gmsIntent.putExtra("imei", extras.get("imei").toString());
                 mapIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            } else {
+                String device = "Your+Device";
+                if (StringUtils.isNotEmpty(deviceName)) {
+                    device = "Device+" + deviceName;
+                    title = deviceName.replace('-', ' ') + " Notification";
+                }
+                Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + deviceLocation.getLatitude() + "," + deviceLocation.getLongitude() + "(" + device + ")");
+                Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                gmsIntent.setPackage("com.google.android.apps.maps");
+                if (gmsIntent.resolveActivity(context.getPackageManager()) != null) {
+                    mapIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                }
             }
             Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
             if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) { //10 min

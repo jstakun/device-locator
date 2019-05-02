@@ -117,7 +117,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
             LatLngBounds bounds = devicesBounds.build();
-            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0));
+            int width = getResources().getDisplayMetrics().widthPixels;
+            int height = getResources().getDisplayMetrics().heightPixels;
+            int padding = (int) (width * 0.12);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+            //mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0));
             if (center != null && zoom > 0) {
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, zoom));
             } else if (center != null) {
