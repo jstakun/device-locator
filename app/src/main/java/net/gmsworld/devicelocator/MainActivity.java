@@ -60,9 +60,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
@@ -82,6 +80,7 @@ import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.GmsSmartLocationManager;
@@ -103,11 +102,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
@@ -125,7 +121,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     public static final String USER_LOGIN = "userLogin";
     public static final String DEVICE_NAME = "deviceName";
-    public static final String USER_DEVICES = "userDevices";
     public static final String NOTIFICATION_EMAIL = "email";
     public static final String NOTIFICATION_PHONE_NUMBER = "phoneNumber";
     public static final String NOTIFICATION_SOCIAL = "telegramId";
@@ -765,7 +760,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     //user login input setup -------------------------------------------------------------
 
-    private void initUserLoginInput(boolean requestPermission, boolean silent) {
+    public void initUserLoginInput(boolean requestPermission, boolean silent) {
         Log.d(TAG, "initUserLoginInput(" + requestPermission + ")");
         final Spinner userAccounts = this.findViewById(R.id.userAccounts);
 
@@ -823,7 +818,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 //show dialog with info What to do if no account is created
                 showLoginDialogFragment();
                 if (settings.contains(USER_LOGIN)) {
-                    PreferenceManager.getDefaultSharedPreferences(this).edit().remove(MainActivity.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
+                    PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DevicesUtils.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
                     onDeleteDevice(Messenger.getDeviceId(this, false), true);
                 }
             }
@@ -845,8 +840,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             });
         } else {
             //Log.d(TAG, "Device settings view is visible");
-            if (settings.contains(USER_LOGIN) && settings.contains(USER_DEVICES)) {
-                PreferenceManager.getDefaultSharedPreferences(this).edit().remove(MainActivity.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
+            if (settings.contains(USER_LOGIN) && settings.contains(DevicesUtils.USER_DEVICES)) {
+                PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DevicesUtils.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
                 onDeleteDevice(Messenger.getDeviceId(this, false), true);
             }
             if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && !silent) {
@@ -1425,109 +1420,20 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         if (StringUtils.isNotEmpty(userLogin)) {
             //first load devices from cache
-            Set<String> deviceSet = settings.getStringSet(USER_DEVICES, null);
-            if (deviceSet != null && !deviceSet.isEmpty()) {
-                ArrayList<Device> userDevices = new ArrayList<>();
-                for (String device : deviceSet) {
-                    Device d = Device.fromString(device);
-                    if (d != null) {
-                        userDevices.add(d);
-                    }
-                }
+            ArrayList<Device> userDevices = DevicesUtils.buildDeviceList(settings);
+            if (!userDevices.isEmpty()) {
                 Collections.sort(userDevices, new DeviceComparator());
-                populateDeviceList(userDevices, deviceList);
+                populateDeviceList(userDevices);
             }
             //second load device list and set array adapter
-            loadDeviceList(new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String results, int responseCode, String url) {
-                    if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                        JsonElement reply = new JsonParser().parse(results);
-                        JsonArray devices = reply.getAsJsonObject().get("devices").getAsJsonArray();
-                        boolean thisDeviceOnList = false;
-                        if (devices.size() > 0) {
-                            ArrayList<Device> userDevices = new ArrayList<>();
-                            final String imei = Messenger.getDeviceId(MainActivity.this, false);
-                            Iterator<JsonElement> iter = devices.iterator();
-                            while (iter.hasNext()) {
-                                JsonObject deviceObject = iter.next().getAsJsonObject();
-                                if (StringUtils.isNotEmpty(deviceObject.get("token").getAsString())) {
-                                    Device device = new Device();
-                                    if (deviceObject.has("name")) {
-                                        device.name = deviceObject.get("name").getAsString();
-                                    }
-                                    device.imei = deviceObject.get("imei").getAsString();
-                                    device.creationDate = deviceObject.get("creationDate").getAsString();
-                                    if (deviceObject.has("geo")) {
-                                        device.geo = deviceObject.get("geo").getAsString();
-                                    }
-                                    if (StringUtils.equals(device.imei, imei)) {
-                                        thisDeviceOnList = true;
-                                    }
-                                    userDevices.add(device);
-                                }
-                            }
-                            if (thisDeviceOnList) {
-                                populateDeviceList(userDevices, deviceList);
-                                Set<String> deviceSet = new HashSet<>();
-                                for (Device device : userDevices) {
-                                    deviceSet.add(device.toString());
-                                }
-                                PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putStringSet(USER_DEVICES, deviceSet).apply();
-                            } else {
-                                deviceListEmpty.setText(R.string.devices_list_empty);
-                            }
-                        } else {
-                            deviceListEmpty.setText(R.string.devices_list_empty);
-                        }
-                        if (!thisDeviceOnList) {
-                            //this device has been removed from other device
-                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(USER_LOGIN).remove(USER_DEVICES).apply();
-                            initUserLoginInput(true, false);
-                        }
-                    } else {
-                        deviceListEmpty.setText(R.string.devices_list_loading_failed);
-                    }
-                }
-            });
+            DevicesUtils.loadDeviceList(this, settings, this);
         } else {
             deviceListEmpty.setText(R.string.devices_list_empty);
         }
     }
 
-    private void loadDeviceList(final Network.OnGetFinishListener onGetFinishListener) {
-        if (Network.isNetworkAvailable(this)) {
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
-            final Map<String, String> headers = new HashMap<>();
-            headers.put("X-GMS-AppId", "2");
-            headers.put("X-GMS-Scope", "dl");
-            if (StringUtils.isNotEmpty(tokenStr)) {
-                String userLogin = settings.getString(USER_LOGIN);
-                if (StringUtils.isNotEmpty(userLogin)) {
-                    headers.put("Authorization", "Bearer " + tokenStr);
-                    String content = "username=" + userLogin + "&action=list";
-                    Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, onGetFinishListener);
-                } else {
-                    Log.e(TAG, "User login is unset. No device list will be loaded");
-                }
-            } else {
-                String queryString = "scope=dl&user=" + Messenger.getDeviceId(this, false);
-                Network.get(this, getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
-                    @Override
-                    public void onGetFinish(String results, int responseCode, String url) {
-                        if (responseCode == 200) {
-                            Messenger.getToken(MainActivity.this, results);
-                            loadDeviceList(onGetFinishListener);
-                        } else {
-                            Log.d(TAG, "Failed to receive token: " + results);
-                        }
-                    }
-                });
-            }
-        }
-    }
-
-    private void populateDeviceList(final ArrayList<Device> userDevices, final ListView deviceList) {
+    public void populateDeviceList(final ArrayList<Device> userDevices) {
+        final ListView deviceList = findViewById(R.id.deviceList);
         final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, userDevices);
         Log.d(TAG, "Found " + userDevices.size() + " devices");
         deviceList.setAdapter(adapter);
@@ -1551,7 +1457,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         }
                         //current device has been removed
                         if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
-                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(USER_LOGIN).remove(USER_DEVICES).apply();
+                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(USER_LOGIN).remove(DevicesUtils.USER_DEVICES).apply();
                             if (!silent) {
                                 initUserLoginInput(true, false);
                             }

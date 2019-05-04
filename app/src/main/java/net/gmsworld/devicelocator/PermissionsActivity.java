@@ -20,22 +20,17 @@ import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
 
+import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
-import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.utilities.AppUtils;
+import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.FingerprintHelper;
 import net.gmsworld.devicelocator.utilities.Messenger;
-import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver.DEVICE_ADMIN_ENABLED;
 
 public class PermissionsActivity extends AppCompatActivity {
 
@@ -47,8 +42,6 @@ public class PermissionsActivity extends AppCompatActivity {
     private static final int MANAGE_OVERLAY_WITH_CAMERA = 4;
     private static final int CONTACTS_PERMISSION = 5;
     private static final int RESET_PERMISSION = 6;
-
-    private static final String CURRENT_DEVICE_ID = "currentDeviceId";
 
     private PreferencesUtils settings;
 
@@ -113,18 +106,18 @@ public class PermissionsActivity extends AppCompatActivity {
         super.onResume();
 
         Log.d(TAG, "onResume()");
-        final String savedDeviceId = settings.getString(CURRENT_DEVICE_ID);
+        final String savedDeviceId = settings.getString(DevicesUtils.CURRENT_DEVICE_ID);
         final String deviceId = Messenger.getDeviceId(this, false);
         if (StringUtils.isNotEmpty(savedDeviceId) && !StringUtils.equals(deviceId, savedDeviceId)) {
             //device name has changed because READ_PHONE_STATE permission was revoked
-            registerDevice();
+            DevicesUtils.registerDevice(this, settings);
         }
 
         // device permissions
 
         //device admin
         Switch deviceAdminPermission = findViewById(R.id.device_admin_permission);
-        deviceAdminPermission.setChecked(settings.getBoolean(DEVICE_ADMIN_ENABLED, false));
+        deviceAdminPermission.setChecked(settings.getBoolean(DeviceAdminEventReceiver.DEVICE_ADMIN_ENABLED, false));
 
         //manage overlay
         Switch manageOverlayPermission = findViewById(R.id.manage_overlay_permission);
@@ -168,10 +161,10 @@ public class PermissionsActivity extends AppCompatActivity {
             boolean perm = Permissions.haveReadContactsPermission(this);
             readContactsPermission.setChecked(perm);
             PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", perm).apply();
-            if (!perm && settings.contains(MainActivity.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
+            if (!perm && settings.contains(DevicesUtils.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
                 //READ_CONTACTS permission has been revoked: remove devices data
-                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(MainActivity.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
-                deleteDevice(deviceId);
+                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(DevicesUtils.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
+                DevicesUtils.deleteDevice(this, settings, deviceId);
             }
         } else {
             readContactsPermission.setVisibility(View.GONE);
@@ -210,7 +203,7 @@ public class PermissionsActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(CURRENT_DEVICE_ID).apply();
+        PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(DevicesUtils.CURRENT_DEVICE_ID).apply();
     }
 
     @Override
@@ -251,7 +244,7 @@ public class PermissionsActivity extends AppCompatActivity {
 
         switch (view.getId()) {
             case R.id.device_admin_permission:
-                if (checked && !settings.getBoolean(DEVICE_ADMIN_ENABLED, false)) {
+                if (checked && !settings.getBoolean(DeviceAdminEventReceiver.DEVICE_ADMIN_ENABLED, false)) {
                     Permissions.startAddDeviceAdminIntent(this, DEVICE_ADMIN);
                 } else if (!checked) {
                     Permissions.startDeviceAdminIntent(this);
@@ -309,7 +302,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.call_phone_permission:
-                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putString(CURRENT_DEVICE_ID, Messenger.getDeviceId(this, false)).apply();
+                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putString(DevicesUtils.CURRENT_DEVICE_ID, Messenger.getDeviceId(this, false)).apply();
                 if (checked && !Permissions.haveCallPhonePermission(this)) {
                     Permissions.requestCallPhonePermission(this, CALL_PERMISSION);
                 } else if (!checked) {
@@ -317,7 +310,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.read_phone_state_permission:
-                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putString(CURRENT_DEVICE_ID, Messenger.getDeviceId(this, false)).apply();
+                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putString(DevicesUtils.CURRENT_DEVICE_ID, Messenger.getDeviceId(this, false)).apply();
                 if (checked && !Permissions.haveReadPhoneStatePermission(this)) {
                     Permissions.requestReadPhoneStatePermission(this, CALL_PERMISSION);
                 } else if (!checked) {
@@ -332,7 +325,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.reset_permission:
-                if (checked && !settings.getBoolean(DEVICE_ADMIN_ENABLED, false)) {
+                if (checked && !settings.getBoolean(DeviceAdminEventReceiver.DEVICE_ADMIN_ENABLED, false)) {
                     Permissions.startAddDeviceAdminIntent(this, RESET_PERMISSION);
                 } else {
                     PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("allowReset", checked).apply();
@@ -347,22 +340,6 @@ public class PermissionsActivity extends AppCompatActivity {
 
             default:
                 break;
-        }
-    }
-
-    private void registerDevice() {
-        PreferencesUtils settings = new PreferencesUtils(this);
-        final String userLogin = settings.getString(MainActivity.USER_LOGIN);
-        if (StringUtils.isNotEmpty(userLogin)) {
-            Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
-        }
-        if (DlFirebaseMessagingService.sendRegistrationToServer(this, userLogin, settings.getString(MainActivity.DEVICE_NAME), true)) {
-            //delete old device
-            if (settings.contains(CURRENT_DEVICE_ID)) {
-                deleteDevice(settings.getString(CURRENT_DEVICE_ID));
-            }
-        } else {
-            Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -388,20 +365,5 @@ public class PermissionsActivity extends AppCompatActivity {
         Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
         cameraIntent.putExtra("test", true);
         startService(cameraIntent);
-    }
-
-    private void deleteDevice(final String deviceId) {
-        final String content = "imei=" + deviceId + "&action=delete";
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + settings.getString(DeviceLocatorApp.GMS_TOKEN));
-        Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
-            @Override
-            public void onGetFinish(String results, int responseCode, String url) {
-                if (responseCode == 200) {
-                    Log.d(TAG, "Device " + deviceId + " has been removed!");
-                    PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(MainActivity.USER_DEVICES).remove(CURRENT_DEVICE_ID).apply();
-                }
-            }
-        });
     }
 }

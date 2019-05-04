@@ -22,6 +22,7 @@ import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -86,6 +87,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                                     if (coords.length >= 3) {
                                         location.setAccuracy(Float.valueOf(coords[2]));
                                     }
+                                    DevicesUtils.loadDeviceList(this, new PreferencesUtils(this), null);
                                 }
                             } else if (token.startsWith("routeId:")) {
                                 extras.putString("routeId", token.split(":")[1]);

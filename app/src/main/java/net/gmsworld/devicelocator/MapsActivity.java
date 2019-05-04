@@ -1,5 +1,6 @@
 package net.gmsworld.devicelocator;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import net.gmsworld.devicelocator.model.Device;
+import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Permissions;
@@ -28,7 +30,6 @@ import org.ocpsoft.prettytime.PrettyTime;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Set;
 
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
@@ -80,6 +81,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG, "onMapReady()");
@@ -105,46 +107,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void loadDeviceMarkers() {
         mMap.clear();
-        Set<String> deviceSet = settings.getStringSet(MainActivity.USER_DEVICES, null);
         LatLng center = null;
-        if (deviceSet != null && !deviceSet.isEmpty()) {
-            final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
-            int i = 0;
-            devices = new ArrayList<Device>();
-            for (String device : deviceSet) {
-                Device d = Device.fromString(device);
-                if (d != null) {
-                    devices.add(d);
-                    String[] geo = d.geo.split(" ");
-                    LatLng deviceMarker = new LatLng(Double.valueOf(geo[0]), Double.valueOf(geo[1]));
-                    devicesBounds.include(deviceMarker);
+        final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
+        devices = DevicesUtils.buildDeviceList(settings);
+        if (!devices.isEmpty()) {
+            for (int i =0;i<devices.size(); i++) {
+                Device d = devices.get(i);
+                String[] geo = d.geo.split(" ");
+                LatLng deviceMarker = new LatLng(Double.valueOf(geo[0]), Double.valueOf(geo[1]));
+                devicesBounds.include(deviceMarker);
 
-                    long timestamp = Long.valueOf(geo[geo.length - 1]);
-                    String snippet = "Last seen " + pt.format(new Date(timestamp));
-                    Location location = SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).getLastLocation();
-                    if (location != null) {
-                        Location deviceLocation = new Location("");
-                        deviceLocation.setLatitude(Location.convert(geo[0]));
-                        deviceLocation.setLongitude(Location.convert(geo[1]));
+                long timestamp = Long.valueOf(geo[geo.length - 1]);
+                String snippet = "Last seen " + pt.format(new Date(timestamp));
+                Location location = SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).getLastLocation();
+                if (location != null) {
+                    Location deviceLocation = new Location("");
+                    deviceLocation.setLatitude(Location.convert(geo[0]));
+                    deviceLocation.setLongitude(Location.convert(geo[1]));
 
-                        int dist = (int) location.distanceTo(deviceLocation);
-                        if (dist <= 0) {
-                            dist = 1;
-                        }
-                        snippet += " " + DistanceFormatter.format(dist) + " away";
+                    int dist = (int) location.distanceTo(deviceLocation);
+                    if (dist <= 0) {
+                        dist = 1;
                     }
-
-                    MarkerOptions mo = null;
-                    if (d.imei.equals(deviceImei)) {
-                        center = deviceMarker;
-                        mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_small_red));
-                    } else {
-                        mo = new MarkerOptions().zIndex(0.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_small));
-                    }
-                    Marker m = mMap.addMarker(mo);
-                    m.setTag(i);
-                    i++;
+                    snippet += " " + DistanceFormatter.format(dist) + " away";
                 }
+
+                MarkerOptions mo = null;
+                if (d.imei.equals(deviceImei)) {
+                    center = deviceMarker;
+                    mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
+                } else {
+                    mo = new MarkerOptions().zIndex(0.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phone));
+                }
+                Marker m = mMap.addMarker(mo);
+                m.setTag(i);
             }
 
             LatLngBounds bounds = devicesBounds.build();
