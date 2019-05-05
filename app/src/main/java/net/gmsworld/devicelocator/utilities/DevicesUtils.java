@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator.utilities;
 
 import android.content.Context;
+import android.location.Location;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.TextView;
@@ -22,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,9 +54,8 @@ public class DevicesUtils {
                                 if (devices.size() > 0) {
                                     ArrayList<Device> userDevices = new ArrayList<>();
                                     final String imei = Messenger.getDeviceId(context, false);
-                                    Iterator<JsonElement> iter = devices.iterator();
-                                    while (iter.hasNext()) {
-                                        JsonObject deviceObject = iter.next().getAsJsonObject();
+                                    for (JsonElement d : devices) {
+                                        JsonObject deviceObject = d.getAsJsonObject();
                                         if (StringUtils.isNotEmpty(deviceObject.get("token").getAsString())) {
                                             Device device = new Device();
                                             if (deviceObject.has("name")) {
@@ -90,10 +89,12 @@ public class DevicesUtils {
                                     final TextView deviceListEmpty = mainActivity.findViewById(R.id.deviceListEmpty);
                                     deviceListEmpty.setText(R.string.devices_list_empty);
                                 }
-                                if (!thisDeviceOnList && mainActivity != null) {
+                                if (!thisDeviceOnList) {
                                     //this device has been removed from other device
                                     PreferenceManager.getDefaultSharedPreferences(context).edit().remove(MainActivity.USER_LOGIN).remove(DevicesUtils.USER_DEVICES).apply();
-                                    mainActivity.initUserLoginInput(true, false);
+                                    if (mainActivity != null) {
+                                        mainActivity.initUserLoginInput(true, false);
+                                    }
                                 }
                             } else if (mainActivity != null) {
                                 final TextView deviceListEmpty = mainActivity.findViewById(R.id.deviceListEmpty);
@@ -163,5 +164,24 @@ public class DevicesUtils {
             }
         }
         return userDevices;
+    }
+
+    public static void sendGeo(Context context, PreferencesUtils settings, Location location) {
+        if (Network.isNetworkAvailable(context)) {
+            final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+            final String geo = "geo:" + location.getLatitude() + " " + location.getLongitude() + " " + location.getAccuracy();
+            final String content = "imei=" + Messenger.getDeviceId(context, false) + "&flex=" + geo;
+
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer " + tokenStr);
+
+            Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                }
+            });
+        } else {
+            Log.e(TAG, "No network available. Failed to send device location!");
+        }
     }
 }

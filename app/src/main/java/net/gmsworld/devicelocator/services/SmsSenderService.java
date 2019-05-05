@@ -120,11 +120,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
                         .config(LocationParams.NAVIGATION)
                         .start(this);
-
-                //SmartLocation smartLocation = new SmartLocation.Builder(this).logging(true).build();
-                //smartLocation.location(new LocationGooglePlayServicesWithFallbackProvider(this))
-                //        .config(LocationParams.NAVIGATION)
-                //        .start(this);
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);
             }
@@ -169,12 +164,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                     bestLocation = location;
                 }
             }
-
-
-            //if (isLocationFused(bestLocation)) {
-                //Log.d(TAG, "Location still fused.");
-            //    return;
-            //}
 
             if (bestLocation.getAccuracy() > AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
                 Log.d(TAG, "Accuracy is " + bestLocation.getAccuracy() + " more than max " + AbstractLocationManager.MAX_REASONABLE_ACCURACY + ", will check again.");

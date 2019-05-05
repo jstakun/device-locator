@@ -3,6 +3,7 @@ package net.gmsworld.devicelocator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -20,6 +21,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import net.gmsworld.devicelocator.model.Device;
+import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Messenger;
@@ -31,10 +33,12 @@ import org.ocpsoft.prettytime.PrettyTime;
 import java.util.ArrayList;
 import java.util.Date;
 
+import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
+import io.nlopez.smartlocation.location.config.LocationParams;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, OnLocationUpdatedListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -49,13 +53,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private final PrettyTime pt = new PrettyTime();
 
+    private Location bestLocation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         settings = new PreferencesUtils(this);
@@ -67,8 +72,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             zoom = 15;
         }
-
-        //TODO send locate command to all devices and update location on map view when received reply
     }
 
 
@@ -79,6 +82,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mMap != null) {
             loadDeviceMarkers();
         }
+        try {
+            if (SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
+                SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
+                        .config(LocationParams.NAVIGATION)
+                        .start(this);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SmartLocation.with(this).location().stop();
     }
 
     @SuppressLint("MissingPermission")
@@ -132,7 +150,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     snippet += " " + DistanceFormatter.format(dist) + " away";
                 }
 
-                MarkerOptions mo = null;
+                MarkerOptions mo;
                 if (d.imei.equals(deviceImei)) {
                     center = deviceMarker;
                     mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
@@ -167,4 +185,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startActivity(intent);
     }
 
+    @Override
+    public void onLocationUpdated(Location location) {
+        if (bestLocation == null) {
+            bestLocation = location;
+        }
+
+        float accDiff = bestLocation.getAccuracy() - location.getAccuracy();
+        float dist = location.distanceTo(bestLocation);
+
+        if (!bestLocation.getProvider().equals(LocationManager.GPS_PROVIDER) || bestLocation.getProvider().equals(location.getProvider())) {
+            if (location.hasAccuracy() && bestLocation.hasAccuracy() && location.getAccuracy() < bestLocation.getAccuracy()) {
+                //Log.d(TAG, "Updating best location.");
+                bestLocation = location;
+            }
+        }
+
+        if (bestLocation.getAccuracy() < AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
+            if (dist > 1f || accDiff > 1f) {
+                Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + " and distance " + dist);
+                DevicesUtils.sendGeo(this, settings, bestLocation);
+            }
+        } else {
+            Log.d(TAG, "Accuracy is " + bestLocation.getAccuracy() + " more than max " + AbstractLocationManager.MAX_REASONABLE_ACCURACY + ", will check again.");
+        }
+    }
 }
