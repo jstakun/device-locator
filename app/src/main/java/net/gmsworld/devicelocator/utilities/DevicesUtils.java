@@ -1,7 +1,7 @@
 package net.gmsworld.devicelocator.utilities;
 
+import android.app.Activity;
 import android.content.Context;
-import android.location.Location;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.TextView;
@@ -14,6 +14,7 @@ import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.MapsActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
@@ -33,7 +34,7 @@ public class DevicesUtils {
 
     private static final String TAG = DevicesUtils.class.getSimpleName();
 
-    public static void loadDeviceList(final Context context, final PreferencesUtils settings, final MainActivity mainActivity) {
+    public static void loadDeviceList(final Context context, final PreferencesUtils settings, final Activity callerActivity) {
         if (Network.isNetworkAvailable(context)) {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             final Map<String, String> headers = new HashMap<>();
@@ -78,26 +79,30 @@ public class DevicesUtils {
                                             deviceSet.add(device.toString());
                                         }
                                         PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet(DevicesUtils.USER_DEVICES, deviceSet).apply();
-                                        if (mainActivity != null) {
-                                            mainActivity.populateDeviceList(userDevices);
+                                        if (callerActivity != null) {
+                                            if (callerActivity instanceof MainActivity) {
+                                                ((MainActivity)callerActivity).populateDeviceList(userDevices);
+                                            } else if (callerActivity instanceof MapsActivity) {
+                                                ((MapsActivity)callerActivity).loadDeviceMarkers();
+                                            }
                                         }
-                                    } else if (mainActivity != null) {
-                                        final TextView deviceListEmpty = mainActivity.findViewById(R.id.deviceListEmpty);
+                                    } else if (callerActivity != null && callerActivity instanceof MainActivity) {
+                                        final TextView deviceListEmpty = ((MainActivity)callerActivity).findViewById(R.id.deviceListEmpty);
                                         deviceListEmpty.setText(R.string.devices_list_empty);
                                     }
-                                } else if (mainActivity != null) {
-                                    final TextView deviceListEmpty = mainActivity.findViewById(R.id.deviceListEmpty);
+                                } else if (callerActivity != null && callerActivity instanceof MainActivity) {
+                                    final TextView deviceListEmpty = ((MainActivity)callerActivity).findViewById(R.id.deviceListEmpty);
                                     deviceListEmpty.setText(R.string.devices_list_empty);
                                 }
                                 if (!thisDeviceOnList) {
                                     //this device has been removed from other device
                                     PreferenceManager.getDefaultSharedPreferences(context).edit().remove(MainActivity.USER_LOGIN).remove(DevicesUtils.USER_DEVICES).apply();
-                                    if (mainActivity != null) {
-                                        mainActivity.initUserLoginInput(true, false);
+                                    if (callerActivity != null && callerActivity instanceof MainActivity) {
+                                        ((MainActivity)callerActivity).initUserLoginInput(true, false);
                                     }
                                 }
-                            } else if (mainActivity != null) {
-                                final TextView deviceListEmpty = mainActivity.findViewById(R.id.deviceListEmpty);
+                            } else if (callerActivity != null && callerActivity instanceof MainActivity) {
+                                final TextView deviceListEmpty = ((MainActivity)callerActivity).findViewById(R.id.deviceListEmpty);
                                 deviceListEmpty.setText(R.string.devices_list_loading_failed);
                             }
                         }
@@ -112,7 +117,7 @@ public class DevicesUtils {
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             Messenger.getToken(context, results);
-                            loadDeviceList(context, settings,  mainActivity);
+                            loadDeviceList(context, settings,  callerActivity);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
@@ -164,24 +169,5 @@ public class DevicesUtils {
             }
         }
         return userDevices;
-    }
-
-    public static void sendGeo(Context context, PreferencesUtils settings, Location location) {
-        if (Network.isNetworkAvailable(context)) {
-            final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
-            final String geo = "geo:" + location.getLatitude() + " " + location.getLongitude() + " " + location.getAccuracy();
-            final String content = "imei=" + Messenger.getDeviceId(context, false) + "&flex=" + geo;
-
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "Bearer " + tokenStr);
-
-            Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String results, int responseCode, String url) {
-                }
-            });
-        } else {
-            Log.e(TAG, "No network available. Failed to send device location!");
-        }
     }
 }

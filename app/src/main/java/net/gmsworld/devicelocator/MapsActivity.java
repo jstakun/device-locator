@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
@@ -25,6 +26,7 @@ import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
@@ -32,6 +34,8 @@ import org.ocpsoft.prettytime.PrettyTime;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
@@ -123,7 +127,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         loadDeviceMarkers();
     }
 
-    private void loadDeviceMarkers() {
+    public void loadDeviceMarkers() {
         mMap.clear();
         LatLng center = null;
         final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
@@ -204,10 +208,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (bestLocation.getAccuracy() < AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
             if (dist > 1f || accDiff > 1f) {
                 Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + " and distance " + dist);
-                DevicesUtils.sendGeo(this, settings, bestLocation);
+                sendGeo(this, settings, bestLocation);
             }
         } else {
             Log.d(TAG, "Accuracy is " + bestLocation.getAccuracy() + " more than max " + AbstractLocationManager.MAX_REASONABLE_ACCURACY + ", will check again.");
+        }
+    }
+
+    private void sendGeo(final Context context, final PreferencesUtils settings, Location location) {
+        if (Network.isNetworkAvailable(context)) {
+            final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+            final String geo = "geo:" + location.getLatitude() + " " + location.getLongitude() + " " + location.getAccuracy();
+            final String content = "imei=" + Messenger.getDeviceId(context, false) + "&flex=" + geo;
+
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer " + tokenStr);
+
+            Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    DevicesUtils.loadDeviceList(context, settings, null);
+                }
+            });
+        } else {
+            Log.e(TAG, "No network available. Failed to send device location!");
         }
     }
 }
