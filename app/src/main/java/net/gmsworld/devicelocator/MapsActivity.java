@@ -164,6 +164,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Marker m = mMap.addMarker(mo);
                 m.setTag(i);
             }
+            Log.d(TAG, "Loaded " + devices.size() + " device markers to the map");
 
             LatLngBounds bounds = devicesBounds.build();
             int width = getResources().getDisplayMetrics().widthPixels;
@@ -227,7 +228,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    DevicesUtils.loadDeviceList(context, settings, null);
+                    DevicesUtils.loadDeviceList(context, settings, MapsActivity.this);
                 }
             });
         } else {
