@@ -201,7 +201,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         if (bestLocation.getAccuracy() < AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
-            if (dist > 1f || accDiff > 1f) {
+            if (dist > 3f || accDiff > 1f) {
                 Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + " and distance " + dist);
                 sendGeo(this, settings, bestLocation);
             }
