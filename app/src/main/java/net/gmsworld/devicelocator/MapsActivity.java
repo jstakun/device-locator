@@ -53,7 +53,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<Device> devices;
 
     private String deviceImei = null;
-    private int zoom = -1;
 
     private final PrettyTime pt = new PrettyTime();
 
@@ -73,8 +72,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (deviceImei == null) {
             deviceImei = Messenger.getDeviceId(this, false);
-        } else {
-            zoom = 15;
         }
     }
 
@@ -167,15 +164,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d(TAG, "Loaded " + devices.size() + " device markers to the map");
 
             LatLngBounds bounds = devicesBounds.build();
-            int width = getResources().getDisplayMetrics().widthPixels;
-            int height = getResources().getDisplayMetrics().heightPixels;
-            int padding = (int) (width * 0.12);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
-            //mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0));
-            if (center != null && zoom > 0) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, zoom));
-            } else if (center != null) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(center));
+            final int width = getResources().getDisplayMetrics().widthPixels;
+            final int height = getResources().getDisplayMetrics().heightPixels;
+            final int padding = (int) (width * 0.2);
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+            if (center != null) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 14f));
             }
         } else {
             Toast.makeText(this, "No devices registered! Please go to Devices tab and register your device.", Toast.LENGTH_LONG).show();
