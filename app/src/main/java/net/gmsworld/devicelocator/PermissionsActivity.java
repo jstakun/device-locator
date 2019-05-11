@@ -234,6 +234,10 @@ public class PermissionsActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
                 return true;
+            case R.id.map:
+                startActivity(new Intent(this, MapsActivity.class));
+                finish();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -337,7 +341,6 @@ public class PermissionsActivity extends AppCompatActivity {
                     Toast.makeText(this, "Be careful. From now on Security PIN is not required to send command to your device!", Toast.LENGTH_LONG).show();
                 }
                 break;
-
             default:
                 break;
         }
