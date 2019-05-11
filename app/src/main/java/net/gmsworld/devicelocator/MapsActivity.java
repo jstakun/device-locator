@@ -30,6 +30,7 @@ import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.util.ArrayList;
@@ -134,34 +135,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (!devices.isEmpty()) {
             for (int i =0;i<devices.size(); i++) {
                 Device d = devices.get(i);
-                String[] geo = d.geo.split(" ");
-                LatLng deviceMarker = new LatLng(Double.valueOf(geo[0]), Double.valueOf(geo[1]));
-                devicesBounds.include(deviceMarker);
+                String[] geo = StringUtils.split(d.geo," ");
+                if (geo != null && geo.length > 1) {
+                    LatLng deviceMarker = new LatLng(Double.valueOf(geo[0]), Double.valueOf(geo[1]));
+                    devicesBounds.include(deviceMarker);
 
-                long timestamp = Long.valueOf(geo[geo.length - 1]);
-                String snippet = "Last seen " + pt.format(new Date(timestamp));
-                Location location = SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).getLastLocation();
-                if (location != null) {
-                    Location deviceLocation = new Location("");
-                    deviceLocation.setLatitude(Location.convert(geo[0]));
-                    deviceLocation.setLongitude(Location.convert(geo[1]));
+                    long timestamp = Long.valueOf(geo[geo.length - 1]);
+                    String snippet = "Last seen " + pt.format(new Date(timestamp));
+                    Location location = SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).getLastLocation();
+                    if (location != null) {
+                        Location deviceLocation = new Location("");
+                        deviceLocation.setLatitude(Location.convert(geo[0]));
+                        deviceLocation.setLongitude(Location.convert(geo[1]));
 
-                    int dist = (int) location.distanceTo(deviceLocation);
-                    if (dist <= 0) {
-                        dist = 1;
+                        int dist = (int) location.distanceTo(deviceLocation);
+                        if (dist <= 0) {
+                            dist = 1;
+                        }
+                        snippet += " " + DistanceFormatter.format(dist) + " away";
                     }
-                    snippet += " " + DistanceFormatter.format(dist) + " away";
-                }
 
-                MarkerOptions mo;
-                if (d.imei.equals(deviceImei)) {
-                    center = deviceMarker;
-                    mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
-                } else {
-                    mo = new MarkerOptions().zIndex(0.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phone));
+                    MarkerOptions mo;
+                    if (d.imei.equals(deviceImei)) {
+                        center = deviceMarker;
+                        mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
+                    } else {
+                        mo = new MarkerOptions().zIndex(0.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phone));
+                    }
+                    Marker m = mMap.addMarker(mo);
+                    m.setTag(i);
                 }
-                Marker m = mMap.addMarker(mo);
-                m.setTag(i);
             }
             Log.d(TAG, "Loaded " + devices.size() + " device markers to the map");
 
