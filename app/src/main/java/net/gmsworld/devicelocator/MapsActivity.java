@@ -54,6 +54,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private String deviceImei = null;
 
+    private float currentZoom = -1f;
+
     private final PrettyTime pt = new PrettyTime();
 
     private Location bestLocation;
@@ -115,7 +117,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mUiSettings = mMap.getUiSettings();
         mUiSettings.setZoomControlsEnabled(true);
         mUiSettings.setCompassEnabled(true);
-        mUiSettings.setMyLocationButtonEnabled(false);
+        mUiSettings.setMyLocationButtonEnabled(true);
         mUiSettings.setScrollGesturesEnabled(true);
         mUiSettings.setZoomGesturesEnabled(true);
         mUiSettings.setTiltGesturesEnabled(true);
@@ -169,7 +171,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             final int padding = (int) (width * 0.2);
             mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
             if (center != null) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 14f));
+                if (currentZoom > 0) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(center));
+                } else {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 14f));
+                }
+                currentZoom = mMap.getCameraPosition().zoom;
             }
         } else {
             Toast.makeText(this, "No devices registered! Please go to Devices tab and register your device.", Toast.LENGTH_LONG).show();
