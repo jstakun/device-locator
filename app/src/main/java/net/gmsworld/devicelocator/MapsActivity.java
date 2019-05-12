@@ -8,7 +8,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -21,6 +20,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import net.gmsworld.devicelocator.fragments.RegisterDeviceDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
@@ -55,6 +55,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private String deviceImei = null;
 
+    private String thisDeviceImei = null;
+
     private float currentZoom = -1f;
 
     private final PrettyTime pt = new PrettyTime();
@@ -73,8 +75,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         deviceImei = getIntent().getStringExtra("imei");
 
+        thisDeviceImei = Messenger.getDeviceId(this, false);
         if (deviceImei == null) {
-            deviceImei = Messenger.getDeviceId(this, false);
+            deviceImei = thisDeviceImei;
+        } else {
+            //TODO send locate command to deviceImei
         }
     }
 
@@ -159,6 +164,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (d.imei.equals(deviceImei)) {
                         center = deviceMarker;
                         mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
+                    } else if (d.imei.equals(thisDeviceImei)) {
+                        mo = new MarkerOptions().zIndex(0.5f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk));
                     } else {
                         mo = new MarkerOptions().zIndex(0.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phone));
                     }
@@ -182,7 +189,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 currentZoom = mMap.getCameraPosition().zoom;
             }
         } else {
-            Toast.makeText(this, "No devices registered! Please go to Devices tab and register your device.", Toast.LENGTH_LONG).show();
+            RegisterDeviceDialogFragment registerDeviceDialogFragment = new RegisterDeviceDialogFragment();
+            registerDeviceDialogFragment.show(this.getFragmentManager(), RegisterDeviceDialogFragment.TAG);
         }
     }
 
