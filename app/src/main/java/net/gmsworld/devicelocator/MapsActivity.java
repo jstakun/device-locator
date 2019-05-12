@@ -73,12 +73,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         settings = new PreferencesUtils(this);
 
-        deviceImei = getIntent().getStringExtra("imei");
-
         thisDeviceImei = Messenger.getDeviceId(this, false);
-        if (deviceImei == null) {
-            deviceImei = thisDeviceImei;
-        } else {
+
+        deviceImei = getIntent().getStringExtra("imei");
+        if (deviceImei != null) {
             //TODO send locate command to deviceImei
         }
     }
@@ -138,6 +136,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
         devices = DevicesUtils.buildDeviceList(settings);
         if (!devices.isEmpty()) {
+            int markerCount = 0;
             for (int i =0;i<devices.size(); i++) {
                 Device d = devices.get(i);
                 String[] geo = StringUtils.split(d.geo," ");
@@ -161,7 +160,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
 
                     MarkerOptions mo;
-                    if (d.imei.equals(deviceImei)) {
+                    if (deviceImei != null && d.imei.equals(deviceImei)) {
                         center = deviceMarker;
                         mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
                     } else if (d.imei.equals(thisDeviceImei)) {
@@ -171,22 +170,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                     Marker m = mMap.addMarker(mo);
                     m.setTag(i);
+                    markerCount++;
                 }
             }
-            Log.d(TAG, "Loaded " + devices.size() + " device markers to the map");
+            Log.d(TAG, "Loaded " + markerCount + " device markers to the map");
 
-            LatLngBounds bounds = devicesBounds.build();
-            final int width = getResources().getDisplayMetrics().widthPixels;
-            final int height = getResources().getDisplayMetrics().heightPixels;
-            final int padding = (int) (width * 0.2);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
-            if (center != null) {
-                if (currentZoom > 0) {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLng(center));
-                } else {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 14f));
+            if (markerCount > 0) {
+                LatLngBounds bounds = devicesBounds.build();
+                final int width = getResources().getDisplayMetrics().widthPixels;
+                final int height = getResources().getDisplayMetrics().heightPixels;
+                final int padding = (int) (width * 0.2);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                if (center != null) {
+                    if (currentZoom > 0) {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLng(center));
+                    } else {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 14f));
+                    }
+                    currentZoom = mMap.getCameraPosition().zoom;
                 }
-                currentZoom = mMap.getCameraPosition().zoom;
             }
         } else {
             RegisterDeviceDialogFragment registerDeviceDialogFragment = new RegisterDeviceDialogFragment();
