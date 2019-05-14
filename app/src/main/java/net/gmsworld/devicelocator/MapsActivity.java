@@ -22,6 +22,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import net.gmsworld.devicelocator.fragments.RegisterDeviceDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
+import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
@@ -76,8 +77,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         thisDeviceImei = Messenger.getDeviceId(this, false);
 
         deviceImei = getIntent().getStringExtra("imei");
-        if (deviceImei != null) {
+        if (deviceImei != null && settings.contains(CommandActivity.PIN_PREFIX + deviceImei)) {
             //TODO send locate command to deviceImei
+            String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + deviceImei);
+            Intent newIntent = new Intent(this, CommandService.class);
+            newIntent.putExtra("command", "locate");
+            newIntent.putExtra("imei", deviceImei);
+            newIntent.putExtra("pin", devicePin);
+            newIntent.putExtra("args", "silent");
+            startService(newIntent);
         }
     }
 
@@ -222,7 +230,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (bestLocation.getAccuracy() < AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
             if (dist > 3f || accDiff > 1f) {
-                Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + " and distance " + dist);
+                Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + ", distance " + dist + " and accuracy difference " + accDiff);
                 sendGeo(this, settings, bestLocation);
             }
         } else {

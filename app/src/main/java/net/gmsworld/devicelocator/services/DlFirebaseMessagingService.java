@@ -68,6 +68,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                     String args = message.get("args");
                     command += " " + args;
                     extras.putString("args", args);
+                    Log.d(TAG, "Found args string: " + args);
                 }
 
                 //flex
