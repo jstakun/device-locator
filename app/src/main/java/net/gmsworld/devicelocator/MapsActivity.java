@@ -77,8 +77,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         thisDeviceImei = Messenger.getDeviceId(this, false);
 
         deviceImei = getIntent().getStringExtra("imei");
-        if (deviceImei != null && settings.contains(CommandActivity.PIN_PREFIX + deviceImei)) {
-            //TODO send locate command to deviceImei
+        if (deviceImei != null && !StringUtils.equals(deviceImei, thisDeviceImei) && settings.contains(CommandActivity.PIN_PREFIX + deviceImei)) {
+            //send locate command to deviceImei
             String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + deviceImei);
             Intent newIntent = new Intent(this, CommandService.class);
             newIntent.putExtra("command", "locate");
@@ -168,7 +168,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
 
                     MarkerOptions mo;
-                    if (deviceImei != null && d.imei.equals(deviceImei)) {
+                    if (d.imei.equals(deviceImei)) {
                         center = deviceMarker;
                         mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
                     } else if (d.imei.equals(thisDeviceImei)) {

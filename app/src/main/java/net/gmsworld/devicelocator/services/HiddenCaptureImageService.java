@@ -1,5 +1,6 @@
 package net.gmsworld.devicelocator.services;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -76,6 +77,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
         SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).stop();
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         isTest = intent.getBooleanExtra("test", false);

@@ -149,7 +149,7 @@ public class LoginActivity extends AppCompatActivity  {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
                 if (StringUtils.isNotEmpty(tokenStr)) {
-                    Map<String, String> headers = new HashMap<String, String>();
+                    Map<String, String> headers = new HashMap<>();
                     headers.put("Authorization", "Bearer " + tokenStr);
                     headers.put("X-GMS-AppId", "2");
                     String deviceId = Messenger.getDeviceId(this, false);

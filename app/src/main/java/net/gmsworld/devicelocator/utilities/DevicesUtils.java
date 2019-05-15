@@ -86,22 +86,22 @@ public class DevicesUtils {
                                                 ((MapsActivity)callerActivity).loadDeviceMarkers();
                                             }
                                         }
-                                    } else if (callerActivity != null && callerActivity instanceof MainActivity) {
+                                    } else if (callerActivity instanceof MainActivity) {
                                         final TextView deviceListEmpty = ((MainActivity)callerActivity).findViewById(R.id.deviceListEmpty);
                                         deviceListEmpty.setText(R.string.devices_list_empty);
                                     }
-                                } else if (callerActivity != null && callerActivity instanceof MainActivity) {
+                                } else if (callerActivity instanceof MainActivity) {
                                     final TextView deviceListEmpty = ((MainActivity)callerActivity).findViewById(R.id.deviceListEmpty);
                                     deviceListEmpty.setText(R.string.devices_list_empty);
                                 }
                                 if (!thisDeviceOnList) {
                                     //this device has been removed from other device
                                     PreferenceManager.getDefaultSharedPreferences(context).edit().remove(MainActivity.USER_LOGIN).remove(DevicesUtils.USER_DEVICES).apply();
-                                    if (callerActivity != null && callerActivity instanceof MainActivity) {
+                                    if (callerActivity instanceof MainActivity) {
                                         ((MainActivity)callerActivity).initUserLoginInput(true, false);
                                     }
                                 }
-                            } else if (callerActivity != null && callerActivity instanceof MainActivity) {
+                            } else if (callerActivity instanceof MainActivity) {
                                 final TextView deviceListEmpty = ((MainActivity)callerActivity).findViewById(R.id.deviceListEmpty);
                                 deviceListEmpty.setText(R.string.devices_list_loading_failed);
                             }

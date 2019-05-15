@@ -14,11 +14,6 @@ public class TelegramSetupDialogFragment extends DialogFragment {
 
     public static final String TAG = "TelegramSetupDialog";
 
-    public static TelegramSetupDialogFragment newInstance() {
-        TelegramSetupDialogFragment telegramSetupDialogFragment = new TelegramSetupDialogFragment();
-        return telegramSetupDialogFragment;
-    }
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

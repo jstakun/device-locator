@@ -257,7 +257,7 @@ public class RouteTrackingService extends Service {
         }
 
         IncomingHandler(RouteTrackingService service) {
-            routeTrackingService = new WeakReference<RouteTrackingService>(service);
+            routeTrackingService = new WeakReference<>(service);
         }
 
         @Override

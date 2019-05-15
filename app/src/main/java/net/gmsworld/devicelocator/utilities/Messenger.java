@@ -998,7 +998,7 @@ public class Messenger {
                         Activity activity = (Activity)context;
                         if (!activity.isFinishing()) {
                             try {
-                                TelegramSetupDialogFragment telegramSetupDialogFragment = TelegramSetupDialogFragment.newInstance();
+                                TelegramSetupDialogFragment telegramSetupDialogFragment = new TelegramSetupDialogFragment();
                                 telegramSetupDialogFragment.show(activity.getFragmentManager(), TelegramSetupDialogFragment.TAG);
                             } catch (Exception e) {
                                 Log.e(TAG, e.getMessage(), e);
