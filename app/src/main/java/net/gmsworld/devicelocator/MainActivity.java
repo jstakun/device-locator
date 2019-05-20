@@ -74,6 +74,7 @@ import net.gmsworld.devicelocator.fragments.SmsCommandsEnabledDialogFragment;
 import net.gmsworld.devicelocator.fragments.SmsCommandsInitDialogFragment;
 import net.gmsworld.devicelocator.fragments.SmsNotificationWarningDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
+import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
@@ -1823,6 +1824,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         private void showDeviceLocation(Device device) {
             if (StringUtils.isNotEmpty(device.geo)) {
+                //send locate command to device
+                if (settings.contains(CommandActivity.PIN_PREFIX + device.imei) && !StringUtils.equals(device.imei, Messenger.getDeviceId(MainActivity.this, false))) {
+                    //send locate command to deviceImei
+                    String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + device.imei);
+                    Intent newIntent = new Intent(MainActivity.this, CommandService.class);
+                    newIntent.putExtra("command", "locate");
+                    newIntent.putExtra("imei", device.imei);
+                    newIntent.putExtra("pin", devicePin);
+                    newIntent.putExtra("args", "silent");
+                    startService(newIntent);
+                }
                 if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext()) == ConnectionResult.SUCCESS) {
                     Intent mapIntent = new Intent(MainActivity.this, MapsActivity.class);
                     mapIntent.putExtra("imei", device.imei);
