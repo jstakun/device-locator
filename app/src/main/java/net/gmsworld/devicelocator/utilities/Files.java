@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static net.gmsworld.devicelocator.utilities.AbstractLocationManager.ROUTE_FILE;
+
 /**
  * Created by jstakun on 5/31/17.
  */
@@ -62,16 +64,16 @@ public class Files {
         return lines;
     }
 
-    public static boolean hasRoutePoints(String filename, Context context, int numOfPoints) {
-        int i=0;
+    public static int getRoutePoints(Context context) {
+        int numOfPoints=0;
         QueueFile queueFile = null;
 
         try {
-            File fc = getFilesDir(context, filename, false);
+            File fc = getFilesDir(context, ROUTE_FILE, false);
             if (fc.exists()) {
                 queueFile = new QueueFile.Builder(fc).build();
-                i = queueFile.size();
-                Log.d(TAG, "Route file has " + i + " points.");
+                numOfPoints = queueFile.size();
+                Log.d(TAG, "Route file has " + numOfPoints + " points.");
             }
         } catch(Exception e){
             Log.d(TAG, e.getMessage(), e);
@@ -85,7 +87,7 @@ public class Files {
             }
         }
 
-        return (i >= numOfPoints);
+        return numOfPoints;
     }
 
     public static void deleteFileFromContextDir(String filename, Context context, boolean external) {

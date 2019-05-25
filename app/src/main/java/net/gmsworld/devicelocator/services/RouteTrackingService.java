@@ -74,7 +74,6 @@ public class RouteTrackingService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //Log.d(TAG, "RouteTrackingService onStartCommand()");
         super.onStartCommand(intent, flags, startId);
 
         if (intent != null) {
@@ -83,7 +82,7 @@ public class RouteTrackingService extends Service {
             }
             if (intent.hasExtra(COMMAND)) {
                 int command = intent.getIntExtra(COMMAND, -1);
-                Log.d(TAG, "onStartCommand(): " + command);
+                Log.d(TAG, "RouteTrackingService onStartCommand(): " + command);
                 switch (command) {
                     case COMMAND_START:
                         this.phoneNumber = intent.getStringExtra("phoneNumber");
@@ -191,7 +190,8 @@ public class RouteTrackingService extends Service {
 
     private void shareRoute(final String phoneNumber, final String telegramId, final String email, final String app, final boolean stopSelf) {
         Log.d(TAG, "shareRoute()");
-        if (Files.hasRoutePoints(AbstractLocationManager.ROUTE_FILE, this, 2)) {
+        final int numOfPoints = Files.getRoutePoints(this);
+        if (numOfPoints >= 2) {
             GmsSmartLocationManager.getInstance().executeRouteUploadTask(this, true, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -212,7 +212,7 @@ public class RouteTrackingService extends Service {
                     }
                     newIntent.putExtra("command", Command.ROUTE_COMMAND);
                     if (responseCode == 200) {
-                        newIntent.putExtra("size", 2); //we know only size > 1
+                        newIntent.putExtra("size", numOfPoints);
                     } else {
                         newIntent.putExtra("size", -1);
                     }

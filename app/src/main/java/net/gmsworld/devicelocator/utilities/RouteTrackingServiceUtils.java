@@ -90,6 +90,7 @@ public class RouteTrackingServiceUtils {
         if (StringUtils.isEmpty(title)) {
             title = "device_locator_route_" + Messenger.getDeviceId(context, false) + "_" + System.currentTimeMillis();
             settings.edit().putString(ROUTE_TITLE, title).apply();
+            Log.d(TAG, "New route created: " + title);
         }
 
         return title;

@@ -78,7 +78,6 @@ import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
-import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
@@ -550,7 +549,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         ((Switch) this.findViewById(R.id.dlTrackerSwitch)).setChecked(motionDetectorRunning);
 
-        if (Files.hasRoutePoints(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
+        if (Files.getRoutePoints(MainActivity.this) >= 2) {
             ViewCompat.setBackgroundTintList(this.findViewById(R.id.route_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         } else {
             ViewCompat.setBackgroundTintList(this.findViewById(R.id.route_button), ColorStateList.valueOf(getResources().getColor(R.color.lightGray)));
@@ -1201,7 +1200,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         shareRouteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Files.hasRoutePoints(AbstractLocationManager.ROUTE_FILE, MainActivity.this, 2)) {
+                if (Files.getRoutePoints(MainActivity.this) >= 2) {
                     GmsSmartLocationManager.getInstance().executeRouteUploadTask(MainActivity.this, false, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String result, int responseCode, String url) {
