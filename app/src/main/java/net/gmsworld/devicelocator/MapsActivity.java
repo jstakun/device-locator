@@ -231,7 +231,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (Network.isNetworkAvailable(context)) {
             final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             final String geo = "geo:" + location.getLatitude() + " " + location.getLongitude() + " " + location.getAccuracy();
-            final String content = "imei=" + Messenger.getDeviceId(context, false) + "&flex=" + geo;
+            final String content = "imei=" + thisDeviceImei + "&flex=" + geo;
 
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bearer " + tokenStr);

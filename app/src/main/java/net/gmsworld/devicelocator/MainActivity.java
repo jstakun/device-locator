@@ -1830,6 +1830,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     Intent newIntent = new Intent(MainActivity.this, CommandService.class);
                     newIntent.putExtra("command", "locate");
                     newIntent.putExtra("imei", device.imei);
+                    newIntent.putExtra(DEVICE_NAME, device.name);
                     newIntent.putExtra("pin", devicePin);
                     newIntent.putExtra("args", "silent");
                     startService(newIntent);
