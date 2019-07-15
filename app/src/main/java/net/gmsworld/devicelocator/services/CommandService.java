@@ -38,7 +38,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     public static final String AUTH_NEEDED = "authNeeded";
 
-    private static boolean commandInProgress = false;
+    //private static boolean commandInProgress = false;
 
     private Handler toastHandler;
 
@@ -136,7 +136,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 }
             }
 
-            if (!commandInProgress) {
+            //if (!commandInProgress) {
                 if (StringUtils.isNotEmpty(cancelCommand)) {
                     String notificationId = imei + "_" + cancelCommand;
                     Log.d(TAG, "Cancelling command " + cancelCommand);
@@ -145,16 +145,16 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 } else if (StringUtils.isNotEmpty("routeId")) {
                     NotificationUtils.cancel(this, routeId);
                 }
-                sendCommand(content, command, imei, name, prefs);
-            } else {
-                showToast("Previous command in progress...");
-            }
+                sendCommand(content, command, imei, name, prefs, deviceId);
+            //} else {
+            //    showToast("Previous command in progress...");
+            //}
         }
     }
 
-    private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils settings) {
+    private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils settings, final String deviceId) {
         if (Network.isNetworkAvailable(this)) {
-            commandInProgress = true;
+            //commandInProgress = true;
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
             headers.put("X-GMS-AppId", "2");
@@ -178,21 +178,21 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         } else {
                             showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + "!");
                         }
-                        commandInProgress = false;
+                        //commandInProgress = false;
                     }
                 });
             } else {
-                String qs = "scope=dl&user=" + Messenger.getDeviceId(this, false);
+                String qs = "scope=dl&user=" + deviceId;
                 Network.get(this, getString(R.string.tokenUrl) + "?" + qs, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             Messenger.getToken(CommandService.this, results);
-                            sendCommand(queryString, command, imei, name, settings);
+                            sendCommand(queryString, command, imei, name, settings, deviceId);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
-                        commandInProgress = false;
+                        //commandInProgress = false;
                     }
                 });
             }

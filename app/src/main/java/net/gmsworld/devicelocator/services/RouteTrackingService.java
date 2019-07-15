@@ -24,6 +24,7 @@ import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
+import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -161,16 +162,21 @@ public class RouteTrackingService extends Service {
             this.mWakeLock = null;
         }
 
-        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
-        if (pm != null) {
-            this.mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-            this.mWakeLock.acquire();
+        if (Permissions.haveLocationPermission(this)) {
+
+            PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
+            if (pm != null) {
+                this.mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+                this.mWakeLock.acquire();
+            }
+
+            startForeground(NOTIFICATION_ID, NotificationUtils.buildTrackerNotification(this, NOTIFICATION_ID));
+
+            //use smart location lib
+            GmsSmartLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, gpsAccuracy, resetRoute);
+        } else {
+            Log.e(TAG, "Unable to start route tracking service due to lack of Location permission!");
         }
-
-        startForeground(NOTIFICATION_ID, NotificationUtils.buildTrackerNotification(this, NOTIFICATION_ID));
-
-        //use smart location lib
-        GmsSmartLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, gpsAccuracy, resetRoute);
     }
 
     private synchronized void stopTracking() {

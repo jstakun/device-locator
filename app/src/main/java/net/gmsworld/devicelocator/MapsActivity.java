@@ -8,6 +8,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,6 +25,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import net.gmsworld.devicelocator.fragments.RegisterDeviceDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
+import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
@@ -134,6 +138,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         devices = DevicesUtils.buildDeviceList(settings);
         if (!devices.isEmpty()) {
             int markerCount = 0;
+            if (devices.size() > 1) {
+                initLocateButton();
+            }
             for (int i =0;i<devices.size(); i++) {
                 Device d = devices.get(i);
                 String[] geo = StringUtils.split(d.geo," ");
@@ -245,5 +252,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             Log.e(TAG, "No network available. Failed to send device location!");
         }
+    }
+
+    private void initLocateButton() {
+        final ImageButton locateButton = this.findViewById(R.id.locateDevices);
+        locateButton.setVisibility(View.VISIBLE);
+
+        locateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (devices != null && devices.size() > 1) {
+                    Toast.makeText(MapsActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
+                    for (Device device : devices) {
+                        if (settings.contains(CommandActivity.PIN_PREFIX + device.imei) && !StringUtils.equals(device.imei, thisDeviceImei)) {
+                            //send locate command to deviceImei
+                            String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + device.imei);
+                            Intent newIntent = new Intent(MapsActivity.this, CommandService.class);
+                            newIntent.putExtra("command", "locate");
+                            newIntent.putExtra("imei", device.imei);
+                            newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
+                            newIntent.putExtra("pin", devicePin);
+                            newIntent.putExtra("args", "silent");
+                            startService(newIntent);
+                        }
+                    }
+                }
+
+            }
+        });
     }
 }
