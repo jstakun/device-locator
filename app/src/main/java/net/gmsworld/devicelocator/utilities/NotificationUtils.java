@@ -23,6 +23,7 @@ import net.gmsworld.devicelocator.LauncherActivity;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.MapsActivity;
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.RouteActivity;
 import net.gmsworld.devicelocator.services.CommandService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -107,6 +108,7 @@ public class NotificationUtils {
             if (extras.containsKey("imei") && GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
                 Intent gmsIntent = new Intent(context, MapsActivity.class);
                 gmsIntent.putExtra("imei", extras.get("imei").toString());
+                //gmsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 mapIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             } else {
                 String device = "Your+Device";
@@ -156,8 +158,16 @@ public class NotificationUtils {
                 Intent notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(token));
                 webIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 if (routeIntent == null && token.startsWith(context.getString(R.string.showRouteUrl))) {
-                    notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(token));
-                    routeIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
+                        String[] discs = StringUtils.split(token, "/");
+                        Intent gmsIntent = new Intent(context, RouteActivity.class);
+                        gmsIntent.putExtra("imei", discs[discs.length-2]);
+                        gmsIntent.putExtra("routeId", discs[discs.length-3]);
+                        routeIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    } else {
+                        notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(token));
+                        routeIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    }
                 }
             }
         }
@@ -178,9 +188,17 @@ public class NotificationUtils {
             tokens = StringUtils.split(routeId,'_');
             Log.d(TAG, "Route id: " + routeId);
             if (tokens.length == 5) {
-                String routeUrl = context.getString(R.string.showRouteUrl) + "/" + tokens[3] + "/" + tokens[4] + "/now";
-                Intent notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(routeUrl));
-                routeIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
+                    //tokens[3] = imei, tokens[4] = routeId
+                    Intent gmsIntent = new Intent(context, RouteActivity.class);
+                    gmsIntent.putExtra("imei", tokens[3]);
+                    gmsIntent.putExtra("routeId", tokens[4]);
+                    routeIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                } else {
+                    String routeUrl = context.getString(R.string.showRouteUrl) + "/" + tokens[3] + "/" + tokens[4] + "/now";
+                    Intent notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(routeUrl));
+                    routeIntent = PendingIntent.getActivity(context, notificationId, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                }
             }
         }
 

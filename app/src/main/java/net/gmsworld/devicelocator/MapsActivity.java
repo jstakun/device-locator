@@ -82,7 +82,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         deviceImei = getIntent().getStringExtra("imei");
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -104,7 +103,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "onPause()");
         SmartLocation.with(this).location().stop();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d(TAG, "onNewIntent()");
+        if (intent.hasExtra("imei")) {
+            deviceImei = intent.getStringExtra("imei");
+        }
     }
 
     @SuppressLint("MissingPermission")

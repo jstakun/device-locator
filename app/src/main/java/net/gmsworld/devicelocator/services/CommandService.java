@@ -136,7 +136,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 }
             }
 
-            //if (!commandInProgress) {
+            //if (!commandInProgress) { //TODO check if same command to the same device is in progress
                 if (StringUtils.isNotEmpty(cancelCommand)) {
                     String notificationId = imei + "_" + cancelCommand;
                     Log.d(TAG, "Cancelling command " + cancelCommand);
