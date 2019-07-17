@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -12,7 +13,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -20,19 +23,20 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RouteActivity extends FragmentActivity implements OnMapReadyCallback {
+public class RouteActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
 
     private static final String TAG = RouteActivity.class.getSimpleName();
 
     private GoogleMap mMap;
 
-    private String deviceImei = null, routeId = null;
+    private String deviceImei = null, routeId = null, thisDeviceImei = null;
 
     List<LatLng> routePoints = new ArrayList<LatLng>();
 
@@ -61,6 +65,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                             }
                         } else {
                             Log.d(TAG, "No route points found!");
+                            Toast.makeText(RouteActivity.this, "No route points found!", Toast.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage(), e);
@@ -80,9 +85,23 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
         deviceImei = getIntent().getStringExtra("imei");
 
+        thisDeviceImei = Messenger.getDeviceId(this, false);
+
         routeId = getIntent().getStringExtra("routeId");
 
         getRoutePoints(listener);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d(TAG, "onNewIntent()");
+        if (intent.hasExtra("imei") && intent.hasExtra("routeId")) {
+            deviceImei = intent.getStringExtra("imei");
+            routeId = getIntent().getStringExtra("routeId");
+            mMap.clear();
+            getRoutePoints(listener);
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -93,6 +112,8 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         if (Permissions.haveLocationPermission(this)) {
             mMap.setMyLocationEnabled(true);
         }
+
+        mMap.setOnInfoWindowClickListener(this);
 
         UiSettings mUiSettings = mMap.getUiSettings();
         mUiSettings.setZoomControlsEnabled(true);
@@ -115,25 +136,40 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         } else {
             Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
         }
+        //TODO retry after 10 seconds
     }
 
     private void loadMarkers() {
         if (mMap != null && !routePoints.isEmpty()) {
             mMap.clear();
-            mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).title("Route start point"));
 
             if (routePoints.size() > 1) {
+                Marker m = mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).title("Route start point").snippet("Click to stop tracing"));
+                m.setTag("first");
                 for (int i=0;i<routePoints.size()-1;i++) {
                     Polyline line = mMap.addPolyline(new PolylineOptions()
                             .add(routePoints.get(i), routePoints.get(i+1))
-                            .width(5)
+                            .width(8)
                             .color(Color.RED));
                 }
-
-                mMap.addMarker(new MarkerOptions().position(routePoints.get(routePoints.size()-1)).title("Current route end point"));
             }
 
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size()-1), 14f));
+            MarkerOptions mo;
+            if (deviceImei.equals(thisDeviceImei)) {
+                mo = new MarkerOptions().zIndex(1.0f).position(routePoints.get(routePoints.size()-1)).title("Current device location").snippet("Click to stop tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
+            } else {
+                mo = new MarkerOptions().zIndex(0.0f).position(routePoints.get(routePoints.size()-1)).title("Current device location").snippet("Click to stop tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk));
+            }
+            Marker m = mMap.addMarker(mo);
+            m.setTag("last");
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size()-1), 14f));
         }
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        Log.d(TAG, "Device tracing will be stopped...");
+        //TODO call stop command
     }
 }

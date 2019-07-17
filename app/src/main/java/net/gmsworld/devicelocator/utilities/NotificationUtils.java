@@ -160,9 +160,15 @@ public class NotificationUtils {
                 if (routeIntent == null && token.startsWith(context.getString(R.string.showRouteUrl))) {
                     if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
                         String[] discs = StringUtils.split(token, "/");
+                        Log.d(TAG, "Route tokens /: " + token);
                         Intent gmsIntent = new Intent(context, RouteActivity.class);
-                        gmsIntent.putExtra("imei", discs[discs.length-2]);
-                        gmsIntent.putExtra("routeId", discs[discs.length-3]);
+                        if (token.endsWith("/now")) {
+                            gmsIntent.putExtra("imei", discs[discs.length - 3]);
+                            gmsIntent.putExtra("routeId", discs[discs.length - 2]);
+                        }  else {
+                            gmsIntent.putExtra("imei", discs[discs.length - 2]);
+                            gmsIntent.putExtra("routeId", discs[discs.length - 1]);
+                        }
                         routeIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                     } else {
                         notificationIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(token));
@@ -189,7 +195,7 @@ public class NotificationUtils {
             Log.d(TAG, "Route id: " + routeId);
             if (tokens.length == 5) {
                 if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
-                    //tokens[3] = imei, tokens[4] = routeId
+                    Log.d(TAG, "Route tokens _: " + routeId);
                     Intent gmsIntent = new Intent(context, RouteActivity.class);
                     gmsIntent.putExtra("imei", tokens[3]);
                     gmsIntent.putExtra("routeId", tokens[4]);
