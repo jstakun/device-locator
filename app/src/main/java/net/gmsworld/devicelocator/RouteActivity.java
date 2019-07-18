@@ -23,6 +23,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import net.gmsworld.devicelocator.services.CommandService;
+import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
@@ -144,21 +146,22 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             mMap.clear();
 
             if (routePoints.size() > 1) {
-                Marker m = mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).title("Route start point").snippet("Click to stop tracing"));
+                Marker m = mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)));
                 m.setTag("first");
                 for (int i=0;i<routePoints.size()-1;i++) {
                     Polyline line = mMap.addPolyline(new PolylineOptions()
                             .add(routePoints.get(i), routePoints.get(i+1))
-                            .width(8)
+                            .width(12)
                             .color(Color.RED));
+                    mMap.addMarker(new MarkerOptions().position(routePoints.get(i+1)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)));
                 }
             }
 
             MarkerOptions mo;
             if (deviceImei.equals(thisDeviceImei)) {
-                mo = new MarkerOptions().zIndex(1.0f).position(routePoints.get(routePoints.size()-1)).title("Current device location").snippet("Click to stop tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
+                mo = new MarkerOptions().zIndex(1.0f).position(routePoints.get(routePoints.size()-1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
             } else {
-                mo = new MarkerOptions().zIndex(0.0f).position(routePoints.get(routePoints.size()-1)).title("Current device location").snippet("Click to stop tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk));
+                mo = new MarkerOptions().zIndex(0.0f).position(routePoints.get(routePoints.size()-1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk));
             }
             Marker m = mMap.addMarker(mo);
             m.setTag("last");
@@ -170,6 +173,9 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
     @Override
     public void onInfoWindowClick(Marker marker) {
         Log.d(TAG, "Device tracing will be stopped...");
-        //TODO call stop command
+        Intent newIntent = new Intent(this, CommandService.class);
+        newIntent.putExtra("command", Command.STOP_COMMAND);
+        newIntent.putExtra("imei", deviceImei);
+        startService(newIntent);
     }
 }
