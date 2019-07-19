@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.Toast;
@@ -43,6 +44,15 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
     private String deviceImei = null, routeId = null, thisDeviceImei = null, now = null;
 
     List<LatLng> routePoints = new ArrayList<LatLng>();
+
+    private Handler handler = new Handler();
+
+    private Runnable r = new Runnable() {
+        @Override
+        public void run() {
+            getRoutePoints(listener);
+        }
+    };
 
     private Network.OnGetFinishListener listener = new Network.OnGetFinishListener() {
         @Override
@@ -99,6 +109,23 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (StringUtils.equals(now, "true")) {
+            handler.removeCallbacks(r);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (StringUtils.equals(now, "true") && StringUtils.isNotEmpty(deviceImei) && StringUtils.isNotEmpty(routeId)) {
+            handler.removeCallbacks(r);
+            handler.post(r);
+        }
+    }
+
+    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         Log.d(TAG, "onNewIntent()");
@@ -106,7 +133,10 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             deviceImei = intent.getStringExtra("imei");
             routeId = getIntent().getStringExtra("routeId");
             now = getIntent().getStringExtra("now");
-            mMap.clear();
+            if (mMap != null) {
+                mMap.clear();
+            }
+            routePoints.clear();
             getRoutePoints(listener);
         }
     }
@@ -138,7 +168,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         if (Network.isNetworkAvailable(this)) {
             Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
             String queryString = "route=" + "device_locator_route_" + deviceImei + "_" + routeId;
-            if (StringUtils.equals("now", "true")) {
+            if (StringUtils.equals(now, "true")) {
                 queryString += "&now=true";
             }
             Log.d(TAG, "Calling " + queryString);
@@ -146,7 +176,11 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         } else {
             Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
         }
-        //TODO retry after 10 seconds
+
+        if (StringUtils.equals(now, "true")) {
+            handler.removeCallbacks(r);
+            handler.postDelayed(r, 10000);
+        }
     }
 
     private void loadMarkers() {
@@ -156,25 +190,25 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             if (routePoints.size() > 1) {
                 Marker m = mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)));
                 m.setTag("first");
-                for (int i=0;i<routePoints.size()-1;i++) {
+                for (int i = 0; i < routePoints.size() - 1; i++) {
                     Polyline line = mMap.addPolyline(new PolylineOptions()
-                            .add(routePoints.get(i), routePoints.get(i+1))
+                            .add(routePoints.get(i), routePoints.get(i + 1))
                             .width(12)
                             .color(Color.RED));
-                    mMap.addMarker(new MarkerOptions().position(routePoints.get(i+1)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)));
+                    mMap.addMarker(new MarkerOptions().position(routePoints.get(i + 1)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)));
                 }
             }
 
             MarkerOptions mo;
             if (deviceImei.equals(thisDeviceImei)) {
-                mo = new MarkerOptions().zIndex(1.0f).position(routePoints.get(routePoints.size()-1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
+                mo = new MarkerOptions().zIndex(1.0f).position(routePoints.get(routePoints.size() - 1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
             } else {
-                mo = new MarkerOptions().zIndex(0.0f).position(routePoints.get(routePoints.size()-1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk));
+                mo = new MarkerOptions().zIndex(0.0f).position(routePoints.get(routePoints.size() - 1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk));
             }
             Marker m = mMap.addMarker(mo);
             m.setTag("last");
 
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size()-1), 14f));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
         }
     }
 

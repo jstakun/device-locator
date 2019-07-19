@@ -169,6 +169,7 @@ public class NotificationUtils {
                         }  else {
                             gmsIntent.putExtra("imei", discs[discs.length - 2]);
                             gmsIntent.putExtra("routeId", discs[discs.length - 1]);
+                            gmsIntent.putExtra("now", "false");
                         }
                         routeIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                     } else {
