@@ -29,6 +29,8 @@ import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
 
-    private String deviceImei = null, routeId = null, thisDeviceImei = null;
+    private String deviceImei = null, routeId = null, thisDeviceImei = null, now = null;
 
     List<LatLng> routePoints = new ArrayList<LatLng>();
 
@@ -91,6 +93,8 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
         routeId = getIntent().getStringExtra("routeId");
 
+        now = getIntent().getStringExtra("now");
+
         getRoutePoints(listener);
     }
 
@@ -101,6 +105,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         if (intent.hasExtra("imei") && intent.hasExtra("routeId")) {
             deviceImei = intent.getStringExtra("imei");
             routeId = getIntent().getStringExtra("routeId");
+            now = getIntent().getStringExtra("now");
             mMap.clear();
             getRoutePoints(listener);
         }
@@ -132,7 +137,10 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
     public void getRoutePoints(Network.OnGetFinishListener onGetFinishListener) {
         if (Network.isNetworkAvailable(this)) {
             Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
-            String queryString = "route=" + "device_locator_route_" + deviceImei + "_" + routeId + "&now=true";
+            String queryString = "route=" + "device_locator_route_" + deviceImei + "_" + routeId;
+            if (StringUtils.equals("now", "true")) {
+                queryString += "&now=true";
+            }
             Log.d(TAG, "Calling " + queryString);
             Network.get(this, getString(R.string.routeProviderUrl) + "?" + queryString, null, onGetFinishListener);
         } else {

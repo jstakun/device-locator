@@ -165,6 +165,7 @@ public class NotificationUtils {
                         if (token.endsWith("/now")) {
                             gmsIntent.putExtra("imei", discs[discs.length - 3]);
                             gmsIntent.putExtra("routeId", discs[discs.length - 2]);
+                            gmsIntent.putExtra("now", "true");
                         }  else {
                             gmsIntent.putExtra("imei", discs[discs.length - 2]);
                             gmsIntent.putExtra("routeId", discs[discs.length - 1]);
@@ -199,6 +200,7 @@ public class NotificationUtils {
                     Intent gmsIntent = new Intent(context, RouteActivity.class);
                     gmsIntent.putExtra("imei", tokens[3]);
                     gmsIntent.putExtra("routeId", tokens[4]);
+                    gmsIntent.putExtra("now", "true");
                     routeIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 } else {
                     String routeUrl = context.getString(R.string.showRouteUrl) + "/" + tokens[3] + "/" + tokens[4] + "/now";
