@@ -25,7 +25,9 @@ import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -38,7 +40,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     public static final String AUTH_NEEDED = "authNeeded";
 
-    //private static boolean commandInProgress = false;
+    private static List<String> commandsInProgress = new ArrayList<>();
 
     private Handler toastHandler;
 
@@ -136,7 +138,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 }
             }
 
-            //if (!commandInProgress) { //TODO check if same command to the same device is in progress imei + command
+            if (!commandsInProgress.contains(imei + "_" + command)) {
                 if (StringUtils.isNotEmpty(cancelCommand)) {
                     String notificationId = imei + "_" + cancelCommand;
                     Log.d(TAG, "Cancelling command " + cancelCommand);
@@ -146,15 +148,15 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                     NotificationUtils.cancel(this, routeId);
                 }
                 sendCommand(content, command, imei, name, prefs, deviceId);
-            //} else {
-            //    showToast("Previous command in progress...");
-            //}
+            } else {
+                showToast("Command " + command + " has been sent to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!");
+            }
         }
     }
 
     private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils settings, final String deviceId) {
         if (Network.isNetworkAvailable(this)) {
-            //commandInProgress = true;
+            commandsInProgress.add(imei + "_" + command);
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
             headers.put("X-GMS-AppId", "2");
@@ -178,7 +180,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         } else {
                             showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + "!");
                         }
-                        //commandInProgress = false;
+                        commandsInProgress.remove(imei + "_" + command);
                     }
                 });
             } else {
@@ -192,7 +194,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
-                        //commandInProgress = false;
+                        commandsInProgress.remove(imei + "_" + command);
                     }
                 });
             }

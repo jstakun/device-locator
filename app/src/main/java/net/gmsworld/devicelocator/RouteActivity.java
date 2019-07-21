@@ -111,16 +111,14 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
     @Override
     protected void onPause() {
         super.onPause();
-        if (StringUtils.equals(now, "true")) {
-            handler.removeCallbacks(r);
-        }
+        handler.removeCallbacks(r);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        handler.removeCallbacks(r);
         if (StringUtils.equals(now, "true") && StringUtils.isNotEmpty(deviceImei) && StringUtils.isNotEmpty(routeId)) {
-            handler.removeCallbacks(r);
             handler.post(r);
         }
     }
@@ -177,8 +175,8 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
         }
 
+        handler.removeCallbacks(r);
         if (StringUtils.equals(now, "true")) {
-            handler.removeCallbacks(r);
             handler.postDelayed(r, 10000);
         }
     }
@@ -188,22 +186,22 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             mMap.clear();
 
             if (routePoints.size() > 1) {
-                Marker m = mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)));
+                Marker m = mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)).anchor(0.5f, 0.5f));
                 m.setTag("first");
                 for (int i = 0; i < routePoints.size() - 1; i++) {
                     Polyline line = mMap.addPolyline(new PolylineOptions()
                             .add(routePoints.get(i), routePoints.get(i + 1))
                             .width(12)
                             .color(Color.RED));
-                    mMap.addMarker(new MarkerOptions().position(routePoints.get(i + 1)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)));
+                    mMap.addMarker(new MarkerOptions().position(routePoints.get(i + 1)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)).anchor(0.5f, 0.5f));
                 }
             }
 
             MarkerOptions mo;
             if (deviceImei.equals(thisDeviceImei)) {
-                mo = new MarkerOptions().zIndex(1.0f).position(routePoints.get(routePoints.size() - 1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok));
+                mo = new MarkerOptions().zIndex(1.0f).position(routePoints.get(routePoints.size() - 1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok)).anchor(0.5f, 0.5f);
             } else {
-                mo = new MarkerOptions().zIndex(0.0f).position(routePoints.get(routePoints.size() - 1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk));
+                mo = new MarkerOptions().zIndex(0.0f).position(routePoints.get(routePoints.size() - 1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk)).anchor(0.5f, 0.5f);
             }
             Marker m = mMap.addMarker(mo);
             m.setTag("last");
