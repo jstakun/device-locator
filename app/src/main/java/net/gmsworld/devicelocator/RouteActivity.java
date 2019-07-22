@@ -79,7 +79,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                             }
                         } else {
                             Log.d(TAG, "No route points found!");
-                            Toast.makeText(RouteActivity.this, "No route points found!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(RouteActivity.this, "No route points saved yet!", Toast.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage(), e);
@@ -164,7 +164,9 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
     public void getRoutePoints(Network.OnGetFinishListener onGetFinishListener) {
         if (Network.isNetworkAvailable(this)) {
-            Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
+            if (!StringUtils.equals(now, "true")) {
+                Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
+            }
             String queryString = "route=" + "device_locator_route_" + deviceImei + "_" + routeId;
             if (StringUtils.equals(now, "true")) {
                 queryString += "&now=true";

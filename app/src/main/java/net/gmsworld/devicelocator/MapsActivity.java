@@ -273,16 +273,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (devices != null && devices.size() > 1) {
                     Toast.makeText(MapsActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
                     for (Device device : devices) {
-                        if (settings.contains(CommandActivity.PIN_PREFIX + device.imei) && !StringUtils.equals(device.imei, thisDeviceImei)) {
-                            //send locate command to deviceImei
-                            String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + device.imei);
-                            Intent newIntent = new Intent(MapsActivity.this, CommandService.class);
-                            newIntent.putExtra("command", "locate");
-                            newIntent.putExtra("imei", device.imei);
-                            newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
-                            newIntent.putExtra("pin", devicePin);
-                            newIntent.putExtra("args", "silent");
-                            startService(newIntent);
+                        if (!StringUtils.equals(device.imei, thisDeviceImei)) {
+                            if (settings.contains(CommandActivity.PIN_PREFIX + device.imei)) {
+                                //send locate command to deviceImei
+                                String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + device.imei);
+                                Intent newIntent = new Intent(MapsActivity.this, CommandService.class);
+                                newIntent.putExtra("command", "locate");
+                                newIntent.putExtra("imei", device.imei);
+                                newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
+                                newIntent.putExtra("pin", devicePin);
+                                newIntent.putExtra("args", "silent");
+                                startService(newIntent);
+                            } else {
+                                Toast.makeText(MapsActivity.this, "Unable to send command to the device " + device.name + " because PIN is not saved!", Toast.LENGTH_LONG).show();
+                            }
                         }
                     }
                 }
