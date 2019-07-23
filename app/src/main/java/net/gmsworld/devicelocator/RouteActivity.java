@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,6 +27,7 @@ import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
@@ -45,6 +47,10 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
     List<LatLng> routePoints = new ArrayList<LatLng>();
 
+    private Integer time;
+
+    private Double distance;
+
     private Handler handler = new Handler();
 
     private Runnable r = new Runnable() {
@@ -63,6 +69,11 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                     try {
                         JsonArray features = reply.getAsJsonObject().getAsJsonArray("features");
                         if (features.size() > 0) {
+                            JsonElement properties = features.get(0).getAsJsonObject().getAsJsonObject("properties");
+                            if (properties.getAsJsonObject().has("distance") && properties.getAsJsonObject().has("time")) {
+                                distance = properties.getAsJsonObject().get("distance").getAsDouble();
+                                time = properties.getAsJsonObject().get("time").getAsInt();
+                            }
                             JsonElement geometry = features.get(0).getAsJsonObject().getAsJsonObject("geometry");
                             JsonArray coords = geometry.getAsJsonObject().getAsJsonArray("coordinates");
                             if (coords.size() > routePoints.size()) {
@@ -200,10 +211,18 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             }
 
             MarkerOptions mo;
+            final String title = "Device location";
+            String snippet = "Click to stop device tracing";
+            if (!StringUtils.equals(now, "true") && time != null && distance != null) {
+                float avg = (float)(distance / (time / 1000d) * 3.6); //km/h
+                snippet = "Route length: " + DistanceFormatter.format(distance.intValue()) + " , Average speed: " +  Messenger.getSpeed(this, avg) + " , Estimated time: " + DateUtils.formatElapsedTime(time/1000);
+            } else if (!StringUtils.equals(now, "true")) {
+                snippet = "";
+            }
             if (deviceImei.equals(thisDeviceImei)) {
-                mo = new MarkerOptions().zIndex(1.0f).position(routePoints.get(routePoints.size() - 1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok)).anchor(0.5f, 0.5f);
+                mo = new MarkerOptions().zIndex(1.0f).position(routePoints.get(routePoints.size() - 1)).title(title).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok)).anchor(0.5f, 0.5f);
             } else {
-                mo = new MarkerOptions().zIndex(0.0f).position(routePoints.get(routePoints.size() - 1)).title("Device location").snippet("Click to stop device tracing").icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk)).anchor(0.5f, 0.5f);
+                mo = new MarkerOptions().zIndex(0.0f).position(routePoints.get(routePoints.size() - 1)).title(title).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk)).anchor(0.5f, 0.5f);
             }
             Marker m = mMap.addMarker(mo);
             m.setTag("last");

@@ -866,7 +866,7 @@ public class Messenger {
 
     //public static double convertMPStoMPH(double speed) { return speed * 2.23694; }
 
-    private static String getSpeed(Context context, float speed) {
+    public static String getSpeed(Context context, float speed) {
         Locale l;
         try {
             l = context.getResources().getConfiguration().locale;
