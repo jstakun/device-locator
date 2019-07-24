@@ -19,7 +19,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -45,7 +44,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private String deviceImei = null, routeId = null, thisDeviceImei = null, now = null;
 
-    List<LatLng> routePoints = new ArrayList<LatLng>();
+    private final List<LatLng> routePoints = new ArrayList<>();
 
     private Integer time;
 
@@ -202,10 +201,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 Marker m = mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)).anchor(0.5f, 0.5f));
                 m.setTag("first");
                 for (int i = 0; i < routePoints.size() - 1; i++) {
-                    Polyline line = mMap.addPolyline(new PolylineOptions()
-                            .add(routePoints.get(i), routePoints.get(i + 1))
-                            .width(12)
-                            .color(Color.RED));
+                    mMap.addPolyline(new PolylineOptions().add(routePoints.get(i), routePoints.get(i + 1)).width(12).color(Color.RED));
                     mMap.addMarker(new MarkerOptions().position(routePoints.get(i + 1)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)).anchor(0.5f, 0.5f));
                 }
             }
@@ -233,10 +229,12 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Log.d(TAG, "Device tracing will be stopped...");
-        Intent newIntent = new Intent(this, CommandService.class);
-        newIntent.putExtra("command", Command.STOP_COMMAND);
-        newIntent.putExtra("imei", deviceImei);
-        startService(newIntent);
+        if (StringUtils.equals(now, "true")) {
+            Log.d(TAG, "Device tracing will be stopped...");
+            Intent newIntent = new Intent(this, CommandService.class);
+            newIntent.putExtra("command", Command.STOP_COMMAND);
+            newIntent.putExtra("imei", deviceImei);
+            startService(newIntent);
+        }
     }
 }

@@ -1079,9 +1079,9 @@ public class Command {
                         } else {
                             hasValidToken = true;
                         }
-                    } else {
+                    } //else {
                         //skip token
-                    }
+                    //}
                 }
                 return hasValidToken;
             } else {

@@ -641,10 +641,7 @@ public class Messenger {
                     break;
                 case Command.ROUTE_COMMAND:
                     title = context.getString(R.string.message, deviceId) + " - route map link";
-                    int size = 0;
-                    if (extras != null) {
-                        size = extras.getInt("size", 0);
-                    }
+                    final int size = extras.getInt("size", 0);
                     if (size > 1) {
                         text = "Check your route from device " + deviceId + " at " + RouteTrackingServiceUtils.getRouteUrl(context);
                     } else if (size == 0) {
@@ -685,10 +682,7 @@ public class Messenger {
                 case Command.TAKE_PHOTO_COMMAND:
                     title = context.getString(R.string.message, deviceId) + " - front camera photo";
                     boolean hiddenCamera = settings.getBoolean("hiddenCamera", false);
-                    String imageUrl = null;
-                    if (extras != null) {
-                        imageUrl = extras.getString("imageUrl");
-                    }
+                    String imageUrl = extras.getString("imageUrl");
                     if (StringUtils.isEmpty(imageUrl) && hiddenCamera) {
                         text = "Front camera photo will be taken on device " + deviceId + ". You should receive link soon.";
                     } else if (StringUtils.isEmpty(imageUrl) && !hiddenCamera) {

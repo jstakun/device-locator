@@ -1502,7 +1502,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     }
                                     JsonElement cid = reply.getAsJsonObject().get("chatId");
                                     if (cid != null) {
-                                        Long chatId = cid.getAsLong();
+                                        final long chatId = cid.getAsLong();
                                         final TextView telegramInput = MainActivity.this.findViewById(R.id.telegramId);
                                         telegramId = Long.toString(chatId);
                                         telegramInput.setText(telegramId);

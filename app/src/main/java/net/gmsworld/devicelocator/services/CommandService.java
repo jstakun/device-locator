@@ -40,7 +40,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     public static final String AUTH_NEEDED = "authNeeded";
 
-    private static List<String> commandsInProgress = new ArrayList<>();
+    private static final List<String> commandsInProgress = new ArrayList<>();
 
     private Handler toastHandler;
 
