@@ -211,7 +211,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             String snippet = "Click to stop device tracing";
             if (!StringUtils.equals(now, "true") && time != null && distance != null) {
                 float avg = (float)(distance / (time / 1000d)); // meters / second
-                snippet = "Distance: " + DistanceFormatter.format(distance.intValue()) + " , speed: " +  Messenger.getSpeed(this, avg) + " , time: " + DateUtils.formatElapsedTime(time/1000);
+                snippet = "Distance: " + DistanceFormatter.format(distance.intValue()) + ", avg. speed: " +  Messenger.getSpeed(this, avg) + ", time: " + DateUtils.formatElapsedTime(time/1000);
             } else if (!StringUtils.equals(now, "true")) {
                 snippet = "";
             }
