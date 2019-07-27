@@ -2,13 +2,14 @@ package net.gmsworld.devicelocator.views;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 
 import net.gmsworld.devicelocator.R;
+
+import androidx.cardview.widget.CardView;
 
 public class DLTrackerCard extends CardView {
     private TypedArray attributes;

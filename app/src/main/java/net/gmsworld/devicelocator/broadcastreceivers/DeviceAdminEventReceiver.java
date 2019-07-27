@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.MainActivity;
@@ -13,6 +12,8 @@ import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
+
+import androidx.core.content.ContextCompat;
 
 /**
  * Created by jstakun on 8/24/17.

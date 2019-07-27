@@ -698,6 +698,10 @@ public class Messenger {
                         text = "No Security PIN is set on device " + deviceId + "!";
                     } else {
                         text = "Security PIN on device " + deviceId + " is " + pin;
+                        final String secret = extras.getString("secret");
+                        if (StringUtils.isNotEmpty(secret)) {
+                            text += "\n" + secret;
+                        }
                     }
                     text += "\n" + "Battery level: " + getBatteryLevel(context);
                     break;

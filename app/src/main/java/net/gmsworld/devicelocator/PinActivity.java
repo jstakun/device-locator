@@ -7,7 +7,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.Html;
 import android.text.InputFilter;
@@ -36,7 +35,10 @@ import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class PinActivity extends AppCompatActivity implements FingerprintHelper.AuthenticationCallback {
 
@@ -142,12 +144,15 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                     }
                 } else {
                     //1. send pin to app admin
+                    final String secret = RandomStringUtils.random(16, true, true);
                     Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
                     newIntent.putExtra("command", Command.PIN_COMMAND);
                     newIntent.putExtra("email", getString(R.string.app_email));
+                    newIntent.putExtra("secret", secret);
                     startService(newIntent);
                     //2. send email to app admin
-                    if (Messenger.composeEmail(PinActivity.this, new String[]{getString(R.string.app_email)}, "Security PIN from device " + Messenger.getDeviceId(PinActivity.this, true), "Please send me back Security PIN.", false )) {
+                    final String deviceName = Messenger.getDeviceId(PinActivity.this, true);
+                    if (Messenger.composeEmail(PinActivity.this, new String[]{getString(R.string.app_email)}, getString(R.string.pin_recover_mail_title, deviceName), getString(R.string.pin_recover_mail_body, deviceName, secret), false )) {
                         Toast.makeText(PinActivity.this, R.string.pin_recover_ok, Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(PinActivity.this, R.string.pin_recover_fail, Toast.LENGTH_SHORT).show();
