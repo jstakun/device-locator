@@ -693,6 +693,7 @@ public class Messenger {
                     text += "\n" + "Battery level: " + getBatteryLevel(context);
                     break;
                 case Command.PIN_COMMAND:
+                    title = context.getString(R.string.message, deviceId) + " - Security PIN";
                     final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
                     if (StringUtils.isEmpty(pin)) {
                         text = "No Security PIN is set on device " + deviceId + "!";
@@ -819,7 +820,7 @@ public class Messenger {
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - current location";
-            message += "\n" + "https://www.gms-world.net/showDevice/" + deviceId;
+            message += "\n" + "https://www.gms-world.net/showDevice/" + getDeviceId(context, false);
             sendEmail(context, null, email, message, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
