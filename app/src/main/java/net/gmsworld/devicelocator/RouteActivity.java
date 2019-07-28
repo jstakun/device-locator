@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -117,6 +119,8 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         now = getIntent().getStringExtra("now");
 
         getRoutePoints(listener);
+
+        initShareRouteButton();
     }
 
     @Override
@@ -192,6 +196,25 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         if (StringUtils.equals(now, "true")) {
             handler.postDelayed(r, 10000);
         }
+    }
+
+    private void initShareRouteButton() {
+        final ImageButton shareButton = this.findViewById(R.id.shareRoute);
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String routeUrl = getString(R.string.showRouteUrl) + "/" + deviceImei + "/" + routeId;
+                if (StringUtils.equals(now, "true")) {
+                    routeUrl += "/now";
+                }
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device at: " + routeUrl);
+                sendIntent.setType("text/plain");
+                startActivity(sendIntent);
+            }
+        });
     }
 
     private void loadMarkers() {

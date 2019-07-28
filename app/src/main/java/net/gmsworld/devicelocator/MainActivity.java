@@ -1720,8 +1720,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                             clipboard.setPrimaryClip(urlClip);
                             Toast.makeText(activity, "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
                         }
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
-                        activity.startActivity(browserIntent);
+                        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity) == ConnectionResult.SUCCESS) {
+                            String[] discs = StringUtils.split(showRouteUrl, "/");
+                            Log.d(TAG, "Route tokens /: " + showRouteUrl);
+                            Intent gmsIntent = new Intent(activity, RouteActivity.class);
+                            gmsIntent.putExtra("imei", discs[discs.length - 2]);
+                            gmsIntent.putExtra("routeId", discs[discs.length - 1]);
+                            gmsIntent.putExtra("now", "false");
+                            activity.startActivity(gmsIntent);
+                        } else {
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
+                            activity.startActivity(browserIntent);
+                        }
                         final Intent newIntent = new Intent(activity, SmsSenderService.class);
                         if (StringUtils.isNotEmpty(activity.phoneNumber)) {
                             newIntent.putExtra("phoneNumber", activity.phoneNumber);
