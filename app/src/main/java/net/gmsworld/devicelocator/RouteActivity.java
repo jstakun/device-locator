@@ -210,14 +210,14 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 }
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device at: " + routeUrl);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + deviceImei + " at: " + routeUrl);
                 sendIntent.setType("text/plain");
                 startActivity(sendIntent);
             }
         });
     }
 
-    private void loadMarkers() {
+    private synchronized void loadMarkers() {
         if (mMap != null && !routePoints.isEmpty()) {
             mMap.clear();
 

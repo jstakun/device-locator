@@ -139,7 +139,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         loadDeviceMarkers();
     }
 
-    public void loadDeviceMarkers() {
+    public synchronized void loadDeviceMarkers() {
         mMap.clear();
         LatLng center = null;
         final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
