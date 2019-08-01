@@ -45,7 +45,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
 
-    private String deviceImei = null, routeId = null, thisDeviceImei = null, now = null;
+    private String deviceImei = null, routeId = null, thisDeviceImei = null, now = null, deviceName = null;
 
     private final List<LatLng> routePoints = new ArrayList<>();
 
@@ -117,6 +117,12 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         routeId = getIntent().getStringExtra("routeId");
 
         now = getIntent().getStringExtra("now");
+
+        deviceName = getIntent().getStringExtra("deviceName");
+
+        if (StringUtils.isEmpty(deviceName)) {
+            deviceName = deviceImei;
+        }
 
         getRoutePoints(listener);
 
@@ -210,7 +216,8 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 }
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + deviceImei + " at: " + routeUrl);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.roue_share_text, deviceName, routeUrl));
+                sendIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.message, deviceName) + " - route map link");
                 sendIntent.setType("text/plain");
                 startActivity(sendIntent);
             }

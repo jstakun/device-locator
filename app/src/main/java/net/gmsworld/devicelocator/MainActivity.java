@@ -1720,8 +1720,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                             clipboard.setPrimaryClip(urlClip);
                             Toast.makeText(activity, "Route has been uploaded to server and route map url has been saved to clipboard.", Toast.LENGTH_LONG).show();
                         }
+                        String[] discs = StringUtils.split(showRouteUrl, "/");
                         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity) == ConnectionResult.SUCCESS) {
-                            String[] discs = StringUtils.split(showRouteUrl, "/");
                             Log.d(TAG, "Route tokens /: " + showRouteUrl);
                             Intent gmsIntent = new Intent(activity, RouteActivity.class);
                             gmsIntent.putExtra("imei", discs[discs.length - 2]);
@@ -1745,6 +1745,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         newIntent.putExtra("command", Command.ROUTE_COMMAND);
                         newIntent.putExtra("size", 2); //we know only size > 1
                         activity.startService(newIntent);
+
+                        Intent sendIntent = new Intent();
+                        sendIntent.setAction(Intent.ACTION_SEND);
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, activity.getString(R.string.roue_share_text, discs[discs.length - 2], showRouteUrl));
+                        sendIntent.putExtra(Intent.EXTRA_TITLE, activity.getString(R.string.message, discs[discs.length - 2]) + " - route map link");
+                        sendIntent.setType("text/plain");
+                        activity.startActivity(sendIntent);
                     } else {
                         Toast.makeText(activity, "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
                     }
