@@ -150,6 +150,9 @@ public class NotificationUtils {
                         putFloat(extras.getString("imei") + "_previousLatitude", (float)deviceLocation.getLatitude()).
                         putFloat(extras.getString("imei") + "_previousLongitude", (float)deviceLocation.getLongitude()).apply();
             }
+            if (deviceLocation.hasSpeed() && deviceLocation.getSpeed() > 10f) {
+                message += "\n" + "Speed: " + Messenger.getSpeed(context, deviceLocation.getSpeed());
+            }
         }
 
         String[] tokens = message.split("\\s+");

@@ -61,6 +61,7 @@ public class Messenger {
     public static final String LAT_HEADER = "X-GMS-Lat";
     public static final String LNG_HEADER = "X-GMS-Lng";
     public static final String ACC_HEADER = "X-GMS-Acc";
+    public static final String SPD_HEADER = "X-GMS-Speed";
 
     public static final String TELEGRAM_PACKAGE = "org.telegram.messenger";
     private static final String FACEBOOK_MESSENGER_PACKAGE = "com.facebook.orca";
@@ -109,7 +110,12 @@ public class Messenger {
                     if (location != null) {
                         headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
                         headers.put(LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
-                        headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
+                        if (location.hasAccuracy()) {
+                            headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
+                        }
+                        if (location.hasSpeed()) {
+                            headers.put(SPD_HEADER, Float.toString(location.getSpeed()));
+                        }
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     if (StringUtils.equalsAnyIgnoreCase(replyToCommand, Command.START_COMMAND, Command.STOP_COMMAND, Command.RESUME_COMMAND, Command.PERIMETER_COMMAND, Command.ROUTE_COMMAND)) {
@@ -189,7 +195,12 @@ public class Messenger {
                     if (location != null) {
                         headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
                         headers.put(LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
-                        headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
+                        if (location.hasAccuracy()) {
+                            headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
+                        }
+                        if (location.hasSpeed()) {
+                            headers.put(SPD_HEADER, Float.toString(location.getSpeed()));
+                        }
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     sendEmail(context, email, message, title, 1, headers);
@@ -266,7 +277,12 @@ public class Messenger {
                     if (location != null) {
                         headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
                         headers.put(LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
-                        headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
+                        if (location.hasAccuracy()) {
+                            headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
+                        }
+                        if (location.hasSpeed()) {
+                            headers.put(SPD_HEADER, Float.toString(location.getSpeed()));
+                        }
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     sendTelegram(context, telegramId, message, 1, headers);
@@ -362,7 +378,12 @@ public class Messenger {
                 if (location != null) {
                     headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
                     headers.put(LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
-                    headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
+                    if (location.hasAccuracy()) {
+                        headers.put(ACC_HEADER, Float.toString(location.getAccuracy()));
+                    }
+                    if (location.hasSpeed()) {
+                        headers.put(SPD_HEADER, Float.toString(location.getSpeed()));
+                    }
                 }
                 headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                 sendRoutePoint(context, 1, headers);

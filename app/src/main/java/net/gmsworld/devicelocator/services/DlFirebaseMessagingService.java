@@ -89,6 +89,9 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                                     if (coords.length >= 3) {
                                         location.setAccuracy(Float.valueOf(coords[2]));
                                     }
+                                    if (coords.length >= 4) {
+                                        location.setSpeed(Float.valueOf(coords[3]));
+                                    }
                                     DevicesUtils.loadDeviceList(this, new PreferencesUtils(this), null);
                                 }
                             } else if (token.startsWith("routeId:")) {
