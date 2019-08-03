@@ -83,7 +83,7 @@ public class DevicesUtils {
                                             if (callerActivity instanceof MainActivity) {
                                                 ((MainActivity)callerActivity).populateDeviceList(userDevices);
                                             } else if (callerActivity instanceof MapsActivity) {
-                                                ((MapsActivity)callerActivity).loadDeviceMarkers();
+                                                ((MapsActivity)callerActivity).loadDeviceMarkers(false);
                                             }
                                         }
                                     } else if (callerActivity instanceof MainActivity) {

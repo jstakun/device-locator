@@ -87,7 +87,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                                     routePoints.add(new LatLng(lat, lng));
                                 }
                                 if (mMap != null) {
-                                    loadMarkers();
+                                    loadMarkers(false);
                                 }
                             }
                         } else {
@@ -179,8 +179,9 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         mUiSettings.setZoomGesturesEnabled(true);
         mUiSettings.setTiltGesturesEnabled(true);
         mUiSettings.setRotateGesturesEnabled(true);
+        mUiSettings.setMapToolbarEnabled(false);
 
-        loadMarkers();
+        loadMarkers(true);
     }
 
     public void getRoutePoints(Network.OnGetFinishListener onGetFinishListener) {
@@ -224,7 +225,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         });
     }
 
-    private synchronized void loadMarkers() {
+    private void loadMarkers(boolean zoom) {
         if (mMap != null && !routePoints.isEmpty()) {
             mMap.clear();
 
@@ -254,7 +255,11 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             Marker m = mMap.addMarker(mo);
             m.setTag("last");
 
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
+            if (zoom) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
+            } else {
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(routePoints.get(routePoints.size() - 1)));
+            }
         }
     }
 

@@ -86,7 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onResume();
         Log.d(TAG, "onResume()");
         if (mMap != null) {
-            loadDeviceMarkers();
+            loadDeviceMarkers(true);
         }
         try {
             if (SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
@@ -135,11 +135,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mUiSettings.setZoomGesturesEnabled(true);
         mUiSettings.setTiltGesturesEnabled(true);
         mUiSettings.setRotateGesturesEnabled(true);
+        mUiSettings.setMapToolbarEnabled(false);
 
-        loadDeviceMarkers();
+        loadDeviceMarkers(true);
     }
 
-    public synchronized void loadDeviceMarkers() {
+    public void loadDeviceMarkers(boolean centerToBounds) {
         mMap.clear();
         LatLng center = null;
         final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
@@ -192,7 +193,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 final int width = getResources().getDisplayMetrics().widthPixels;
                 final int height = getResources().getDisplayMetrics().heightPixels;
                 final int padding = (int) (width * 0.2);
-                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                if (centerToBounds) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                }
                 if (center != null) {
                     if (currentZoom > 0) {
                         mMap.animateCamera(CameraUpdateFactory.newLatLng(center));
@@ -223,17 +226,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         float accDiff = bestLocation.getAccuracy() - location.getAccuracy();
+        boolean isAccBetter = location.getAccuracy() <= bestLocation.getAccuracy();
         float dist = location.distanceTo(bestLocation);
 
         if (!bestLocation.getProvider().equals(LocationManager.GPS_PROVIDER) || bestLocation.getProvider().equals(location.getProvider())) {
-            if (location.hasAccuracy() && bestLocation.hasAccuracy() && location.getAccuracy() < bestLocation.getAccuracy()) {
+            if (location.hasAccuracy() && bestLocation.hasAccuracy() && isAccBetter) {
                 //Log.d(TAG, "Updating best location.");
                 bestLocation = location;
             }
         }
 
         if (bestLocation.getAccuracy() < AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
-            if (dist > 3f || accDiff > 1f) {
+            if (isAccBetter && (dist > 3f || accDiff > 2f)) {
                 Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + ", distance " + dist + " and accuracy difference " + accDiff);
                 sendGeo(this, settings, bestLocation);
             }
