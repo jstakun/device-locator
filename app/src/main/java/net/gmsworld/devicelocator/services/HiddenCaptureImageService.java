@@ -92,9 +92,13 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
 
             if (HiddenCameraUtils.canOverDrawOtherApps(this) && !isRunning) {
 
-                isRunning = true;
+                try {
 
-                CameraConfig cameraConfig = new CameraConfig()
+                    isRunning = true;
+
+                    Log.d(TAG, "Preparing camera");
+
+                    CameraConfig cameraConfig = new CameraConfig()
                         .getBuilder(this)
                         .setCameraFacing(CameraFacing.FRONT_FACING_CAMERA)
                         .setCameraResolution(CameraResolution.HIGH_RESOLUTION) //.MEDIUM_RESOLUTION)
@@ -102,8 +106,11 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                         .setImageRotation(CameraRotation.ROTATION_270)
                         .build();
 
-                try {
+                    Log.d(TAG, "Starting camera");
+
                     startCamera(cameraConfig);
+
+                    Log.d(TAG, "Picture will be taken in 1 second");
 
                     new Handler().postDelayed(new Runnable() {
                         @Override
