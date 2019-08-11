@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -39,6 +40,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     private final static String TAG = CommandService.class.getSimpleName();
 
     public static final String AUTH_NEEDED = "authNeeded";
+
+    public static final String LAST_COMMAND_SUFFIX = "_lastCommand";
 
     private static final List<String> commandsInProgress = new ArrayList<>();
 
@@ -111,6 +114,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 Log.e(TAG, "Missing command or imei!");
                 return;
             }
+
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putString(imei + LAST_COMMAND_SUFFIX, command).apply();
 
             String pin = extras.getString("pin");
             if (pin == null) {

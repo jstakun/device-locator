@@ -288,14 +288,13 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
     }
 
     public void sendCommand(String command, Intent intent) {
-        PreferenceManager.getDefaultSharedPreferences(CommandActivity.this).edit().putString(device.imei + "_lastCommand", command).apply();
         Toast.makeText(CommandActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
         firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
         startService(intent);
     }
 
     private void setSelectedCommand(PreferencesUtils prefs, Spinner commandSpinner) {
-        String lastCommand = prefs.getString(device.imei + "_lastCommand");
+        String lastCommand = prefs.getString(device.imei + CommandService.LAST_COMMAND_SUFFIX);
         Log.d(TAG, "Found last command " + lastCommand);
         if (StringUtils.isNotEmpty(lastCommand)) {
             AbstractCommand c = Command.getCommandByName(lastCommand);
