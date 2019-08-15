@@ -818,7 +818,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 //show dialog with info What to do if no account is created
                 showLoginDialogFragment();
                 if (settings.contains(USER_LOGIN)) {
-                    PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DevicesUtils.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
+                    PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(MainActivity.USER_LOGIN).apply();
                     onDeleteDevice(Messenger.getDeviceId(this, false), true);
                 }
             }
@@ -841,7 +841,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         } else {
             //Log.d(TAG, "Device settings view is visible");
             if (settings.contains(USER_LOGIN) && settings.contains(DevicesUtils.USER_DEVICES)) {
-                PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DevicesUtils.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
+                PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(MainActivity.USER_LOGIN).apply();
                 onDeleteDevice(Messenger.getDeviceId(this, false), true);
             }
             if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && !silent) {
@@ -1457,7 +1457,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         }
                         //current device has been removed
                         if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
-                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(USER_LOGIN).remove(DevicesUtils.USER_DEVICES).apply();
+                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(USER_LOGIN).remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).apply();
                             if (!silent) {
                                 initUserLoginInput(true, false);
                             }

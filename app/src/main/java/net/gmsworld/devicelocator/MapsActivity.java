@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -60,11 +61,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private String thisDeviceImei = null;
 
+    private long devicesTimestamp = -1;
+
     private float currentZoom = -1f;
 
     private final PrettyTime pt = new PrettyTime();
 
     private Location bestLocation;
+
+    private Handler handler = new Handler();
+
+    private Runnable r = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "Checking for new devices list...");
+            if (devicesTimestamp < settings.getLong(DevicesUtils.USER_DEVICES_TIMESTAMP, -1L)) {
+                Log.d(TAG, "Found!");
+                loadDeviceMarkers(false);
+            } else {
+                Log.d(TAG, "Will check again in 5 seconds...");
+                handler.postDelayed(r, 5000L);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +123,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onPause();
         Log.d(TAG, "onPause()");
         SmartLocation.with(this).location().stop();
+        handler.removeCallbacks(r);
     }
 
     @Override
@@ -140,12 +160,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         loadDeviceMarkers(true);
     }
 
-    public void loadDeviceMarkers(boolean centerToBounds) {
+    private void loadDeviceMarkers(boolean centerToBounds) {
         mMap.clear();
-        LatLng center = null;
-        final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
         devices = DevicesUtils.buildDeviceList(settings);
         if (!devices.isEmpty()) {
+            LatLng center = null;
+            final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
+            devicesTimestamp = settings.getLong(DevicesUtils.USER_DEVICES_TIMESTAMP, -1L);
             int markerCount = 0;
             if (devices.size() > 1) {
                 initLocateButton();
@@ -205,6 +226,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     currentZoom = mMap.getCameraPosition().zoom;
                 }
             }
+            handler.postDelayed(r, 5000L);
         } else {
             RegisterDeviceDialogFragment registerDeviceDialogFragment = new RegisterDeviceDialogFragment();
             registerDeviceDialogFragment.show(this.getFragmentManager(), RegisterDeviceDialogFragment.TAG);

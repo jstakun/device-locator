@@ -164,7 +164,7 @@ public class PermissionsActivity extends AppCompatActivity {
             PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", perm).apply();
             if (!perm && settings.contains(DevicesUtils.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
                 //READ_CONTACTS permission has been revoked: remove devices data
-                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(DevicesUtils.USER_DEVICES).remove(MainActivity.USER_LOGIN).apply();
+                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(MainActivity.USER_LOGIN).apply();
                 DevicesUtils.deleteDevice(this, settings, deviceId);
             }
         } else {

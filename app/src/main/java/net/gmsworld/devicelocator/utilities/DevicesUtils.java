@@ -14,7 +14,6 @@ import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
-import net.gmsworld.devicelocator.MapsActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
@@ -30,6 +29,7 @@ import java.util.Set;
 public class DevicesUtils {
 
     public static final String USER_DEVICES = "userDevices";
+    public static final String USER_DEVICES_TIMESTAMP = "userDevicesTimestamp";
     public static final String CURRENT_DEVICE_ID = "currentDeviceId";
 
     private static final String TAG = DevicesUtils.class.getSimpleName();
@@ -78,13 +78,13 @@ public class DevicesUtils {
                                         for (Device device : userDevices) {
                                             deviceSet.add(device.toString());
                                         }
-                                        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet(DevicesUtils.USER_DEVICES, deviceSet).apply();
+                                        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet(USER_DEVICES, deviceSet).putLong(USER_DEVICES_TIMESTAMP, System.currentTimeMillis()).apply();
                                         if (callerActivity != null) {
                                             if (callerActivity instanceof MainActivity) {
                                                 ((MainActivity)callerActivity).populateDeviceList(userDevices);
-                                            } else if (callerActivity instanceof MapsActivity) {
-                                                ((MapsActivity)callerActivity).loadDeviceMarkers(false);
-                                            }
+                                            } //else if (callerActivity instanceof MapsActivity) {
+                                              //  ((MapsActivity)callerActivity).loadDeviceMarkers(false);
+                                            //}
                                         }
                                     } else if (callerActivity instanceof MainActivity) {
                                         final TextView deviceListEmpty = ((MainActivity)callerActivity).findViewById(R.id.deviceListEmpty);
@@ -96,7 +96,7 @@ public class DevicesUtils {
                                 }
                                 if (!thisDeviceOnList) {
                                     //this device has been removed from other device
-                                    PreferenceManager.getDefaultSharedPreferences(context).edit().remove(MainActivity.USER_LOGIN).remove(DevicesUtils.USER_DEVICES).apply();
+                                    PreferenceManager.getDefaultSharedPreferences(context).edit().remove(MainActivity.USER_LOGIN).remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).apply();
                                     if (callerActivity instanceof MainActivity) {
                                         ((MainActivity)callerActivity).initUserLoginInput(true, false);
                                     }
@@ -136,7 +136,7 @@ public class DevicesUtils {
             public void onGetFinish(String results, int responseCode, String url) {
                 if (responseCode == 200) {
                     Log.d(TAG, "Device " + deviceId + " has been removed!");
-                    PreferenceManager.getDefaultSharedPreferences(context).edit().remove(DevicesUtils.USER_DEVICES).remove(CURRENT_DEVICE_ID).apply();
+                    PreferenceManager.getDefaultSharedPreferences(context).edit().remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(CURRENT_DEVICE_ID).apply();
                 }
             }
         });
