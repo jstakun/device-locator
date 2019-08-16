@@ -3,6 +3,7 @@ package net.gmsworld.devicelocator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.format.DateUtils;
@@ -18,6 +19,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -110,15 +112,27 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        deviceImei = getIntent().getStringExtra("imei");
+        Intent intent = getIntent();
+        String action = intent.getAction();
 
         thisDeviceImei = Messenger.getDeviceId(this, false);
 
-        routeId = getIntent().getStringExtra("routeId");
-
-        now = getIntent().getStringExtra("now");
-
-        deviceName = getIntent().getStringExtra("deviceName");
+        if (action.equals(Intent.ACTION_VIEW)) {
+            Uri data = intent.getData();
+            String[] tokens = StringUtils.split(data.getPath(), "/");
+            if (tokens.length >= 3) {
+                deviceImei = tokens[1];
+                routeId = tokens[2];
+                if (tokens.length >= 4 && StringUtils.equals(tokens[3], "now")) {
+                    now = "true";
+                }
+            }
+        } else {
+            deviceImei = intent.getStringExtra("imei");
+            routeId = getIntent().getStringExtra("routeId");
+            now = getIntent().getStringExtra("now");
+            deviceName = getIntent().getStringExtra("deviceName");
+        }
 
         if (StringUtils.isEmpty(deviceName)) {
             deviceName = deviceImei;
@@ -235,6 +249,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
     private void loadMarkers(boolean zoom) {
         if (mMap != null && !routePoints.isEmpty()) {
             mMap.clear();
+            final LatLngBounds.Builder routePointsBounds = new LatLngBounds.Builder();
 
             if (routePoints.size() > 1) {
                 Marker m = mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)).anchor(0.5f, 0.5f));
@@ -242,7 +257,9 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 for (int i = 0; i < routePoints.size() - 1; i++) {
                     mMap.addPolyline(new PolylineOptions().add(routePoints.get(i), routePoints.get(i + 1)).width(12).color(Color.RED));
                     mMap.addMarker(new MarkerOptions().position(routePoints.get(i + 1)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)).anchor(0.5f, 0.5f));
+                    routePointsBounds.include(routePoints.get(i));
                 }
+                routePointsBounds.include(routePoints.get(routePoints.size()-1));
             }
 
             MarkerOptions mo;
@@ -265,7 +282,12 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             if (zoom) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
             } else {
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(routePoints.get(routePoints.size() - 1)));
+                LatLngBounds bounds = routePointsBounds.build();
+                final int width = getResources().getDisplayMetrics().widthPixels;
+                final int height = getResources().getDisplayMetrics().heightPixels;
+                final int padding = (int) (width * 0.2);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                //mMap.animateCamera(CameraUpdateFactory.newLatLng(routePoints.get(routePoints.size() - 1)));
             }
         }
     }

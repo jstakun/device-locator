@@ -54,7 +54,15 @@
         <activity
             android:name=".RouteActivity"
             android:label="@string/title_activity_route"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="www.gms-world.net" android:pathPrefix="/dlr/" />
+                <data android:scheme="https" android:host="www.gms-world.net" android:pathPrefix="/dlr/" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps"

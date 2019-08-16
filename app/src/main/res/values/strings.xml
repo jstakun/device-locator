@@ -153,8 +153,8 @@
 
     <string name="title_activity_ringing">RingingActivity</string>
 
-    <string name="title_activity_maps">Devices</string>
-    <string name="title_activity_route">Map</string>
+    <string name="title_activity_maps">Devices on Map</string>
+    <string name="title_activity_route">Device Route</string>
 
     <string name="roue_share_text">Follow device %1$s at %2$s</string>
 </resources>
