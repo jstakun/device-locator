@@ -152,6 +152,10 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             deviceImei = intent.getStringExtra("imei");
             routeId = getIntent().getStringExtra("routeId");
             now = getIntent().getStringExtra("now");
+            deviceName = getIntent().getStringExtra("deviceName");
+            if (StringUtils.isEmpty(deviceName)) {
+                deviceName = deviceImei;
+            }
             if (mMap != null) {
                 mMap.clear();
             }
@@ -184,17 +188,20 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         loadMarkers(true);
     }
 
-    public void getRoutePoints(Network.OnGetFinishListener onGetFinishListener) {
+    private void getRoutePoints(Network.OnGetFinishListener onGetFinishListener) {
         if (Network.isNetworkAvailable(this)) {
-            if (!StringUtils.equals(now, "true")) {
-                Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
+            if (StringUtils.isNotEmpty(deviceImei) && StringUtils.isNotEmpty(routeId)) {
+                String queryString = "route=" + "device_locator_route_" + deviceImei + "_" + routeId;
+                if (StringUtils.equals(now, "true")) {
+                    queryString += "&now=true";
+                } else {
+                    Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
+                }
+                //Log.d(TAG, "Calling " + queryString);
+                Network.get(this, getString(R.string.routeProviderUrl) + "?" + queryString, null, onGetFinishListener);
+            } else {
+                Toast.makeText(this, R.string.internal_error, Toast.LENGTH_LONG).show();
             }
-            String queryString = "route=" + "device_locator_route_" + deviceImei + "_" + routeId;
-            if (StringUtils.equals(now, "true")) {
-                queryString += "&now=true";
-            }
-            Log.d(TAG, "Calling " + queryString);
-            Network.get(this, getString(R.string.routeProviderUrl) + "?" + queryString, null, onGetFinishListener);
         } else {
             Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
         }
