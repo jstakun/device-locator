@@ -117,7 +117,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
         thisDeviceImei = Messenger.getDeviceId(this, false);
 
-        if (action.equals(Intent.ACTION_VIEW)) {
+        if (StringUtils.equals(action,Intent.ACTION_VIEW)) {
             Uri data = intent.getData();
             String[] tokens = StringUtils.split(data.getPath(), "/");
             if (tokens.length >= 3) {
@@ -281,13 +281,14 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
             if (zoom) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
-            } else {
+            } else if (routePoints.size() > 1) {
                 LatLngBounds bounds = routePointsBounds.build();
                 final int width = getResources().getDisplayMetrics().widthPixels;
                 final int height = getResources().getDisplayMetrics().heightPixels;
                 final int padding = (int) (width * 0.2);
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
-                //mMap.animateCamera(CameraUpdateFactory.newLatLng(routePoints.get(routePoints.size() - 1)));
+            } else if (routePoints.size() == 1) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
             }
         }
     }
