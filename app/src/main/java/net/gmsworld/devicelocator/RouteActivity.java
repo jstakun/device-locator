@@ -129,9 +129,9 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             }
         } else {
             deviceImei = intent.getStringExtra("imei");
-            routeId = getIntent().getStringExtra("routeId");
-            now = getIntent().getStringExtra("now");
-            deviceName = getIntent().getStringExtra("deviceName");
+            routeId = intent.getStringExtra("routeId");
+            now = intent.getStringExtra("now");
+            deviceName = intent.getStringExtra("deviceName");
         }
 
         if (StringUtils.isEmpty(deviceName)) {
