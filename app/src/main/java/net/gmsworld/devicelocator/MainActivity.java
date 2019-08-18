@@ -61,6 +61,7 @@ import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
 import net.gmsworld.devicelocator.fragments.DownloadFullApplicationDialogFragment;
+import net.gmsworld.devicelocator.fragments.EmailNotificationDialogFragment;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
 import net.gmsworld.devicelocator.fragments.LoginDialogFragment;
 import net.gmsworld.devicelocator.fragments.NewVersionDialogFragment;
@@ -481,6 +482,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private void showRemoveDeviceDialogFragment(final Device device) {
         RemoveDeviceDialogFragment removeDeviceDialogFragment = RemoveDeviceDialogFragment.newInstance(this, device);
         removeDeviceDialogFragment.show(getFragmentManager(), RemoveDeviceDialogFragment.TAG);
+    }
+
+    private void showEmailNotificationDialogFragment(final String userLogin) {
+        EmailNotificationDialogFragment emailNotificationDialogFragment = EmailNotificationDialogFragment.newInstance(userLogin);
+        emailNotificationDialogFragment.show(getFragmentManager(), EmailNotificationDialogFragment.TAG);
     }
 
     private void initLocationSMSCheckbox() {
@@ -954,18 +960,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     //email input setup ------------------------------------------------------------------
 
     private void initEmailInput() {
-        final TextView emailInput = this.findViewById(R.id.email);
+        final TextView emailInput = findViewById(R.id.email);
         emailInput.setText(email);
 
         emailInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 
             public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    registerEmail(emailInput, false);
-                } else {
-                    //paste email from clipboard
+                if (hasFocus) {
                     String currentText = emailInput.getText().toString();
                     if (currentText.isEmpty()) {
+                        //paste email from clipboard
+                        boolean pasted = false;
                         try {
                             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                             if (clipboard != null && clipboard.hasPrimaryClip()) {
@@ -976,14 +981,30 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     if (!StringUtils.equals(pasteData, email) && Patterns.EMAIL_ADDRESS.matcher(pasteData).matches()) {
                                         emailInput.setText(pasteData);
                                         Toast.makeText(getApplicationContext(), "Pasted email address from clipboard!", Toast.LENGTH_SHORT).show();
+                                        pasted = true;
                                         break;
                                     }
                                 }
                             }
                         } catch (Exception e) {
-                            Log.e(TAG, "Failed to paste text from clipboard", e);
+                            Log.e(TAG, e.getMessage(), e);
+                        }
+                        if (!pasted)
+                        {
+                            try {
+                                //set email from user login
+                                final String userLogin = settings.getString(USER_LOGIN);
+                                if (StringUtils.isNotEmpty(userLogin) && Patterns.EMAIL_ADDRESS.matcher(userLogin).matches()) {
+                                    //show dialog with user email
+                                    showEmailNotificationDialogFragment(userLogin);
+                                }
+                            } catch (Exception e) {
+                                Log.e(TAG, e.getMessage(), e);
+                            }
                         }
                     }
+                } else {
+                    registerEmail(emailInput, false);
                 }
             }
         });
