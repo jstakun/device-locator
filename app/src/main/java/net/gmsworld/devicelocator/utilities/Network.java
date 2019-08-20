@@ -58,6 +58,7 @@ public class Network {
     public static String get(Context context, String urlString, Map<String, String> headers) {
         HttpURLConnection urlConnection;
         String response = null;
+        int responseCode = -1;
 
         try {
             URL url = new URL(urlString);
@@ -87,9 +88,13 @@ public class Network {
             }
 
             response = total.toString();
-
+            responseCode = urlConnection.getResponseCode();
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
+            if (responseCode == -1) {
+                responseCode = 500;
+                response = e.getClass().getName() + ": " + e.getMessage();
+            }
         }
 
         return response;
@@ -202,6 +207,7 @@ public class Network {
                 Log.e(TAG, e.getMessage(), e);
                 if (responseCode == -1) {
                     responseCode = 500;
+                    response = e.getClass().getName() + ": " + e.getMessage();
                 }
             }
             return responseCode;
@@ -305,6 +311,7 @@ public class Network {
                 Log.d(TAG, ".uploadScreenshot() exception: " + e.getMessage(), e);
                 if (responseCode == -1) {
                     responseCode = 500;
+                    response = e.getClass().getName() + ": " + e.getMessage();
                 }
             } finally {
                 try {
@@ -403,6 +410,7 @@ public class Network {
                 Log.e(TAG, e.getMessage(), e);
                 if (responseCode == -1) {
                     responseCode = 500;
+                    response = e.getClass().getName() + ": " + e.getMessage();
                 }
             }
 

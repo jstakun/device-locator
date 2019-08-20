@@ -158,7 +158,8 @@ public class Command {
             final String commandName = message.split("dl")[0];
             Log.d(TAG, "Invalid command " + commandName + " found in message!");
             if (StringUtils.isNotEmpty(sender)) {
-                Messenger.sendCloudMessage(context, null, sender, "Invalid command " + commandName + " sent to device " + Messenger.getDeviceId(context, true), commandName, 1, new HashMap<String, String>());
+                final String msg = "Invalid command " + commandName + " sent to device " + Messenger.getDeviceId(context, true);
+                Messenger.sendCloudMessage(context, null, sender, msg, commandName, 1, 2000, new HashMap<String, String>());
             }
             AbstractCommand.sendSocialNotification(context, INVALID_COMMAND, sender, commandName);
         }

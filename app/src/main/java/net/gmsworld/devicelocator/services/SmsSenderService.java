@@ -148,6 +148,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
         if (currentTime - startTime < LOCATION_REQUEST_MAX_WAIT_TIME) {
 
+            Log.d(TAG, "Checking for deadline: " + (currentTime - startTime) + " < " + LOCATION_REQUEST_MAX_WAIT_TIME);
+
             //check if location is older than 10 minutes
             if ((System.currentTimeMillis() - location.getTime()) > 10 * 60 * 1000) {
                 Log.d(TAG, "Location is older than 10 minutes");
@@ -176,10 +178,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
     private synchronized void disableUpdates() {
         //stop the location updates
+        SmartLocation.with(this).location().stop();
+
         if (isRunning) {
             Log.d(TAG, "Disabling location updates...");
-
-            SmartLocation.with(this).location().stop();
 
             handler.removeCallbacks(task);
 
@@ -189,7 +191,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 if (gpsSms && isRunning) {
                     Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), phoneNumber, telegramId, email, app);
                 } else {
-                    Log.d(TAG, "Location message won't be send");
+                    Log.d(TAG, "Location details message won't be send");
                 }
 
                 if (googleMapsSms && isRunning) {
@@ -200,6 +202,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             }
             isRunning = false;
         }
+
+        stopSelf();
     }
 
     private void readSettings() {
