@@ -20,7 +20,10 @@ import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
@@ -160,13 +163,16 @@ public class Network {
                 }
 
                 if (content != null) {
-                    urlConnection.setRequestProperty("Content-Length", Integer.toString(content.length()));
-
+                    String contentEnc = null;
                     if (contentType != null) {
+                        contentEnc = content;
                         urlConnection.setRequestProperty("Content-Type", contentType);
                     } else {
+                        contentEnc = encodeQueryStringUTF8(content);
                         urlConnection.setRequestProperty("Content-Type", FORM_ENCODING);
                     }
+
+                    urlConnection.setRequestProperty("Content-Length", Integer.toString(contentEnc.length()));
 
                     urlConnection.setDoInput(true);
                     urlConnection.setDoOutput(true);
@@ -175,7 +181,7 @@ public class Network {
 
                     //Send request
                     DataOutputStream wr = new DataOutputStream(urlConnection.getOutputStream());
-                    wr.writeBytes(content);
+                    wr.writeBytes(contentEnc);
                     wr.flush();
                     wr.close();
                 } else {
@@ -344,6 +350,16 @@ public class Network {
             }
         }
         return defaultHeaders;
+    }
+
+    private static String encodeQueryStringUTF8(final String queryString) throws Exception {
+        List<String> query_pairs = new ArrayList<>();
+        String[] pairs = queryString.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            query_pairs.add(pair.substring(0, idx) + "=" + URLEncoder.encode(pair.substring(idx + 1), "UTF-8"));
+        }
+        return StringUtils.join(query_pairs, "&");
     }
 
     static class GetTask extends AsyncTask<Void, Integer, Integer> {

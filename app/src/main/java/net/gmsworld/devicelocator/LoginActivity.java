@@ -158,7 +158,7 @@ public class LoginActivity extends AppCompatActivity  {
                         headers.put("X-GMS-DeviceId", deviceId);
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
-                    String queryString = "type=reset&login=" + email;
+                    final String queryString = "type=reset&login=" + email;
                     Network.post(this, getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {

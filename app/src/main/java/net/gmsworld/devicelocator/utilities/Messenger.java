@@ -252,7 +252,7 @@ public class Messenger {
 
     private static void sendEmail(final Context context, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
         try {
-            String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title + "&username=" + getDeviceId(context, false);
+            final String queryString = "type=m_dl&emailTo=" + email + "&message=" + message + "&title=" + title + "&username=" + getDeviceId(context, false);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -336,7 +336,7 @@ public class Messenger {
 
     private static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
         try {
-            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context, false);
+            final String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context, false);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -434,7 +434,7 @@ public class Messenger {
 
     private static void sendRoutePoint(final Context context, final int retryCount, final Map<String, String> headers) {
         try {
-            String queryString = "type=routePoint&username=" + getDeviceId(context, false);
+            final String queryString = "type=routePoint&username=" + getDeviceId(context, false);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -1078,7 +1078,7 @@ public class Messenger {
         headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
 
         try {
-            String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false);
+            final String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false);
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
