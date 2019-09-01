@@ -27,6 +27,7 @@ import net.gmsworld.devicelocator.services.CommandService;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,6 +103,12 @@ public class NotificationUtils {
         String deviceName = extras.getString(MainActivity.DEVICE_NAME);
         String routeId = extras.getString("routeId");
         String title = context.getString(R.string.app_name) + " Notification";
+
+        try {
+            message = URLDecoder.decode(message, "UTF-8");
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
 
         if (deviceLocation != null) {
             //message has location
