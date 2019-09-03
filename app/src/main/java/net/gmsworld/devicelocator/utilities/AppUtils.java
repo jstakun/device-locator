@@ -2,6 +2,7 @@ package net.gmsworld.devicelocator.utilities;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.os.Build;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.BuildConfig;
@@ -36,13 +37,14 @@ public class AppUtils {
         if (aboutMessage == null) {
             String versionName = "latest";
             int versionCode = 1;
+            String androidVersion =  "Android " + Build.VERSION.RELEASE + " (SDK " + Build.VERSION.SDK_INT +")";
 
             if (getPackageInfo(c) != null) {
                 versionName = getPackageInfo(c).versionName;
                 versionCode = getPackageInfo(c).versionCode;
             }
 
-            aboutMessage = c.getString(R.string.info_about, c.getString(R.string.app_name), versionName, versionCode, BuildConfig.APP_TYPE, getBuildDate(c), Calendar.getInstance().get(Calendar.YEAR), c.getString(R.string.serverUrl), Messenger.getDeviceId(c, true));
+            aboutMessage = c.getString(R.string.info_about, c.getString(R.string.app_name), versionName, versionCode, BuildConfig.APP_TYPE, getBuildDate(c), Calendar.getInstance().get(Calendar.YEAR), c.getString(R.string.serverUrl), Messenger.getDeviceId(c, true), androidVersion);
         }
         return aboutMessage;
     }

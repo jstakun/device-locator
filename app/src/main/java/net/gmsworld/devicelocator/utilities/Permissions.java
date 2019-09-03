@@ -218,8 +218,14 @@ public class Permissions {
 
     public static void startNotificationPolicyAccessIntent(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Toast.makeText(context, "Please grant \"Do Not Disturb\" access to " + context.getString(R.string.app_name), Toast.LENGTH_LONG).show();
             Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
-            context.startActivity(intent);
+            try {
+                context.startActivity(intent);
+            } catch (Exception e){
+                Log.e(TAG, e.getMessage(), e);
+            }
+
         } else {
             Toast.makeText(context, "This permission is granted by default on your device!", Toast.LENGTH_LONG).show();
         }
