@@ -37,7 +37,7 @@ public class AppUtils {
         if (aboutMessage == null) {
             String versionName = "latest";
             int versionCode = 1;
-            String androidVersion =  "Android " + Build.VERSION.RELEASE + " (SDK " + Build.VERSION.SDK_INT +")";
+            String androidVersion =  "Android " + Build.VERSION.RELEASE + ", API " + Build.VERSION.SDK_INT;
 
             if (getPackageInfo(c) != null) {
                 versionName = getPackageInfo(c).versionName;

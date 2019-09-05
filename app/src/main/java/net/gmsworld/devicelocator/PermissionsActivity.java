@@ -194,11 +194,14 @@ public class PermissionsActivity extends AppCompatActivity {
         }
 
         Switch readPhoneStatePermission = findViewById(R.id.read_phone_state_permission);
-        readPhoneStatePermission.setChecked(Permissions.haveReadPhoneStatePermission(this));
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            readPhoneStatePermission.setChecked(Permissions.haveReadPhoneStatePermission(this));
+        } else {
+            readPhoneStatePermission.setVisibility(View.GONE);
+        }
 
         Switch getAccountsPermission = findViewById(R.id.get_accounts_permission);
         getAccountsPermission.setChecked(Permissions.haveGetAccountsPermission(this));
-
     }
 
     @Override

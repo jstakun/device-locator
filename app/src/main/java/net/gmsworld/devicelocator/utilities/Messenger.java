@@ -1160,7 +1160,7 @@ public class Messenger {
 
         if (androidDeviceId == null && context != null) {
             //get telephony imei Manifest.permission.READ_PHONE_STATE required
-            if (Permissions.haveReadPhoneStatePermission(context)) {
+            if (Permissions.haveReadPhoneStatePermission(context) && Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                 try {
                     final TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                     if (tm != null) {
@@ -1174,7 +1174,7 @@ public class Messenger {
             // get internal android device id
             if (StringUtils.isEmpty(androidDeviceId)) {
                 try {
-                    androidDeviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    androidDeviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID); //Android Secure ID (SSAID)
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
                 }
