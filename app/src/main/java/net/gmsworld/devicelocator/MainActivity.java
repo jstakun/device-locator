@@ -494,10 +494,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false));
         ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, true));
         ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
-        //check if READ_CONTACTS permission is set
-        if (settings.getBoolean("settings_sms_contacts", false) && !Permissions.haveReadContactsPermission(this)) {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("settings_sms_contacts", false).apply();
-        }
     }
 
     public void onLocationSMSCheckboxClicked(View view) {

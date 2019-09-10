@@ -96,9 +96,6 @@ public class PermissionsActivity extends AppCompatActivity {
             //device is registered in onResume()
         } else if (requestCode == CONTACTS_PERMISSION) {
             Log.d(TAG, "Contacts permission callback");
-            if (Permissions.haveReadContactsPermission(this)) {
-                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", true).apply();
-            }
         }
     }
 
@@ -161,9 +158,8 @@ public class PermissionsActivity extends AppCompatActivity {
         if (AppUtils.getInstance().isFullVersion()) {
             boolean perm = Permissions.haveReadContactsPermission(this);
             readContactsPermission.setChecked(perm);
-            PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_contacts", perm).apply();
             if (!perm && settings.contains(DevicesUtils.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
-                //READ_CONTACTS permission has been revoked: remove devices data
+                //READ_CONTACTS permission has been revoked: remove this device old data
                 PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(MainActivity.USER_LOGIN).apply();
                 DevicesUtils.deleteDevice(this, settings, deviceId);
             }
@@ -276,14 +272,14 @@ public class PermissionsActivity extends AppCompatActivity {
                 if (checked && !Permissions.haveLocationPermission(this)) {
                     Permissions.requestLocationPermission(this, 0);
                 } else if (!checked) {
-                    Permissions.startSettingsIntent(this);
+                    Permissions.startSettingsIntent(this , "Location");
                 }
                 break;
             case R.id.sms_permission:
                 if (checked && !Permissions.haveSendSMSPermission(this)) {
                     Permissions.requestSendSMSPermission(this, 0);
                 } else if (!checked) {
-                    Permissions.startSettingsIntent(this);
+                    Permissions.startSettingsIntent(this, "SMS");
                 }
                 break;
             case R.id.camera_permission:
@@ -293,7 +289,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 if (checked && !Permissions.haveReadContactsPermission(this)) {
                     Permissions.requestContactsPermission(this, CONTACTS_PERMISSION);
                 } else if (!checked) {
-                    Permissions.startSettingsIntent(this);
+                    Permissions.startSettingsIntent(this, "Contacts");
                 }
                 break;
             case R.id.use_fingerprint_permission:
@@ -303,7 +299,7 @@ public class PermissionsActivity extends AppCompatActivity {
                     if (fingerprintManager != null && fingerprintManager.isHardwareDetected() && checked && !Permissions.haveFingerprintPermission(this)) {
                         Permissions.requestCallPhonePermission(this, 0);
                     } else if (!checked && fingerprintManager != null && fingerprintManager.isHardwareDetected() && Permissions.haveFingerprintPermission(this)) {
-                        Permissions.startSettingsIntent(this);
+                        Permissions.startSettingsIntent(this, "Biometric");
                     } else if (fingerprintManager == null || !fingerprintManager.isHardwareDetected()) {
                         Toast.makeText(this, "Your device has no fingerprint reader!", Toast.LENGTH_LONG).show();
                     }
@@ -314,7 +310,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 if (checked && !Permissions.haveCallPhonePermission(this)) {
                     Permissions.requestCallPhonePermission(this, CALL_PERMISSION);
                 } else if (!checked) {
-                    Permissions.startSettingsIntent(this);
+                    Permissions.startSettingsIntent(this, "Phone");
                 }
                 break;
             case R.id.read_phone_state_permission:
@@ -322,14 +318,14 @@ public class PermissionsActivity extends AppCompatActivity {
                 if (checked && !Permissions.haveReadPhoneStatePermission(this)) {
                     Permissions.requestReadPhoneStatePermission(this, CALL_PERMISSION);
                 } else if (!checked) {
-                    Permissions.startSettingsIntent(this);
+                    Permissions.startSettingsIntent(this, "Phone");
                 }
                 break;
             case R.id.get_accounts_permission:
                 if (checked && !Permissions.haveGetAccountsPermission(this)) {
                     Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
                 } else if (!checked) {
-                    Permissions.startSettingsIntent(this);
+                    Permissions.startSettingsIntent(this, "Contacts");
                 }
                 break;
             case R.id.reset_permission:
@@ -363,7 +359,7 @@ public class PermissionsActivity extends AppCompatActivity {
             }
         } else {
             Log.d(TAG, "Camera is currently on");
-            Permissions.startSettingsIntent(PermissionsActivity.this);
+            Permissions.startSettingsIntent(PermissionsActivity.this, "Camera");
         }
     }
 

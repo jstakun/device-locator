@@ -190,9 +190,9 @@ public class Permissions {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
     }
 
-    public static void startSettingsIntent(Context context) {
+    public static void startSettingsIntent(Context context, String permission) {
         try {
-            Toast.makeText(context, "Click on Permissions", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Click on Permissions and select " + permission, Toast.LENGTH_LONG).show();
             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + context.getPackageName()));
             //https://stackoverflow.com/questions/31955872/how-to-jump-to-the-manage-permission-page-in-settings-app-with-code
             //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

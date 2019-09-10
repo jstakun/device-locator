@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.telephony.SmsMessage;
 import android.util.Log;
@@ -30,7 +29,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
         boolean proceed = true;
 
-        if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("settings_sms_contacts", false)) {
+        if (Permissions.haveReadContactsPermission(context)) {
             proceed = false;
             if (bundle != null) {
                 Object[] pdus = (Object[]) bundle.get("pdus");
