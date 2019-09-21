@@ -16,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 
+import static net.gmsworld.devicelocator.utilities.Messenger.CID_SEPARATOR;
+
 /**
  * Created by jstakun on 10/25/17.
  */
@@ -111,7 +113,12 @@ public abstract class AbstractCommand {
     protected final int findSocialCommand(Context context, String message, String pin, String sender, boolean isPinRequired, boolean hasSocialNotifiers) {
         int foundCommand = 0;
         if ((StringUtils.startsWithIgnoreCase(message, smsCommand + "t") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "t")) && hasSocialNotifiers) {
-            auditCommand(context, smsCommand + "t", sender.split(" ")[0], message);
+            String[] ts = StringUtils.split(sender, CID_SEPARATOR);
+            String s = sender;
+            if (ts.length > 0) {
+                s = ts[0];
+            }
+            auditCommand(context, smsCommand + "t", s, message);
             foundCommand = findKeyword(context, smsCommand + "t", message, pin, sender, isPinRequired);
             if (foundCommand == 1) {
                 onSocialCommandFound(null, context);
@@ -128,7 +135,12 @@ public abstract class AbstractCommand {
     protected final int findAppCommand(Context context, String message, String sender, Location location, Bundle extras, String pin, boolean isPinRequired) {
         int foundCommand = 0;
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "app") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "app")) {
-            auditCommand(context, smsCommand + "app", sender.split(" ")[0], message);
+            String[] ts = StringUtils.split(sender, CID_SEPARATOR);
+            String s = sender;
+            if (ts.length > 0) {
+                s = ts[0];
+            }
+            auditCommand(context, smsCommand + "app", s, message);
             foundCommand = findKeyword(context, smsCommand + "app", message, pin, sender, isPinRequired);
             if (foundCommand == 1) {
                 onAppCommandFound(sender, context, location, extras);
@@ -146,7 +158,12 @@ public abstract class AbstractCommand {
         int foundCommand = 0;
         //Log.d(TAG, "Matching " + message + " with " + smsCommand + "adminapp");
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "admindlt") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "admindlt")) {
-            auditCommand(context, smsCommand + "admindlt", sender.split(" ")[0], message);
+            String[] ts = StringUtils.split(sender, CID_SEPARATOR);
+            String s = sender;
+            if (ts.length > 0) {
+                s = ts[0];
+            }
+            auditCommand(context, smsCommand + "admindlt", s, message);
             foundCommand = findKeyword(context, smsCommand + "admindlt", message, otp, sender, false);
             if (foundCommand == 1) {
                 onAdmCommandFound(sender, context);
@@ -265,7 +282,11 @@ public abstract class AbstractCommand {
     }
 
     private void auditCommand(Context context, final String command, final String from, final String message) {
-        String auditLog = System.currentTimeMillis() + " "  + Messenger.CID_SEPARATOR + from + " " + command;
+        String auditLog = System.currentTimeMillis() + " ";
+        if (StringUtils.isNotEmpty(from)) {
+            auditLog += Messenger.CID_SEPARATOR + from + " ";
+        }
+        auditLog += command;
         if (StringUtils.isNotEmpty(message)) {
             auditLog += " " + message;
         }
