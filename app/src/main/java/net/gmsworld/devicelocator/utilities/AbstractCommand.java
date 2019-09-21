@@ -115,7 +115,7 @@ public abstract class AbstractCommand {
         if ((StringUtils.startsWithIgnoreCase(message, smsCommand + "t") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "t")) && hasSocialNotifiers) {
             String[] ts = StringUtils.split(sender, CID_SEPARATOR);
             String s = sender;
-            if (ts.length > 0) {
+            if (ts != null && ts.length > 0) {
                 s = ts[0];
             }
             auditCommand(context, smsCommand + "t", s, message);
@@ -137,7 +137,7 @@ public abstract class AbstractCommand {
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "app") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "app")) {
             String[] ts = StringUtils.split(sender, CID_SEPARATOR);
             String s = sender;
-            if (ts.length > 0) {
+            if (ts != null && ts.length > 0) {
                 s = ts[0];
             }
             auditCommand(context, smsCommand + "app", s, message);
@@ -160,7 +160,7 @@ public abstract class AbstractCommand {
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "admindlt") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "admindlt")) {
             String[] ts = StringUtils.split(sender, CID_SEPARATOR);
             String s = sender;
-            if (ts.length > 0) {
+            if (ts != null && ts.length > 0) {
                 s = ts[0];
             }
             auditCommand(context, smsCommand + "admindlt", s, message);
