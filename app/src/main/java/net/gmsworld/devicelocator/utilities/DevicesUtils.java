@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -170,4 +171,14 @@ public class DevicesUtils {
         }
         return userDevices;
     }
+
+    public static String getDeviceName(List<Device> devices, String deviceId) {
+        for (Device d : devices) {
+            if (d.imei.equals(deviceId)) {
+                return d.name;
+            }
+        }
+        return deviceId;
+    }
+
 }

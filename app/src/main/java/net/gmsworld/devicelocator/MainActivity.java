@@ -359,6 +359,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             case R.id.map:
                 startActivity(new Intent(this, MapsActivity.class));
                 return true;
+            case R.id.commandLog:
+                startActivity(new Intent(this, CommandListActivity.class));
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -381,6 +383,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             menu.findItem(R.id.tracker).setVisible(true);
             menu.findItem(R.id.devices).setVisible(true);
             menu.findItem(R.id.sms).setVisible(false);
+        }
+
+        if (Files.getAuditComands(this) == 0) {
+            menu.findItem(R.id.commandLog).setVisible(false);
         }
 
         return true;

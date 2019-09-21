@@ -42,12 +42,14 @@ public class Files {
                 long start = System.nanoTime();
                 queueFile = new QueueFile.Builder(fc).build();
                 Iterator<byte[]> iterator = queueFile.iterator();
+                int count = 0;
                 while (iterator.hasNext()) {
                     byte[] element = iterator.next();
                     lines.add(new String(element));
+                    count++;
                 }
                 long time = System.nanoTime() - start;
-                Log.d(TAG, "Route file processed in " + time + " ns.");
+                Log.d(TAG, "File " + filename + " containing " + count + " points processed in " + time + " ns.");
             }
         } catch(Exception e){
             Log.d(TAG, e.getMessage(), e);
@@ -65,15 +67,23 @@ public class Files {
     }
 
     public static int getRoutePoints(Context context) {
+        return getQueueSize(ROUTE_FILE, context);
+    }
+
+    public static int getAuditComands(Context context) {
+        return getQueueSize(AbstractCommand.AUDIT_FILE, context);
+    }
+
+    private static int getQueueSize(String queueName, Context context) {
         int numOfPoints=0;
         QueueFile queueFile = null;
 
         try {
-            File fc = getFilesDir(context, ROUTE_FILE, false);
+            File fc = getFilesDir(context, queueName, false);
             if (fc.exists()) {
                 queueFile = new QueueFile.Builder(fc).build();
                 numOfPoints = queueFile.size();
-                Log.d(TAG, "Route file has " + numOfPoints + " points.");
+                Log.d(TAG, "Queue file " + queueName + " has " + numOfPoints + " items.");
             }
         } catch(Exception e){
             Log.d(TAG, e.getMessage(), e);

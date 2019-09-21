@@ -25,4 +25,9 @@
         android:title="@string/title_activity_permissions"
         android:icon="@drawable/ic_settings_cell_white"
         app:showAsAction="ifRoom|withText"/>
+    <item
+        android:id="@+id/commandLog"
+        android:title="@string/command_log"
+        android:icon="@drawable/ic_format_list_bulleted_white"
+        app:showAsAction="ifRoom|withText"/>
 </menu>
