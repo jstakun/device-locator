@@ -84,11 +84,11 @@ public abstract class AbstractCommand {
         //sms with sms notification
         if (StringUtils.startsWithIgnoreCase(smsMessage, smsCommand)) {
             status = findCommandInMessage(context, smsCommand, smsMessage, pin, sender, isPinRequired);
-            auditCommand(context, smsCommand, sender);
+            auditCommand(context, smsCommand, sender, smsMessage);
         }
         if (status == 0 && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
             status = findCommandInMessage(context, smsShortCommand, smsMessage, pin, sender, isPinRequired);
-            auditCommand(context, smsShortCommand, sender);
+            auditCommand(context, smsShortCommand, sender, smsMessage);
         }
         if (status == 1) {
             onSmsCommandFound(sender, context);
@@ -111,7 +111,7 @@ public abstract class AbstractCommand {
     protected final int findSocialCommand(Context context, String message, String pin, String sender, boolean isPinRequired, boolean hasSocialNotifiers) {
         int foundCommand = 0;
         if ((StringUtils.startsWithIgnoreCase(message, smsCommand + "t") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "t")) && hasSocialNotifiers) {
-            auditCommand(context, message, sender.split(" ")[0]);
+            auditCommand(context, smsCommand + "t", sender.split(" ")[0], message);
             foundCommand = findKeyword(context, smsCommand + "t", message, pin, sender, isPinRequired);
             if (foundCommand == 1) {
                 onSocialCommandFound(null, context);
@@ -128,7 +128,7 @@ public abstract class AbstractCommand {
     protected final int findAppCommand(Context context, String message, String sender, Location location, Bundle extras, String pin, boolean isPinRequired) {
         int foundCommand = 0;
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "app") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "app")) {
-            auditCommand(context, message, sender.split(" ")[0]);
+            auditCommand(context, smsCommand + "app", sender.split(" ")[0], message);
             foundCommand = findKeyword(context, smsCommand + "app", message, pin, sender, isPinRequired);
             if (foundCommand == 1) {
                 onAppCommandFound(sender, context, location, extras);
@@ -146,7 +146,7 @@ public abstract class AbstractCommand {
         int foundCommand = 0;
         //Log.d(TAG, "Matching " + message + " with " + smsCommand + "adminapp");
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "admindlt") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "admindlt")) {
-            auditCommand(context, message, sender.split(" ")[0]);
+            auditCommand(context, smsCommand + "admindlt", sender.split(" ")[0], message);
             foundCommand = findKeyword(context, smsCommand + "admindlt", message, otp, sender, false);
             if (foundCommand == 1) {
                 onAdmCommandFound(sender, context);
@@ -264,8 +264,12 @@ public abstract class AbstractCommand {
         context.startService(newIntent);
     }
 
-    private void auditCommand(Context context, final String command, final String from) {
+    private void auditCommand(Context context, final String command, final String from, final String message) {
+        String auditLog = System.currentTimeMillis() + " "  + Messenger.CID_SEPARATOR + from + " " + command;
+        if (StringUtils.isNotEmpty(message)) {
+            auditLog += " " + message;
+        }
         File auditFile = Files.getFilesDir(context, AUDIT_FILE, false);
-        Files.appendLineToFileFromContextDir(auditFile, System.currentTimeMillis() + " "  + Messenger.CID_SEPARATOR + from + " " + command, 100, 10);
+        Files.appendLineToFileFromContextDir(auditFile, auditLog, 100, 10);
     }
 }
