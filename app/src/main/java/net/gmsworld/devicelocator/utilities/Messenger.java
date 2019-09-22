@@ -69,8 +69,6 @@ public class Messenger {
 
     public static final String CID_SEPARATOR = "+=+";
 
-    private static Handler handler = new Handler();
-
     private static void sendSMS(final Context context, final String phoneNumber, final String message) {
         String status = null;
         if (Permissions.haveSendSMSPermission(context)) {
@@ -137,7 +135,7 @@ public class Messenger {
                                     Log.e(TAG, "Failed to parse token!");
                                 }
                             } else if (responseCode == 500 && retryCount > 0) {
-                                handler.postDelayed(new Runnable() {
+                                new Handler().postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
                                         sendCloudMessage(context, location, replyTo, message, replyToCommand, retryCount - 1, delayMillis * 2, headers);
@@ -152,7 +150,7 @@ public class Messenger {
             } else {
                 Log.w(TAG, context.getString(R.string.no_network_error));
                 if (retryCount > 0) {
-                    handler.postDelayed(new Runnable() {
+                    new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             sendCloudMessage(context, location, replyTo, message, replyToCommand, retryCount - 1, delayMillis * 2, headers);
@@ -187,7 +185,7 @@ public class Messenger {
                         Toast.makeText(context, "Command has been rejected! Please try again after some time.", Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "Message has been rejected by server!");
                     } else if (responseCode == 500 && retryCount > 0) {
-                        handler.postDelayed(new Runnable() {
+                        new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 sendCloudMessage(context, replyTo, message, replyToCommand, retryCount - 1, delayMillis * 2, headers);

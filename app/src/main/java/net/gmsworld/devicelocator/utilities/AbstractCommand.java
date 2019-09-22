@@ -86,11 +86,15 @@ public abstract class AbstractCommand {
         //sms with sms notification
         if (StringUtils.startsWithIgnoreCase(smsMessage, smsCommand)) {
             status = findCommandInMessage(context, smsCommand, smsMessage, pin, sender, isPinRequired);
-            auditCommand(context, smsCommand, sender, smsMessage);
+            if (status == 1) {
+                auditCommand(context, smsCommand, sender, smsMessage);
+            }
         }
         if (status == 0 && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
             status = findCommandInMessage(context, smsShortCommand, smsMessage, pin, sender, isPinRequired);
-            auditCommand(context, smsShortCommand, sender, smsMessage);
+            if (status == 1) {
+                auditCommand(context, smsShortCommand, sender, smsMessage);
+            }
         }
         if (status == 1) {
             onSmsCommandFound(sender, context);
@@ -110,20 +114,22 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    protected final int findSocialCommand(Context context, String message, String pin, String sender, boolean isPinRequired, boolean hasSocialNotifiers) {
+    protected final int findSocialCommand(Context context, String message, String pin, String replyTo, boolean isPinRequired, boolean hasSocialNotifiers) {
         int foundCommand = 0;
         if ((StringUtils.startsWithIgnoreCase(message, smsCommand + "t") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "t")) && hasSocialNotifiers) {
-            String[] ts = StringUtils.split(sender, CID_SEPARATOR);
-            String s = sender;
-            if (ts != null && ts.length > 0) {
-                s = ts[0];
+            String sender = replyTo;
+            if (replyTo != null) {
+                String[] ts = StringUtils.split(replyTo, CID_SEPARATOR);
+                if (ts != null && ts.length > 0) {
+                    sender = ts[0];
+                }
             }
-            auditCommand(context, smsCommand + "t", s, message);
-            foundCommand = findKeyword(context, smsCommand + "t", message, pin, sender, isPinRequired);
+            auditCommand(context, smsCommand + "t", sender, message);
+            foundCommand = findKeyword(context, smsCommand + "t", message, pin, replyTo, isPinRequired);
             if (foundCommand == 1) {
                 onSocialCommandFound(null, context);
             } else if (foundCommand == 0) {
-                foundCommand = findKeyword(context, smsShortCommand + "t", message, pin, sender, isPinRequired);
+                foundCommand = findKeyword(context, smsShortCommand + "t", message, pin, replyTo, isPinRequired);
                 if (foundCommand == 1) {
                     onSocialCommandFound(null, context);
                 }
@@ -132,45 +138,52 @@ public abstract class AbstractCommand {
         return foundCommand;
     }
 
-    protected final int findAppCommand(Context context, String message, String sender, Location location, Bundle extras, String pin, boolean isPinRequired) {
+    protected final int findAppCommand(Context context, String message, String replyTo, Location location, Bundle extras, String pin, boolean isPinRequired) {
         int foundCommand = 0;
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "app") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "app")) {
-            String[] ts = StringUtils.split(sender, CID_SEPARATOR);
-            String s = sender;
-            if (ts != null && ts.length > 0) {
-                s = ts[0];
+            String sender = replyTo;
+            if (replyTo != null) {
+                String[] ts = StringUtils.split(replyTo, CID_SEPARATOR);
+                if (ts != null && ts.length > 0) {
+                    sender = ts[0];
+                }
             }
-            auditCommand(context, smsCommand + "app", s, message);
-            foundCommand = findKeyword(context, smsCommand + "app", message, pin, sender, isPinRequired);
+            if (sender == null && extras.containsKey("imei")) {
+                sender = extras.getString("imei");
+            }
+            auditCommand(context, smsCommand + "app", sender, message);
+            foundCommand = findKeyword(context, smsCommand + "app", message, pin, replyTo, isPinRequired);
             if (foundCommand == 1) {
-                onAppCommandFound(sender, context, location, extras);
+                onAppCommandFound(replyTo, context, location, extras);
             } else if (foundCommand == 0) {
-                foundCommand = findKeyword(context, smsShortCommand + "app", message, pin, sender, isPinRequired);
+                foundCommand = findKeyword(context, smsShortCommand + "app", message, pin, replyTo, isPinRequired);
                 if (foundCommand == 1) {
-                    onAppCommandFound(sender, context, location, extras);
+                    onAppCommandFound(replyTo, context, location, extras);
                 }
             }
         }
         return foundCommand;
     }
 
-    protected final int findAdmCommand(Context context, String message, String sender, Location location, Bundle extras, String otp) {
+    protected final int findAdmCommand(Context context, String message, String replyTo, Location location, Bundle extras, String otp) {
         int foundCommand = 0;
         //Log.d(TAG, "Matching " + message + " with " + smsCommand + "adminapp");
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "admindlt") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "admindlt")) {
-            String[] ts = StringUtils.split(sender, CID_SEPARATOR);
-            String s = sender;
-            if (ts != null && ts.length > 0) {
-                s = ts[0];
+            String sender = replyTo;
+            if (replyTo!= null) {
+                String[] ts = StringUtils.split(replyTo, CID_SEPARATOR);
+                if (ts != null && ts.length > 0) {
+                    sender = ts[0];
+                }
             }
-            auditCommand(context, smsCommand + "admindlt", s, message);
-            foundCommand = findKeyword(context, smsCommand + "admindlt", message, otp, sender, false);
+            auditCommand(context, smsCommand + "admindlt", sender, message);
+            foundCommand = findKeyword(context, smsCommand + "admindlt", message, otp, replyTo, false);
             if (foundCommand == 1) {
-                onAdmCommandFound(sender, context);
+                onAdmCommandFound(replyTo, context);
             } else if (foundCommand == 0) {
-                foundCommand = findKeyword(context, smsShortCommand + "admindlt", message, otp, sender, false);
+                foundCommand = findKeyword(context, smsShortCommand + "admindlt", message, otp, replyTo, false);
                 if (foundCommand == 1) {
-                    onAdmCommandFound(sender, context);
+                    onAdmCommandFound(replyTo, context);
                 }
             }
         }
