@@ -52,25 +52,37 @@ public abstract class AbstractCommand {
 
     protected abstract void onAdmCommandFound(String sender, Context context);
 
-    public String getOppositeCommand() { return null; }
+    public String getOppositeCommand() {
+        return null;
+    }
 
-    public String getLabel() { return StringUtils.capitalize(getSmsCommand().substring(0, getSmsCommand().length()-2)); }
+    public String getLabel() {
+        return StringUtils.capitalize(getSmsCommand().substring(0, getSmsCommand().length() - 2));
+    }
 
     public boolean validateTokens() {
         return false;
     }
 
-    public String getDefaultArgs() { return ""; }
+    public String getDefaultArgs() {
+        return "";
+    }
 
-    public int getConfirmation() { return -1; }
+    public int getConfirmation() {
+        return -1;
+    }
 
-    public boolean canResend() { return false; }
+    public boolean canResend() {
+        return false;
+    }
 
     public final boolean hasParameters() {
         return finder.equals(Finder.STARTS);
     }
 
-    public final boolean hasOppositeCommand() { return getOppositeCommand() != null; }
+    public final boolean hasOppositeCommand() {
+        return getOppositeCommand() != null;
+    }
 
     protected final String getSmsCommand() {
         return smsCommand;
@@ -114,15 +126,14 @@ public abstract class AbstractCommand {
         return false;
     }
 
-    protected final int findSocialCommand(Context context, String message, String pin, String replyTo, boolean isPinRequired, boolean hasSocialNotifiers) {
+    protected final int findSocialCommand(Context context, String message, String pin, String replyTo, Bundle extras, boolean isPinRequired, boolean hasSocialNotifiers) {
         int foundCommand = 0;
         if ((StringUtils.startsWithIgnoreCase(message, smsCommand + "t") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "t")) && hasSocialNotifiers) {
-            String sender = replyTo;
-            if (replyTo != null) {
-                String[] ts = StringUtils.split(replyTo, CID_SEPARATOR);
-                if (ts != null && ts.length > 0) {
-                    sender = ts[0];
-                }
+            String sender = "Social";//replyTo;
+            if (extras.containsKey("telegram")) {
+                sender = "Telegram:" + extras.getString("telegram");
+            } else if (extras.containsKey("messenger")) {
+                sender = "Messenger:" + extras.getString("messenger");
             }
             auditCommand(context, smsCommand + "t", sender, message);
             foundCommand = findKeyword(context, smsCommand + "t", message, pin, replyTo, isPinRequired);
@@ -151,7 +162,11 @@ public abstract class AbstractCommand {
             if (sender == null && extras.containsKey("imei")) {
                 sender = extras.getString("imei");
             }
-            auditCommand(context, smsCommand + "app", sender, message);
+            String command = smsCommand + "app";
+            if (extras.containsKey("command")) {
+                command = "replyto:" + extras.getString("command");
+            }
+            auditCommand(context, command, sender, message);
             foundCommand = findKeyword(context, smsCommand + "app", message, pin, replyTo, isPinRequired);
             if (foundCommand == 1) {
                 onAppCommandFound(replyTo, context, location, extras);
@@ -169,12 +184,11 @@ public abstract class AbstractCommand {
         int foundCommand = 0;
         //Log.d(TAG, "Matching " + message + " with " + smsCommand + "adminapp");
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "admindlt") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "admindlt")) {
-            String sender = replyTo;
-            if (replyTo!= null) {
-                String[] ts = StringUtils.split(replyTo, CID_SEPARATOR);
-                if (ts != null && ts.length > 0) {
-                    sender = ts[0];
-                }
+            String sender = "Admin";
+            if (extras.containsKey("telegram")) {
+                sender = "Telegram:" + extras.getString("telegram");
+            } else if (extras.containsKey("messenger")) {
+                sender = "Messenger:" + extras.getString("messenger");
             }
             auditCommand(context, smsCommand + "admindlt", sender, message);
             foundCommand = findKeyword(context, smsCommand + "admindlt", message, otp, replyTo, false);

@@ -102,6 +102,10 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                                 extras.putString("imei", token.split(":")[1]);
                             } else if (token.startsWith("command:")) {
                                 extras.putString("command", token.split(":")[1]);
+                            } else if (token.startsWith("telegram:")) {
+                                extras.putString("telegram", token.split(":")[1]);
+                            } else if (token.startsWith("messenger:")) {
+                                extras.putString("messenger", token.split(":")[1]);
                             }
                         }
                     } catch (Exception e) {

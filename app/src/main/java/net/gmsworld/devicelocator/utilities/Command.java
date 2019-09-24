@@ -144,7 +144,7 @@ public class Command {
                     //invalid pin
                     return null;
                 } else {
-                    foundCommand = c.findSocialCommand(context, StringUtils.trim(message), pin, replyTo, isPinRequired, hasSocialNotifiers);
+                    foundCommand = c.findSocialCommand(context, StringUtils.trim(message), pin, replyTo, extras, isPinRequired, hasSocialNotifiers);
                     if (foundCommand == 1) {
                         Log.d(TAG, "Found matching social command");
                         return c.getSmsCommand();

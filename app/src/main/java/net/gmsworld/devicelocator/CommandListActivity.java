@@ -48,13 +48,18 @@ public class CommandListActivity extends AppCompatActivity {
             final String sender = tokens[1];
             if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
                 final String deviceName = DevicesUtils.getDeviceName(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
-                final String message = "Command " + tokens[2] + "\n" +
-                                       "has been sent from device " + deviceName + "\n" +
-                                       pt.format(new Date(timestamp));
+                String commandName = tokens[2];
+                String message = null;
+                if (StringUtils.startsWith(commandName, "replyto:")) {
+                    message = "Reply to command " + commandName.substring(8);
+                } else {
+                    message = "Command " + tokens[2];
+                }
+                message += " has been sent from " + deviceName + "\n" + pt.format(new Date(timestamp));
                 values.add(message);
             } else {
                 final String message = "Command " + tokens[1] + "\n" +
-                                       "has been sent from device\n" +
+                                       "has been sent from unknown\n" +
                                        pt.format(new Date(timestamp));
                 values.add(message);
             }
