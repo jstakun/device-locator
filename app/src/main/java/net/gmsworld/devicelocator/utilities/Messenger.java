@@ -95,7 +95,7 @@ public class Messenger {
     }
 
     public static void sendCloudMessage(final Context context, final Location location, final String replyTo, final String message, final String replyToCommand, final int retryCount, final long delayMillis, final Map<String, String> headers) {
-        if (StringUtils.isNotEmpty(replyTo) && StringUtils.isNotEmpty(message)) {
+        if ((StringUtils.isNotEmpty(replyTo) && StringUtils.isNotEmpty(message)) || location != null) {
             if (Network.isNetworkAvailable(context)) {
                 final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
@@ -163,10 +163,12 @@ public class Messenger {
 
     private static void sendCloudMessage(final Context context, final String replyTo, final String message, final String replyToCommand, final int retryCount, final long delayMillis, final Map<String, String> headers) {
         String[] tokens = StringUtils.split(replyTo, CID_SEPARATOR);
-        if (tokens.length >= 2) {
+        if (tokens != null && tokens.length >= 1) {
             String content = "imei=" + tokens[0].trim();
-            content += "&command=" + Command.MESSAGE_COMMAND + "app";
-            content += "&pin=" + tokens[1].trim();
+            if (tokens.length >= 2) {
+                content += "&command=" + Command.MESSAGE_COMMAND + "app";
+                content += "&pin=" + tokens[1].trim();
+            }
             if (StringUtils.isNotEmpty(replyToCommand)) {
                 content += "&replyToCommand=" + StringUtils.remove(replyToCommand, "dl");
             }

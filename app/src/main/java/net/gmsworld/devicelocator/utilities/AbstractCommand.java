@@ -114,8 +114,14 @@ public abstract class AbstractCommand {
         } else if ((StringUtils.startsWithIgnoreCase(smsMessage, smsCommand + "t") || StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand + "t")) && hasSocialNotifiers) {
             //sms with social notification
             status = findCommandInMessage(context, smsCommand + "t", smsMessage, pin, sender, isPinRequired);
+            if (status == 1) {
+                auditCommand(context, smsCommand, sender, smsMessage);
+            }
             if (status == 0 && StringUtils.startsWithIgnoreCase(smsMessage, smsShortCommand)) {
                 status = findCommandInMessage(context, smsShortCommand + "t", smsMessage, pin, sender, isPinRequired);
+                if (status == 1) {
+                    auditCommand(context, smsShortCommand, sender, smsMessage);
+                }
             }
             if (status == 1) {
                 onSocialCommandFound(sender, context);

@@ -18,6 +18,8 @@ import net.gmsworld.devicelocator.utilities.NotificationUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
+
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.config.LocationParams;
@@ -198,6 +200,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                     Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId, email, app);
                 } else {
                     Log.d(TAG, "Google Maps link message won't be send");
+                }
+                //send location message for sms only
+                if (telegramId == null && email == null && app == null) {
+                    Messenger.sendCloudMessage(this, bestLocation, Messenger.getDeviceId(this, false), null, null, 2, 2000, new HashMap<String, String>());
                 }
             }
             isRunning = false;
