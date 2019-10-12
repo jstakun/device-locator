@@ -172,10 +172,12 @@ public class Messenger {
             if (StringUtils.isNotEmpty(replyToCommand)) {
                 content += "&replyToCommand=" + StringUtils.remove(replyToCommand, "dl");
             }
-            try {
-                content += "&args=" + URLEncoder.encode(message, "UTF-8");
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage(), e);
+            if (message != null) {
+                try {
+                    content += "&args=" + URLEncoder.encode(message, "UTF-8");
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
             }
             Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                 @Override
