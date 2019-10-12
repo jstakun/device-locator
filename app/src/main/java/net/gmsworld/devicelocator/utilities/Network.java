@@ -21,9 +21,7 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
@@ -353,13 +351,19 @@ public class Network {
     }
 
     private static String encodeQueryStringUTF8(final String queryString) throws Exception {
-        List<String> query_pairs = new ArrayList<>();
         String[] pairs = queryString.split("&");
+        String encQueryString = "";
         for (String pair : pairs) {
-            int idx = pair.indexOf("=");
-            query_pairs.add(pair.substring(0, idx) + "=" + URLEncoder.encode(pair.substring(idx + 1), "UTF-8"));
+            if (pair.contains("=")) {
+                int idx = pair.indexOf("=");
+                if (encQueryString.length() > 0) {
+                    encQueryString += "&";
+                }
+                encQueryString += pair.substring(0, idx) + "=" + URLEncoder.encode(pair.substring(idx + 1), "UTF-8");
+            }
+
         }
-        return StringUtils.join(query_pairs, "&");
+        return encQueryString;
     }
 
     static class GetTask extends AsyncTask<Void, Integer, Integer> {
