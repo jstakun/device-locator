@@ -165,11 +165,11 @@ public abstract class AbstractCommand {
                     sender = ts[0];
                 }
             }
-            if (sender == null && extras.containsKey("imei")) {
+            if (sender == null && extras != null && extras.containsKey("imei")) {
                 sender = extras.getString("imei");
             }
             String command = smsCommand + "app";
-            if (extras.containsKey("command")) {
+            if (extras != null && extras.containsKey("command")) {
                 command = "replyto:" + extras.getString("command");
             }
             auditCommand(context, command, sender, message);
