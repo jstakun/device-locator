@@ -112,7 +112,7 @@ public class Command {
                             final boolean hasSocialNotifiers = StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_SOCIAL)) || StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_EMAIL));
                             for (AbstractCommand c : getCommands()) {
                                 if (c.findSmsCommand(context, smsMessage, sms.getOriginatingAddress(), pin, isPinRequired, hasSocialNotifiers)) {
-                                    Log.d(TAG, "Found matching sms command " + c.getSmsCommand());
+                                    Log.d(TAG, "Found matching command " + c.getSmsCommand() + " in sms message " + smsMessage);
                                     return c.getSmsCommand();
                                 }
                             }
