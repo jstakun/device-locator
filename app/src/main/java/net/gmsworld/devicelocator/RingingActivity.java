@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 
 import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,7 +34,7 @@ public class RingingActivity extends AppCompatActivity {
             public void onClick(View view) {
                 final PreferencesUtils prefs = new PreferencesUtils(RingingActivity.this);
                 final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
-                Command.findCommandInMessage(RingingActivity.this, Command.RING_OFF_COMMAND + "app" + pin, null, null, new Bundle(), null);
+                Command.findCommandInMessage(RingingActivity.this, Command.RING_OFF_COMMAND + "app" + pin, Messenger.getDeviceId(RingingActivity.this, true), null, new Bundle(), null);
                 finish();
              }
         });
