@@ -238,6 +238,10 @@ public class PermissionsActivity extends AppCompatActivity {
                 startActivity(new Intent(this, MapsActivity.class));
                 finish();
                 return true;
+            case R.id.commandLog:
+                startActivity(new Intent(this, CommandListActivity.class));
+                finish();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
