@@ -1775,8 +1775,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         sendIntent.putExtra(Intent.EXTRA_TITLE, activity.getString(R.string.message, discs[discs.length - 2]) + " - route map link");
                         sendIntent.setType("text/plain");
                         activity.startActivity(sendIntent);
+                    } else if (responseCode == 400) {
+                        Toast.makeText(activity, "Route upload failed due to invalid route file!", Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(activity, "Route upload failed. Please try again in a few moments", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, "Route upload failed. Please try again in a few moments!", Toast.LENGTH_LONG).show();
                     }
                 } else if (msg.what == UPDATE_UI_MESSAGE) {
                     activity.updateUI();

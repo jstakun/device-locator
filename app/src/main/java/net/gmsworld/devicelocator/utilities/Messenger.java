@@ -186,7 +186,7 @@ public class Messenger {
                         //Toast.makeText(context, "Command has been sent!", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "Message has been sent to the cloud!");
                     } else if (responseCode >= 400 && responseCode < 500) {
-                        Toast.makeText(context, "Command has been rejected! Please try again after some time.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Command has been rejected due to quota limit! Please try again after some time or contact " + context.getString(R.string.app_email), Toast.LENGTH_SHORT).show();
                         Log.e(TAG, "Message has been rejected by server!");
                     } else if (responseCode == 500 && retryCount > 0) {
                         new Handler().postDelayed(new Runnable() {

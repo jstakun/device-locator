@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.R;
@@ -333,7 +334,7 @@ public abstract class AbstractLocationManager {
         }
 
         private String routeToGeoJson(List<String> routePoints, String description, String deviceId) {
-            Gson gson = new Gson();
+            Gson gson = new GsonBuilder().create();
 
             String filename = RouteTrackingServiceUtils.getRouteId(callerActivity.get());
 
