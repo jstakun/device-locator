@@ -1,7 +1,10 @@
 package net.gmsworld.devicelocator;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -17,7 +20,6 @@ import org.ocpsoft.prettytime.PrettyTime;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +29,8 @@ public class CommandListActivity extends AppCompatActivity {
     PrettyTime pt = new PrettyTime();
 
     PreferencesUtils settings;
+
+    ArrayList<Device> devices = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +45,9 @@ public class CommandListActivity extends AppCompatActivity {
 
             settings = new PreferencesUtils(this);
 
-            List<Device> devices = DevicesUtils.buildDeviceList(settings);
+            devices = DevicesUtils.buildDeviceList(settings);
+
+            List<Integer> positions = new ArrayList<Integer>();
 
             List<String> values = new ArrayList<String>();
 
@@ -52,6 +58,7 @@ public class CommandListActivity extends AppCompatActivity {
                 final String sender = tokens[1];
                 if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
                     final String deviceName = DevicesUtils.getDeviceName(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
+                    positions.add(DevicesUtils.getDevicePosition(devices, sender.substring(Messenger.CID_SEPARATOR.length())));
                     String commandName = tokens[2];
                     String message = null;
                     if (StringUtils.startsWith(commandName, "replyto:")) {
@@ -62,56 +69,54 @@ public class CommandListActivity extends AppCompatActivity {
                     message += " has been sent from " + deviceName + "\n" + pt.format(new Date(timestamp));
                     values.add(message);
                 } else {
-                    final String message = "Command " + tokens[1] + "\n" +
-                            "has been sent from unknown\n" +
-                            pt.format(new Date(timestamp));
+                    final String message = "Command " + tokens[1] + "\n" + "has been sent from unknown\n" + pt.format(new Date(timestamp));
                     values.add(message);
+                    positions.add(-1);
                 }
             }
 
-            final CommandArrayAdapter adapter = new CommandArrayAdapter(this,
-                    android.R.layout.simple_list_item_1, values);
+            final CommandArrayAdapter adapter = new CommandArrayAdapter(this, android.R.layout.simple_list_item_1, values, positions);
             listview.setAdapter(adapter);
 
-            /*listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
+            listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
-                public void onItemClick(AdapterView<?> parent, final View view,
-                                    int position, long id) {
-                    final String item = (String) parent.getItemAtPosition(position);
-                    view.animate().setDuration(2000).alpha(0)
-                        .withEndAction(new Runnable() {
-                            @Override
-                            public void run() {
-                                commands.remove(item);
-                                adapter.notifyDataSetChanged();
-                                view.setAlpha(1);
-                            }
-                        });
+                public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
+                    if (id >= 0) {
+                        showCommandActivity((int) id);
+                    }
                 }
-
-            });*/
+            });
         } else {
             listview.setAdapter(null);
             listview.setEmptyView(findViewById(R.id.commandEmpty));
         }
     }
 
+    private void showCommandActivity(int selectedPosition) {
+        Intent intent = new Intent(CommandListActivity.this, CommandActivity.class);
+        intent.putExtra("index", selectedPosition);
+        intent.putParcelableArrayListExtra("devices", devices);
+        CommandListActivity.this.startActivity(intent);
+    }
+
     private class CommandArrayAdapter extends ArrayAdapter<String> {
 
-        HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
+        //HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
+        List<Integer> ids;
 
-        public CommandArrayAdapter(Context context, int textViewResourceId, List<String> objects) {
+        public CommandArrayAdapter(Context context, int textViewResourceId, List<String> objects, List<Integer> ids) {
             super(context, textViewResourceId, objects);
-            for (int i = 0; i < objects.size(); ++i) {
-                mIdMap.put(objects.get(i), i);
-            }
+            //for (int i = 0; i < objects.size(); ++i) {
+            //    mIdMap.put(objects.get(i), i);
+            //}
+            this.ids = ids;
         }
 
         @Override
         public long getItemId(int position) {
-            String item = getItem(position);
-            return mIdMap.get(item);
+            //String item = getItem(position);
+            //return mIdMap.get(item);
+            return ids.get(position);
         }
 
         @Override

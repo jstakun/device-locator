@@ -181,4 +181,14 @@ public class DevicesUtils {
         return deviceId;
     }
 
+    public static int getDevicePosition(List<Device> devices, String deviceId) {
+        for (int i=0;i<devices.size();i++) {
+            Device d = devices.get(i);
+            if (d.imei.equals(deviceId)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 }
