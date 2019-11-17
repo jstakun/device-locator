@@ -361,6 +361,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 return true;
             case R.id.commandLog:
                 startActivity(new Intent(this, CommandListActivity.class));
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

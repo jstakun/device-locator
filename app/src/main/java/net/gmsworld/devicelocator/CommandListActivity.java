@@ -91,9 +91,6 @@ public class CommandListActivity extends AppCompatActivity {
         });*/
     }
 
-
-
-
     private class CommandArrayAdapter extends ArrayAdapter<String> {
 
         HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();

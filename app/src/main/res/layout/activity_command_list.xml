@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".CommandListActivity">
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:padding="4dp">
 
-
-    <LinearLayout
-        android:orientation="vertical"
+    <ListView
+        android:id="@+id/commandList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="4dp">
+        android:divider="@color/lightGray"
+        android:dividerHeight="1dp"/>
 
-        <ListView
-            android:id="@+id/commandList"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:divider="@color/lightGray"
-            android:dividerHeight="1dp"/>
+    <TextView android:id="@android:id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:text="No commands has been sent to this device yet!"/>
 
-    </LinearLayout>
-
- </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>
