@@ -238,7 +238,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 }
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.roue_share_text, deviceName, routeUrl));
+                sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.route_share_text, deviceName, routeUrl));
                 sendIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.message, deviceName) + " - route map link");
                 sendIntent.setType("text/plain");
                 startActivity(sendIntent);

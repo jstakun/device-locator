@@ -1772,7 +1772,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
                         Intent sendIntent = new Intent();
                         sendIntent.setAction(Intent.ACTION_SEND);
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, activity.getString(R.string.roue_share_text, discs[discs.length - 2], showRouteUrl));
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, activity.getString(R.string.route_share_text, discs[discs.length - 2], showRouteUrl));
                         sendIntent.putExtra(Intent.EXTRA_TITLE, activity.getString(R.string.message, discs[discs.length - 2]) + " - route map link");
                         sendIntent.setType("text/plain");
                         activity.startActivity(sendIntent);
@@ -1877,6 +1877,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     newIntent.putExtra("pin", devicePin);
                     newIntent.putExtra("args", "silent");
                     startService(newIntent);
+                } else {
+                    Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.no_pin_saved, device.name), Toast.LENGTH_LONG).show();
                 }
                 if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext()) == ConnectionResult.SUCCESS) {
                     Intent mapIntent = new Intent(MainActivity.this, MapsActivity.class);

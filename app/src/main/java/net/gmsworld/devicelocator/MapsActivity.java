@@ -311,7 +311,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 newIntent.putExtra("args", "silent");
                                 startService(newIntent);
                             } else {
-                                Toast.makeText(MapsActivity.this, "Unable to send command to the device " + device.name + " because PIN is not saved!", Toast.LENGTH_LONG).show();
+                                Toast.makeText(MapsActivity.this, MapsActivity.this.getString(R.string.no_pin_saved, device.name), Toast.LENGTH_LONG).show();
                             }
                         }
                     }
