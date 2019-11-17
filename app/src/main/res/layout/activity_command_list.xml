@@ -1,23 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"
-    android:padding="4dp">
+    android:layout_height="match_parent"
+    tools:context=".CommandListActivity">
 
-    <ListView
-        android:id="@+id/commandList"
+
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:divider="@color/lightGray"
-        android:dividerHeight="1dp"/>
+        android:padding="4dp">
 
-    <TextView android:id="@android:id/empty"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:text="No commands has been sent to this device yet!"/>
+        <ListView
+            android:id="@+id/commandList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@color/lightGray"
+            android:dividerHeight="1dp"/>
 
-</FrameLayout>
+        <TextView android:id="@+id/commandEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:text="@string/commandEmpty"/>
+
+    </LinearLayout>
+
+ </androidx.constraintlayout.widget.ConstraintLayout>

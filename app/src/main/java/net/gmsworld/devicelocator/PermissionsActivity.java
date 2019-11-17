@@ -22,6 +22,7 @@ import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
+import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.FingerprintHelper;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Permissions;
@@ -211,7 +212,13 @@ public class PermissionsActivity extends AppCompatActivity {
         //Log.d(TAG, "onCreateOptionsMenu()");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
+
         menu.findItem(R.id.permissions).setVisible(false);
+
+        if (Files.getAuditComands(this) == 0) {
+            menu.findItem(R.id.commandLog).setVisible(false);
+        }
+
         return true;
     }
 
