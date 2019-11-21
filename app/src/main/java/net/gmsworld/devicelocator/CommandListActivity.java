@@ -3,6 +3,9 @@ package net.gmsworld.devicelocator;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -92,6 +95,49 @@ public class CommandListActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        //Log.d(TAG, "onCreateOptionsMenu()");
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+
+        menu.findItem(R.id.commandLog).setVisible(false);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent = new Intent(this, MainActivity.class);
+        switch (item.getItemId()) {
+            case R.id.sms:
+                intent.setAction(MainActivity.ACTION_SMS_MANAGER);
+                startActivity(intent);
+                finish();
+                return true;
+            case R.id.tracker:
+                intent.setAction(MainActivity.ACTION_DEVICE_TRACKER_NOTIFICATION);
+                startActivity(intent);
+                finish();
+                return true;
+            case R.id.devices:
+                intent.setAction(MainActivity.ACTION_DEVICE_MANAGER);
+                startActivity(intent);
+                finish();
+                return true;
+            case R.id.map:
+                startActivity(new Intent(this, MapsActivity.class));
+                finish();
+                return true;
+            case R.id.permissions:
+                startActivity(new Intent(this, PermissionsActivity.class));
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void showCommandActivity(int selectedPosition) {
         Intent intent = new Intent(CommandListActivity.this, CommandActivity.class);
         intent.putExtra("index", selectedPosition);
@@ -101,22 +147,16 @@ public class CommandListActivity extends AppCompatActivity {
 
     private class CommandArrayAdapter extends ArrayAdapter<String> {
 
-        //HashMap<String, Integer> mIdMap = new HashMap<String, Integer>();
-        List<Integer> ids;
+        List<Integer> deviceIds;
 
         public CommandArrayAdapter(Context context, int textViewResourceId, List<String> objects, List<Integer> ids) {
             super(context, textViewResourceId, objects);
-            //for (int i = 0; i < objects.size(); ++i) {
-            //    mIdMap.put(objects.get(i), i);
-            //}
-            this.ids = ids;
+            this.deviceIds = ids;
         }
 
         @Override
         public long getItemId(int position) {
-            //String item = getItem(position);
-            //return mIdMap.get(item);
-            return ids.get(position);
+            return deviceIds.get(position);
         }
 
         @Override
