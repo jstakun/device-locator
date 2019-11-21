@@ -9,8 +9,7 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="4dp">
+        android:layout_height="match_parent">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/smsToolbar"
@@ -25,13 +24,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:divider="@color/lightGray"
-            android:dividerHeight="1dp"/>
+            android:dividerHeight="1dp"
+            android:padding="4dp"/>
 
         <TextView android:id="@+id/commandEmpty"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:text="@string/commandEmpty"/>
+            android:text="@string/commandEmpty"
+            android:padding="4dp"/>
 
     </LinearLayout>
 

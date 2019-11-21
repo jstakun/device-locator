@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 public class CommandListActivity extends AppCompatActivity {
 
@@ -39,6 +40,9 @@ public class CommandListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_command_list);
+
+        final Toolbar toolbar = findViewById(R.id.smsToolbar);
+        setSupportActionBar(toolbar);
 
         final List<String> commands = Files.readFileByLinesFromContextDir(AbstractCommand.AUDIT_FILE, this);
 
