@@ -46,8 +46,6 @@
         android:resizeableActivity="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".CommandListActivity"></activity>
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -123,6 +121,12 @@
             android:exported="false"
             android:label="@string/title_activity_permissions"
             android:launchMode="singleInstance" />
+        <activity
+            android:name=".CommandListActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="false"
+            android:label="@string/command_log"
+            android:launchMode="singleInstance"/>
 
         <service
             android:name=".services.SmsSenderService"
