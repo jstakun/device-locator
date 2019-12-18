@@ -194,10 +194,10 @@
                 android:name="android.app.device_admin"
                 android:resource="@xml/device_admin" />
         </receiver>
-        <receiver android:name="broadcastreceivers.BootReceiver"
+        <receiver android:name=".broadcastreceivers.BootReceiver"
             android:enabled="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 
