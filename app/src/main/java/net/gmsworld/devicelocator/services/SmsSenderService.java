@@ -94,7 +94,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 Messenger.sendCommandMessage(this, extras);
             }
 
-            LocationAlarmUtils.initWhenDown(this);
+            LocationAlarmUtils.initWhenDown(this,true);
         } else {
             Log.e(TAG, "Required parameters missing");
             stopSelf();

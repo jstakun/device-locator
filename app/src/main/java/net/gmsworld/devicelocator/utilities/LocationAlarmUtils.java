@@ -15,35 +15,43 @@ import java.util.Date;
 public class LocationAlarmUtils {
 
     private static final String TAG = LocationAlarmUtils.class.getName();
-    public static final String ALARM_KEY = "locationAlarm";
+    private static final String ALARM_KEY = "locationAlarm";
 
-    public static void initWhenDown(Context context) {
+    public static void initWhenDown(Context context, boolean forceReset) {
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent senderIntent = new Intent(context, SmsSenderService.class);
         PreferencesUtils settings = new PreferencesUtils(context);
 
-        //TODO remove after testing
         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
         final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
+        final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
         senderIntent.putExtra("telegramId", telegramId);
         senderIntent.putExtra("email", email);
-        //
-        //send empty phone just to send location update
-        senderIntent.putExtra("phoneNumber", "");
+        senderIntent.putExtra("phoneNumber", phoneNumber);
 
-        boolean alarmDown = (PendingIntent.getService(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null);
-        if (alarmDown) {
-            final long triggerAtMillis = System.currentTimeMillis() + AlarmManager.INTERVAL_HOUR;
+        //for silent mode send empty phone just to send location update
+        //senderIntent.putExtra("phoneNumber", "");
+
+        if (forceReset || (PendingIntent.getService(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null)) {
+            final long triggerAtMillis = System.currentTimeMillis() + AlarmManager.INTERVAL_DAY; //.INTERVAL_HOUR;
             Log.d(TAG, "Creating Location Alarm to be triggered at " + new Date(triggerAtMillis));
-            final PendingIntent operation = PendingIntent.getService(context, 0, senderIntent, 0);
+            final PendingIntent operation = PendingIntent.getService(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
             } else {
                 alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, AlarmManager.INTERVAL_HOUR, operation);
             }
+            settings.setLong(ALARM_KEY, System.currentTimeMillis());
         } else {
             Log.d(TAG, "Location Alarm has been set on " + new Date(settings.getLong(ALARM_KEY)));
-            settings.setLong(ALARM_KEY, System.currentTimeMillis());
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (alarmMgr.getNextAlarmClock() != null) {
+                long nextAlarm = alarmMgr.getNextAlarmClock().getTriggerTime();
+                if (nextAlarm > 0) {
+                    Log.d(TAG, "Next alarm will be triggered on " + new Date(nextAlarm));
+                }
+            }
         }
     }
 
