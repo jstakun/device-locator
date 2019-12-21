@@ -33,17 +33,17 @@ public class LocationAlarmUtils {
         //senderIntent.putExtra("phoneNumber", "");
 
         if (forceReset || (PendingIntent.getService(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null)) {
-            final long triggerAtMillis = System.currentTimeMillis() + AlarmManager.INTERVAL_DAY; //.INTERVAL_HOUR;
+            final long triggerAtMillis = System.currentTimeMillis() + AlarmManager.INTERVAL_DAY;
             Log.d(TAG, "Creating Location Alarm to be triggered at " + new Date(triggerAtMillis));
             final PendingIntent operation = PendingIntent.getService(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
             } else {
-                alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, AlarmManager.INTERVAL_HOUR, operation);
+                alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, AlarmManager.INTERVAL_DAY, operation);
             }
             settings.setLong(ALARM_KEY, System.currentTimeMillis());
         } else {
-            Log.d(TAG, "Location Alarm has been set on " + new Date(settings.getLong(ALARM_KEY)));
+            Log.d(TAG, "Location Alarm has been set on " + new Date(settings.getLong(ALARM_KEY)) + " with interval " + AlarmManager.INTERVAL_DAY + "ms");
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (alarmMgr.getNextAlarmClock() != null) {
