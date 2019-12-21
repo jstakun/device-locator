@@ -27,7 +27,6 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -81,6 +80,7 @@ import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.GmsSmartLocationManager;
+import net.gmsworld.devicelocator.utilities.LinkMovementMethodFixed;
 import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
-        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
+        commandLink.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
         if (AppUtils.getInstance().isFullVersion()) {
             toggleSmsBroadcastReceiver();
@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         TextView deviceId = findViewById(R.id.device_id_text);
         deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
-        deviceId.setMovementMethod(LinkMovementMethod.getInstance());
+        deviceId.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
         if (AppUtils.getInstance().isFullVersion()) {
             checkForNewVersion();

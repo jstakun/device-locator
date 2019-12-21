@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -26,6 +25,7 @@ import android.widget.Toast;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import net.gmsworld.devicelocator.utilities.LinkMovementMethodFixed;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.SCUtils;
@@ -85,7 +85,7 @@ public class LoginActivity extends AppCompatActivity  {
 
         TextView register = findViewById(R.id.register);
         register.setText(Html.fromHtml(getString(R.string.registerLink)));
-        register.setMovementMethod(LinkMovementMethod.getInstance());
+        register.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
         TextView reset = findViewById(R.id.reset);
         reset.setText(Html.fromHtml(getString(R.string.resetLink)));

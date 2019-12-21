@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.InputType;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -27,6 +26,7 @@ import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractCommand;
 import net.gmsworld.devicelocator.utilities.Command;
+import net.gmsworld.devicelocator.utilities.LinkMovementMethodFixed;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -196,7 +196,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
         TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
-        commandLink.setMovementMethod(LinkMovementMethod.getInstance());
+        commandLink.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
         findViewById(R.id.commandView).requestFocus();
 

@@ -27,8 +27,9 @@ public class LocationAlarmUtils {
         final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
         senderIntent.putExtra("telegramId", telegramId);
         senderIntent.putExtra("email", email);
+        //
         //send empty phone just to send location update
-        //senderIntent.putExtra("phoneNumber", "");
+        senderIntent.putExtra("phoneNumber", "");
 
         boolean alarmDown = (PendingIntent.getService(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null);
         if (alarmDown) {
@@ -36,10 +37,9 @@ public class LocationAlarmUtils {
             Log.d(TAG, "Creating Location Alarm to be triggered at " + new Date(triggerAtMillis));
             final PendingIntent operation = PendingIntent.getService(context, 0, senderIntent, 0);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmMgr.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, operation);
-                senderIntent.putExtra(ALARM_KEY, true);
+                alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
             } else {
-                alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, AlarmManager.INTERVAL_HOUR, operation);
+                alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, AlarmManager.INTERVAL_HOUR, operation);
             }
         } else {
             Log.d(TAG, "Location Alarm has been set on " + new Date(settings.getLong(ALARM_KEY)));
