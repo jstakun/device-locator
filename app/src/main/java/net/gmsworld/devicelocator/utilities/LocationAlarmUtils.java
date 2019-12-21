@@ -4,7 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.SystemClock;
+import android.os.Build;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.MainActivity;
@@ -15,7 +15,7 @@ import java.util.Date;
 public class LocationAlarmUtils {
 
     private static final String TAG = LocationAlarmUtils.class.getName();
-    private static final String ALARM_KEY = "locationAlarmSetTime";
+    public static final String ALARM_KEY = "locationAlarm";
 
     public static void initWhenDown(Context context) {
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -27,14 +27,20 @@ public class LocationAlarmUtils {
         final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
         senderIntent.putExtra("telegramId", telegramId);
         senderIntent.putExtra("email", email);
-
         //send empty phone just to send location update
         //senderIntent.putExtra("phoneNumber", "");
+
         boolean alarmDown = (PendingIntent.getService(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null);
         if (alarmDown) {
-            Log.d(TAG, "Creating Location Alarm");
-            alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime(),
-                    AlarmManager.INTERVAL_HOUR, PendingIntent.getService(context, 0, senderIntent, 0));
+            final long triggerAtMillis = System.currentTimeMillis() + AlarmManager.INTERVAL_HOUR;
+            Log.d(TAG, "Creating Location Alarm to be triggered at " + new Date(triggerAtMillis));
+            final PendingIntent operation = PendingIntent.getService(context, 0, senderIntent, 0);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmMgr.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, operation);
+                senderIntent.putExtra(ALARM_KEY, true);
+            } else {
+                alarmMgr.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, AlarmManager.INTERVAL_HOUR, operation);
+            }
         } else {
             Log.d(TAG, "Location Alarm has been set on " + new Date(settings.getLong(ALARM_KEY)));
             settings.setLong(ALARM_KEY, System.currentTimeMillis());
