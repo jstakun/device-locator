@@ -81,6 +81,7 @@ import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.GmsSmartLocationManager;
+import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
@@ -212,12 +213,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
             notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
         }
+
+        LocationAlarmUtils.initWhenDown(this);
     }
 
     @Override
     public void onNewIntent(Intent intent) {
         //show tracker view
         Log.d(TAG, "onNewIntent()");
+        super.onNewIntent(intent);
         if (intent != null) {
             String action = intent.getAction();
             if (action != null) {
@@ -304,6 +308,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             } else {
                 Toast.makeText(this, "If you want to start receiving sms notifications please select phone number from contacts list", Toast.LENGTH_SHORT).show();
             }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 

@@ -46,6 +46,19 @@ public class PreferencesUtils {
         }
     }
 
+    public void setString(String key, String value) {
+        if (StringUtils.isNotEmpty(value)) {
+            sharedPreferences.edit().putString(key, value).apply();
+        }
+    }
+
+    public void setLong(String key, Long value) {
+        if (value != null) {
+            sharedPreferences.edit().putLong(key, value).apply();
+        }
+    }
+
+
     public String getString(String key) {
         return sharedPreferences.getString(key, "");
     }
@@ -76,5 +89,9 @@ public class PreferencesUtils {
 
     public Set<String> getStringSet(String key, Set<String> defaultValue) {
         return sharedPreferences.getStringSet(key, defaultValue);
+    }
+
+    public void remove(String key) {
+        sharedPreferences.edit().remove(key).apply();
     }
 }
