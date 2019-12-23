@@ -58,6 +58,12 @@ public class PreferencesUtils {
         }
     }
 
+    public void setInt(String key, Integer value) {
+        if (value != null) {
+            sharedPreferences.edit().putInt(key, value).apply();
+        }
+    }
+
 
     public String getString(String key) {
         return sharedPreferences.getString(key, "");

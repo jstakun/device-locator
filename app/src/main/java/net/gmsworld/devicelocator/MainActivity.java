@@ -171,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initRunningButton();
         initShareRouteButton();
         initRadiusInput();
+        initAlarmInput();
         initMotionDetectorButton();
         initPhoneNumberInput();
         initEmailInput();
@@ -507,6 +508,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false));
         ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, true));
         ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
+        ((Switch) findViewById(R.id.settings_alarm)).setChecked(settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false));
     }
 
     public void onLocationSMSCheckboxClicked(View view) {
@@ -531,6 +533,21 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 } else if (checked) {
                     Toast.makeText(this, "Please remember your Security PIN", Toast.LENGTH_LONG).show();
                 }
+                break;
+            case R.id.settings_alarm:
+                editor.putBoolean(LocationAlarmUtils.ALARM_SETTINGS, checked).apply();
+                if (checked) {
+                    LocationAlarmUtils.initWhenDown(this, true);
+                } else {
+                    LocationAlarmUtils.cancel(this);
+                }
+                final TextView alarmInterval = findViewById(R.id.alarm_interval);
+                String alarmText = "Location will be uploaded with " + settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12) + " hours interval.";
+                final long triggerAtMillis = settings.getLong(LocationAlarmUtils.ALARM_KEY,0);
+                if (triggerAtMillis > 0) {
+                    alarmText += " Next upload at " + new Date(triggerAtMillis);
+                }
+                alarmInterval.setText(alarmText);
                 break;
             default:
                 break;
@@ -735,13 +752,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         });
     }
 
-    // --------------------------------------------------------------------------------------------------------------------------------------------
+    //radius seekbar settings ----------------------------------------------------------------------------------------------------------------------
 
     private void initRadiusInput() {
         SeekBar radiusBar = findViewById(R.id.radiusBar);
         radiusBar.setProgress(radius);
 
-        ((TextView) this.findViewById(R.id.motion_radius)).setText(getString(R.string.motion_radius, radius));
+        final TextView motionRadius = findViewById(R.id.motion_radius);
+        motionRadius.setText(getString(R.string.motion_radius, radius));
 
         radiusBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int progressChangedValue = 0;
@@ -762,7 +780,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
 
                 radius = progressChangedValue;
-                ((TextView) MainActivity.this.findViewById(R.id.motion_radius)).setText(getString(R.string.motion_radius, radius));
+                motionRadius.setText(getString(R.string.motion_radius, radius));
                 saveData();
                 //update route tracking service if running
                 if (motionDetectorRunning) {
@@ -770,8 +788,47 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             }
         });
-
     }
+
+    //alarm interval settings ------------------------------------------------------------
+
+    private void initAlarmInput() {
+        SeekBar alarmBar = findViewById(R.id.alarmBar);
+        alarmBar.setProgress(settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12));
+
+        final TextView alarmInterval = findViewById(R.id.alarm_interval);
+        String alarmText = "Location will be uploaded with " + settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12) + " hour interval.";
+        if (settings.getLong(LocationAlarmUtils.ALARM_KEY,0L) > 0) {
+            alarmText += " Next upload at " + new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY));
+        }
+        alarmInterval.setText(alarmText);
+
+        alarmBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            int progressChangedValue = 12;
+
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChangedValue = progress;
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                seekBar.requestFocus();
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (progressChangedValue < 1) {
+                    progressChangedValue = 1;
+                } else if (progressChangedValue > 24) {
+                    progressChangedValue = 24;
+                }
+
+                settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, progressChangedValue);
+
+                LocationAlarmUtils.initWhenDown(MainActivity.this, true);
+                alarmInterval.setText("Location will be uploaded with " + progressChangedValue + " hours interval. Next upload at " + new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY)));
+            }
+        });
+    }
+
 
     //user login input setup -------------------------------------------------------------
 

@@ -218,6 +218,44 @@
                                 android:focusableInTouchMode="true"/>
                         </LinearLayout>
 
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="15dp">
+
+                            <Switch
+                                android:id="@+id/settings_alarm"
+                                android:text="Periodically upload my device location"
+                                android:textColor="@color/gray"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:checked="false"
+                                android:paddingTop="15dp"
+                                android:paddingBottom="8dp"
+                                android:onClick="onLocationSMSCheckboxClicked"/>
+
+                            <TextView
+                                android:id="@+id/alarm_interval"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:paddingTop="15dp"
+                                android:gravity="left"/>
+
+                            <SeekBar
+                                android:id="@+id/alarmBar"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content"
+                                android:max="24"
+                                android:min="1"
+                                android:progress="1"
+                                android:paddingTop="15dp"
+                                android:focusable="true"
+                                android:focusableInTouchMode="true"/>
+
+                        </LinearLayout>
+
                     </LinearLayout>
 
                 </net.gmsworld.devicelocator.views.DLTrackerCard>
