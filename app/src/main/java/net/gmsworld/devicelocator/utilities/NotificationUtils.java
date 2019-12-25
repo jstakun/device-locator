@@ -329,13 +329,16 @@ public class NotificationUtils {
         return nb.build();
     }
 
-    public static Notification buildWorkerNotification(Context context) {
+    public static Notification buildWorkerNotification(Context context, String text) {
         initChannels(context, DEFAULT_CHANNEL_ID);
+        if (text == null) {
+            text = context.getString(R.string.please_wait);
+        }
         return new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_devices_other_white)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
                     .setContentTitle(context.getString(R.string.app_name) + " Notification")
-                    .setContentText(context.getString(R.string.please_wait)).build();
+                    .setContentText(text).build();
     }
 
     public static void cancel(Context context, String notificationId) {

@@ -84,7 +84,13 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             String command = extras.getString("command");
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForeground(NotificationUtils.WORKER_NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this));
+                String text = null;
+                if (StringUtils.isEmpty(command)) {
+                    text = "Sending device location in progress...";
+                } else {
+                    text = "Sending device command " + command + " in progress...";
+                }
+                startForeground(NotificationUtils.WORKER_NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, text));
             }
 
             if (StringUtils.isEmpty(command)) {
