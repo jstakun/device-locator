@@ -13,7 +13,6 @@ import android.util.Log;
 
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
-import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 
@@ -93,8 +92,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             } else {
                 Messenger.sendCommandMessage(this, extras);
             }
-
-            LocationAlarmUtils.initWhenDown(this,true);
         } else {
             Log.e(TAG, "Required parameters missing");
             stopSelf();

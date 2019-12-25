@@ -200,6 +200,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
+        <receiver android:name=".broadcastreceivers.LocationAlarmReceiver" android:enabled="true"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

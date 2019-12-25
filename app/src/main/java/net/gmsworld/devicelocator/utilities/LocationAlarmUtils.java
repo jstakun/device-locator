@@ -7,8 +7,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
-import net.gmsworld.devicelocator.MainActivity;
-import net.gmsworld.devicelocator.services.SmsSenderService;
+import net.gmsworld.devicelocator.broadcastreceivers.LocationAlarmReceiver;
 
 import java.util.Date;
 
@@ -25,22 +24,12 @@ public class LocationAlarmUtils {
             final long alarmInterval = settings.getInt(ALARM_INTERVAL, 12) * AlarmManager.INTERVAL_HOUR;
 
             AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            Intent senderIntent = new Intent(context, SmsSenderService.class);
+            Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);
 
-            final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
-            final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
-            final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
-            senderIntent.putExtra("telegramId", telegramId);
-            senderIntent.putExtra("email", email);
-            senderIntent.putExtra("phoneNumber", phoneNumber);
-
-            //for silent mode send empty phone just to send location update
-            //senderIntent.putExtra("phoneNumber", "");
-
-            if (forceReset || (PendingIntent.getService(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null)) {
+            if (forceReset || (PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null)) {
                 final long triggerAtMillis = System.currentTimeMillis() + alarmInterval;
                 Log.d(TAG, "Creating Location Alarm to be triggered at " + new Date(triggerAtMillis));
-                final PendingIntent operation = PendingIntent.getService(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                final PendingIntent operation = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
                 } else {
@@ -48,8 +37,9 @@ public class LocationAlarmUtils {
                 }
                 settings.setLong(ALARM_KEY, triggerAtMillis);
             } else {
-                Log.d(TAG, "Location Alarm will be triggered at " + new Date(settings.getLong(ALARM_KEY)));
+                Log.d(TAG, "Next location alarm will be triggered at " + new Date(settings.getLong(ALARM_KEY)));
             }
+
             /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 if (alarmMgr.getNextAlarmClock() != null) {
                     long nextAlarm = alarmMgr.getNextAlarmClock().getTriggerTime();
@@ -67,8 +57,8 @@ public class LocationAlarmUtils {
 
     public static void cancel(Context context) {
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent senderIntent = new Intent(context, SmsSenderService.class);
-        PendingIntent intent = PendingIntent.getService(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE);
+        Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);
+        PendingIntent intent = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE);
         if (intent != null) {
             alarmMgr.cancel(intent);
             PreferencesUtils settings = new PreferencesUtils(context);

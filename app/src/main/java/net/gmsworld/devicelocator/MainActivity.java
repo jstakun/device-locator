@@ -590,6 +590,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.contact_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.telegram_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         ViewCompat.setBackgroundTintList(this.findViewById(R.id.ping_button), ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+
+        updateAlarmText();
     }
 
     public void toggleRunning() {
@@ -795,14 +797,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private void initAlarmInput() {
         SeekBar alarmBar = findViewById(R.id.alarmBar);
         alarmBar.setProgress(settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12));
-
-        final TextView alarmInterval = findViewById(R.id.alarm_interval);
-        String alarmText = "Location will be uploaded with " + settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12) + " hour interval.";
-        if (settings.getLong(LocationAlarmUtils.ALARM_KEY,0L) > 0) {
-            alarmText += " Next upload at " + new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY));
-        }
-        alarmInterval.setText(alarmText);
-
+        updateAlarmText();
         alarmBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int progressChangedValue = 12;
 
@@ -824,11 +819,19 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, progressChangedValue);
 
                 LocationAlarmUtils.initWhenDown(MainActivity.this, true);
-                alarmInterval.setText("Location will be uploaded with " + progressChangedValue + " hours interval. Next upload at " + new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY)));
+                updateAlarmText();
             }
         });
     }
 
+    private void updateAlarmText() {
+        final TextView alarmInterval = findViewById(R.id.alarm_interval);
+        String alarmText = "Location will be uploaded with " + settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12) + " hour interval.";
+        if (settings.getLong(LocationAlarmUtils.ALARM_KEY,0L) > 0) {
+            alarmText += " Next upload at " + new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY));
+        }
+        alarmInterval.setText(alarmText);
+    }
 
     //user login input setup -------------------------------------------------------------
 
