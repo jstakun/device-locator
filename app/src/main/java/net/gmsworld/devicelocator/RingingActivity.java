@@ -45,6 +45,7 @@ public class RingingActivity extends AppCompatActivity {
     @Override
     public void onNewIntent(Intent intent) {
         //show tracker view
+        super.onNewIntent(intent);
         Log.d(TAG, "onNewIntent()");
         if (intent != null) {
             String action = intent.getAction();

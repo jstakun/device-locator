@@ -143,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private final Handler loadingHandler = new UIHandler(this);
     private boolean isTrackingServiceBound = false;
     private FirebaseAnalytics firebaseAnalytics;
+    private final PrettyTime pt = new PrettyTime();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -828,7 +829,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         final TextView alarmInterval = findViewById(R.id.alarm_interval);
         String alarmText = "Location will be uploaded with " + settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12) + " hour interval.";
         if (settings.getLong(LocationAlarmUtils.ALARM_KEY,0L) > 0) {
-            alarmText += " Next upload at " + new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY));
+            alarmText += " Next upload " + pt.format(new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY)));
         }
         alarmInterval.setText(alarmText);
     }
@@ -1858,7 +1859,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         private final ArrayList<Device> devices;
         private final Location location;
-        private final PrettyTime pt = new PrettyTime();
         private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         DeviceArrayAdapter(Context context, int textViewResourceId, ArrayList<Device> devices) {

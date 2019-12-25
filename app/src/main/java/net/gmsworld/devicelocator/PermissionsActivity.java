@@ -84,6 +84,8 @@ public class PermissionsActivity extends AppCompatActivity {
         } else if ((requestCode == DEVICE_ADMIN || requestCode == RESET_PERMISSION) && resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Select checkbox next to " + getString(R.string.app_name), Toast.LENGTH_LONG).show();
             Permissions.startDeviceAdminIntent(this);
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
