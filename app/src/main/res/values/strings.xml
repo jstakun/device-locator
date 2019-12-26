@@ -162,5 +162,11 @@
     <string name="command_log">Command Log</string>
     <string name="commandEmpty">No commands has been sent to this device yet!</string>
     <string name="no_pin_saved">Unable to send command to the device %1$s because PIN is not saved!</string>
-    <string name="settings_alarm">Periodically upload location</string>
+    <string name="settings_alarm">Periodically save location</string>
+    <plurals name="alarm_interval">
+        <item quantity="one">Device location will be saved in an interval of %d hour</item>
+        <item quantity="other">Device location will be saved in an interval of %d hours</item>
+    </plurals>
+    <string name="alarm_settings_suffix">. Next saving %1$s</string>
+
 </resources>

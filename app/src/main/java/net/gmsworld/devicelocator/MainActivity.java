@@ -822,12 +822,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private void updateAlarmText() {
         final TextView alarmInterval = findViewById(R.id.alarm_interval);
         int interval = settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12);
-        String alarmText = "Location will be uploaded in an interval of " + interval + " hour";
-        if (interval > 1) {
-            alarmText += "s";
-        }
+        String alarmText = getResources().getQuantityString(R.plurals.alarm_interval, interval, interval);
         if (settings.getLong(LocationAlarmUtils.ALARM_KEY,0L) > 0) {
-            alarmText += ". Next upload " + pt.format(new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY)));
+            alarmText += getString(R.string.alarm_settings_suffix, pt.format(new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY))));
         }
         alarmInterval.setText(alarmText);
     }
