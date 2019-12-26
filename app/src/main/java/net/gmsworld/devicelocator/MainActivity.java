@@ -542,13 +542,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 } else {
                     LocationAlarmUtils.cancel(this);
                 }
-                final TextView alarmInterval = findViewById(R.id.alarm_interval);
-                String alarmText = "Location will be uploaded with " + settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12) + " hours interval.";
-                final long triggerAtMillis = settings.getLong(LocationAlarmUtils.ALARM_KEY,0);
-                if (triggerAtMillis > 0) {
-                    alarmText += " Next upload at " + new Date(triggerAtMillis);
-                }
-                alarmInterval.setText(alarmText);
+                updateAlarmText();
                 break;
             default:
                 break;
@@ -827,9 +821,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private void updateAlarmText() {
         final TextView alarmInterval = findViewById(R.id.alarm_interval);
-        String alarmText = "Location will be uploaded with " + settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12) + " hour interval.";
+        int interval = settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12);
+        String alarmText = "Location will be uploaded in an interval of " + interval + " hour";
+        if (interval > 1) {
+            alarmText += "s";
+        }
         if (settings.getLong(LocationAlarmUtils.ALARM_KEY,0L) > 0) {
-            alarmText += " Next upload " + pt.format(new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY)));
+            alarmText += ". Next upload " + pt.format(new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY)));
         }
         alarmInterval.setText(alarmText);
     }

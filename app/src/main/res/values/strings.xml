@@ -162,4 +162,5 @@
     <string name="command_log">Command Log</string>
     <string name="commandEmpty">No commands has been sent to this device yet!</string>
     <string name="no_pin_saved">Unable to send command to the device %1$s because PIN is not saved!</string>
+    <string name="settings_alarm">Periodically upload location</string>
 </resources>
