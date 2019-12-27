@@ -64,6 +64,11 @@ public class PreferencesUtils {
         }
     }
 
+    public void setBoolean(String key, Boolean value) {
+        if (value != null) {
+            sharedPreferences.edit().putBoolean(key, value).apply();
+        }
+    }
 
     public String getString(String key) {
         return sharedPreferences.getString(key, "");

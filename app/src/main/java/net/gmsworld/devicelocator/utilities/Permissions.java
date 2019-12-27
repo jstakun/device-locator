@@ -33,6 +33,8 @@ public class Permissions {
 
     public static final int PERMISSIONS_WRITE_STORAGE = 1006;
 
+    public static final int PERMISSIONS_REQUEST_ALARM_CONTROL = 1007;
+
     private static final String TAG = Permissions.class.getSimpleName();
 
     /*public static void checkAndRequestPermissionsAtStartup(Activity activity) {

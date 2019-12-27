@@ -215,8 +215,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
             notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
         }
-
-        LocationAlarmUtils.initWhenDown(this, false);
     }
 
     @Override
@@ -421,6 +419,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     Toast.makeText(this, R.string.send_location_permission, Toast.LENGTH_SHORT).show();
                 }
                 break;
+            case Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL:
+                if (Permissions.haveLocationPermission(this)) {
+                    setAlarmChecked(true);
+                } else {
+                    Toast.makeText(this, R.string.send_location_permission, Toast.LENGTH_SHORT).show();
+                }
+                break;
             case Permissions.PERMISSIONS_REQUEST_CALL:
                 if (!Permissions.haveCallPhonePermission(this)) {
                     Toast.makeText(this, "Call command won't work without this permission!", Toast.LENGTH_SHORT).show();
@@ -536,19 +541,29 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
                 break;
             case R.id.settings_alarm:
-                editor.putBoolean(LocationAlarmUtils.ALARM_SETTINGS, checked).apply();
-                if (checked) {
-                    LocationAlarmUtils.initWhenDown(this, true);
+                if (checked && !Permissions.haveLocationPermission(MainActivity.this)) {
+                    Permissions.requestLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL);
+                    return;
                 } else {
-                    LocationAlarmUtils.cancel(this);
+                    setAlarmChecked(checked);
                 }
-                updateAlarmText();
                 break;
             default:
                 break;
         }
 
         editor.apply();
+    }
+
+    private void setAlarmChecked(boolean checked) {
+        settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, checked);
+        //findViewById(R.id.alarmBar).setEnabled(checked);
+        if (checked) {
+            LocationAlarmUtils.initWhenDown(this, true);
+        } else {
+            LocationAlarmUtils.cancel(this);
+        }
+        updateAlarmText();
     }
 
     private void clearFocus() {
@@ -1401,8 +1416,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (StringUtils.isEmpty(email) && StringUtils.isEmpty(phoneNumber) && StringUtils.isEmpty(telegramId)) {
                     Toast.makeText(getApplicationContext(), getString(R.string.motion_confirm_empty, radius), Toast.LENGTH_LONG).show();
                     title.setChecked(false);
+                    //findViewById(R.id.radiusBar).setEnabled(false);
                 } else {
                     MainActivity.this.toggleMotionDetectorRunning();
+                    //findViewById(R.id.radiusBar).setEnabled(true);
                     MainActivity.this.clearFocus();
                 }
             }

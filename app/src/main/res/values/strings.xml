@@ -167,6 +167,6 @@
         <item quantity="one">Device location will be saved in an interval of %d hour</item>
         <item quantity="other">Device location will be saved in an interval of %d hours</item>
     </plurals>
-    <string name="alarm_settings_suffix">. Next saving %1$s</string>
+    <string name="alarm_settings_suffix">. Next %1$s</string>
 
 </resources>
