@@ -1949,11 +1949,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     //send locate command to deviceImei
                     String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + device.imei);
                     Intent newIntent = new Intent(MainActivity.this, CommandService.class);
-                    newIntent.putExtra("command", "locate");
+                    newIntent.putExtra("command", Command.SHARE_COMMAND);
                     newIntent.putExtra("imei", device.imei);
                     newIntent.putExtra(DEVICE_NAME, device.name);
                     newIntent.putExtra("pin", devicePin);
-                    newIntent.putExtra("args", "silent");
+                    //newIntent.putExtra("args", "silent");
                     startService(newIntent);
                 } else {
                     Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.no_pin_saved, device.name), Toast.LENGTH_LONG).show();
