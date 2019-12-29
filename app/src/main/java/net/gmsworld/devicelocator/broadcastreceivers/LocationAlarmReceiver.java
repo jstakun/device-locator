@@ -11,6 +11,8 @@ import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class LocationAlarmReceiver extends BroadcastReceiver {
 
     private final static String TAG = LocationAlarmReceiver.class.getName();
@@ -22,8 +24,11 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
         Intent senderIntent = new Intent(context, SmsSenderService.class);
 
         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
-        final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
         final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
+        String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
+        if (StringUtils.isEmpty(telegramId)) {
+            telegramId = "@device_locator_notifications";
+        }
         senderIntent.putExtra("telegramId", telegramId);
         senderIntent.putExtra("email", email);
         senderIntent.putExtra("phoneNumber", phoneNumber);
