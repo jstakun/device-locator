@@ -80,12 +80,13 @@ public class Command {
     public final static String AUDIO_OFF_COMMAND = "noaudiodl"; //na disable audio transmitter
 
     //not a command
-    public final static String LOCK_SCREEN_FAILED = "lockfail"; //this is not command
-    public final static String RESET_FAILED = "resetfail"; //this is not command
-    public final static String MUTE_FAILED = "mutefail"; //this is not command
-    public final static String STOPPED_TRACKER = "stopped"; //this is not command
+    public final static String LOCK_SCREEN_FAILED = "lockfail";
+    public final static String RESET_FAILED = "resetfail";
+    public final static String MUTE_FAILED = "mutefail";
+    public final static String STOPPED_TRACKER = "stopped";
     protected final static String INVALID_PIN = "invalidPin";
     protected final static String INVALID_COMMAND = "invalidCommand";
+    public final static String ALARM_COMMAND = "alarm";
 
     private static List<AbstractCommand> commands = null;
 
@@ -514,7 +515,32 @@ public class Command {
     private static final class ShareLocationCommand extends AbstractCommand {
 
         public ShareLocationCommand() {
-            super(SHARE_COMMAND, "l", Finder.EQUALS);
+            super(SHARE_COMMAND, "l", Finder.STARTS);
+        }
+
+        @Override
+        public String getDefaultArgs() {
+            return "now";
+        }
+
+        @Override
+        public boolean validateTokens() {
+            int interval = -1;
+            if (commandTokens != null && commandTokens.length > 1) {
+                final String intervalStr = commandTokens[commandTokens.length - 1];
+                if (StringUtils.endsWithIgnoreCase(intervalStr, "now")) {
+                    interval = 0;
+                } else {
+                    try {
+                        interval = Integer.parseInt(intervalStr);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Wrong interval: " + intervalStr);
+                    }
+                }
+            } else {
+                interval = 0;
+            }
+            return interval >= 0 && interval <= 24;
         }
 
         @Override
@@ -528,7 +554,29 @@ public class Command {
                 Log.e(TAG, "Missing SMS and/or Location permission");
                 sendSmsNotification(context, sender, SHARE_COMMAND);
             } else {
-                sendSmsNotification(context, sender, null); //don't set SHARE_COMMAND here!
+                if (commandTokens != null && commandTokens.length > 1) {
+                    String intervalStr = commandTokens[commandTokens.length - 1];
+                    if (StringUtils.equalsIgnoreCase(intervalStr, "now")) {
+                        sendSmsNotification(context, sender, null); //don't set SHARE_COMMAND here!
+                    } else if (StringUtils.isNumeric(intervalStr)) {
+                        int interval = Integer.parseInt(intervalStr);
+                        if (interval == 0) {
+                            LocationAlarmUtils.cancel(context);
+                        } else {
+                            if (interval <= 24 && interval > 0) {
+                                PreferencesUtils settings = new PreferencesUtils(context);
+                                settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, interval);
+                                settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, true);
+                                LocationAlarmUtils.initWhenDown(context, true);
+                                sendSmsNotification(context, sender, ALARM_COMMAND);
+                            } else {
+                                sendSmsNotification(context, sender, null); //don't set SHARE_COMMAND here!
+                            }
+                        }
+                    }
+                } else {
+                    sendSmsNotification(context, sender, null); //don't set SHARE_COMMAND here!
+                }
             }
         }
 
@@ -538,7 +586,27 @@ public class Command {
                 Log.e(TAG, "Missing Location permission");
                 sendSocialNotification(context, SHARE_COMMAND, sender, null);
             } else {
-                sendSocialNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
+                if (commandTokens != null && commandTokens.length > 1) {
+                    String intervalStr = commandTokens[commandTokens.length - 1];
+                    if (StringUtils.equalsIgnoreCase(intervalStr, "now")) {
+                        sendSocialNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
+                    } else {
+                        int interval = Integer.parseInt(intervalStr);
+                        if (interval == 0) {
+                            LocationAlarmUtils.cancel(context);
+                        } else if (interval <= 24 && interval > 0) {
+                            PreferencesUtils settings = new PreferencesUtils(context);
+                            settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, interval);
+                            settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, true);
+                            LocationAlarmUtils.initWhenDown(context, true);
+                            sendSocialNotification(context, ALARM_COMMAND, sender, null);
+                        } else {
+                            sendSocialNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
+                        }
+                    }
+                } else {
+                    sendSocialNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
+                }
             }
         }
 
@@ -548,7 +616,27 @@ public class Command {
                 Log.e(TAG, "Missing Location permission");
                 sendAppNotification(context, SHARE_COMMAND, sender);
             } else {
-                sendAppNotification(context, null, sender); //don't set SHARE_COMMAND here!
+                if (commandTokens != null && commandTokens.length > 1) {
+                    String intervalStr = commandTokens[commandTokens.length - 1];
+                    if (StringUtils.equalsIgnoreCase(intervalStr, "now")) {
+                        sendAppNotification(context, null, sender); //don't set SHARE_COMMAND here!
+                    } else {
+                        int interval = Integer.parseInt(intervalStr);
+                        if (interval == 0) {
+                            LocationAlarmUtils.cancel(context);
+                        } else if (interval <= 24 && interval > 0) {
+                            PreferencesUtils settings = new PreferencesUtils(context);
+                            settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, interval);
+                            settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, true);
+                            LocationAlarmUtils.initWhenDown(context, true);
+                            sendAppNotification(context, ALARM_COMMAND, sender);
+                        } else {
+                            sendAppNotification(context, null, sender); //don't set SHARE_COMMAND here!
+                        }
+                    }
+                } else {
+                    sendAppNotification(context, null, sender); //don't set SHARE_COMMAND here!
+                }
             }
         }
 
@@ -558,7 +646,28 @@ public class Command {
                 Log.e(TAG, "Missing Location permission");
                 sendAdmNotification(context, SHARE_COMMAND, sender, null);
             } else {
-                sendAdmNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
+                if (commandTokens != null && commandTokens.length > 1) {
+                    String intervalStr = commandTokens[commandTokens.length - 1];
+                    if (StringUtils.equalsIgnoreCase(intervalStr, "now")) {
+                        sendAdmNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
+                    } else {
+                        int interval = Integer.parseInt(intervalStr);
+                        if (interval == 0) {
+                            LocationAlarmUtils.cancel(context);
+                        } else if (interval <= 24 && interval > 0) {
+                            PreferencesUtils settings = new PreferencesUtils(context);
+                            settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, interval);
+                            settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, true);
+                            LocationAlarmUtils.initWhenDown(context, true);
+                            sendAdmNotification(context, ALARM_COMMAND, sender, null);
+                        } else {
+                            sendAdmNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
+                        }
+                    }
+
+                } else {
+                    sendAdmNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
+                }
             }
         }
 

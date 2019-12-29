@@ -248,7 +248,7 @@ public abstract class AbstractCommand {
                         final String commandStr = StringUtils.substring(commandTokens[0], 0, commandTokens[0].length() - pin.length());
                         final String pinStr = StringUtils.substring(commandTokens[0], commandTokens[0].length() - pin.length());
                         Log.d(TAG, "Comparing " + commandStr + " " + pinStr + " with " + command);
-                        if (StringUtils.startsWithIgnoreCase(commandStr, command) && StringUtils.isNumeric(pinStr)) {
+                        if (StringUtils.equalsIgnoreCase(commandStr, command) && StringUtils.isNumeric(pinStr)) {
                             sendSocialNotification(context, Command.INVALID_PIN, sender, commandTokens[0]);
                             Log.e(TAG, "2: Command " + commandTokens[0] + " with invalid Security PIN received!");
                             foundCommand = -1;
