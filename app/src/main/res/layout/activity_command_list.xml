@@ -23,9 +23,9 @@
             android:id="@+id/commandList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:divider="@color/lightGray"
-            android:dividerHeight="1dp"
-            android:padding="4dp"/>
+            android:divider="@drawable/divider"
+            android:dividerHeight="8dp"
+            android:padding="2dp"/>
 
         <TextView android:id="@+id/commandEmpty"
             android:layout_width="match_parent"
