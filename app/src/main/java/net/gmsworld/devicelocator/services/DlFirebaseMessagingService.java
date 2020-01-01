@@ -156,8 +156,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
 
     private static boolean sendRegistrationToServer(final Context context, final String firebaseToken, final String username, final String deviceName) {
         if (StringUtils.isNotEmpty(firebaseToken) && !StringUtils.equalsIgnoreCase(firebaseToken, "BLACKLISTED")) {
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
+            final String tokenStr = PreferenceManager.getDefaultSharedPreferences(context).getString(DeviceLocatorApp.GMS_TOKEN, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
                 sendRegistrationToServer(context, firebaseToken, username, deviceName, tokenStr);
             } else {
@@ -242,8 +241,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
 
     public static boolean sendRegistrationToServer(final Context context, final String username, final String deviceName, final boolean silent) {
         if (Network.isNetworkAvailable(context)) {
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String firebaseToken = settings.getString(FIREBASE_TOKEN, "");
+            final String firebaseToken = PreferenceManager.getDefaultSharedPreferences(context).getString(FIREBASE_TOKEN, "");
             if (StringUtils.isEmpty(firebaseToken)) {
                 Task<InstanceIdResult> result = FirebaseInstanceId.getInstance().getInstanceId();
 

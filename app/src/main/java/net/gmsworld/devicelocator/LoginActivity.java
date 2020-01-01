@@ -5,11 +5,9 @@ import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
@@ -28,6 +26,7 @@ import com.google.gson.JsonParser;
 import net.gmsworld.devicelocator.utilities.LinkMovementMethodFixed;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.utilities.SCUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -147,8 +146,8 @@ public class LoginActivity extends AppCompatActivity  {
         if (StringUtils.isNotEmpty(email)) {
             if (Network.isNetworkAvailable(this)) {
                 Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
-                final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
+                PreferencesUtils settings = new PreferencesUtils(this);
+                final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     Map<String, String> headers = new HashMap<>();
                     headers.put("Authorization", "Bearer " + tokenStr);

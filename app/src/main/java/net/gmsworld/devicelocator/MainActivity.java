@@ -819,6 +819,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 updateAlarmText();
             }
         });
+        //check if alarm is running
+        if (settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)){
+            LocationAlarmUtils.initWhenDown(this, false);
+        }
     }
 
     private void updateAlarmText() {
