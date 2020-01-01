@@ -49,24 +49,32 @@ public class PreferencesUtils {
     public void setString(String key, String value) {
         if (StringUtils.isNotEmpty(value)) {
             sharedPreferences.edit().putString(key, value).apply();
+        } else {
+            sharedPreferences.edit().remove(key).apply();
         }
     }
 
     public void setLong(String key, Long value) {
         if (value != null) {
             sharedPreferences.edit().putLong(key, value).apply();
+        } else {
+            sharedPreferences.edit().remove(key).apply();
         }
     }
 
     public void setInt(String key, Integer value) {
         if (value != null) {
             sharedPreferences.edit().putInt(key, value).apply();
+        } else {
+            sharedPreferences.edit().remove(key).apply();
         }
     }
 
     public void setBoolean(String key, Boolean value) {
         if (value != null) {
             sharedPreferences.edit().putBoolean(key, value).apply();
+        } else {
+            sharedPreferences.edit().remove(key).apply();
         }
     }
 
