@@ -250,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         //check for active Telegram registration
         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
             final String telegramSecret = settings.getString(NotificationActivationDialogFragment.TELEGRAM_SECRET);
+            Log.d(TAG, "Found Telegram Secret ");
             if (StringUtils.equals(telegramSecret, "none")) {
                 settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET);
                 final TextView telegramInput = this.findViewById(R.id.telegramId);
@@ -272,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to paste text from clipboard", e);
                 }
-            } else if (StringUtils.isEmpty(telegramId) && StringUtils.isNotEmpty(telegramSecret)) {
+            } else if (StringUtils.isNotEmpty(telegramSecret)) {
                 getTelegramChatId(telegramSecret.trim());
             }
         }

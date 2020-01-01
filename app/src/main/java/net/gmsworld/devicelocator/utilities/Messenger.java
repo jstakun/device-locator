@@ -1284,8 +1284,9 @@ public class Messenger {
                 context.getPackageManager().getPackageInfo(TELEGRAM_PACKAGE, PackageManager.GET_ACTIVITIES);
                 intent.setPackage(TELEGRAM_PACKAGE);
             }
-            context.startActivity(intent);
+            Log.d(TAG, "Setting Telegram Secret ");
             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, deviceSecret).apply();
+            context.startActivity(intent);
             if (appInstalled) {
                 Toast.makeText(context, "Please push Start button", Toast.LENGTH_SHORT).show();
             } else {
