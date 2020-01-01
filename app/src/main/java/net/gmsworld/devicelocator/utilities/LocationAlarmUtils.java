@@ -61,8 +61,8 @@ public class LocationAlarmUtils {
         PendingIntent intent = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE);
         if (intent != null) {
             alarmMgr.cancel(intent);
-            PreferencesUtils settings = new PreferencesUtils(context);
-            settings.remove(ALARM_KEY);
         }
+        PreferencesUtils settings = new PreferencesUtils(context);
+        settings.remove(ALARM_KEY, ALARM_INTERVAL);
     }
 }

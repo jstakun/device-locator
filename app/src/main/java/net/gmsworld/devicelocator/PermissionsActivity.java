@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,7 +56,7 @@ public class PermissionsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         if (!settings.contains("PermissionsFirstTimeUseDialog")) {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("PermissionsFirstTimeUseDialog", true).apply();
+            settings.setBoolean("PermissionsFirstTimeUseDialog", true);
             FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.permissions_first_time_use, R.drawable.ic_settings_cell_gray);
             firstTimeUseDialogFragment.show(getFragmentManager(), "PermissionsFirstTimeUseDialog");
         }
@@ -152,7 +151,7 @@ public class PermissionsActivity extends AppCompatActivity {
         Switch cameraPermission = findViewById(R.id.camera_permission);
         if (!Permissions.haveCameraPermission(this) || !HiddenCameraUtils.canOverDrawOtherApps(this)) {
             cameraPermission.setChecked(false);
-            PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("hiddenCamera", false).apply();
+            settings.setBoolean("hiddenCamera", false);
         } else {
             cameraPermission.setChecked(true);
         }
@@ -163,7 +162,7 @@ public class PermissionsActivity extends AppCompatActivity {
             readContactsPermission.setChecked(perm);
             if (!perm && settings.contains(DevicesUtils.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
                 //READ_CONTACTS permission has been revoked: remove this device old data
-                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(MainActivity.USER_LOGIN).apply();
+                settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
                 DevicesUtils.deleteDevice(this, settings, deviceId);
             }
         } else {
@@ -184,7 +183,7 @@ public class PermissionsActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
             if (fingerprintManager != null && fingerprintManager.isHardwareDetected()) {
-                useFingerprintPermission.setChecked(Permissions.haveFingerprintPermission(this) && PreferenceManager.getDefaultSharedPreferences(this).getBoolean(FingerprintHelper.BIOMETRIC_AUTH, true));
+                useFingerprintPermission.setChecked(Permissions.haveFingerprintPermission(this) && settings.getBoolean(FingerprintHelper.BIOMETRIC_AUTH, true));
             } else {
                 useFingerprintPermission.setVisibility(View.GONE);
             }
@@ -206,7 +205,7 @@ public class PermissionsActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().remove(DevicesUtils.CURRENT_DEVICE_ID).apply();
+        settings.remove(DevicesUtils.CURRENT_DEVICE_ID);
     }
 
     @Override
@@ -307,7 +306,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 break;
             case R.id.use_fingerprint_permission:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(FingerprintHelper.BIOMETRIC_AUTH, checked).apply();
+                    settings.setBoolean(FingerprintHelper.BIOMETRIC_AUTH, checked);
                     FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
                     if (fingerprintManager != null && fingerprintManager.isHardwareDetected() && checked && !Permissions.haveFingerprintPermission(this)) {
                         Permissions.requestCallPhonePermission(this, 0);
@@ -319,7 +318,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.call_phone_permission:
-                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putString(DevicesUtils.CURRENT_DEVICE_ID, Messenger.getDeviceId(this, false)).apply();
+                settings.setString(DevicesUtils.CURRENT_DEVICE_ID, Messenger.getDeviceId(this, false));
                 if (checked && !Permissions.haveCallPhonePermission(this)) {
                     Permissions.requestCallPhonePermission(this, CALL_PERMISSION);
                 } else if (!checked) {
@@ -327,7 +326,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.read_phone_state_permission:
-                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putString(DevicesUtils.CURRENT_DEVICE_ID, Messenger.getDeviceId(this, false)).apply();
+                settings.setString(DevicesUtils.CURRENT_DEVICE_ID, Messenger.getDeviceId(this, false));
                 if (checked && !Permissions.haveReadPhoneStatePermission(this)) {
                     Permissions.requestReadPhoneStatePermission(this, CALL_PERMISSION);
                 } else if (!checked) {
@@ -345,11 +344,11 @@ public class PermissionsActivity extends AppCompatActivity {
                 if (checked && !settings.getBoolean(DeviceAdminEventReceiver.DEVICE_ADMIN_ENABLED, false)) {
                     Permissions.startAddDeviceAdminIntent(this, RESET_PERMISSION);
                 } else {
-                    PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("allowReset", checked).apply();
+                    settings.setBoolean("allowReset", checked);
                 }
                 break;
             case R.id.settings_sms_without_pin:
-                PreferenceManager.getDefaultSharedPreferences(PermissionsActivity.this).edit().putBoolean("settings_sms_without_pin", checked).apply();
+                settings.setBoolean("settings_sms_without_pin", checked);
                 if (!checked) {
                     Toast.makeText(this, "Be careful. From now on Security PIN is not required to send command to your device!", Toast.LENGTH_LONG).show();
                 }

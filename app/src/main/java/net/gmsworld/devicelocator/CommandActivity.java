@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.location.Location;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
@@ -50,15 +49,15 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
     public static final String PIN_PREFIX = "pin_";
 
     private FirebaseAnalytics firebaseAnalytics;
-
     private Device device;
+    private PreferencesUtils settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_command);
 
-        final PreferencesUtils prefs = new PreferencesUtils(this);
+        settings = new PreferencesUtils(this);
 
         final List<Device> devices = getIntent().getParcelableArrayListExtra("devices");
 
@@ -80,7 +79,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
-                    sendCommand(prefs, pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString(), socialSend.isChecked());
+                    sendCommand(pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString(), socialSend.isChecked());
                 }
                 return false;
             }
@@ -89,7 +88,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         final CommandArrayAdapter commands = new CommandArrayAdapter(this, R.layout.command_row,  getResources().getStringArray(R.array.device_commands));
         commandSpinner.setAdapter(commands);
 
-        setSelectedCommand(prefs, commandSpinner);
+        setSelectedCommand(commandSpinner);
 
         commandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -122,9 +121,9 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
         String savedPin;
         if (StringUtils.equals(device.imei, Messenger.getDeviceId(this, false))) {
-            savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+            savedPin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
         } else {
-            savedPin = prefs.getEncryptedString(PIN_PREFIX + device.imei);
+            savedPin = settings.getEncryptedString(PIN_PREFIX + device.imei);
         }
         if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
             pinEdit.setText(savedPin);
@@ -156,16 +155,16 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 device = devices.get(position);
                 String savedPin;
                 if (StringUtils.equals(device.imei, Messenger.getDeviceId(CommandActivity.this, false))) {
-                    savedPin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+                    savedPin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
                 } else {
-                    savedPin = prefs.getEncryptedString(PIN_PREFIX + device.imei);
+                    savedPin = settings.getEncryptedString(PIN_PREFIX + device.imei);
                 }
                 if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
                     pinEdit.setText(savedPin);
                 } else {
                     pinEdit.setText("");
                 }
-                setSelectedCommand(prefs, commandSpinner);
+                setSelectedCommand(commandSpinner);
             }
 
             @Override
@@ -188,7 +187,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                sendCommand(prefs, pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString(), socialSend.isChecked());
+                sendCommand(pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString(), socialSend.isChecked());
             }
         });
 
@@ -219,7 +218,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
     protected void onDestroy() {
         super.onDestroy();
         //reset pin verification time
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).apply();
+        settings.setLong("pinVerificationMillis", System.currentTimeMillis());
     }
 
     @Override
@@ -253,7 +252,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         }
     }
 
-    private void sendCommand(PreferencesUtils prefs, String pin, String command, String commandArgs, boolean sendSocial) {
+    private void sendCommand(String pin, String command, String commandArgs, boolean sendSocial) {
         if (isValidCommand(pin, command, commandArgs)) {
             if (sendSocial) {
                 //command pin imei -p args
@@ -263,7 +262,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 }
                 Messenger.sendTelegramMessage(CommandActivity.this, message);
             } else if (Network.isNetworkAvailable(CommandActivity.this)) {
-                prefs.setEncryptedString(PIN_PREFIX + device.imei, pin);
+                settings.setEncryptedString(PIN_PREFIX + device.imei, pin);
                 Intent newIntent = new Intent(this, CommandService.class);
                 AbstractCommand c = Command.getCommandByName(command);
                 if ((c == null || c.hasParameters()) && StringUtils.isNotEmpty(commandArgs)) {
@@ -293,8 +292,8 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         startService(intent);
     }
 
-    private void setSelectedCommand(PreferencesUtils prefs, Spinner commandSpinner) {
-        String lastCommand = prefs.getString(device.imei + CommandService.LAST_COMMAND_SUFFIX);
+    private void setSelectedCommand(Spinner commandSpinner) {
+        String lastCommand = settings.getString(device.imei + CommandService.LAST_COMMAND_SUFFIX);
         Log.d(TAG, "Found last command " + lastCommand);
         if (StringUtils.isNotEmpty(lastCommand)) {
             AbstractCommand c = Command.getCommandByName(lastCommand);

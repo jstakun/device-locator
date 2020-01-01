@@ -11,7 +11,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
@@ -21,7 +20,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.text.Editable;
@@ -253,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
             final String telegramSecret = settings.getString(NotificationActivationDialogFragment.TELEGRAM_SECRET);
             if (StringUtils.equals(telegramSecret, "none")) {
-                PreferenceManager.getDefaultSharedPreferences(this).edit().remove(NotificationActivationDialogFragment.TELEGRAM_SECRET).apply();
+                settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET);
                 final TextView telegramInput = this.findViewById(R.id.telegramId);
                 //paste telegram id from clipboard
                 try {
@@ -294,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         registerDeviceName((TextView) findViewById(R.id.deviceName), true);
 
         //reset pin verification time
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putLong("pinVerificationMillis", System.currentTimeMillis()).apply();
+        settings.setLong("pinVerificationMillis", System.currentTimeMillis());
     }
 
     @Override
@@ -326,9 +324,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         switch (item.getItemId()) {
             case R.id.sms:
                 Log.d(TAG, "Show sms settings");
-                PreferenceManager.getDefaultSharedPreferences(this).edit()
-                        .putBoolean("isTrackerShown", false)
-                        .putBoolean("isDeviceManagerShown", false).apply();
+                settings.setBoolean("isTrackerShown", false);
+                settings.setBoolean("isDeviceManagerShown", false);
                 findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_sms_focus).requestFocus();
@@ -337,9 +334,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 return true;
             case R.id.tracker:
                 Log.d(TAG, "Show tracker settings");
-                PreferenceManager.getDefaultSharedPreferences(this).edit()
-                        .putBoolean("isTrackerShown", true)
-                        .putBoolean("isDeviceManagerShown", false).apply();
+                settings.setBoolean("isTrackerShown", true);
+                settings.setBoolean("isDeviceManagerShown", false);
                 findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.ll_tracker_focus).requestFocus();
@@ -348,9 +344,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 return true;
             case R.id.devices:
                 Log.d(TAG, "Show Device Manager settings");
-                PreferenceManager.getDefaultSharedPreferences(this).edit()
-                        .putBoolean("isTrackerShown", false)
-                        .putBoolean("isDeviceManagerShown", true).apply();
+                settings.setBoolean("isTrackerShown", false);
+                settings.setBoolean("isDeviceManagerShown", true);
                 findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
                 findViewById(R.id.smsSettings).setVisibility(View.GONE);
                 findViewById(R.id.trackerSettings).setVisibility(View.GONE);
@@ -453,29 +448,25 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             switch (action) {
                 case ACTION_DEVICE_TRACKER:
                     isTrackerShown = true;
-                    PreferenceManager.getDefaultSharedPreferences(this).edit()
-                            .putBoolean("isTrackerShown", true)
-                            .putBoolean("isDeviceManagerShown", false).apply();
+                    settings.setBoolean("isTrackerShown", true);
+                    settings.setBoolean("isDeviceManagerShown", false);
                     break;
                 case ACTION_DEVICE_TRACKER_NOTIFICATION:
                     isTrackerShown = true;
-                    PreferenceManager.getDefaultSharedPreferences(this).edit()
-                            .putBoolean("isTrackerShown", true)
-                            .putBoolean("isDeviceManagerShown", false).apply();
+                    settings.setBoolean("isTrackerShown", true);
+                    settings.setBoolean("isDeviceManagerShown", false);
                     findViewById(R.id.email).requestFocus();
                     break;
                 case ACTION_DEVICE_MANAGER:
                     isDeviceManagerShown = true;
-                    PreferenceManager.getDefaultSharedPreferences(this).edit()
-                            .putBoolean("isTrackerShown", false)
-                            .putBoolean("isDeviceManagerShown", true).apply();
+                    settings.setBoolean("isTrackerShown", false);
+                    settings.setBoolean("isDeviceManagerShown", true);
                     break;
                 case ACTION_SMS_MANAGER:
                     isTrackerShown = false;
                     isDeviceManagerShown = false;
-                    PreferenceManager.getDefaultSharedPreferences(this).edit()
-                            .putBoolean("isTrackerShown", false)
-                            .putBoolean("isDeviceManagerShown", false).apply();
+                    settings.setBoolean("isTrackerShown", false);
+                    settings.setBoolean("isDeviceManagerShown", false);
                     break;
                 default:
                     break;
@@ -519,21 +510,19 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     public void onLocationSMSCheckboxClicked(View view) {
         boolean checked = ((Switch) view).isChecked();
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = settings.edit();
 
         switch (view.getId()) {
             case R.id.settings_detected_sms:
-                editor.putBoolean(SmsSenderService.SEND_ACKNOWLEDGE_MESSAGE, checked);
+                settings.setBoolean(SmsSenderService.SEND_ACKNOWLEDGE_MESSAGE, checked);
                 break;
             case R.id.settings_gps_sms:
-                editor.putBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, checked);
+                settings.setBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, checked);
                 break;
             case R.id.settings_google_sms:
-                editor.putBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, checked);
+                settings.setBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, checked);
                 break;
             case R.id.settings_verify_pin:
-                editor.putBoolean("settings_verify_pin", checked);
+                settings.setBoolean("settings_verify_pin", checked);
                 if (checked && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email) && StringUtils.isNotEmpty(phoneNumber)) {
                     Toast.makeText(this, "Please remember your Security PIN and configure Notification settings in order to be able to recover forgotten Security PIN.", Toast.LENGTH_LONG).show();
                 } else if (checked) {
@@ -551,8 +540,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             default:
                 break;
         }
-
-        editor.apply();
     }
 
     private void setAlarmChecked(boolean checked) {
@@ -617,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 Log.e(TAG, "Something is wrong here with either empty pin:" + StringUtils.isEmpty(pin) + " or with empty Firebase token:" + StringUtils.isEmpty(firebaseToken));
             }
         } else {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DlFirebaseMessagingService.FIREBASE_TOKEN).apply();
+            settings.remove(DlFirebaseMessagingService.FIREBASE_TOKEN);
         }
         //
 
@@ -836,10 +823,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private void updateAlarmText() {
         final TextView alarmInterval = findViewById(R.id.alarm_interval);
-        int interval = settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12);
+        final int interval = settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12);
+        final long alarmMillis = settings.getLong(LocationAlarmUtils.ALARM_KEY,0L);
         String alarmText = getResources().getQuantityString(R.plurals.alarm_interval, interval, interval);
-        if (settings.getLong(LocationAlarmUtils.ALARM_KEY,0L) > 0) {
-            alarmText += getString(R.string.alarm_settings_suffix, pt.format(new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY))));
+        if (alarmMillis > System.currentTimeMillis() && settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)) {
+            alarmText += getString(R.string.alarm_settings_suffix, pt.format(new Date(alarmMillis)));
         }
         alarmInterval.setText(alarmText);
     }
@@ -904,7 +892,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 //show dialog with info What to do if no account is created
                 showLoginDialogFragment();
                 if (settings.contains(USER_LOGIN)) {
-                    PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(MainActivity.USER_LOGIN).apply();
+                    settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
                     onDeleteDevice(Messenger.getDeviceId(this, false), true);
                 }
             }
@@ -927,7 +915,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         } else {
             //Log.d(TAG, "Device settings view is visible");
             if (settings.contains(USER_LOGIN) && settings.contains(DevicesUtils.USER_DEVICES)) {
-                PreferenceManager.getDefaultSharedPreferences(this).edit().remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(MainActivity.USER_LOGIN).apply();
+                settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
                 onDeleteDevice(Messenger.getDeviceId(this, false), true);
             }
             if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && !silent) {
@@ -970,7 +958,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         String deviceName = settings.getString(DEVICE_NAME);
         if (StringUtils.isEmpty(deviceName)) {
             deviceName = Messenger.getDeviceName();
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putString(DEVICE_NAME, deviceName).apply();
+            settings.setString(DEVICE_NAME, deviceName);
         }
         //Log.d(TAG, "Device name: -" + deviceName + "-");
         deviceNameInput.setText(deviceName);
@@ -1021,7 +1009,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
                     EditText deviceNameEdit = findViewById(R.id.deviceName);
                     deviceNameEdit.setText(normalizedDeviceName);
-                    PreferenceManager.getDefaultSharedPreferences(this).edit().putString(DEVICE_NAME, normalizedDeviceName).apply();
+                    settings.setString(DEVICE_NAME, normalizedDeviceName);
                 }
                 if (!silent) {
                     Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
@@ -1349,14 +1337,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (isTrackerShown) {
             //Device Tracker
             if (!settings.contains("DeviceTrackerFirstTimeUseDialog")) {
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("DeviceTrackerFirstTimeUseDialog", true).apply();
+                settings.setBoolean("DeviceTrackerFirstTimeUseDialog", true);
                 FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.device_tracker_first_time_use, R.drawable.ic_location_on_gray);
                 firstTimeUseDialogFragment.show(getFragmentManager(), "DeviceTrackerFirstTimeUseDialog");
             }
         } else if (isDeviceManagerShown) {
             //Device Manager
             if (!settings.contains("DeviceManagerFirstTimeUseDialog")) {
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("DeviceManagerFirstTimeUseDialog", true).apply();
+                settings.setBoolean("DeviceManagerFirstTimeUseDialog", true);
                 FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.device_manager_first_time_use, R.drawable.ic_devices_other_gray);
                 firstTimeUseDialogFragment.show(getFragmentManager(), "DeviceManagerFirstTimeUseDialog");
             }
@@ -1365,7 +1353,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             //Full version
             if (AppUtils.getInstance().isFullVersion()) {
                 if (!settings.contains(SmsCommandsInitDialogFragment.TAG)) {
-                    PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(SmsCommandsInitDialogFragment.TAG, true).apply();
+                    settings.setBoolean(SmsCommandsInitDialogFragment.TAG, true);
                     SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = SmsCommandsInitDialogFragment.newInstance(this);
                     smsCommandsInitDialogFragment.show(getFragmentManager(), SmsCommandsInitDialogFragment.TAG);
                 }
@@ -1374,7 +1362,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 //DownloadFullApplicationDialogFragment downloadFullApplicationDialogFragment = DownloadFullApplicationDialogFragment.newInstance(this);
                 //downloadFullApplicationDialogFragment.show(getFragmentManager(), DownloadFullApplicationDialogFragment.TAG);
                 if (!settings.contains("SmsManagerFirstTimeUseDialog")) {
-                    PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("SmsManagerFirstTimeUseDialog", true).apply();
+                    settings.setBoolean("SmsManagerFirstTimeUseDialog", true);
                     FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.sms_manager_first_time_use_gp, R.drawable.ic_devices_other_gray);
                     firstTimeUseDialogFragment.show(getFragmentManager(), "SmsManagerFirstTimeUseDialog");
                 }
@@ -1560,7 +1548,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         }
                         //current device has been removed
                         if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
-                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(USER_LOGIN).remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).apply();
+                            settings.remove(USER_LOGIN, DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP);
                             if (!silent) {
                                 initUserLoginInput(true, false);
                             }
@@ -1588,7 +1576,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
-                            PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().remove(NotificationActivationDialogFragment.TELEGRAM_SECRET).apply();
+                            settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET);
                             if (responseCode == 200 && results.startsWith("{")) {
                                 String secret = null, status = null;
                                 JsonElement reply = new JsonParser().parse(results);
@@ -1596,12 +1584,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     JsonElement st = reply.getAsJsonObject().get("status");
                                     if (st != null) {
                                         status = st.getAsString();
-                                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
+                                        settings.setString(MainActivity.SOCIAL_REGISTRATION_STATUS, status);
                                     }
                                     JsonElement se = reply.getAsJsonObject().get("secret");
                                     if (se != null) {
                                         secret = se.getAsString();
-                                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret).apply();
+                                        settings.setString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret);
                                     }
                                     JsonElement cid = reply.getAsJsonObject().get("chatId");
                                     if (cid != null) {
@@ -1659,14 +1647,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void saveData() {
-        PreferenceManager.getDefaultSharedPreferences(this).edit()
-                .putBoolean("running", this.running)
-                .putBoolean("motionDetectorRunning", this.motionDetectorRunning)
-                .putInt("radius", this.radius)
-                .putString(NOTIFICATION_PHONE_NUMBER, phoneNumber)
-                .putString(NOTIFICATION_EMAIL, email)
-                .putString(NOTIFICATION_SOCIAL, telegramId)
-                .apply();
+        settings.setBoolean("running", this.running);
+        settings.setBoolean("motionDetectorRunning", this.motionDetectorRunning);
+        settings.setInt("radius", this.radius);
+        settings.setString(NOTIFICATION_PHONE_NUMBER, phoneNumber);
+        settings.setString(NOTIFICATION_EMAIL, email);
+        settings.setString(NOTIFICATION_SOCIAL, telegramId);
     }
 
     private void restoreSavedData() {
@@ -1688,7 +1674,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         this.telegramId = settings.getString(NOTIFICATION_SOCIAL);
         //testing use count
         int useCount = settings.getInt("useCount", 0);
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putInt("useCount", useCount + 1).apply();
+        settings.setInt("useCount", useCount + 1);
     }
 
     private void showLoginDialogFragment() {

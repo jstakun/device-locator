@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -27,7 +28,7 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
         final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
         String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
         if (StringUtils.isEmpty(telegramId)) {
-            telegramId = "@device_locator_notifications";
+            telegramId = context.getString(R.string.telegram_notification);
         }
         senderIntent.putExtra("telegramId", telegramId);
         senderIntent.putExtra("email", email);

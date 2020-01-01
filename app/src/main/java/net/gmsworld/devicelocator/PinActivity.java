@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.Html;
 import android.text.InputFilter;
@@ -203,10 +202,8 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             }
             startActivity(intent);
         }
-        PreferenceManager.getDefaultSharedPreferences(this).edit()
-                .remove("pinFailedCount")
-                .putLong("pinVerificationMillis", System.currentTimeMillis())
-                .apply();
+        settings.remove("pinFailedCount");
+        settings.setLong("pinVerificationMillis", System.currentTimeMillis());
         finish();
     }
 
@@ -250,9 +247,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                 Log.d(TAG, "Camera is disabled. No photo will be taken");
             }
         }
-        PreferenceManager.getDefaultSharedPreferences(PinActivity.this).edit()
-                .putInt("pinFailedCount", pinFailedCount + 1)
-                .apply();
+        settings.setInt("pinFailedCount", pinFailedCount + 1);
     }
 
     private abstract class TextViewLinkHandler extends LinkMovementMethod {

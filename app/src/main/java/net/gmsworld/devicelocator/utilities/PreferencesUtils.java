@@ -102,7 +102,12 @@ public class PreferencesUtils {
         return sharedPreferences.getStringSet(key, defaultValue);
     }
 
-    public void remove(String key) {
-        sharedPreferences.edit().remove(key).apply();
+    public void remove(String... keys) {
+        for (String key : keys) {
+            sharedPreferences.edit().remove(key);
+        }
+        sharedPreferences.edit().apply();
     }
+
+
 }

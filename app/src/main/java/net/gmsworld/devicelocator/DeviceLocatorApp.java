@@ -1,7 +1,6 @@
 package net.gmsworld.devicelocator;
 
 import android.app.Application;
-import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -17,15 +16,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by jstakun on 5/28/17.
- */
-
-//@ReportsCrashes(
-//        formUri = "https://www.gms-world.net/crashReport",
-//        mode = ReportingInteractionMode.TOAST,
-//        resToastText = R.string.Crash_error,
-//        socketTimeout = 30000)
 public class DeviceLocatorApp extends Application {
 
     public static final String GMS_TOKEN = "gmsToken";
@@ -35,8 +25,7 @@ public class DeviceLocatorApp extends Application {
     public void onCreate() {
         super.onCreate();
         final Map<String, String> headers = new HashMap<>();
-        final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        String tokenStr = settings.getString(GMS_TOKEN, "");
+        final String tokenStr = PreferenceManager.getDefaultSharedPreferences(this).getString(GMS_TOKEN, "");
         if (StringUtils.isNotEmpty(tokenStr)) {
             headers.put("Authorization", "Bearer " + tokenStr);
             headers.put("X-GMS-AppId", "2");
