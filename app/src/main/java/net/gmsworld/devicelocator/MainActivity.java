@@ -1620,7 +1620,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             headers.put("X-GMS-Scope", "dl");
             if (StringUtils.isNotEmpty(tokenStr)) {
                 final String queryString = "type=getTelegramChatId&telegramSecret=" + telegramSecret;
-                Network.get(this, getString(R.string.telegramUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
+                Network.get(this, getString(R.string.telegramUrl) + "?" + queryString, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
@@ -1905,7 +1905,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         private final ArrayList<Device> devices;
         private final Location location;
-        private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); // ISO8601
 
         DeviceArrayAdapter(Context context, int textViewResourceId, ArrayList<Device> devices) {
             super(context, textViewResourceId, devices);
@@ -2063,11 +2063,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private class DeviceComparator implements Comparator<Device> {
 
+        // ISO8601
         final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
         @Override
         public int compare(Device device, Device device2) {
             try {
+                //Log.d(TAG, "Comparing " + device.name + ": " + device.creationDate + " with " + device2.name + ": " + device2.creationDate);
                 return formatter.parse(device2.creationDate).compareTo(formatter.parse(device.creationDate));
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
