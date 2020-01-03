@@ -1070,20 +1070,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage(), e);
                         }
-                        //TODO remove in v58
-                        //set notification email from user login
-                        /*if (!pasted)
-                        {
-                            try {
-                                final String userLogin = settings.getString(USER_LOGIN);
-                                if (StringUtils.isNotEmpty(userLogin) && Patterns.EMAIL_ADDRESS.matcher(userLogin).matches()) {
-                                    //show dialog with user email
-                                    showEmailNotificationDialogFragment(userLogin);
-                                }
-                            } catch (Exception e) {
-                                Log.e(TAG, e.getMessage(), e);
-                            }
-                        }*/
                     }
                 } else {
                     registerEmail(emailInput, true,false);

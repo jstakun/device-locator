@@ -46,7 +46,7 @@ public class EmailNotificationDialogFragment extends DialogFragment {
                         }
                     });
             alertDialogBuilder.setNegativeButton(R.string.no, null);
-            alertDialogBuilder.setIcon(R.drawable.ic_warning_gray);
+            alertDialogBuilder.setIcon(R.drawable.ic_help_gray);
         } else {
             alertDialogBuilder.setTitle("Choose notification email");// add a radio button list
             alertDialogBuilder.setSingleChoiceItems(userLogins, checkedItem, new DialogInterface.OnClickListener() {
@@ -63,7 +63,7 @@ public class EmailNotificationDialogFragment extends DialogFragment {
                 }
             });
             alertDialogBuilder.setNegativeButton("Cancel", null);
-            alertDialogBuilder.setIcon(R.drawable.ic_warning_gray);
+            alertDialogBuilder.setIcon(R.drawable.ic_help_gray);
         }
         return alertDialogBuilder.create();
     }

@@ -28,7 +28,7 @@ public class RegisterDeviceDialogFragment extends DialogFragment {
         });
         builder.setMessage(Html.fromHtml(getString(R.string.register_device)));
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-        builder.setIcon(R.drawable.ic_warning_gray);
+        builder.setIcon(R.drawable.ic_help_gray);
         return builder.create();
     }
 }
