@@ -57,12 +57,12 @@ public final class SCUtils {
         return cipherData(cipherAES, plain);
     }
 
-    public static String getMessageDigest(String message) throws NoSuchAlgorithmException {
+    /*public static String getMessageDigest(String message) throws NoSuchAlgorithmException {
         MessageDigest hash = getMessageDigest();
         hash.update(message.getBytes());
         byte[] digest = hash.digest();
         return new String(Hex.encode(digest));
-    }
+    }*/
 
     private static MessageDigest getMessageDigest() throws NoSuchAlgorithmException {
         if (md == null) {

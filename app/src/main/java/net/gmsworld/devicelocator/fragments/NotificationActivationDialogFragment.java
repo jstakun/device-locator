@@ -148,7 +148,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                             //send registration email again
                             String email = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(MainActivity.NOTIFICATION_EMAIL, "");
                             if (StringUtils.isNotEmpty(email)) {
-                                Messenger.sendEmailRegistrationRequest(getActivity(), email, 1);
+                                Messenger.sendEmailRegistrationRequest(getActivity(), email, true, 1);
                                 Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_LONG).show();
                                 NotificationActivationDialogFragment.this.dismiss();
                             } else {

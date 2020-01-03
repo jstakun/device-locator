@@ -69,9 +69,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Location bestLocation;
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
 
-    private Runnable r = new Runnable() {
+    private final Runnable r = new Runnable() {
         @Override
         public void run() {
             Log.d(TAG, "Checking for new devices list...");

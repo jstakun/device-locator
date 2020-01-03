@@ -109,7 +109,8 @@ import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
 public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener, NewVersionDialogFragment.NewVersionDialogListener,
-        SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener, DownloadFullApplicationDialogFragment.DownloadFullApplicationDialogListener {
+        SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener,
+        DownloadFullApplicationDialogFragment.DownloadFullApplicationDialogListener, EmailNotificationDialogFragment.EmailNotificationDialogListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -179,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initTelegramButton();
         initTokenInput();
         initPingButton();
+        initMailButton();
         initDeviceNameInput();
         initUserLoginInput(false, true);
 
@@ -286,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         RouteTrackingServiceUtils.unbindRouteTrackingService(this, null, isTrackingServiceBound);
 
-        registerEmail((TextView) findViewById(R.id.email), false);
+        registerEmail((TextView) findViewById(R.id.email), true, false);
         registerTelegram((TextView) findViewById(R.id.telegramId));
         registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
         registerUserLogin((Spinner) findViewById(R.id.userAccounts), true);
@@ -436,6 +438,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (Permissions.haveWriteStoragePermission(this)) {
                     downloadApk();
                 }
+                break;
+            case Permissions.PERMISSIONS_REQUEST_GET_EMAIL:
+                if (Permissions.haveGetAccountsPermission(this)) {
+                    initEmailListDialog();
+                }
+                break;
             default:
                 break;
         }
@@ -496,8 +504,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         removeDeviceDialogFragment.show(getFragmentManager(), RemoveDeviceDialogFragment.TAG);
     }
 
-    private void showEmailNotificationDialogFragment(final String userLogin) {
-        EmailNotificationDialogFragment emailNotificationDialogFragment = EmailNotificationDialogFragment.newInstance(userLogin);
+    private void showEmailNotificationDialogFragment(final String[] userLogins) {
+        EmailNotificationDialogFragment emailNotificationDialogFragment = EmailNotificationDialogFragment.newInstance(this, userLogins);
         emailNotificationDialogFragment.show(getFragmentManager(), EmailNotificationDialogFragment.TAG);
     }
 
@@ -1043,7 +1051,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     String currentText = emailInput.getText().toString();
                     if (currentText.isEmpty()) {
                         //paste email from clipboard
-                        boolean pasted = false;
+                        //boolean pasted = false;
                         try {
                             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                             if (clipboard != null && clipboard.hasPrimaryClip()) {
@@ -1054,7 +1062,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     if (!StringUtils.equals(pasteData, email) && Patterns.EMAIL_ADDRESS.matcher(pasteData).matches()) {
                                         emailInput.setText(pasteData);
                                         Toast.makeText(getApplicationContext(), "Pasted email address from clipboard!", Toast.LENGTH_SHORT).show();
-                                        pasted = true;
+                                        //pasted = true;
                                         break;
                                     }
                                 }
@@ -1062,10 +1070,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         } catch (Exception e) {
                             Log.e(TAG, e.getMessage(), e);
                         }
-                        if (!pasted)
+                        //TODO remove in v58
+                        //set notification email from user login
+                        /*if (!pasted)
                         {
                             try {
-                                //set email from user login
                                 final String userLogin = settings.getString(USER_LOGIN);
                                 if (StringUtils.isNotEmpty(userLogin) && Patterns.EMAIL_ADDRESS.matcher(userLogin).matches()) {
                                     //show dialog with user email
@@ -1074,10 +1083,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                             } catch (Exception e) {
                                 Log.e(TAG, e.getMessage(), e);
                             }
-                        }
+                        }*/
                     }
                 } else {
-                    registerEmail(emailInput, false);
+                    registerEmail(emailInput, true,false);
                 }
             }
         });
@@ -1086,7 +1095,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
-                    registerEmail(v, false);
+                    registerEmail(v, true,false);
                 }
                 return false;
             }
@@ -1099,7 +1108,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (keyCode) {
                         case KeyEvent.KEYCODE_BACK:
-                            registerEmail((TextView) v, false);
+                            registerEmail((TextView) v, true,false);
                             break;
                         default:
                             break;
@@ -1110,7 +1119,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         });
     }
 
-    private synchronized void registerEmail(TextView emailInput, boolean retry) {
+    public synchronized void registerEmail(TextView emailInput, boolean validate, boolean retry) {
         String newEmailAddress = emailInput.getText().toString();
         email = settings.getString(NOTIFICATION_EMAIL);
         if ((!StringUtils.equals(email, newEmailAddress) || retry) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
@@ -1125,7 +1134,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
                 if (StringUtils.isNotEmpty(email)) {
                     Toast.makeText(MainActivity.this, "Email verification in progress...", Toast.LENGTH_SHORT).show();
-                    Messenger.sendEmailRegistrationRequest(MainActivity.this, email, 1);
+                    Messenger.sendEmailRegistrationRequest(MainActivity.this, email, validate, 1);
                 } else {
                     Toast.makeText(MainActivity.this, "No email notifications will be sent...", Toast.LENGTH_LONG).show();
                 }
@@ -1465,7 +1474,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
                     Toast.makeText(MainActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
                     registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
-                    registerEmail((TextView) findViewById(R.id.email), false);
+                    registerEmail((TextView) findViewById(R.id.email), true,false);
                     registerTelegram((TextView) findViewById(R.id.telegramId));
 
                     if (StringUtils.isNotEmpty(phoneNumber)) {
@@ -1504,6 +1513,54 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             }
         });
+    }
+
+    private void initMailButton() {
+        final ImageButton emailButton = this.findViewById(R.id.email_button);
+
+        emailButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (Permissions.haveGetAccountsPermission(MainActivity.this)) {
+                    initEmailListDialog();
+                } else {
+                    Toast.makeText(MainActivity.this, "Please grant this permission to list accounts registered on this device", Toast.LENGTH_LONG).show();
+                    Permissions.requestGetAccountsPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_GET_EMAIL);
+                }
+            }
+        });
+    }
+
+    private void initEmailListDialog() {
+        List<String> accountNames = new ArrayList<>();
+
+        final String userLogin = settings.getString(USER_LOGIN);
+        if (StringUtils.isNotEmpty(userLogin)) {
+            accountNames.add(userLogin);
+        }
+
+            Account[] dlAccounts = AccountManager.get(this).getAccountsByType(getString(R.string.account_type));
+        for (Account a : dlAccounts) {
+            if (!accountNames.contains(a.name)) {
+                accountNames.add(a.name);
+            }
+        }
+
+        Account[] allAccounts = AccountManager.get(this).getAccounts();
+        for (Account a : allAccounts) {
+            //Log.d(TAG, "Found account " + a.name);
+            if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.equalsIgnoreCase(a.name, email)) {
+                if (!accountNames.contains(a.name)) {
+                    accountNames.add(a.name);
+                }
+            }
+        }
+
+        if (!accountNames.isEmpty()) {
+            showEmailNotificationDialogFragment(accountNames.toArray(new String[accountNames.size()]));
+        } else {
+            Toast.makeText(MainActivity.this, "No email addresses are registered in this device. Please enter a new one!", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void initDeviceList() {

@@ -947,21 +947,21 @@ public class Messenger {
         }
     }
 
-    public static void sendEmailRegistrationRequest(final Context context, final String email, final int retryCount) {
+    public static void sendEmailRegistrationRequest(final Context context, final String email, final boolean validate, final int retryCount) {
         if (StringUtils.isNotEmpty(email)) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
-                sendEmailRegistrationRequest(context, email, tokenStr, retryCount);
+                sendEmailRegistrationRequest(context, email, validate, tokenStr, retryCount);
             } else {
                 String queryString = "scope=dl&user=" + getDeviceId(context, false);
                 Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
-                            sendEmailRegistrationRequest(context, email, getToken(context, results), retryCount);
+                            sendEmailRegistrationRequest(context, email, validate, getToken(context, results), retryCount);
                         } else if (responseCode == 500 && retryCount > 0) {
-                            sendEmailRegistrationRequest(context, email, retryCount - 1);
+                            sendEmailRegistrationRequest(context, email, validate, retryCount - 1);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
@@ -1081,13 +1081,13 @@ public class Messenger {
         }
     }
 
-    private static void sendEmailRegistrationRequest(final Context context, final String email, final String tokenStr, final int retryCount) {
+    private static void sendEmailRegistrationRequest(final Context context, final String email, final boolean validate, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
         headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
 
         try {
-            final String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false);
+            final String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false) + "&validate=" + validate;
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -1131,7 +1131,7 @@ public class Messenger {
                     } else if (responseCode == 400) {
                         onFailedEmailRegistration(context, "Your email address seems to be incorrect. Please check it once again!", false);
                     } else if (responseCode != 200 && retryCount > 0) {
-                        sendEmailRegistrationRequest(context, email, tokenStr, retryCount - 1);
+                        sendEmailRegistrationRequest(context, email, validate, tokenStr, retryCount - 1);
                     } else {
                         onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", true);
                     }
@@ -1309,7 +1309,7 @@ public class Messenger {
         Toast.makeText(context, "Find Device Locator bot", Toast.LENGTH_LONG).show();
     }
 
-    public static void sendMessengerMessage(Context context, String message) {
+    /*public static void sendMessengerMessage(Context context, String message) {
         //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("fb-messenger://user/252112178789066"));
 
         Intent intent = new Intent(Intent.ACTION_SEND);
@@ -1322,7 +1322,7 @@ public class Messenger {
         catch (Exception ex) {
             Log.e(TAG, ex.getMessage(), ex);
         }
-    }
+    }*/
 
     public static boolean isAppInstalled(Context context, String packageName) {
         try {

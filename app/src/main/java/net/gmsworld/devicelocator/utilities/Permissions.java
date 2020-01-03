@@ -35,6 +35,8 @@ public class Permissions {
 
     public static final int PERMISSIONS_REQUEST_ALARM_CONTROL = 1007;
 
+    public static final int PERMISSIONS_REQUEST_GET_EMAIL = 1008;
+
     private static final String TAG = Permissions.class.getSimpleName();
 
     /*public static void checkAndRequestPermissionsAtStartup(Activity activity) {

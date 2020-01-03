@@ -140,9 +140,9 @@ public class NotificationUtils {
                 }
             }
             if (extras.containsKey("imei")) {
-                float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLatitude", Float.NaN);
-                float lng = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLongitude", Float.NaN);
-                if (lat != Float.NaN && lng != Float.NaN) {
+                Float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLatitude", Float.NaN);
+                Float lng = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLongitude", Float.NaN);
+                if (!lat.isNaN() && !lng.isNaN()) {
                     Location l = new Location("");
                     l.setLatitude((double) lat);
                     l.setLongitude((double) lng);

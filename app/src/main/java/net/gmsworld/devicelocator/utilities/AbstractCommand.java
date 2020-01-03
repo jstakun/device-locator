@@ -186,7 +186,7 @@ public abstract class AbstractCommand {
         return foundCommand;
     }
 
-    protected final int findAdmCommand(Context context, String message, String replyTo, Location location, Bundle extras, String otp) {
+    protected final int findAdmCommand(Context context, String message, String replyTo, Bundle extras, String otp) {
         int foundCommand = 0;
         //Log.d(TAG, "Matching " + message + " with " + smsCommand + "adminapp");
         if (StringUtils.startsWithIgnoreCase(message, smsCommand + "admindlt") || StringUtils.startsWithIgnoreCase(message, smsShortCommand + "admindlt")) {

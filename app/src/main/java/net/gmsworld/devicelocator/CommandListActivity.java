@@ -30,7 +30,7 @@ import androidx.appcompat.widget.Toolbar;
 
 public class CommandListActivity extends AppCompatActivity {
 
-    PrettyTime pt = new PrettyTime();
+    final PrettyTime pt = new PrettyTime();
 
     PreferencesUtils settings;
 
@@ -151,7 +151,7 @@ public class CommandListActivity extends AppCompatActivity {
 
     private class CommandArrayAdapter extends ArrayAdapter<String> {
 
-        List<Integer> deviceIds;
+        final List<Integer> deviceIds;
 
         public CommandArrayAdapter(Context context, int textViewResourceId, List<String> objects, List<Integer> ids) {
             super(context, textViewResourceId, objects);

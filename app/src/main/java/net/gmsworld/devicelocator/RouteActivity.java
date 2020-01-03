@@ -55,16 +55,16 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
 
     private Double distance;
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
 
-    private Runnable r = new Runnable() {
+    private final Runnable r = new Runnable() {
         @Override
         public void run() {
             getRoutePoints(listener);
         }
     };
 
-    private Network.OnGetFinishListener listener = new Network.OnGetFinishListener() {
+    private final Network.OnGetFinishListener listener = new Network.OnGetFinishListener() {
         @Override
         public void onGetFinish(String results, int responseCode, String url) {
             if (responseCode == 200 && results.startsWith("{")) {

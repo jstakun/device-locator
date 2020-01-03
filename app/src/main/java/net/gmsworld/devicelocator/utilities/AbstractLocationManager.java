@@ -376,7 +376,7 @@ public abstract class AbstractLocationManager {
                 }
 
                 if (i > 0) {
-                    float dist[] = new float[1];
+                    float[] dist = new float[1];
                     Location.distanceBetween(coordinates[i][0], coordinates[i][1], coordinates[i - 1][0], coordinates[i - 1][1], dist);
                     if (dist[0] > 0) {
                         routeDistance += dist[0];

@@ -176,7 +176,7 @@ public class Command {
                 if (responseCode == 200) {
                     Log.d(TAG, "Otp has been verified successfully!");
                     for (AbstractCommand c : getCommands()) {
-                        if (c.findAdmCommand(context, StringUtils.trim(message), sender, location, extras, otp) == 1) {
+                        if (c.findAdmCommand(context, StringUtils.trim(message), sender, extras, otp) == 1) {
                             Log.d(TAG, "Found matching adm command");
                             break;
                         }
@@ -1220,7 +1220,7 @@ public class Command {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
                     editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
-                    Messenger.sendEmailRegistrationRequest(context, email, 1);
+                    Messenger.sendEmailRegistrationRequest(context, email, true, 1);
                 } else {
                     email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
@@ -1266,7 +1266,7 @@ public class Command {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
                     editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
-                    Messenger.sendEmailRegistrationRequest(context, email, 1);
+                    Messenger.sendEmailRegistrationRequest(context, email, true, 1);
                 } else {
                     email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
@@ -1312,7 +1312,7 @@ public class Command {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
                     editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
-                    Messenger.sendEmailRegistrationRequest(context, email, 1);
+                    Messenger.sendEmailRegistrationRequest(context, email, true, 1);
                 } else {
                     email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
@@ -1358,7 +1358,7 @@ public class Command {
                 SharedPreferences.Editor editor = settings.edit();
                 if (email != null) {
                     editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
-                    Messenger.sendEmailRegistrationRequest(context, email, 1);
+                    Messenger.sendEmailRegistrationRequest(context, email, true, 1);
                 }
                 if (phoneNumber != null) {
                     editor.putString(MainActivity.NOTIFICATION_PHONE_NUMBER, phoneNumber);

@@ -75,7 +75,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 //flex
                 Location location =  null;
                 if (message.containsKey("flex")) {
-                    String flex = message.get("flex");
+                    final String flex = message.get("flex");
                     Log.d(TAG, "Found flex string: " + flex);
                     try {
                         String[] tokens = StringUtils.split(flex, ",");
