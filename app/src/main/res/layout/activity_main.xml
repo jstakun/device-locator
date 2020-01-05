@@ -209,6 +209,7 @@
 
                             <SeekBar
                                 android:id="@+id/radiusBar"
+                                android:contentDescription="Device tracker radius in meters"
                                 android:layout_width="fill_parent"
                                 android:layout_height="wrap_content"
                                 android:max="1000"
@@ -246,6 +247,7 @@
 
                             <SeekBar
                                 android:id="@+id/alarmBar"
+                                android:contentDescription="Location share interval in hours"
                                 android:layout_width="fill_parent"
                                 android:layout_height="wrap_content"
                                 android:max="24"
@@ -331,6 +333,7 @@
 
                             <ImageButton
                                 android:id="@+id/email_button"
+                                android:contentDescription="Configure email notification"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="8dp"
@@ -373,6 +376,7 @@
 
                             <ImageButton
                                 android:id="@+id/telegram_button"
+                                android:contentDescription="Telegram notification configuration"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="8dp"

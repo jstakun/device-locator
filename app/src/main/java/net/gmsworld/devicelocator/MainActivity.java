@@ -92,7 +92,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1905,7 +1904,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         private final ArrayList<Device> devices;
         private final Location location;
-        private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); // ISO8601
 
         DeviceArrayAdapter(Context context, int textViewResourceId, ArrayList<Device> devices) {
             super(context, textViewResourceId, devices);
@@ -1972,6 +1970,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     showRemoveDeviceDialogFragment(devices.get(position));
                 }
             });
+
+            viewHolder.deviceRemove.setContentDescription("Remove device " + position);
 
             return convertView;
         }
@@ -2045,7 +2045,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             } else {
                 try {
-                    message = "Last edited " + pt.format(formatter.parse(device.creationDate));
+                    message = "Last edited " + pt.format(device.getDate());
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                 }
@@ -2063,14 +2063,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private class DeviceComparator implements Comparator<Device> {
 
-        // ISO8601
-        final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
         @Override
         public int compare(Device device, Device device2) {
             try {
                 //Log.d(TAG, "Comparing " + device.name + ": " + device.creationDate + " with " + device2.name + ": " + device2.creationDate);
-                return formatter.parse(device2.creationDate).compareTo(formatter.parse(device.creationDate));
+                return device2.getDate().compareTo(device.getDate());
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage());
                 return 0;

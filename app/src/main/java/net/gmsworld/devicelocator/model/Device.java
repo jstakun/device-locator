@@ -2,14 +2,26 @@ package net.gmsworld.devicelocator.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Device implements Parcelable{
+
+    private static final String TAG = Device.class.getName();
+
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"); // ISO8601
+
     public String imei;
     public String name;
     public String creationDate;
     public String geo;
+
+    private volatile Date date;
 
     public Device() {
 
@@ -67,5 +79,17 @@ public class Device implements Parcelable{
             }
         }
         return d;
+    }
+
+    //formatter is not thread safe!
+    public synchronized Date getDate() {
+        if (date == null) {
+            try {
+                date = formatter.parse(creationDate);
+            } catch (ParseException e) {
+                Log.d(TAG, e.getMessage(), e);
+            }
+        }
+        return date;
     }
 }

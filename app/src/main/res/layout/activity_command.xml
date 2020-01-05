@@ -76,6 +76,7 @@
 
                 <net.gmsworld.devicelocator.views.KeyboardEditText
                     android:id="@+id/devicePin"
+                    android:contentDescription="@string/device_security_pin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/device_security_pin"
