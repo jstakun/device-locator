@@ -94,7 +94,7 @@
     <string name="devices_list_loading">Synchronizing your devices…</string>
     <string name="devices_list_loading_failed">Device synchronization failed!</string>
     <string name="devices">Registered devices</string>
-    <string name="device_map">Devices location</string>
+    <string name="device_map">Devices Map</string>
     <string name="device_name">Device name</string>
     <string name="your_login">Your login</string>
     <string name="send_command_title">Send Command to Device</string>
@@ -152,9 +152,6 @@
     <string name="email_notification_message">&lt;font color="#808080">Do you want to receive notifications to %1$s?&lt;/font></string>
 
     <string name="title_activity_ringing">Ringing Activity</string>
-
-    <string name="title_activity_maps">Devices on Map</string>
-    <string name="title_activity_route">Device Locator</string>
 
     <string name="route_share_text">Follow device %1$s at %2$s</string>
     <string name="command_log">Command Log</string>

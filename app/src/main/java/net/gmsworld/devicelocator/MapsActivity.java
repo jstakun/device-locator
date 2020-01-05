@@ -8,6 +8,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -42,13 +45,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import androidx.fragment.app.FragmentActivity;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.config.LocationParams;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, OnLocationUpdatedListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, OnLocationUpdatedListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -90,8 +94,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        final Toolbar toolbar = findViewById(R.id.smsToolbar);
+        setSupportActionBar(toolbar);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
 
         settings = new PreferencesUtils(this);
 
@@ -132,6 +141,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d(TAG, "onNewIntent()");
         if (intent.hasExtra("imei")) {
             deviceImei = intent.getStringExtra("imei");
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        //Log.d(TAG, "onCreateOptionsMenu()");
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+
+        menu.findItem(R.id.map).setVisible(false);
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent = new Intent(this, MainActivity.class);
+        switch (item.getItemId()) {
+            case R.id.sms:
+                intent.setAction(MainActivity.ACTION_SMS_MANAGER);
+                startActivity(intent);
+                finish();
+                return true;
+            case R.id.tracker:
+                intent.setAction(MainActivity.ACTION_DEVICE_TRACKER_NOTIFICATION);
+                startActivity(intent);
+                finish();
+                return true;
+            case R.id.devices:
+                intent.setAction(MainActivity.ACTION_DEVICE_MANAGER);
+                startActivity(intent);
+                finish();
+                return true;
+            case R.id.commandLog:
+                startActivity(new Intent(this, CommandListActivity.class));
+                finish();
+                return true;
+            case R.id.permissions:
+                startActivity(new Intent(this, PermissionsActivity.class));
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 
