@@ -54,9 +54,9 @@ public class CommandListActivity extends AppCompatActivity {
 
             devices = DevicesUtils.buildDeviceList(settings);
 
-            List<Integer> positions = new ArrayList<Integer>();
+            List<Integer> positions = new ArrayList<>();
 
-            List<String> values = new ArrayList<String>();
+            List<String> values = new ArrayList<>();
 
             for (int i = commands.size() - 1; i >= 0; i--) {
                 String command = commands.get(i);
@@ -67,7 +67,7 @@ public class CommandListActivity extends AppCompatActivity {
                     final String deviceName = DevicesUtils.getDeviceName(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
                     positions.add(DevicesUtils.getDevicePosition(devices, sender.substring(Messenger.CID_SEPARATOR.length())));
                     String commandName = tokens[2];
-                    String message = null;
+                    String message;
                     if (StringUtils.startsWith(commandName, "replyto:")) {
                         message = "Reply to command " + commandName.substring(8);
                     } else {

@@ -27,7 +27,6 @@
     <string name="send">Send</string>
     <string name="approximate">Approximate</string>
     <string name="accurate">Accurate</string>
-    <string name="read_contacts_permission">Can\'t select a contact without Read Contacts permission.</string>
     <string name="send_sms_permission">SMS permission is required to receive SMS notifications.</string>
     <string name="send_location_permission">Location permission is required to receive location notifications.</string>
     <string name="docsLink">Check all available commands &lt;a href="http://www.gms-world.net/dl">here&lt;/a></string>
@@ -158,7 +157,6 @@
     <string name="title_activity_route">Device Locator</string>
 
     <string name="route_share_text">Follow device %1$s at %2$s</string>
-    <string name="title_activity_command_list">Command List</string>
     <string name="command_log">Command Log</string>
     <string name="commandEmpty">No commands has been sent to this device yet!</string>
     <string name="no_pin_saved">Unable to send command to the device %1$s because PIN is not saved!</string>

@@ -18,7 +18,8 @@
                 android:id="@+id/imageView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:srcCompat="@mipmap/ic_launcher" />
+                app:srcCompat="@mipmap/ic_launcher"
+                android:contentDescription="Device Locator is ringing" />
 
             <TextView
                 android:id="@+id/fullscreen_content"

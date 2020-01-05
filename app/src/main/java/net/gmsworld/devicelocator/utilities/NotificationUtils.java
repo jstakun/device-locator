@@ -59,7 +59,7 @@ public class NotificationUtils {
                 .setContentTitle(context.getString(R.string.app_name) + " Notification")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_place_white)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setContentIntent(contentIntent)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -240,7 +240,7 @@ public class NotificationUtils {
                 .setContentTitle(title)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_devices_other_white)
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setSound(notificationUri)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
@@ -336,7 +336,7 @@ public class NotificationUtils {
         }
         return new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_devices_other_white)
-                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_large))
+                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                     .setContentTitle(context.getString(R.string.app_name) + " Notification")
                     .setContentText(text).build();
     }

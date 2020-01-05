@@ -853,6 +853,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         userAccounts.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
+                view.performClick();
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && userAccounts.getAdapter() == null) {
                     initUserLoginInput(true, false);
                 }

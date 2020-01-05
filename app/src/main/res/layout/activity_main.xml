@@ -295,7 +295,8 @@
                                 android:layout_marginRight="8dp"
                                 android:backgroundTint="@color/colorPrimary"
                                 android:textColor="@android:color/white"
-                                android:src="@drawable/ic_contact_phone_white"/>
+                                android:src="@drawable/ic_contact_phone_white"
+                                android:contentDescription="Select phone number for contacts" />
 
                             <EditText
                                 android:id="@+id/phoneNumber"

@@ -21,7 +21,5 @@
         <item>Radius</item>
         <item>Notify</item>
         <item>About</item>
-        <!--item>Gpshigh</item>
-        <item>Gpsbalance</item-->
     </string-array>
 </resources>

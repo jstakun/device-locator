@@ -59,7 +59,7 @@ public class Network {
     public static String get(Context context, String urlString, Map<String, String> headers) {
         HttpURLConnection urlConnection;
         String response = null;
-        int responseCode = -1;
+        //int responseCode = -1;
 
         try {
             URL url = new URL(urlString);
@@ -89,13 +89,13 @@ public class Network {
             }
 
             response = total.toString();
-            responseCode = urlConnection.getResponseCode();
+            //responseCode = urlConnection.getResponseCode();
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
-            if (responseCode == -1) {
-                responseCode = 500;
-                response = e.getClass().getName() + ": " + e.getMessage();
-            }
+            //if (responseCode == -1) {
+                //responseCode = 500;
+            //response = e.getClass().getName() + ": " + e.getMessage();
+            //}
         }
 
         return response;
@@ -161,7 +161,7 @@ public class Network {
                 }
 
                 if (content != null) {
-                    String contentEnc = null;
+                    String contentEnc;
                     if (contentType != null) {
                         contentEnc = content;
                         urlConnection.setRequestProperty("Content-Type", contentType);
@@ -352,18 +352,18 @@ public class Network {
 
     private static String encodeQueryStringUTF8(final String queryString) throws Exception {
         String[] pairs = queryString.split("&");
-        String encQueryString = "";
+        StringBuilder encQueryString = new StringBuilder();
         for (String pair : pairs) {
             if (pair.contains("=")) {
                 int idx = pair.indexOf("=");
                 if (encQueryString.length() > 0) {
-                    encQueryString += "&";
+                    encQueryString.append("&");
                 }
-                encQueryString += pair.substring(0, idx) + "=" + URLEncoder.encode(pair.substring(idx + 1), "UTF-8");
+                encQueryString.append(pair.substring(0, idx)).append("=").append(URLEncoder.encode(pair.substring(idx + 1), "UTF-8"));
             }
 
         }
-        return encQueryString;
+        return encQueryString.toString();
     }
 
     static class GetTask extends AsyncTask<Void, Integer, Integer> {
