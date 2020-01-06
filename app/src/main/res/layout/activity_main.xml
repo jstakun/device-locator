@@ -294,6 +294,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="8dp"
                                 android:backgroundTint="@color/colorPrimary"
+                                android:layout_gravity="bottom"
                                 android:textColor="@android:color/white"
                                 android:src="@drawable/ic_contact_phone_white"
                                 android:contentDescription="Select phone number for contacts" />
@@ -339,6 +340,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="8dp"
                                 android:backgroundTint="@color/colorPrimary"
+                                android:layout_gravity="bottom"
                                 android:textColor="@android:color/white"
                                 android:src="@drawable/ic_contact_mail_white"/>
 
@@ -381,6 +383,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="8dp"
+                                android:layout_gravity="bottom"
                                 android:backgroundTint="@color/colorPrimary"
                                 android:textColor="@android:color/white"
                                 android:src="@drawable/ic_people_outline_white"/>

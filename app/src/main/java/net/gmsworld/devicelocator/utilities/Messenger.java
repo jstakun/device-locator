@@ -808,8 +808,11 @@ public class Messenger {
                 case Command.INVALID_COMMAND:
                     if (extras != null) {
                         String sender = extras.getString("sender", "unknown");
-                        String source = extras.getString("source");
-                        String invalidCommand = extras.getString("invalidCommand");
+                        if (sender.contains("=")) {
+                            sender = sender.split("=")[0].trim();
+                        }
+                        final String source = extras.getString("source");
+                        final String invalidCommand = extras.getString("invalidCommand");
                         text = "Invalid command " + invalidCommand + " has been sent to device " + deviceId + " from " + source + " " + sender + ".";
                     } else {
                         text = "Invalid command has been sent to device " + deviceId + ".";
