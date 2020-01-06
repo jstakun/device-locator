@@ -65,7 +65,7 @@ public class Messenger {
     public static final String SPD_HEADER = "X-GMS-Speed";
 
     public static final String TELEGRAM_PACKAGE = "org.telegram.messenger";
-    // --Commented out by Inspection (1/5/20 1:28 PM):private static final String FACEBOOK_MESSENGER_PACKAGE = "com.facebook.orca";
+    //private static final String FACEBOOK_MESSENGER_PACKAGE = "com.facebook.orca";
 
     public static final String CID_SEPARATOR = "+=+";
 
