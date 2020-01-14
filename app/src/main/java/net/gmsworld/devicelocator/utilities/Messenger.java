@@ -1133,7 +1133,8 @@ public class Messenger {
                         }
                     } else if (responseCode == 400) {
                         onFailedEmailRegistration(context, "Your email address seems to be incorrect. Please check it once again!", false);
-                    } else if (responseCode != 200 && retryCount > 0) {
+                    } else if (responseCode > 400 && retryCount > 0) {
+                        Log.d(TAG, "Repeating email registration request due to " + responseCode + " reply");
                         sendEmailRegistrationRequest(context, email, validate, tokenStr, retryCount - 1);
                     } else {
                         onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", true);
