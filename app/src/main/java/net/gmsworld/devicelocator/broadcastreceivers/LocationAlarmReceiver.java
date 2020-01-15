@@ -16,7 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class LocationAlarmReceiver extends BroadcastReceiver {
 
-    private final static String TAG = LocationAlarmReceiver.class.getSimpleName();
+    private final static String TAG = "LocationAlarmReceiver";
 
     @Override
     public void onReceive(Context context, Intent intent) {
