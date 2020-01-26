@@ -535,6 +535,7 @@ public class Command {
                         interval = Integer.parseInt(intervalStr);
                     } catch (Exception e) {
                         Log.e(TAG, "Wrong interval: " + intervalStr);
+                        interval = 0;
                     }
                 }
             } else {
@@ -559,7 +560,12 @@ public class Command {
                     if (StringUtils.equalsIgnoreCase(intervalStr, "now")) {
                         sendSmsNotification(context, sender, null); //don't set SHARE_COMMAND here!
                     } else if (StringUtils.isNumeric(intervalStr)) {
-                        int interval = Integer.parseInt(intervalStr);
+                        int interval = 0;
+                        try {
+                            interval = Integer.parseInt(intervalStr);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Wrong interval: " + intervalStr);
+                        }
                         if (interval == 0) {
                             LocationAlarmUtils.cancel(context);
                         } else {
@@ -591,7 +597,12 @@ public class Command {
                     if (StringUtils.equalsIgnoreCase(intervalStr, "now")) {
                         sendSocialNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
                     } else {
-                        int interval = Integer.parseInt(intervalStr);
+                        int interval = 0;
+                        try {
+                            interval = Integer.parseInt(intervalStr);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Wrong interval: " + intervalStr);
+                        }
                         if (interval == 0) {
                             LocationAlarmUtils.cancel(context);
                         } else if (interval <= 24 && interval > 0) {
@@ -621,7 +632,12 @@ public class Command {
                     if (StringUtils.equalsIgnoreCase(intervalStr, "now")) {
                         sendAppNotification(context, null, sender); //don't set SHARE_COMMAND here!
                     } else {
-                        int interval = Integer.parseInt(intervalStr);
+                        int interval = 0;
+                        try {
+                            interval = Integer.parseInt(intervalStr);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Wrong interval: " + intervalStr);
+                        }
                         if (interval == 0) {
                             LocationAlarmUtils.cancel(context);
                         } else if (interval <= 24 && interval > 0) {
@@ -651,7 +667,12 @@ public class Command {
                     if (StringUtils.equalsIgnoreCase(intervalStr, "now")) {
                         sendAdmNotification(context, null, sender, null); //don't set SHARE_COMMAND here!
                     } else {
-                        int interval = Integer.parseInt(intervalStr);
+                        int interval = 0;
+                        try {
+                            interval = Integer.parseInt(intervalStr);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Wrong interval: " + intervalStr);
+                        }
                         if (interval == 0) {
                             LocationAlarmUtils.cancel(context);
                         } else if (interval <= 24 && interval > 0) {

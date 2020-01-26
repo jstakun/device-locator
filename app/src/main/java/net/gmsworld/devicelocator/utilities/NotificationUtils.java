@@ -282,8 +282,9 @@ public class NotificationUtils {
             AbstractCommand command = Command.getCommandByName(commandName);
             if (command != null && command.canResend()) {
                 Intent newIntent = new Intent(context, CommandService.class);
-                if (extras.containsKey("args")) {
-                    newIntent.putExtra("args", extras.getString("args"));
+                final String args = command.getDefaultArgs();
+                if (StringUtils.isNotEmpty(args)) {
+                    newIntent.putExtra("args", args);
                 }
                 newIntent.putExtra("command", commandName);
                 newIntent.putExtra("imei", extras.getString("imei"));
@@ -300,7 +301,7 @@ public class NotificationUtils {
                 if (c != null) {
                     Intent newIntent = new Intent(context, CommandService.class);
                     newIntent.putExtra("command", c.getSmsCommand());
-                    String args = c.getDefaultArgs();
+                    final String args = c.getDefaultArgs();
                     if (StringUtils.isNotEmpty(args)) {
                         newIntent.putExtra("args", args);
                     }

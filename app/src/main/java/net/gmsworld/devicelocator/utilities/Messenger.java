@@ -806,16 +806,18 @@ public class Messenger {
                     }
                     break;
                 case Command.INVALID_COMMAND:
+                    final String deviceName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), deviceId);
                     if (extras != null) {
                         String sender = extras.getString("sender", "unknown");
                         if (sender.contains("=")) {
                             sender = sender.split("=")[0].trim();
                         }
+                        final String senderName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), sender);
                         final String source = extras.getString("source");
                         final String invalidCommand = extras.getString("invalidCommand");
-                        text = "Invalid command " + invalidCommand + " has been sent to device " + deviceId + " from " + source + " " + sender + ".";
+                        text = "Invalid command " + invalidCommand + " has been sent to device " + deviceName + " from " + source + " " + senderName + ".";
                     } else {
-                        text = "Invalid command has been sent to device " + deviceId + ".";
+                        text = "Invalid command has been sent to device " + deviceName + ".";
                     }
                     break;
                 case Command.RESET_COMMAND:
