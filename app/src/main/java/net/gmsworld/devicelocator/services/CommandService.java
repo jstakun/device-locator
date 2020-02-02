@@ -179,6 +179,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         } else if (responseCode == 410) {
                             showToast("It seems device " + deviceName + " has been offline recently. Retry if no reply soon!");
                         } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
+                            //TODO show dialog with action=reset_quota appended to queryString
                             JsonElement reply = new JsonParser().parse(results);
                             final int count = reply.getAsJsonObject().get("count").getAsInt();
                             showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + " after " + count + " attempts!");

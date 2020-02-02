@@ -341,8 +341,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void initLocateButton() {
-        final ImageButton locateButton = this.findViewById(R.id.locateDevices);
+        final ImageButton locateButton = this.findViewById(R.id.locateDevicesAction);
         locateButton.setVisibility(View.VISIBLE);
+        Log.d(TAG, "Showing locate devices button...");
 
         locateButton.setOnClickListener(new View.OnClickListener() {
             @Override
