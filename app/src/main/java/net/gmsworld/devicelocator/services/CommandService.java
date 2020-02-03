@@ -5,12 +5,8 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.CommandActivity;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
@@ -22,6 +18,7 @@ import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.views.DialogActivity;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -115,7 +112,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 return;
             }
 
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putString(imei + LAST_COMMAND_SUFFIX, command).apply();
+            prefs.setString(imei + LAST_COMMAND_SUFFIX, command);
 
             String pin = extras.getString("pin");
             if (pin == null) {
@@ -162,7 +159,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils settings, final String deviceId) {
         if (Network.isNetworkAvailable(this)) {
             commandsInProgress.add(imei + "_" + command);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+            final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
             headers.put("X-GMS-AppId", "2");
             headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(this)));
@@ -180,9 +177,16 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                             showToast("It seems device " + deviceName + " has been offline recently. Retry if no reply soon!");
                         } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
                             //TODO show dialog with action=reset_quota appended to queryString
-                            JsonElement reply = new JsonParser().parse(results);
-                            final int count = reply.getAsJsonObject().get("count").getAsInt();
-                            showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + " after " + count + " attempts!");
+                            //JsonElement reply = new JsonParser().parse(results);
+                            //final int count = reply.getAsJsonObject().get("count").getAsInt();
+                            //showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + " after " + count + " attempts!");
+                            Intent newIntent = new Intent(CommandService.this, DialogActivity.class);
+                            newIntent.putExtra("command", command);
+                            newIntent.putExtra("queryString", queryString);
+                            newIntent.putExtra("token", tokenStr);
+                            newIntent.putExtra("deviceName", deviceName);
+                            newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(newIntent);
                         } else {
                             showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + "!");
                         }
