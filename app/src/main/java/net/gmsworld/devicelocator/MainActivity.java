@@ -142,6 +142,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private boolean isTrackingServiceBound = false;
     private FirebaseAnalytics firebaseAnalytics;
     private final PrettyTime pt = new PrettyTime();
+    private BroadcastReceiver onDownloadComplete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -295,6 +296,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         //reset pin verification time
         settings.setLong("pinVerificationMillis", System.currentTimeMillis());
+
+        if (onDownloadComplete != null) {
+            unregisterReceiver(onDownloadComplete);
+        }
     }
 
     @Override
@@ -1814,23 +1819,26 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
 
         //set BroadcastReceiver to install app when .apk is downloaded
-        BroadcastReceiver onComplete = new BroadcastReceiver() {
+        onDownloadComplete = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
-                try {
-                    Intent install = new Intent(Intent.ACTION_VIEW);
-                    install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    install.setDataAndType(contentUri, manager.getMimeTypeForDownloadedFile(downloadId));
-                    startActivity(install);
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage(), e);
-                    startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                if (downloadId == id) {
+                    try {
+                        Intent install = new Intent(Intent.ACTION_VIEW);
+                        install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        install.setDataAndType(contentUri, manager.getMimeTypeForDownloadedFile(downloadId));
+                        startActivity(install);
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getMessage(), e);
+                        startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                    }
+                    Toast.makeText(MainActivity.this,getString(R.string.app_name) + " Full version has been downloaded. Please uninstall Google Play version and install Full version.", Toast.LENGTH_LONG).show();
+                    unregisterReceiver(this);
                 }
-                Toast.makeText(MainActivity.this, "Please upgrade " + getString(R.string.app_name) + " to latest Full version...", Toast.LENGTH_LONG).show();
-                unregisterReceiver(this);
             }
         };
         //register receiver for when .apk download is compete
-        registerReceiver(onComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
     }
 
     // -----------------------------------------------------------------------------------

@@ -943,7 +943,6 @@ public class Messenger {
         if (batteryStatus != null) {
             int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
             int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-
             float batteryPct = level / (float) scale;
 
             return (int) (batteryPct * 100);
