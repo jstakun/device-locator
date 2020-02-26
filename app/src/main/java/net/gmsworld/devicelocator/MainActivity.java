@@ -642,8 +642,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
 
         if (running) {
-            SmsCommandsEnabledDialogFragment smsCommandsEnabledDialogFragment = new SmsCommandsEnabledDialogFragment();
-            smsCommandsEnabledDialogFragment.show(getFragmentManager(), SmsCommandsEnabledDialogFragment.TAG);
+            SmsCommandsEnabledDialogFragment.newInstance().show(getFragmentManager(), SmsCommandsEnabledDialogFragment.TAG);
         }
     }
 
@@ -908,7 +907,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE) {
                 //show dialog with info What to do if no account is created
-                showLoginDialogFragment();
+                LoginDialogFragment.newInstance().show(getFragmentManager(), LoginDialogFragment.TAG);
                 if (settings.contains(USER_LOGIN)) {
                     settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
                     onDeleteDevice(Messenger.getDeviceId(this, false), true);
@@ -941,7 +940,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     Toast.makeText(this, "Please grant this permission to list accounts registered on this device", Toast.LENGTH_LONG).show();
                     Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
                 } else {
-                    showLoginDialogFragment();
+                    LoginDialogFragment.newInstance().show(getFragmentManager(), LoginDialogFragment.TAG);
                 }
             }
         }
@@ -1728,11 +1727,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         //testing use count
         int useCount = settings.getInt("useCount", 0);
         settings.setInt("useCount", useCount + 1);
-    }
-
-    private void showLoginDialogFragment() {
-        LoginDialogFragment loginDialogFragment = new LoginDialogFragment();
-        loginDialogFragment.show(getFragmentManager(), LoginDialogFragment.TAG);
     }
 
     private static void setListViewHeightBasedOnChildren(ListView listView) {

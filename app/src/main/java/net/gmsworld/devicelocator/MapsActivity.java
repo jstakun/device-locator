@@ -280,8 +280,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             handler.postDelayed(r, 5000L);
         } else {
-            RegisterDeviceDialogFragment registerDeviceDialogFragment = new RegisterDeviceDialogFragment();
-            registerDeviceDialogFragment.show(this.getFragmentManager(), RegisterDeviceDialogFragment.TAG);
+            RegisterDeviceDialogFragment.newInstance().show(this.getFragmentManager(), RegisterDeviceDialogFragment.TAG);
         }
     }
 

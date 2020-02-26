@@ -14,6 +14,12 @@ import androidx.appcompat.app.AlertDialog;
 public class TelegramSetupDialogFragment extends DialogFragment {
 
     public static final String TAG = "TelegramSetupDialog";
+    public static final String TELEGRAM_FAILED_SETUP_COUNT = "TelegramFailedSetupCount";
+
+    public static TelegramSetupDialogFragment newInstance() {
+        TelegramSetupDialogFragment telegramSetupDialogFragment = new TelegramSetupDialogFragment();
+        return telegramSetupDialogFragment;
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

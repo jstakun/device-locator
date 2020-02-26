@@ -16,6 +16,11 @@ public class SmsCommandsEnabledDialogFragment extends DialogFragment {
 
     public static final String TAG = "SmsCommandsEnabledDialog";
 
+    public static SmsCommandsEnabledDialogFragment newInstance() {
+        SmsCommandsEnabledDialogFragment smsCommandsEnabledDialogFragment = new SmsCommandsEnabledDialogFragment();
+        return smsCommandsEnabledDialogFragment;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

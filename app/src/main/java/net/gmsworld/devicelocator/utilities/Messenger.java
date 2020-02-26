@@ -1008,6 +1008,7 @@ public class Messenger {
         Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
             @Override
             public void onGetFinish(String results, int responseCode, String url) {
+                final PreferencesUtils settings = new PreferencesUtils(context);
                 if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                     JsonElement reply = new JsonParser().parse(results);
                     String status = null, secret = null;
@@ -1015,12 +1016,12 @@ public class Messenger {
                         JsonElement st = reply.getAsJsonObject().get("status");
                         if (st != null) {
                             status = st.getAsString();
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
+                            settings.setString(MainActivity.SOCIAL_REGISTRATION_STATUS, status);
                         }
                         JsonElement se = reply.getAsJsonObject().get("secret");
                         if (se != null) {
                             secret = se.getAsString();
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret).apply();
+                            settings.setString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret);
                         }
                     }
                     if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
@@ -1051,12 +1052,17 @@ public class Messenger {
                     if (context instanceof Activity) {
                         Activity activity = (Activity)context;
                         if (!activity.isFinishing()) {
-                            try {
-                                TelegramSetupDialogFragment telegramSetupDialogFragment = new TelegramSetupDialogFragment();
-                                telegramSetupDialogFragment.show(activity.getFragmentManager(), TelegramSetupDialogFragment.TAG);
-                            } catch (Exception e) {
-                                Log.e(TAG, e.getMessage(), e);
-                                onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
+                            final int failedSetupCount = settings.getInt(TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT, 0);
+                            if (failedSetupCount < 3) {
+                                try {
+                                    settings.setInt(TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT, failedSetupCount+1);
+                                    TelegramSetupDialogFragment.newInstance().show(activity.getFragmentManager(), TelegramSetupDialogFragment.TAG);
+                                } catch (Exception e) {
+                                    Log.e(TAG, e.getMessage(), e);
+                                    onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
+                                }
+                            } else {
+                                Messenger.getMyTelegramId(context);
                             }
                         } else {
                             onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);

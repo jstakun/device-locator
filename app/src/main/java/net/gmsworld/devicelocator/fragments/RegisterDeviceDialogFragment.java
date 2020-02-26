@@ -15,6 +15,11 @@ import androidx.appcompat.app.AlertDialog;
 public class RegisterDeviceDialogFragment extends DialogFragment {
     public static final String TAG = "RegisterDeviceDialog";
 
+    public static RegisterDeviceDialogFragment newInstance() {
+        RegisterDeviceDialogFragment registerDeviceDialogFragment = new RegisterDeviceDialogFragment();
+        return registerDeviceDialogFragment;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
