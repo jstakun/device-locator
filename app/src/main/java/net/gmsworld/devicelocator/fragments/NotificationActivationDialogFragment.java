@@ -5,7 +5,6 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -19,6 +18,7 @@ import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -52,16 +52,17 @@ public class NotificationActivationDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         LayoutInflater inflater = getActivity().getLayoutInflater();
-
         View dialogView = inflater.inflate(R.layout.activation_dialog, null);
+
+        final PreferencesUtils settings = new PreferencesUtils(getActivity());
 
         String s;
         if (mode == Mode.Telegram) {
-            s = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(TELEGRAM_SECRET, "");
+            s = settings.getString(TELEGRAM_SECRET);
             ((TextView)dialogView.findViewById(R.id.activationTitle)).setText(R.string.activation_telegram_title);
             ((TextView)dialogView.findViewById(R.id.activationDescription)).setText(R.string.activation_telegram_desc);
         } else {
-            s = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(EMAIL_SECRET, "");
+            s = settings.getString(EMAIL_SECRET);
         }
         final String secret = s;
 
@@ -85,7 +86,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                 //Log.d(TAG, "Comparing " + code + " with " + activationCode);
                 if (code.length() == 4 && StringUtils.equals(code, activationCode)) {
                     if (Network.isNetworkAvailable(getActivity())) {
-                        String tokenStr = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(DeviceLocatorApp.GMS_TOKEN, "");
+                        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
                         Map<String, String> headers = new HashMap<>();
                         headers.put("Authorization", "Bearer " + tokenStr);
                         Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_LONG).show();
@@ -97,16 +98,12 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                                 if (responseCode == 200) {
                                     if (mode == Mode.Telegram) {
                                         Toast.makeText(context, "Your Telegram chat or channel has been verified.", Toast.LENGTH_LONG).show();
-                                        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                                                .putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "verified")
-                                                .remove(TELEGRAM_SECRET)
-                                                .apply();
+                                        settings.setString(MainActivity.SOCIAL_REGISTRATION_STATUS, "verified");
+                                        settings.remove(TELEGRAM_SECRET);
                                     } else {
                                         Toast.makeText(context, "Your email address has been verified.", Toast.LENGTH_LONG).show();
-                                        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                                                .putString(MainActivity.EMAIL_REGISTRATION_STATUS, "verified")
-                                                .remove(EMAIL_SECRET)
-                                                .apply();
+                                        settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, "verified");
+                                        settings.remove(EMAIL_SECRET);
                                     }
                                 } else {
                                     if (mode == Mode.Telegram) {
@@ -136,7 +133,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int id) {
                         if (mode == Mode.Telegram) {
                             //send telegram registration
-                            String telegramId = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(MainActivity.NOTIFICATION_SOCIAL, "");
+                            final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
                             if (StringUtils.isNotEmpty(telegramId)) {
                                 Messenger.sendTelegramRegistrationRequest(getActivity(), telegramId, 1);
                                 Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_LONG).show();
@@ -146,7 +143,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                             }
                         } else {
                             //send registration email again
-                            String email = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(MainActivity.NOTIFICATION_EMAIL, "");
+                            final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
                             if (StringUtils.isNotEmpty(email)) {
                                 Messenger.sendEmailRegistrationRequest(getActivity(), email, true, 1);
                                 Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_LONG).show();
@@ -160,20 +157,11 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.forget_me, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         if (mode == Mode.Telegram) {
-                            PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
-                                    .remove(MainActivity.NOTIFICATION_SOCIAL)
-                                    .remove(MainActivity.SOCIAL_REGISTRATION_STATUS)
-                                    .remove(TELEGRAM_SECRET)
-                                    .apply();
+                            settings.remove(MainActivity.NOTIFICATION_SOCIAL, MainActivity.SOCIAL_REGISTRATION_STATUS, TELEGRAM_SECRET);
                             final TextView telegramInput = getActivity().findViewById(R.id.telegramId);
                             telegramInput.setText("");
                         } else {
-                            PreferenceManager.getDefaultSharedPreferences(getActivity()).edit()
-                                    .remove(MainActivity.NOTIFICATION_EMAIL)
-                                    .remove("emailRegistrationMillis")
-                                    .remove(MainActivity.EMAIL_REGISTRATION_STATUS)
-                                    .remove(EMAIL_SECRET)
-                                    .apply();
+                            settings.remove(MainActivity.NOTIFICATION_EMAIL, MainActivity.EMAIL_REGISTRATION_STATUS, EMAIL_SECRET);
                             final TextView emailInput = getActivity().findViewById(R.id.email);
                             emailInput.setText("");
                         }
