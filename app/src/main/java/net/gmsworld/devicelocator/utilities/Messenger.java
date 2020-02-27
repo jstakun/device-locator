@@ -274,6 +274,13 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
+                            if (context instanceof Activity) {
+                                final TextView emailInput = ((Activity) context).findViewById(R.id.email);
+                                if (emailInput != null) {
+                                    emailInput.setText("");
+                                }
+                            }
                             Toast.makeText(context, R.string.email_unverified_error, Toast.LENGTH_LONG).show();
                         } else {
                             Toast.makeText(context, R.string.email_internal_error, Toast.LENGTH_LONG).show();
@@ -354,27 +361,29 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
-                        if (context instanceof Activity) {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
-                            if (StringUtils.equalsIgnoreCase(status, "sent")) {
-                                Log.d(TAG, "Telegram notification sent successfully!");
-                            } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
+                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
+                        if (StringUtils.equalsIgnoreCase(status, "sent")) {
+                            Log.d(TAG, "Telegram notification sent successfully!");
+                        } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
+                            if (context instanceof Activity) {
                                 final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
                                 if (telegramInput != null) {
                                     telegramInput.setText("");
                                 }
-                                Toast.makeText(context, R.string.telegram_unverified_error, Toast.LENGTH_LONG).show();
-                            } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
-                                final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-                                if (telegramInput != null) {
-                                    telegramInput.setText("");
-                                }
-                                Toast.makeText(context, R.string.telegram_invalid_id, Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(context, R.string.telegram_internal_error, Toast.LENGTH_LONG).show();
                             }
+                            Toast.makeText(context, R.string.telegram_unverified_error, Toast.LENGTH_LONG).show();
+                        } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
+                            if (context instanceof Activity) {
+                               final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
+                                if (telegramInput != null) {
+                                    telegramInput.setText("");
+                                }
+                            }
+                            Toast.makeText(context, R.string.telegram_invalid_id, Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(context, R.string.telegram_internal_error, Toast.LENGTH_LONG).show();
                         }
                     } else if (responseCode >= 400) {
                         Toast.makeText(context, R.string.telegram_internal_error, Toast.LENGTH_LONG).show();
