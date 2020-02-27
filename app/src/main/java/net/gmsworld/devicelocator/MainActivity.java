@@ -252,7 +252,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         //check for active Telegram registration
         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
             final String telegramSecret = settings.getString(NotificationActivationDialogFragment.TELEGRAM_SECRET);
-            Log.d(TAG, "Found Telegram Secret ");
+            Log.d(TAG, "Found Telegram Secret "  + telegramSecret);
             if (StringUtils.equals(telegramSecret, "none")) {
                 settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET);
                 final TextView telegramInput = this.findViewById(R.id.telegramId);
@@ -1750,11 +1750,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void checkForNewVersion() {
-        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+        final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
         if (StringUtils.isNotEmpty(tokenStr)) {
             final Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bearer " + tokenStr);
-            Network.get(this, getString(R.string.notificationUrl) + "?type=v", headers, new Network.OnGetFinishListener() {
+            Network.post(this, getString(R.string.notificationUrl), "type=v", null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     if (responseCode == 200 && StringUtils.startsWith(results, "{")) {

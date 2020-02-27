@@ -99,7 +99,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                                     if (mode == Mode.Telegram) {
                                         Toast.makeText(context, "Your Telegram chat or channel has been verified.", Toast.LENGTH_LONG).show();
                                         settings.setString(MainActivity.SOCIAL_REGISTRATION_STATUS, "verified");
-                                        settings.remove(TELEGRAM_SECRET);
+                                        settings.remove(TELEGRAM_SECRET, TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT);
                                     } else {
                                         Toast.makeText(context, "Your email address has been verified.", Toast.LENGTH_LONG).show();
                                         settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, "verified");

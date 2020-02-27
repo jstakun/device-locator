@@ -111,10 +111,12 @@ public class PreferencesUtils {
     }
 
     public void remove(String... keys) {
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
         for (String key : keys) {
-            sharedPreferences.edit().remove(key);
+            //Log.d(TAG, "Removing from config " + key);
+            editor.remove(key);
         }
-        sharedPreferences.edit().apply();
+        editor.apply();
     }
 
 

@@ -97,8 +97,8 @@ public class Messenger {
     public static void sendCloudMessage(final Context context, final Location location, final String replyTo, final String message, final String replyToCommand, final int retryCount, final long delayMillis, final Map<String, String> headers) {
         if ((StringUtils.isNotEmpty(replyTo) && StringUtils.isNotEmpty(message)) || location != null) {
             if (Network.isNetworkAvailable(context)) {
-                final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
+                final PreferencesUtils settings = new PreferencesUtils(context);
+                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
                 final String deviceId = getDeviceId(context, false);
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
@@ -1034,6 +1034,7 @@ public class Messenger {
                         }
                     }
                     if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
+                        settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET, TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT);
                         Toast.makeText(context, "Your Telegram chat or channel is already verified.", Toast.LENGTH_LONG).show();
                     } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                         //show dialog to enter activation code sent to user
@@ -1110,6 +1111,7 @@ public class Messenger {
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
+                    final PreferencesUtils settings = new PreferencesUtils(context);
                     if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         String status = null, secret = null;
@@ -1121,11 +1123,12 @@ public class Messenger {
                             JsonElement se = reply.getAsJsonObject().get("secret");
                             if (se != null) {
                                 secret = se.getAsString();
-                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NotificationActivationDialogFragment.EMAIL_SECRET, secret).apply();
+                                settings.setString(NotificationActivationDialogFragment.EMAIL_SECRET, secret);
                             }
                         }
-                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, status).apply();
+                        settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, status);
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
+                            settings.remove(NotificationActivationDialogFragment.EMAIL_SECRET);
                             Toast.makeText(context, "Your email address is already verified.", Toast.LENGTH_SHORT).show();
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             //show dialog to enter activation code sent to user
