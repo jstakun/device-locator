@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private boolean isTrackingServiceBound = false;
     private FirebaseAnalytics firebaseAnalytics;
     private final PrettyTime pt = new PrettyTime();
-    private BroadcastReceiver onDownloadComplete;
+    private BroadcastReceiver onDownloadComplete = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -298,7 +298,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         settings.setLong("pinVerificationMillis", System.currentTimeMillis());
 
         if (onDownloadComplete != null) {
-            unregisterReceiver(onDownloadComplete);
+            try {
+                unregisterReceiver(onDownloadComplete);
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
         }
     }
 

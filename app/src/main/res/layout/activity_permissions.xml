@@ -112,6 +112,17 @@
                 android:onClick="onPermissionSwitchSelected"/>
 
             <Switch
+                android:id="@+id/write_storage_permission"
+                android:text="@string/Manifest_permission_WRITE_EXTERNAL_STORAGE"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <Switch
                 android:id="@+id/settings_sms_without_pin"
                 android:text="@string/accept_sms_without_pin"
                 android:textColor="@color/gray"

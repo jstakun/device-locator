@@ -47,6 +47,7 @@
         android:resizeableActivity="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".views.DialogActivity" android:theme="@style/Theme.NoDisplay"></activity>
 
         <meta-data

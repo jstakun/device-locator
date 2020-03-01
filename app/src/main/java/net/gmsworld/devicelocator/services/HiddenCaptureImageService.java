@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -32,6 +33,7 @@ import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -145,6 +147,9 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
     @Override
     public void onImageCapture(final @NonNull File imageFile) {
         if (!isTest) {
+            //save photo to device gallery
+            galleryAddPic(imageFile);
+            //
             if (Network.isNetworkAvailable(this)) {
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inPreferredConfig = Bitmap.Config.ARGB_8888; //.RGB_565; //
@@ -290,5 +295,20 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
 
     public static boolean isBusy() {
         return isRunning;
+    }
+
+    private void galleryAddPic(File imageFile) {
+        if (Permissions.haveWriteStoragePermission(this)) {
+            try {
+                final String path = StringUtils.remove(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(), "Pictures") + getString(R.string.app_name);
+                Log.d(TAG, "Saving camera image to path: " + path);
+                File storageDir = new File(path, imageFile.getName());
+                FileUtils.copyFile(imageFile, storageDir);
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+        } else {
+            Log.w(TAG, "Cmaera image won't be saved on device due to missing write storage permission!");
+        }
     }
 }

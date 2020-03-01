@@ -141,6 +141,7 @@
     <string name="Manifest_permission_USE_FINGERPRINT">Allow application authentication with fingerprint</string>
     <string name="Manifest_permission_GET_ACCOUNTS">Allow to list accounts registered on the device</string>
     <string name="Manifest_permission_READ_PHONE_STATE">Allow to read device IMEI number for device identification</string>
+    <string name="Manifest_permission_WRITE_EXTERNAL_STORAGE">Allow saving camera pictures in device photo gallery</string>
     <string name="reset_permission">Allow Reset device to factory defaults command</string>
     <string name="forget_me">Forget me</string>
     <string name="send_code_again">Send code again</string>

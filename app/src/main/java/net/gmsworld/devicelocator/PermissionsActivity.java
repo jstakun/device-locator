@@ -156,6 +156,9 @@ public class PermissionsActivity extends AppCompatActivity {
             cameraPermission.setChecked(true);
         }
 
+        Switch writeStoragePermission = findViewById(R.id.write_storage_permission);
+        writeStoragePermission.setChecked(Permissions.haveWriteStoragePermission(this));
+
         Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
         if (AppUtils.getInstance().isFullVersion()) {
             boolean perm = Permissions.haveReadContactsPermission(this);
@@ -353,6 +356,12 @@ public class PermissionsActivity extends AppCompatActivity {
                     Toast.makeText(this, "Be careful. From now on Security PIN is not required to send command to your device!", Toast.LENGTH_LONG).show();
                 }
                 break;
+            case R.id.write_storage_permission:
+                if (checked && !Permissions.haveWriteStoragePermission(this)) {
+                    Permissions.requestWriteStoragePermission(this, Permissions.PERMISSIONS_WRITE_STORAGE);
+                } else if (!checked) {
+                    Permissions.startSettingsIntent(this, "Storage");
+                }
             default:
                 break;
         }
