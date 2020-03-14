@@ -393,7 +393,6 @@ public class Messenger {
         } catch (Exception e) {
             Log.d(TAG, e.getMessage(), e);
         }
-
     }
 
     private static void sendRoutePoint(final Context context, final Location location, final int retryCount, final Map<String, String> headers) {

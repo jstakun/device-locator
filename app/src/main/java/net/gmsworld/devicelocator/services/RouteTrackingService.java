@@ -7,7 +7,6 @@ package net.gmsworld.devicelocator.services;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Handler;
 import android.os.IBinder;
@@ -17,6 +16,7 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.morse.MorseSoundGenerator;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.Command;
@@ -25,6 +25,7 @@ import net.gmsworld.devicelocator.utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.utilities.RouteTrackingServiceUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +58,7 @@ public class RouteTrackingService extends Service {
     private final Messenger mMessenger = new Messenger(incomingHandler);
     private Messenger mClient;
     private int radius = DEFAULT_RADIUS;
-    private String phoneNumber, email, telegramId, app;
+    private String app;
     private static Mode mode = Mode.Normal;
 
     @Override
@@ -82,13 +83,21 @@ public class RouteTrackingService extends Service {
                 radius = intent.getIntExtra("radius", DEFAULT_RADIUS);
             }
             if (intent.hasExtra(COMMAND)) {
-                int command = intent.getIntExtra(COMMAND, -1);
+                final int command = intent.getIntExtra(COMMAND, -1);
+                String phoneNumber = "", email = "", telegramId = "";
+                if (command == COMMAND_ROUTE || command == COMMAND_STOP_SHARE) {
+                    PreferencesUtils settings = new PreferencesUtils(this);
+                    phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
+                    if (!settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified")) {
+                        email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
+                    }
+                    if (!settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified")) {
+                        telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
+                    }
+                }
                 Log.d(TAG, "RouteTrackingService onStartCommand(): " + command);
                 switch (command) {
                     case COMMAND_START:
-                        this.phoneNumber = intent.getStringExtra("phoneNumber");
-                        this.email = intent.getStringExtra("email");
-                        this.telegramId = intent.getStringExtra("telegramId");
                         this.app = intent.getStringExtra("app");
                         boolean resetRoute = intent.getBooleanExtra("resetRoute", false);
                         if (intent.hasExtra("mode")) {
@@ -101,15 +110,12 @@ public class RouteTrackingService extends Service {
                         stopSelf();
                         break;
                     case COMMAND_ROUTE:
-                        shareRoute(intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), intent.getStringExtra("app"), false);
+                        shareRoute(phoneNumber, telegramId, email, intent.getStringExtra("app"), false);
                         break;
                     case COMMAND_STOP_SHARE:
-                        shareRoute(intent.getStringExtra("phoneNumber"), intent.getStringExtra("telegramId"), intent.getStringExtra("email"), intent.getStringExtra("app"), true);
+                        shareRoute(phoneNumber, telegramId, email, intent.getStringExtra("app"), true);
                         break;
                     case COMMAND_CONFIGURE:
-                        this.phoneNumber = intent.getStringExtra("phoneNumber");
-                        this.email = intent.getStringExtra("email");
-                        this.telegramId = intent.getStringExtra("telegramId");
                         //use smart location lib
                         GmsSmartLocationManager.getInstance().setRadius(radius);
                         break;
@@ -289,15 +295,24 @@ public class RouteTrackingService extends Service {
                             Location location = (Location) msg.obj;
                             int distance = msg.arg1;
                             if (location != null) {
-                                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(service);
+                                PreferencesUtils settings = new PreferencesUtils(service);
 
-                                long notificationSentMillis = settings.getLong("notificationSentMillis", 0);
+                                long notificationSentMillis = settings.getLong("notificationSentMillis");
                                 //sent notification only if not in silent mode and if last notification was at least sent 10 seconds ago
                                 if (mode == Mode.Normal && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
-                                    settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).apply();
-                                    net.gmsworld.devicelocator.utilities.Messenger.sendRouteMessage(service, location, distance, service.phoneNumber, service.telegramId, service.email, service.app);
+                                    settings.setLong("notificationSentMillis", System.currentTimeMillis());
+                                    String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
+                                    String email = "";
+                                    if (!settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified")) {
+                                        email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
+                                    }
+                                    String telegramId = "";
+                                    if (!settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified")) {
+                                        telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
+                                    }
+                                    net.gmsworld.devicelocator.utilities.Messenger.sendRouteMessage(service, location, distance, phoneNumber, telegramId, email, service.app);
                                 } else if (mode == Mode.Perimeter && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
-                                    settings.edit().putLong("notificationSentMillis", System.currentTimeMillis()).apply();
+                                    settings.setLong("notificationSentMillis", System.currentTimeMillis());
                                     net.gmsworld.devicelocator.utilities.Messenger.sendPerimeterMessage(service, location, service.app);
                                 } else {
                                     Log.d(TAG, "No notification will be sent in mode " + mode.name());

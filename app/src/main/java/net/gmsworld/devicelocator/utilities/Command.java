@@ -1,5 +1,6 @@
 package net.gmsworld.devicelocator.utilities;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -247,9 +248,6 @@ public class Command {
         protected void onSmsCommandFound(String sender, Context context) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-            final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-            final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
             RouteTrackingService.Mode mode = RouteTrackingService.Mode.Normal;
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("silent") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
@@ -257,7 +255,7 @@ public class Command {
             }
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, true, mode);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, true, mode);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
@@ -270,12 +268,9 @@ public class Command {
         protected void onSocialCommandFound(String sender, Context context) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-            final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-            final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, true, RouteTrackingService.Mode.Normal);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, true, RouteTrackingService.Mode.Normal);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
@@ -288,12 +283,9 @@ public class Command {
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-            final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-            final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, sender, true, RouteTrackingService.Mode.Normal);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, sender, true, RouteTrackingService.Mode.Normal);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
@@ -306,11 +298,9 @@ public class Command {
         protected void onAdmCommandFound(String sender, Context context) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String email = context.getString(R.string.app_email);
-            String telegramId = context.getString(R.string.app_telegram);
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, email, telegramId, null, true, RouteTrackingService.Mode.Normal);
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, true, RouteTrackingService.Mode.Normal);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
@@ -328,15 +318,15 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+            PreferencesUtils settings = new PreferencesUtils(context);
+            final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
+            final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
+            final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
+            final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, false, RouteTrackingService.Mode.Normal);
-                settings.edit().putBoolean("motionDetectorRunning", true).apply();
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, false, RouteTrackingService.Mode.Normal);
+                settings.setBoolean("motionDetectorRunning", true);
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -352,15 +342,12 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+            PreferencesUtils settings = new PreferencesUtils(context);
+            final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, null, false, RouteTrackingService.Mode.Normal);
-                settings.edit().putBoolean("motionDetectorRunning", true).apply();
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, false, RouteTrackingService.Mode.Normal);
+                settings.setBoolean("motionDetectorRunning", true);
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -370,15 +357,12 @@ public class Command {
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
+            PreferencesUtils settings = new PreferencesUtils(context);
+            final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, phoneNumber, email, telegramId, sender, false, RouteTrackingService.Mode.Normal);
-                settings.edit().putBoolean("motionDetectorRunning", true).apply();
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, sender, false, RouteTrackingService.Mode.Normal);
+                settings.setBoolean("motionDetectorRunning", true);
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -388,14 +372,12 @@ public class Command {
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            PreferencesUtils settings = new PreferencesUtils(context);
             final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            final String email = context.getString(R.string.app_email);
-            final String telegramId = context.getString(R.string.app_telegram);
 
             if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, email, telegramId, null, false, RouteTrackingService.Mode.Normal);
-                settings.edit().putBoolean("motionDetectorRunning", true).apply();
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, false, RouteTrackingService.Mode.Normal);
+                settings.setBoolean("motionDetectorRunning", true);
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -431,17 +413,17 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            PreferencesUtils settings = new PreferencesUtils(context);
             if (GmsSmartLocationManager.getInstance().isEnabled()) {
                 if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
                     String title = RouteTrackingServiceUtils.getRouteId(context);
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, null, null, null);
+                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, null);
                 } else {
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null, null);
+                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null);
                 }
             }
             if (settings.getBoolean("motionDetectorRunning", false)) {
-                settings.edit().putBoolean("motionDetectorRunning", false).apply();
+                settings.setBoolean("motionDetectorRunning", false);
                 sendSmsNotification(context, sender, STOP_COMMAND);
             } else {
                 sendSmsNotification(context, sender, STOPPED_TRACKER);
@@ -450,19 +432,17 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            PreferencesUtils settings = new PreferencesUtils(context);
             if (GmsSmartLocationManager.getInstance().isEnabled()) {
                 if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
-                    String title = RouteTrackingServiceUtils.getRouteId(context);
-                    String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
-                    String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId, null);
+                    final String title = RouteTrackingServiceUtils.getRouteId(context);
+                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, null);
                 } else {
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null, null);
+                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null);
                 }
             }
             if (settings.getBoolean("motionDetectorRunning", false)) {
-                settings.edit().putBoolean("motionDetectorRunning", false).apply();
+                settings.setBoolean("motionDetectorRunning", false);
                 sendSocialNotification(context, STOP_COMMAND, sender, null);
             } else {
                 sendSocialNotification(context, STOPPED_TRACKER, sender, null);
@@ -471,19 +451,17 @@ public class Command {
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            PreferencesUtils settings = new PreferencesUtils(context);
             if (GmsSmartLocationManager.getInstance().isEnabled()) {
                 if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
-                    String title = RouteTrackingServiceUtils.getRouteId(context);
-                    String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
-                    String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, null, email, telegramId, sender);
+                    final String title = RouteTrackingServiceUtils.getRouteId(context);
+                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender);
                 } else {
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null, sender);
+                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, sender);
                 }
             }
             if (settings.getBoolean("motionDetectorRunning", false)) {
-                settings.edit().putBoolean("motionDetectorRunning", false).apply();
+                settings.setBoolean("motionDetectorRunning", false);
                 sendAppNotification(context, STOP_COMMAND, sender);
             } else {
                 sendAppNotification(context, STOPPED_TRACKER, sender);
@@ -492,19 +470,17 @@ public class Command {
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            PreferencesUtils settings = new PreferencesUtils(context);
             if (GmsSmartLocationManager.getInstance().isEnabled()) {
                 if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
                     String title = RouteTrackingServiceUtils.getRouteId(context);
-                    final String email = context.getString(R.string.app_email);
-                    final String telegramId = context.getString(R.string.app_telegram);
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender, email, telegramId, null);
+                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, null);
                 } else {
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null, null, null, null);
+                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null);
                 }
             }
             if (settings.getBoolean("motionDetectorRunning", false)) {
-                settings.edit().putBoolean("motionDetectorRunning", false).apply();
+                settings.setBoolean("motionDetectorRunning", false);
                 sendAdmNotification(context, STOP_COMMAND, sender, null);
             } else {
                 sendAdmNotification(context, STOPPED_TRACKER, sender, null);
@@ -903,6 +879,7 @@ public class Command {
             }
         }
 
+        @SuppressLint("MissingPermission")
         private boolean initPhoneCall(String sender, Context context) {
             if (Permissions.haveCallPhonePermission(context)) {
                 try {
@@ -951,47 +928,36 @@ public class Command {
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             final int radius = Integer.parseInt(commandTokens[commandTokens.length - 1]);
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
-            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
-            settings.edit().putInt("radius", radius).apply();
+            PreferencesUtils settings = new PreferencesUtils(context);
+            settings.setInt("radius", radius);
+            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, null);
             sendSmsNotification(context, sender, RADIUS_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             final int radius = Integer.parseInt(commandTokens[1]);
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
-            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
-            settings.edit().putInt("radius", radius).apply();
+            PreferencesUtils settings = new PreferencesUtils(context);
+            settings.setInt("radius", radius);
+            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, null);
             sendSocialNotification(context, RADIUS_COMMAND, sender, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             final int radius = Integer.parseInt(commandTokens[1]);
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-            String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-            String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
-            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, sender);
-            settings.edit().putInt("radius", radius).apply();
+            PreferencesUtils settings = new PreferencesUtils(context);
+            settings.setInt("radius", radius);
+            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, sender);
             sendAppNotification(context, RADIUS_COMMAND, sender);
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
             final int radius = Integer.parseInt(commandTokens[1]);
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String email = context.getString(R.string.app_email);
-            String telegramId = context.getString(R.string.app_telegram);
-            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, null, email, telegramId, null);
-            settings.edit().putInt("radius", radius).apply();
+            PreferencesUtils settings = new PreferencesUtils(context);
+            settings.setInt("radius", radius);
+            RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, null);
             sendSocialNotification(context, RADIUS_COMMAND, sender, null);
         }
     }
@@ -1242,25 +1208,19 @@ public class Command {
                 if (email != null) {
                     editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
                     Messenger.sendEmailRegistrationRequest(context, email, true, 1);
-                } else {
-                    email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
                 if (phoneNumber != null) {
                     editor.putString(MainActivity.NOTIFICATION_PHONE_NUMBER, phoneNumber);
-                } else {
-                    phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
                 }
                 if (telegramId != null) {
                     editor.putString(MainActivity.NOTIFICATION_SOCIAL, telegramId);
                     Messenger.sendTelegramRegistrationRequest(context, telegramId, 1);
-                } else {
-                    telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 }
                 editor.apply();
 
-                int radius = settings.getInt("radius", 100);
+                final int radius = settings.getInt("radius", 100);
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, null);
 
                 sendSmsNotification(context, sender, NOTIFY_COMMAND);
             }
@@ -1288,25 +1248,19 @@ public class Command {
                 if (email != null) {
                     editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
                     Messenger.sendEmailRegistrationRequest(context, email, true, 1);
-                } else {
-                    email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
                 if (phoneNumber != null) {
                     editor.putString(MainActivity.NOTIFICATION_PHONE_NUMBER, phoneNumber);
-                } else {
-                    phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
                 }
                 if (telegramId != null) {
                     editor.putString(MainActivity.NOTIFICATION_SOCIAL, telegramId);
                     Messenger.sendTelegramRegistrationRequest(context, telegramId, 1);
-                } else {
-                    telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 }
                 editor.apply();
 
-                int radius = settings.getInt("radius", 100);
+                final int radius = settings.getInt("radius", 100);
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, null);
 
                 sendSocialNotification(context, NOTIFY_COMMAND, sender, null);
             }
@@ -1334,25 +1288,19 @@ public class Command {
                 if (email != null) {
                     editor.putString(MainActivity.NOTIFICATION_EMAIL, email);
                     Messenger.sendEmailRegistrationRequest(context, email, true, 1);
-                } else {
-                    email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
                 }
                 if (phoneNumber != null) {
                     editor.putString(MainActivity.NOTIFICATION_PHONE_NUMBER, phoneNumber);
-                } else {
-                    phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
                 }
                 if (telegramId != null) {
                     editor.putString(MainActivity.NOTIFICATION_SOCIAL, telegramId);
                     Messenger.sendTelegramRegistrationRequest(context, telegramId, 1);
-                } else {
-                    telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
                 }
                 editor.apply();
 
-                int radius = settings.getInt("radius", 100);
+                final int radius = settings.getInt("radius", 100);
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, null);
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, null);
 
                 sendAdmNotification(context, NOTIFY_COMMAND, sender, null);
             }
@@ -1390,9 +1338,9 @@ public class Command {
                 }
                 editor.apply();
 
-                int radius = settings.getInt("radius", 100);
+                final int radius = settings.getInt("radius", 100);
 
-                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, phoneNumber, email, telegramId, sender);
+                RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, sender);
 
                 sendAppNotification(context, NOTIFY_COMMAND, sender);
             }
@@ -1800,10 +1748,11 @@ public class Command {
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (Permissions.haveLocationPermission(context)) {
                 final int perimeter = Integer.parseInt(commandTokens[1]);
-                SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+                PreferencesUtils settings = new PreferencesUtils(context);
                 final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, null, null, sender, true, RouteTrackingService.Mode.Perimeter);
-                settings.edit().putBoolean("motionDetectorRunning", true).putInt("perimeter", perimeter).apply();
+                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, sender, true, RouteTrackingService.Mode.Perimeter);
+                settings.setBoolean("motionDetectorRunning", true);
+                settings.setInt("perimeter", perimeter);
             } else {
                 Log.e(TAG, "Unable to start perimeter service due to lack of Location permission");
             }
