@@ -270,11 +270,11 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
-                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, status).apply();
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().
+                                    putString(MainActivity.EMAIL_REGISTRATION_STATUS, "unverified").apply();
                             if (context instanceof Activity) {
                                 final TextView emailInput = ((Activity) context).findViewById(R.id.email);
                                 if (emailInput != null) {
@@ -361,11 +361,11 @@ public class Messenger {
                                 status = st.getAsString();
                             }
                         }
-                        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, status).apply();
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Telegram notification sent successfully!");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().
+                                    putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "unverified").apply();
                             if (context instanceof Activity) {
                                 final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
                                 if (telegramInput != null) {
@@ -548,6 +548,8 @@ public class Messenger {
     public static void sendRouteMessage(Context context, Location location, int distance, String phoneNumber, String telegramId, String email, String app) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
+        //Log.d(TAG, "---------------------- sendRouteMessage to phone: " + phoneNumber + ", telegram: " + telegramId + ", email: " + email + ", app: " + app + " -----------------------");
+
         if (StringUtils.isNotEmpty(phoneNumber)) {
             if (settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false)) {
                 sendLocationMessage(context, location, true, phoneNumber, null, null, null);
@@ -575,7 +577,7 @@ public class Messenger {
         final Map<String, String> headers = new HashMap<>();
         headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
         //First send notification to telegram and if not configured to email
-        //REMEMBER this could send a lot of messages and your email account could be overloaded
+        //REMEMBER this could send a lot of email messages and your account could be overloaded
         if (StringUtils.isNotEmpty(telegramId)) {
             sendTelegram(context, location, telegramId, message, 1, headers);
         } else if (StringUtils.isNotEmpty(email)) {

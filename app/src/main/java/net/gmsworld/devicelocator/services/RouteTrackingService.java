@@ -85,13 +85,13 @@ public class RouteTrackingService extends Service {
             if (intent.hasExtra(COMMAND)) {
                 final int command = intent.getIntExtra(COMMAND, -1);
                 String phoneNumber = "", email = "", telegramId = "";
+                PreferencesUtils settings = new PreferencesUtils(this);
                 if (command == COMMAND_ROUTE || command == COMMAND_STOP_SHARE) {
-                    PreferencesUtils settings = new PreferencesUtils(this);
                     phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
-                    if (!settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified")) {
+                    if (!settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified", "registered", "sent")) {
                         email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
                     }
-                    if (!settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified")) {
+                    if (!settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified", "registered", "sent")) {
                         telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
                     }
                 }
@@ -103,7 +103,7 @@ public class RouteTrackingService extends Service {
                         if (intent.hasExtra("mode")) {
                             mode = Mode.valueOf(intent.getStringExtra("mode"));
                         }
-                        int gpsAccuracy = PreferenceManager.getDefaultSharedPreferences(this).getInt(GPS_ACCURACY, 1);
+                        int gpsAccuracy = settings.getInt(GPS_ACCURACY, 1);
                         startTracking(gpsAccuracy, resetRoute);
                         break;
                     case COMMAND_STOP:
@@ -282,7 +282,7 @@ public class RouteTrackingService extends Service {
                         Log.d(TAG, "New client registered");
                         break;
                     case AbstractLocationManager.UPDATE_LOCATION:
-                        Log.d(TAG, "Received new location");
+                        Log.d(TAG, "Received new location update");
                         if (service.mClient != null) {
                             try {
                                 Message message = Message.obtain(null, COMMAND_SHOW_ROUTE);
@@ -303,11 +303,13 @@ public class RouteTrackingService extends Service {
                                     settings.setLong("notificationSentMillis", System.currentTimeMillis());
                                     String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
                                     String email = "";
-                                    if (!settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified")) {
+                                    Log.d(TAG, "Email registration status: " + settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS));
+                                    if (!settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified", "registered", "sent")) {
                                         email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
                                     }
                                     String telegramId = "";
-                                    if (!settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified")) {
+                                    Log.d(TAG, "Social registration status: " + settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS));
+                                    if (!settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified", "registered", "sent")) {
                                         telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
                                     }
                                     net.gmsworld.devicelocator.utilities.Messenger.sendRouteMessage(service, location, distance, phoneNumber, telegramId, email, service.app);
