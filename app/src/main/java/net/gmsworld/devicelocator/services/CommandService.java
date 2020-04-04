@@ -18,7 +18,7 @@ import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
-import net.gmsworld.devicelocator.views.DialogActivity;
+import net.gmsworld.devicelocator.views.QuotaResetDialogActivity;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -177,11 +177,11 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         } else if (responseCode == 410) {
                             showToast("It seems device " + deviceName + " has been offline recently. Retry if no reply soon!");
                         } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
-                            //TODO show dialog with action=reset_quota appended to queryString
+                            //show dialog with action=reset_quota appended to queryString
                             //JsonElement reply = new JsonParser().parse(results);
                             //final int count = reply.getAsJsonObject().get("count").getAsInt();
                             //showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + " after " + count + " attempts!");
-                            Intent newIntent = new Intent(CommandService.this, DialogActivity.class);
+                            Intent newIntent = new Intent(CommandService.this, QuotaResetDialogActivity.class);
                             newIntent.putExtra("command", command);
                             newIntent.putExtra("queryString", queryString);
                             newIntent.putExtra("token", tokenStr);

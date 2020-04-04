@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class DialogActivity extends AppCompatActivity {
+public class QuotaResetDialogActivity extends AppCompatActivity {
 
-    private static final String TAG = DialogActivity.class.getSimpleName();
+    private static final String TAG = QuotaResetDialogActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
