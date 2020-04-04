@@ -98,7 +98,6 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             if (StringUtils.endsWith(cmd, "dl")) {
                 cmd = cmd.substring(0, cmd.length() - 2);
             }
-            Log.d(TAG, "Command " + cmd + " will be executed...");
 
             final String command = cmd;
             final String imei = extras.getString("imei");
@@ -111,6 +110,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 Log.e(TAG, "Missing command or imei!");
                 return;
             }
+
+            Log.d(TAG, "Command " + cmd + " will be send to device " + imei + "...");
 
             prefs.setString(imei + LAST_COMMAND_SUFFIX, command);
 

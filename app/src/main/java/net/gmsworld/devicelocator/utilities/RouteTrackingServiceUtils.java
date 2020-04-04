@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -29,7 +30,11 @@ public class RouteTrackingServiceUtils {
         routeTracingService.putExtra("mode", mode.name());
         routeTracingService.putExtra("app", app);
         routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_START);
-        context.startService(routeTracingService);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(routeTracingService);
+        } else {
+            context.startService(routeTracingService);
+        }
         return mConnection != null && context.bindService(routeTracingService, mConnection, Context.BIND_AUTO_CREATE);
     }
 

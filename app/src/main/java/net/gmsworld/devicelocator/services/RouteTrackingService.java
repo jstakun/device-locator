@@ -303,12 +303,12 @@ public class RouteTrackingService extends Service {
                                     settings.setLong("notificationSentMillis", System.currentTimeMillis());
                                     String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
                                     String email = "";
-                                    Log.d(TAG, "Email registration status: " + settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS));
+                                    //Log.d(TAG, "Email registration status: " + settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS));
                                     if (!settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified", "registered", "sent")) {
                                         email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
                                     }
                                     String telegramId = "";
-                                    Log.d(TAG, "Social registration status: " + settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS));
+                                    //Log.d(TAG, "Social registration status: " + settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS));
                                     if (!settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified", "registered", "sent")) {
                                         telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
                                     }

@@ -1828,7 +1828,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         startActivity(install);
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage(), e);
-                        startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                        try {
+                            startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                        } catch (Exception ex) {
+                            Log.e(TAG, ex.getMessage(), ex);
+                        }
                     }
                     Toast.makeText(MainActivity.this,getString(R.string.app_name) + " Full version has been downloaded. Please uninstall Google Play version and install Full version.", Toast.LENGTH_LONG).show();
                     unregisterReceiver(this);
