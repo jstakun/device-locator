@@ -1,19 +1,15 @@
 package net.gmsworld.devicelocator.broadcastreceivers;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 
-import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
-import net.gmsworld.devicelocator.utilities.PreferencesUtils;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class LocationAlarmReceiver extends BroadcastReceiver {
 
@@ -22,25 +18,13 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "Received broadcast...");
-        PreferencesUtils settings = new PreferencesUtils(context);
-        Intent senderIntent = new Intent(context, SmsSenderService.class);
 
-        final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
-        final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
-        String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
-
-        if (StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email) && StringUtils.isEmpty(phoneNumber) && !Permissions.haveLocationPermission(context)) {
-            Log.d(TAG, "Skipping sending location due to lack of permissions and notifiers unset");
+        if (!Permissions.haveLocationPermission(context)) {
+            Log.d(TAG, "Location permission is missing. No location update will be sent.");
         } else {
-            if (StringUtils.isEmpty(telegramId)) {
-                telegramId = context.getString(R.string.telegram_notification);
-            }
-            senderIntent.putExtra("telegramId", telegramId);
-            senderIntent.putExtra("email", email);
-            senderIntent.putExtra("phoneNumber", phoneNumber);
-
-            ComponentName name = context.startService(senderIntent);
-            Log.d(TAG, "Service " + name.getClassName() + " started after broadcast");
+            Bundle extras = new Bundle();
+            extras.putString("telegramId", context.getString(R.string.telegram_notification));
+            SmsSenderService.initService(context, true, true, true, null, null, null, null, extras);
         }
 
         LocationAlarmUtils.initWhenDown(context, true);

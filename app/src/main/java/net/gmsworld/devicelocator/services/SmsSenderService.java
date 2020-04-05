@@ -1,6 +1,8 @@
 package net.gmsworld.devicelocator.services;
 
 import android.app.IntentService;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -11,10 +13,12 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -223,6 +227,83 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         keywordReceivedSms = settings.getBoolean(SEND_ACKNOWLEDGE_MESSAGE, true);
         gpsSms = settings.getBoolean(SEND_LOCATION_MESSAGE, false);
         googleMapsSms = settings.getBoolean(SEND_MAP_LINK_MESSAGE, true);
+    }
+
+    public static boolean initService(final Context context, final boolean usePhoneNumber, final boolean useEmail, final boolean useTelegramId,
+                                   final String app, final String command, final String sender, final String source, final Bundle extras) {
+        PreferencesUtils settings = new PreferencesUtils(context);
+        Intent smsSender = new Intent(context, SmsSenderService.class);
+
+        String email = null;
+        if (useEmail) {
+            if (extras.containsKey("email")) {
+                email = extras.getString("email");
+            } else {
+                email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
+                if (StringUtils.isNotEmpty(email) && Messenger.isEmailVerified(settings)) {
+                    smsSender.putExtra("email", email);
+                }
+            }
+        }
+
+        String telegramId = null;
+        if (useTelegramId) {
+            if (extras.containsKey("telegramId")) {
+                telegramId = extras.getString("telegramId");
+            } else {
+                telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
+                if (StringUtils.isNotEmpty(telegramId) && Messenger.isTelegramVerified(settings)) {
+                    smsSender.putExtra("telegramId", telegramId);
+                }
+            }
+        }
+
+        String phoneNumber = null;
+        if (usePhoneNumber) {
+            if (extras.containsKey("phoneNumber")) {
+                phoneNumber = extras.getString("phoneNumber");
+            } else {
+                phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
+                if (StringUtils.isNotEmpty(phoneNumber)) {
+                    smsSender.putExtra("phoneNumber", phoneNumber);
+                }
+            }
+        }
+
+        if (StringUtils.isEmpty(phoneNumber) && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email) && StringUtils.isEmpty(app)) {
+            Log.d(TAG, "No notifiers set. Notification won't be sent!");
+            return false;
+        } else {
+            if (StringUtils.isNotEmpty(app)) {
+                smsSender.putExtra("app", app);
+            }
+
+            if (StringUtils.isNotEmpty(command)) {
+                smsSender.putExtra("command", command);
+            }
+
+            if (StringUtils.isNotEmpty(sender)) {
+                smsSender.putExtra("sender", sender);
+            }
+
+            if (StringUtils.isNotEmpty(source)) {
+                smsSender.putExtra("source", source);
+            }
+
+            if (extras != null && !extras.isEmpty()) {
+                smsSender.putExtras(extras);
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ComponentName name = context.startForegroundService(smsSender);
+                Log.d(TAG, "Service " + name.getClassName() + " started...");
+            } else {
+                ComponentName name = context.startService(smsSender);
+                Log.d(TAG, "Service " + name.getClassName() + " started...");
+            }
+
+            return true;
+        }
     }
 }
 

@@ -8,10 +8,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -22,6 +22,7 @@ import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.GmsSmartLocationManager;
+import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
@@ -55,8 +56,8 @@ public class RouteTrackingService extends Service {
 
     private PowerManager.WakeLock mWakeLock;
     private final Handler incomingHandler = new IncomingHandler(this);
-    private final Messenger mMessenger = new Messenger(incomingHandler);
-    private Messenger mClient;
+    private final android.os.Messenger mMessenger = new android.os.Messenger(incomingHandler);
+    private android.os.Messenger mClient;
     private int radius = DEFAULT_RADIUS;
     private String app;
     private static Mode mode = Mode.Normal;
@@ -88,10 +89,10 @@ public class RouteTrackingService extends Service {
                 PreferencesUtils settings = new PreferencesUtils(this);
                 if (command == COMMAND_ROUTE || command == COMMAND_STOP_SHARE) {
                     phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
-                    if (!settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified", "registered", "sent")) {
+                    if (Messenger.isEmailVerified(settings)) {
                         email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
                     }
-                    if (!settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified", "registered", "sent")) {
+                    if (Messenger.isTelegramVerified(settings)) {
                         telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
                     }
                 }
@@ -208,47 +209,36 @@ public class RouteTrackingService extends Service {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                 Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                final Intent newIntent = new Intent(RouteTrackingService.this, SmsSenderService.class);
+                boolean usePhone = false, useEmail = false, useTelegram = false;
                 if (StringUtils.isNotEmpty(phoneNumber)) {
-                    newIntent.putExtra("phoneNumber", phoneNumber);
+                    usePhone = true;
                 } else {
-                    if (StringUtils.isNotEmpty(telegramId)) {
-                            newIntent.putExtra("telegramId", telegramId);
-                        }
-                        if (StringUtils.isNotEmpty(email)) {
-                            newIntent.putExtra("email", email);
-                        }
-                    }
-                    if (StringUtils.isNotEmpty(app)) {
-                        newIntent.putExtra("app", app);
-                    }
-                    newIntent.putExtra("command", Command.ROUTE_COMMAND);
-                    if (responseCode == 200) {
-                        newIntent.putExtra("size", numOfPoints);
-                    } else {
-                        newIntent.putExtra("size", -1);
-                    }
-                    RouteTrackingService.this.startService(newIntent);
-                    if (stopSelf) {
-                        RouteTrackingService.this.stopSelf();
-                    }
+                    useEmail = true;
+                    useTelegram = true;
+                }
+                Bundle extras = new Bundle();
+                if (responseCode == 200) {
+                    extras.putInt("size", numOfPoints);
+                } else {
+                    extras.putInt("size", -1);
+                }
+                SmsSenderService.initService(RouteTrackingService.this, usePhone, useEmail, useTelegram, app, Command.ROUTE_COMMAND, null, null, extras);
+                if (stopSelf) {
+                    RouteTrackingService.this.stopSelf();
+                }
                 }
             });
         } else {
-            final Intent newIntent = new Intent(RouteTrackingService.this, SmsSenderService.class);
+            boolean usePhone = false, useEmail = false, useTelegram = false;
             if (StringUtils.isNotEmpty(phoneNumber)) {
-                newIntent.putExtra("phoneNumber", phoneNumber);
+                usePhone = true;
             } else {
-                if (StringUtils.isNotEmpty(telegramId)) {
-                    newIntent.putExtra("telegramId", telegramId);
-                }
-                if (StringUtils.isNotEmpty(email)) {
-                    newIntent.putExtra("email", email);
-                }
+                useEmail = true;
+                useTelegram = true;
             }
-            newIntent.putExtra("command", Command.ROUTE_COMMAND);
-            newIntent.putExtra("size", 0);
-            startService(newIntent);
+            Bundle extras = new Bundle();
+            extras.putInt("size", 0);
+            SmsSenderService.initService(RouteTrackingService.this, usePhone, useEmail, useTelegram, app, Command.ROUTE_COMMAND, null, null, extras);
             if (stopSelf) {
                 RouteTrackingService.this.stopSelf();
             }
@@ -304,18 +294,18 @@ public class RouteTrackingService extends Service {
                                     String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
                                     String email = "";
                                     //Log.d(TAG, "Email registration status: " + settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS));
-                                    if (!settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified", "registered", "sent")) {
+                                    if (Messenger.isEmailVerified(settings)) {
                                         email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
                                     }
                                     String telegramId = "";
                                     //Log.d(TAG, "Social registration status: " + settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS));
-                                    if (!settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified", "registered", "sent")) {
+                                    if (Messenger.isTelegramVerified(settings)) {
                                         telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
                                     }
-                                    net.gmsworld.devicelocator.utilities.Messenger.sendRouteMessage(service, location, distance, phoneNumber, telegramId, email, service.app);
+                                    Messenger.sendRouteMessage(service, location, distance, phoneNumber, telegramId, email, service.app);
                                 } else if (mode == Mode.Perimeter && (System.currentTimeMillis() - notificationSentMillis) > 1000 * 10) {
                                     settings.setLong("notificationSentMillis", System.currentTimeMillis());
-                                    net.gmsworld.devicelocator.utilities.Messenger.sendPerimeterMessage(service, location, service.app);
+                                    Messenger.sendPerimeterMessage(service, location, service.app);
                                 } else {
                                     Log.d(TAG, "No notification will be sent in mode " + mode.name());
                                 }

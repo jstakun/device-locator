@@ -3,15 +3,12 @@ package net.gmsworld.devicelocator.broadcastreceivers;
 import android.app.admin.DeviceAdminReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
-
-import org.apache.commons.lang3.StringUtils;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import androidx.core.content.ContextCompat;
 
@@ -45,26 +42,14 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
     public void onPasswordFailed(Context context, Intent intent) {
         super.onPasswordFailed(context, intent);
         Log.d(TAG, "Wrong password has been entered to unlock this device. SENDING NOTIFICATION!");
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-        String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-        String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
-
-        if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email)) {
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", phoneNumber);
-            newIntent.putExtra("email", email);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("source", SOURCE);
-            ContextCompat.startForegroundService(context, newIntent);
-            //context.startService(newIntent);
-        } else {
+        PreferencesUtils settings = new PreferencesUtils(context);
+        if (!SmsSenderService.initService(context, true, true, true, null, null, null, SOURCE, null)) {
             Log.d(TAG, "Unable to send notification. No notifiers are set.");
         }
 
         if (settings.getBoolean("hiddenCamera", false) && !HiddenCaptureImageService.isBusy()) {
             Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
-            //context.startService(cameraIntent);
+            //context.startForegroundService(cameraIntent);
             ContextCompat.startForegroundService(context, cameraIntent);
         } else {
             Log.d(TAG, "Camera is currently unavailable. No photo will be taken");

@@ -320,9 +320,6 @@ public class Command {
         protected void onSmsCommandFound(String sender, Context context) {
             PreferencesUtils settings = new PreferencesUtils(context);
             final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-            final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
-            final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
-            final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, false, RouteTrackingService.Mode.Normal);
@@ -331,13 +328,9 @@ public class Command {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
 
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", sender);
-            newIntent.putExtra("notificationNumber", phoneNumber);
-            newIntent.putExtra("email", email);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("command", RESUME_COMMAND);
-            context.startService(newIntent);
+            Bundle extras = new Bundle();
+            extras.putString("phoneNumber", sender);
+            SmsSenderService.initService(context, true, true, true, null, RESUME_COMMAND, null, null, extras);
         }
 
         @Override
@@ -1852,25 +1845,7 @@ public class Command {
                     settings.edit().putInt(RouteTrackingService.GPS_ACCURACY, 0).apply();
                 } else if (token.equalsIgnoreCase("nt:on")) {
                     //start Notification test
-                    final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-                    final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-                    final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
-
-                    if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
-                        if (StringUtils.isNotEmpty(phoneNumber)) {
-                            Intent newIntent = new Intent(context, SmsSenderService.class);
-                            newIntent.putExtra("phoneNumber", phoneNumber);
-                            newIntent.putExtra("command", Command.HELLO_COMMAND);
-                            context.startService(newIntent);
-                        }
-                        if (StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
-                            Intent newIntent = new Intent(context, SmsSenderService.class);
-                            newIntent.putExtra("telegramId", telegramId);
-                            newIntent.putExtra("email", email);
-                            newIntent.putExtra("command", Command.HELLO_COMMAND);
-                            context.startService(newIntent);
-                        }
-                    }
+                    SmsSenderService.initService(context, true, true, true, null, Command.HELLO_COMMAND, null, null, null);
                 } else if (token.startsWith("dn:")) {
                     //Device name
                     String newDeviceName = token.substring(3);

@@ -1,14 +1,10 @@
 package net.gmsworld.devicelocator.utilities;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
-import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
@@ -261,64 +257,33 @@ public abstract class AbstractCommand {
     }
 
     static void sendSocialNotification(final Context context, final String command, final String sender, final String invalidCommand) {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-        final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
-        final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-        Intent newIntent = new Intent(context, SmsSenderService.class);
-        newIntent.putExtra("telegramId", telegramId);
-        newIntent.putExtra("email", email);
-        newIntent.putExtra("phoneNumber", phoneNumber);
-        if (StringUtils.isNotEmpty(command)) {
-            newIntent.putExtra("command", command);
-        }
-        if (StringUtils.isNotEmpty(sender)) {
-            newIntent.putExtra("sender", sender);
-        }
-        newIntent.putExtra("source", "mobile");
-        if (StringUtils.isNotEmpty(invalidCommand)) {
-            newIntent.putExtra("invalidCommand", invalidCommand);
-        }
-        context.startService(newIntent);
+        Bundle extras = new Bundle();
+        extras.putString("invalidCommand", invalidCommand);
+        SmsSenderService.initService(context, true, true, true, null, command, sender, "mobile", extras);
     }
 
-    void sendAppNotification(final Context context, final String command, final String sender) {
-        if (sender != null) {
-            Intent newIntent = new Intent(context, SmsSenderService.class);
-            if (StringUtils.isNotEmpty(command)) {
-                newIntent.putExtra("command", command);
-            }
-            newIntent.putExtra("app", sender);
-            context.startService(newIntent);
+    void sendAppNotification(final Context context, final String command, final String app) {
+        if (StringUtils.isNotEmpty(app)) {
+            SmsSenderService.initService(context, false, false, false, app, command, null, null, null);
+        } else {
+            Log.d(TAG, "App is empty!");
         }
     }
 
     void sendSmsNotification(final Context context, final String sender, final String command) {
-        Intent newIntent = new Intent(context, SmsSenderService.class);
-        newIntent.putExtra("phoneNumber", sender);
-        if (StringUtils.isNotEmpty(command)) {
-            newIntent.putExtra("command", command);
-        }
-        context.startService(newIntent);
+        Bundle extras = new Bundle();
+        extras.putString("phoneNumber", sender);
+        SmsSenderService.initService(context, true, false, false, null, command, null, null, extras);
     }
 
     void sendAdmNotification(final Context context, final String command, final String sender, final String invalidCommand) {
-        final String email = context.getString(R.string.app_email);
-        final String telegramId = context.getString(R.string.app_telegram);
-        Intent newIntent = new Intent(context, SmsSenderService.class);
-        newIntent.putExtra("telegramId", telegramId);
-        newIntent.putExtra("email", email);
-        if (StringUtils.isNotEmpty(command)) {
-            newIntent.putExtra("command", command);
-        }
-        if (StringUtils.isNotEmpty(sender)) {
-            newIntent.putExtra("sender", sender);
-        }
-        newIntent.putExtra("source", "mobile");
+        Bundle extras = new Bundle();
+        extras.putString("telegramId", context.getString(R.string.app_telegram));
+        extras.putString("email", context.getString(R.string.app_email));
         if (StringUtils.isNotEmpty(invalidCommand)) {
-            newIntent.putExtra("invalidCommand", invalidCommand);
+            extras.putString("invalidCommand", invalidCommand);
         }
-        context.startService(newIntent);
+        SmsSenderService.initService(context, false, true, true, null, command, sender, "mobile", extras);
     }
 
     private void auditCommand(Context context, final String command, final String from, final String message) {

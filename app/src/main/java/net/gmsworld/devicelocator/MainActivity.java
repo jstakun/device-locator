@@ -1471,36 +1471,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     registerEmail((TextView) findViewById(R.id.email), true,false);
                     registerTelegram((TextView) findViewById(R.id.telegramId));
 
-                    if (StringUtils.isNotEmpty(phoneNumber)) {
-                        Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
-                        newIntent.putExtra("phoneNumber", phoneNumber);
-                        newIntent.putExtra("command", Command.HELLO_COMMAND);
-                        MainActivity.this.startService(newIntent);
-                    }
-
-                    String testEmail = null, testTelegram = null;
-                    if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified")) {
+                    if (!Messenger.isEmailVerified(settings)) {
                         Toast.makeText(MainActivity.this, "Your email address is still unverified! No email notifications will be sent...", Toast.LENGTH_LONG).show();
-                    } else {
-                        testEmail = email;
                     }
 
-                    if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified")) {
+                    if (!Messenger.isTelegramVerified(settings)) {
                         Toast.makeText(MainActivity.this, "Your Telgram char or channel is still unverified! No Telegram notifications will be sent...", Toast.LENGTH_LONG).show();
-                    } else {
-                        testTelegram = telegramId;
                     }
 
-                    if (StringUtils.isNotEmpty(testEmail) || StringUtils.isNotEmpty(testTelegram)) {
-                        if (Network.isNetworkAvailable(MainActivity.this)) {
-                            Intent newIntent = new Intent(MainActivity.this, SmsSenderService.class);
-                            newIntent.putExtra("telegramId", testTelegram);
-                            newIntent.putExtra("email", testEmail);
-                            newIntent.putExtra("command", Command.HELLO_COMMAND);
-                            MainActivity.this.startService(newIntent);
-                        } else {
-                            Toast.makeText(MainActivity.this, getString(R.string.no_network_error), Toast.LENGTH_LONG).show();
-                        }
+                    if (Network.isNetworkAvailable(MainActivity.this)) {
+                        SmsSenderService.initService(MainActivity.this, true, true, true, null, Command.HELLO_COMMAND, null, null, null);
+                    } else {
+                        Toast.makeText(MainActivity.this, getString(R.string.no_network_error), Toast.LENGTH_LONG).show();
                     }
                 } else {
                     Toast.makeText(MainActivity.this, "Please provide notification settings above.", Toast.LENGTH_LONG).show();
@@ -1879,19 +1861,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
                             activity.startActivity(browserIntent);
                         }
-                        final Intent newIntent = new Intent(activity, SmsSenderService.class);
-                        if (StringUtils.isNotEmpty(activity.phoneNumber)) {
-                            newIntent.putExtra("phoneNumber", activity.phoneNumber);
-                        }
-                        if (StringUtils.isNotEmpty(activity.telegramId)) {
-                            newIntent.putExtra("telegramId", activity.telegramId);
-                        }
-                        if (StringUtils.isNotEmpty(activity.email)) {
-                            newIntent.putExtra("email", activity.email);
-                        }
-                        newIntent.putExtra("command", Command.ROUTE_COMMAND);
-                        newIntent.putExtra("size", 2); //we know only size > 1
-                        activity.startService(newIntent);
+
+                        Bundle extras = new Bundle();
+                        extras.putInt("size", 2); //we know only size > 1
+                        SmsSenderService.initService(activity, true, true, true, null, Command.ROUTE_COMMAND, null, null, extras);
 
                         Intent sendIntent = new Intent();
                         sendIntent.setAction(Intent.ACTION_SEND);

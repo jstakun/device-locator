@@ -129,33 +129,26 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         helpText.setMovementMethod(new TextViewLinkHandler() {
             @Override
             public void onLinkClick(String url) {
-                if (StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(phoneNumber)) {
-                    if (Network.isNetworkAvailable(PinActivity.this)) {
-                        Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
-                        newIntent.putExtra("telegramId", telegramId);
-                        newIntent.putExtra("email", email);
-                        newIntent.putExtra("command", Command.PIN_COMMAND);
-                        newIntent.putExtra("phoneNumber", phoneNumber);
-                        startService(newIntent);
+                if (Network.isNetworkAvailable(PinActivity.this)) {
+                    if (SmsSenderService.initService(PinActivity.this, true, true, true, null, Command.PIN_COMMAND, null, null, null)) {
                         Toast.makeText(PinActivity.this, R.string.pin_sent_ok, Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(PinActivity.this, R.string.no_network_error, Toast.LENGTH_SHORT).show();
+                        //1. send pin to app admin
+                        final String secret = RandomStringUtils.random(16, true, true);
+                        Bundle extras = new Bundle();
+                        extras.putString("email", getString(R.string.app_email));
+                        extras.putString("secret", secret);
+                        SmsSenderService.initService(PinActivity.this, false, true, false, null, Command.PIN_COMMAND, null, null, extras);
+                        //2. send email to app admin
+                        final String deviceName = Messenger.getDeviceId(PinActivity.this, true);
+                        if (Messenger.composeEmail(PinActivity.this, new String[]{getString(R.string.app_email)}, getString(R.string.pin_recover_mail_title, deviceName), getString(R.string.pin_recover_mail_body, deviceName, secret), false)) {
+                            Toast.makeText(PinActivity.this, R.string.pin_recover_ok, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(PinActivity.this, R.string.pin_recover_fail, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 } else {
-                    //1. send pin to app admin
-                    final String secret = RandomStringUtils.random(16, true, true);
-                    Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
-                    newIntent.putExtra("command", Command.PIN_COMMAND);
-                    newIntent.putExtra("email", getString(R.string.app_email));
-                    newIntent.putExtra("secret", secret);
-                    startService(newIntent);
-                    //2. send email to app admin
-                    final String deviceName = Messenger.getDeviceId(PinActivity.this, true);
-                    if (Messenger.composeEmail(PinActivity.this, new String[]{getString(R.string.app_email)}, getString(R.string.pin_recover_mail_title, deviceName), getString(R.string.pin_recover_mail_body, deviceName, secret), false )) {
-                        Toast.makeText(PinActivity.this, R.string.pin_recover_ok, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(PinActivity.this, R.string.pin_recover_fail, Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(PinActivity.this, R.string.no_network_error, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -228,18 +221,10 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             Toast.makeText(this, R.string.pin_invalid, Toast.LENGTH_SHORT).show();
         }
         if (pinFailedCount == 2) {
-            final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
-            final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
-            final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
             pinFailedCount = -1;
             //send failed login notification
             Log.d(TAG, "Wrong pin has been entered to unlock the app. SENDING NOTIFICATION!");
-            Intent newIntent = new Intent(PinActivity.this, SmsSenderService.class);
-            newIntent.putExtra("phoneNumber", phoneNumber);
-            newIntent.putExtra("email", email);
-            newIntent.putExtra("telegramId", telegramId);
-            newIntent.putExtra("source", DeviceAdminEventReceiver.SOURCE);
-            startService(newIntent);
+            SmsSenderService.initService(PinActivity.this, true, true, true, null, null, null, DeviceAdminEventReceiver.SOURCE, null);
             if (settings.getBoolean("hiddenCamera", false) && !HiddenCaptureImageService.isBusy()) {
                 Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
                 startService(cameraIntent);

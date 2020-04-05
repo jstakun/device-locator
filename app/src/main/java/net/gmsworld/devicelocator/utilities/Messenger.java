@@ -1348,6 +1348,14 @@ public class Messenger {
         }
     }*/
 
+    public static boolean isEmailVerified(PreferencesUtils settings) {
+        return !settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified", "registered", "sent");
+    }
+
+    public static boolean isTelegramVerified(PreferencesUtils settings) {
+        return !settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified", "registered", "sent");
+    }
+
     public static boolean isAppInstalled(Context context, String packageName) {
         try {
             return context.getPackageManager().getApplicationInfo(packageName, 0).enabled;

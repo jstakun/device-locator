@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,7 +25,6 @@ import com.androidhiddencamera.config.CameraResolution;
 import com.androidhiddencamera.config.CameraRotation;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
-import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Files;
@@ -44,7 +44,6 @@ import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
@@ -197,33 +196,13 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                         public void onGetFinish(String imageUrl, int responseCode, String url) {
                             if (StringUtils.startsWith(imageUrl, "http://") || StringUtils.startsWith(imageUrl, "https://")) {
                                 //send notification with image url
-                                String email = settings.getString(MainActivity.NOTIFICATION_EMAIL, "");
-                                String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-                                String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL, "");
-
-                                if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(sender) || StringUtils.isNotEmpty(telegramId) || StringUtils.isNotEmpty(email)) {
-                                    Intent newIntent = new Intent(HiddenCaptureImageService.this, SmsSenderService.class);
-                                    newIntent.putExtra("command", Command.TAKE_PHOTO_COMMAND);
-                                    newIntent.putExtra("imageUrl", imageUrl);
-                                    if (StringUtils.isNotEmpty(app)) {
-                                        newIntent.putExtra("app", app);
-                                    } else {
-                                        newIntent.putExtra("email", email);
-                                        newIntent.putExtra("telegramId", telegramId);
-                                        if (StringUtils.isNotEmpty(sender)) {
-                                            newIntent.putExtra("phoneNumber", sender);
-                                        } else {
-                                            newIntent.putExtra("phoneNumber", phoneNumber);
-                                        }
-                                    }
-                                    try {
-                                        ContextCompat.startForegroundService(HiddenCaptureImageService.this, newIntent);
-                                    } catch (Exception e) {
-                                        Log.e(TAG, e.getMessage(), e);
-                                    }
-                                } else {
-                                    Log.d(TAG, "Unable to send notification. No notifiers are set.");
+                                Bundle extras = new Bundle();
+                                extras.putString("imageUrl", imageUrl);
+                                if (StringUtils.isNotEmpty(sender)) {
+                                    extras.putString("phoneNumber", sender);
                                 }
+                                extras.putString("telegramId", HiddenCaptureImageService.this.getString(R.string.telegram_notification));
+                                SmsSenderService.initService(HiddenCaptureImageService.this, true, true, true, app, Command.TAKE_PHOTO_COMMAND, null, null, extras);
                                 Files.deleteFileFromCache(imageFile.getName(), HiddenCaptureImageService.this, true);
                             } else {
                                 Log.e(TAG, "Received error response: " + imageUrl);
