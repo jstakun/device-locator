@@ -128,8 +128,8 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                     onCameraError(CameraError.ERROR_CAMERA_OPEN_FAILED);
                 }
             } else {
-                Log.e(TAG, "Draw over other apps permission is missing. Can't take a picture");
-                stopSelf();
+                Log.e(TAG, "Draw over other apps permission is missing. Can't take a picture!");
+                stop();
             }
         } else {
             if (isRunning) {
@@ -137,7 +137,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
             } else {
                 Log.e(TAG, "Camera permission not available!");
             }
-            stopSelf();
+            stop();
         }
 
         return START_NOT_STICKY;
@@ -224,7 +224,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
         }
 
         isRunning = false;
-        stopSelf();
+        stop();
     }
 
     @Override
@@ -257,7 +257,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
         }
 
         isRunning = false;
-        stopSelf();
+        stop();
     }
 
     @Nullable
@@ -288,6 +288,14 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
             }
         } else {
             Log.w(TAG, "Cmaera image won't be saved on device due to missing write storage permission!");
+        }
+    }
+
+    private void stop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            stopForeground(true);
+        } else {
+            stopSelf();
         }
     }
 }

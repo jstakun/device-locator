@@ -93,7 +93,7 @@
     <string name="devices_list_empty">No devices registered! Please make sure to set the same Login above and on all your other registered devices.</string>
     <string name="devices_list_loading">Synchronizing your devices…</string>
     <string name="devices_list_loading_failed">Device synchronization failed!</string>
-    <string name="devices">Registered devices</string>
+    <string name="devices">My devices</string>
     <string name="device_map">Devices Map</string>
     <string name="device_name">Device name</string>
     <string name="your_login">Your login</string>

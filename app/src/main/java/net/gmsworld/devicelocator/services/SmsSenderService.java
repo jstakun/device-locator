@@ -81,7 +81,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
             if (StringUtils.isEmpty(phoneNumber) && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email) && StringUtils.isEmpty(app)) {
                 Log.e(TAG, "Notification settings are empty!");
-                stopSelf();
+                stop();
                 return;
             }
 
@@ -103,8 +103,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 Messenger.sendCommandMessage(this, extras);
             }
         } else {
-            Log.e(TAG, "Required parameters missing");
-            stopSelf();
+            Log.e(TAG, "Required parameters missing!");
+            stop();
         }
     }
 
@@ -219,7 +219,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             isRunning = false;
         }
 
-        stopSelf();
+        stop();
     }
 
     private void readSettings() {
@@ -303,6 +303,14 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             }
 
             return true;
+        }
+    }
+
+    private void stop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            stopForeground(true);
+        } else {
+            stopSelf();
         }
     }
 }

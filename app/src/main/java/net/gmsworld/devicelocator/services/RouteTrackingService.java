@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -108,7 +109,7 @@ public class RouteTrackingService extends Service {
                         startTracking(gpsAccuracy, resetRoute);
                         break;
                     case COMMAND_STOP:
-                        stopSelf();
+                        stop();
                         break;
                     case COMMAND_ROUTE:
                         shareRoute(phoneNumber, telegramId, email, intent.getStringExtra("app"), false);
@@ -224,7 +225,7 @@ public class RouteTrackingService extends Service {
                 }
                 SmsSenderService.initService(RouteTrackingService.this, usePhone, useEmail, useTelegram, app, Command.ROUTE_COMMAND, null, null, extras);
                 if (stopSelf) {
-                    RouteTrackingService.this.stopSelf();
+                    stop();
                 }
                 }
             });
@@ -240,8 +241,16 @@ public class RouteTrackingService extends Service {
             extras.putInt("size", 0);
             SmsSenderService.initService(RouteTrackingService.this, usePhone, useEmail, useTelegram, app, Command.ROUTE_COMMAND, null, null, extras);
             if (stopSelf) {
-                RouteTrackingService.this.stopSelf();
+                stop();
             }
+        }
+    }
+
+    private void stop(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            stopForeground(true);
+        } else {
+            stopSelf();
         }
     }
 
