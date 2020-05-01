@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: com.kevalpatel2106:hiddencamera:1.3.5@aar">
     <ANNOTATIONS>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8e4d9079cf3965aa0c17ec0abb4e5cb7/jetified-hiddencamera-1.3.5/annotations.zip!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f8e577db335921d8396f74dfc9128075/jetified-hiddencamera-1.3.5/annotations.zip!/" />
     </ANNOTATIONS>
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8e4d9079cf3965aa0c17ec0abb4e5cb7/jetified-hiddencamera-1.3.5/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/8e4d9079cf3965aa0c17ec0abb4e5cb7/jetified-hiddencamera-1.3.5/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f8e577db335921d8396f74dfc9128075/jetified-hiddencamera-1.3.5/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/f8e577db335921d8396f74dfc9128075/jetified-hiddencamera-1.3.5/res" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

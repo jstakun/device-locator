@@ -19,6 +19,7 @@ import com.androidhiddencamera.HiddenCameraUtils;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
+import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.Files;
@@ -90,14 +91,25 @@ public class PermissionsActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode ==  CAMERA_PERMISSION) {
-            Log.d(TAG, "Camera permission callback");
-            startCameraTest();
-        } else if (requestCode == CALL_PERMISSION) {
-            Log.d(TAG, "Call permission callback");
-            //device is registered in onResume()
-        } else if (requestCode == CONTACTS_PERMISSION) {
-            Log.d(TAG, "Contacts permission callback");
+        switch (requestCode) {
+            case CAMERA_PERMISSION:
+                 Log.d(TAG, "Camera permission callback");
+                 startCameraTest();
+                 break;
+            case CALL_PERMISSION:
+                 Log.d(TAG, "Call permission callback");
+                 break;
+            case CONTACTS_PERMISSION:
+                 Log.d(TAG, "Contacts permission callback");
+                 break;
+            case Permissions.PERMISSIONS_LOCATION:
+                 //send device location
+                 Bundle extras = new Bundle();
+                 extras.putString("telegramId", getString(R.string.telegram_notification));
+                 SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
+                 break;
+             default:
+                 break;
         }
     }
 
@@ -285,7 +297,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 break;
             case R.id.access_fine_location_permission:
                 if (checked && !Permissions.haveLocationPermission(this)) {
-                    Permissions.requestLocationPermission(this, 0);
+                    Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this , "Location");
                 }

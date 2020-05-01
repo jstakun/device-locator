@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: ch.acra:acra:4.11@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/16966f8ff5ffddcc23179ea5b3ef9b83/jetified-acra-4.11/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/16966f8ff5ffddcc23179ea5b3ef9b83/jetified-acra-4.11/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/baf410f5c681ba67a2e00b4cfb3dbf4c/jetified-acra-4.11/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/baf410f5c681ba67a2e00b4cfb3dbf4c/jetified-acra-4.11/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ch.acra/acra/4.11/112fe70799391e1868a1b0c633822c4a0ba30464/acra-4.11-javadoc.jar!/" />

@@ -37,6 +37,8 @@ public class Permissions {
 
     public static final int PERMISSIONS_REQUEST_GET_EMAIL = 1008;
 
+    public static final int PERMISSIONS_LOCATION = 1009;
+
     private static final String TAG = Permissions.class.getSimpleName();
 
     /*public static void checkAndRequestPermissionsAtStartup(Activity activity) {

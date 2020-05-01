@@ -433,6 +433,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             case Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL:
                 if (Permissions.haveLocationPermission(this)) {
                     setAlarmChecked(true);
+                    //send device location
+                    Bundle extras = new Bundle();
+                    extras.putString("telegramId", getString(R.string.telegram_notification));
+                    SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
                 } else {
                     Toast.makeText(this, R.string.send_location_permission, Toast.LENGTH_SHORT).show();
                 }
@@ -456,6 +460,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (Permissions.haveGetAccountsPermission(this)) {
                     initEmailListDialog();
                 }
+                break;
+            case Permissions.PERMISSIONS_LOCATION:
+                //send device location
+                Bundle extras = new Bundle();
+                extras.putString("telegramId", getString(R.string.telegram_notification));
+                SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
                 break;
             default:
                 break;
@@ -553,7 +563,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 break;
             case R.id.settings_alarm:
                 if (checked && !Permissions.haveLocationPermission(MainActivity.this)) {
-                    Permissions.requestLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL);
+                    Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL);
                     return;
                 } else {
                     setAlarmChecked(checked);
@@ -566,7 +576,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private void setAlarmChecked(boolean checked) {
         settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, checked);
-        //findViewById(R.id.alarmBar).setEnabled(checked);
         if (checked) {
             LocationAlarmUtils.initWhenDown(this, true);
         } else {
@@ -668,7 +677,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
         } else {
             if (!this.motionDetectorRunning && !Permissions.haveLocationPermission(MainActivity.this)) {
-                Permissions.requestLocationPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL);
+                Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL);
                 return;
             }
         }
@@ -980,7 +989,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (!silent) {
                     Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
                     if (!Permissions.haveLocationPermission(this)) {
-                        Permissions.requestLocationPermission(this, 0);
+                        Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
                     }
                 }
             }
@@ -1050,7 +1059,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (!silent) {
                     Toast.makeText(this, "Synchronizing device...", Toast.LENGTH_LONG).show();
                     if (!Permissions.haveLocationPermission(this)) {
-                        Permissions.requestLocationPermission(this, 0);
+                        Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
                     }
                 }
             } else {
