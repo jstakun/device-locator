@@ -53,9 +53,9 @@ public class NotificationUtils {
 
         final String message = context.getString(R.string.notification_tracker);
 
-        initChannels(context, Messenger.getDeviceName());
+        initChannels(context, Messenger.getDefaultDeviceName());
 
-        return new NotificationCompat.Builder(context, Messenger.getDeviceName())
+        return new NotificationCompat.Builder(context, Messenger.getDefaultDeviceName())
                 .setContentTitle(context.getString(R.string.app_name) + " Notification")
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_place_white)

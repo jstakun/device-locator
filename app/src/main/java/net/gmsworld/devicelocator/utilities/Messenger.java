@@ -1186,7 +1186,7 @@ public class Messenger {
             if (PreferenceManager.getDefaultSharedPreferences(context).contains(MainActivity.DEVICE_NAME)) {
                 androidDeviceId = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.DEVICE_NAME, null);
             } else {
-                androidDeviceId = getDeviceName();
+                androidDeviceId = getDefaultDeviceName();
             }
 
         }
@@ -1282,7 +1282,7 @@ public class Messenger {
         return false;
     }
 
-    public static String getDeviceName() {
+    public static String getDefaultDeviceName() {
         String manufacturer = StringUtils.capitalize(Build.MANUFACTURER);
         String model = StringUtils.capitalize(Build.MODEL);
         if (model.startsWith(manufacturer)) {

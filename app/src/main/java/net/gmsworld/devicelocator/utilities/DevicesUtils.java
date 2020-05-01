@@ -148,7 +148,12 @@ public class DevicesUtils {
         if (StringUtils.isNotEmpty(userLogin)) {
             Toast.makeText(context, "Synchronizing device...", Toast.LENGTH_LONG).show();
         }
-        if (DlFirebaseMessagingService.sendRegistrationToServer(context, userLogin, settings.getString(MainActivity.DEVICE_NAME), true)) {
+        String deviceName = settings.getString(MainActivity.DEVICE_NAME);
+        if (StringUtils.isEmpty(deviceName)) {
+            deviceName = Messenger.getDefaultDeviceName();
+            settings.setString(MainActivity.DEVICE_NAME, deviceName);
+        }
+        if (DlFirebaseMessagingService.sendRegistrationToServer(context, userLogin, deviceName, true)) {
             //delete old device
             if (settings.contains(CURRENT_DEVICE_ID)) {
                 deleteDevice(context, settings, settings.getString(CURRENT_DEVICE_ID));

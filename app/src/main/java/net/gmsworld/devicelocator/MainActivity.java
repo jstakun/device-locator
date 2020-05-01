@@ -204,7 +204,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
         final String newFirebaseToken = settings.getString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN);
         if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(newFirebaseToken)) {
-            DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), settings.getString(DEVICE_NAME), true);
+            String deviceName = settings.getString(DEVICE_NAME);
+            if (StringUtils.isEmpty(deviceName)) {
+                deviceName = Messenger.getDefaultDeviceName();
+                settings.setString(DEVICE_NAME, deviceName);
+            }
+            DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
         }
 
         //show email or telegram registration dialog if still unverified
@@ -614,7 +619,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
             final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
             if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(pin)) {
-                DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), settings.getString(DEVICE_NAME), true);
+                String deviceName = settings.getString(DEVICE_NAME);
+                if (StringUtils.isEmpty(deviceName)) {
+                    deviceName = Messenger.getDefaultDeviceName();
+                    settings.setString(DEVICE_NAME, deviceName);
+                }
+                DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
             } else if (StringUtils.isNotEmpty(firebaseToken)) {
                 Log.d(TAG, "Firebase token already set");
             } else {
@@ -957,7 +967,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             Bundle bundle = new Bundle();
             bundle.putBoolean("running", StringUtils.isNotEmpty(newUserLogin));
             firebaseAnalytics.logEvent("device_manager", bundle);
-            if (!DlFirebaseMessagingService.sendRegistrationToServer(this, newUserLogin, settings.getString(DEVICE_NAME), false)) {
+            String deviceName = settings.getString(DEVICE_NAME);
+            if (StringUtils.isEmpty(deviceName)) {
+                deviceName = Messenger.getDefaultDeviceName();
+                settings.setString(DEVICE_NAME, deviceName);
+            }
+            if (!DlFirebaseMessagingService.sendRegistrationToServer(this, newUserLogin, deviceName, false)) {
                 if (!silent) {
                     Toast.makeText(this, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
                 }
@@ -978,7 +993,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         final TextView deviceNameInput = this.findViewById(R.id.deviceName);
         String deviceName = settings.getString(DEVICE_NAME);
         if (StringUtils.isEmpty(deviceName)) {
-            deviceName = Messenger.getDeviceName();
+            deviceName = Messenger.getDefaultDeviceName();
             settings.setString(DEVICE_NAME, deviceName);
         }
         //Log.d(TAG, "Device name: -" + deviceName + "-");
