@@ -190,7 +190,7 @@ public class RouteTrackingService extends Service {
     private synchronized void stopTracking() {
         Log.d(TAG, "stopTracking()");
 
-        stopForeground(true);
+        stop();
 
         if (this.mWakeLock != null)
         {
