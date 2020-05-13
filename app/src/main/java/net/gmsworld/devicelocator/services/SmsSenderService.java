@@ -238,7 +238,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         if (useEmail) {
             if (extras != null && extras.containsKey("email")) {
                 email = extras.getString("email");
-            } else {
+            } else if (Messenger.isEmailVerified(settings)) {
                 email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
                 if (StringUtils.isNotEmpty(email) && Messenger.isEmailVerified(settings)) {
                     smsSender.putExtra("email", email);
@@ -250,7 +250,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         if (useTelegramId) {
             if (extras != null && extras.containsKey("telegramId")) {
                 telegramId = extras.getString("telegramId");
-            } else {
+            } else if (Messenger.isEmailVerified(settings)) {
                 telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
                 if (StringUtils.isNotEmpty(telegramId) && Messenger.isTelegramVerified(settings)) {
                     smsSender.putExtra("telegramId", telegramId);

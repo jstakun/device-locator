@@ -109,7 +109,7 @@ public class RouteTrackingService extends Service {
                         startTracking(gpsAccuracy, resetRoute);
                         break;
                     case COMMAND_STOP:
-                        stop();
+                        stopTracking();
                         break;
                     case COMMAND_ROUTE:
                         shareRoute(phoneNumber, telegramId, email, intent.getStringExtra("app"), false);
@@ -246,7 +246,7 @@ public class RouteTrackingService extends Service {
         }
     }
 
-    private void stop(){
+    private void stop() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             stopForeground(true);
         } else {

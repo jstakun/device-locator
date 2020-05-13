@@ -107,6 +107,8 @@ import androidx.core.view.ViewCompat;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
+import static net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment.TELEGRAM_SECRET;
+
 public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener, NewVersionDialogFragment.NewVersionDialogListener,
         SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener,
         DownloadFullApplicationDialogFragment.DownloadFullApplicationDialogListener, EmailNotificationDialogFragment.EmailNotificationDialogListener {
@@ -256,11 +258,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
 
         //check for active Telegram registration
-        if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
-            final String telegramSecret = settings.getString(NotificationActivationDialogFragment.TELEGRAM_SECRET);
+        if (settings.contains(TELEGRAM_SECRET)) {
+            final String telegramSecret = settings.getString(TELEGRAM_SECRET);
             //Log.d(TAG, "Found Telegram Secret "  + telegramSecret);
             if (StringUtils.equals(telegramSecret, "none")) {
-                settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET);
+                settings.remove(TELEGRAM_SECRET);
                 final TextView telegramInput = this.findViewById(R.id.telegramId);
                 //paste telegram id from clipboard
                 try {
@@ -284,7 +286,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             } else if (StringUtils.isNotEmpty(telegramSecret)) {
                 getTelegramChatId(telegramSecret.trim());
             }
-        }
+        } //else if (settings.contains(NotificationActivationDialogFragment.EMAIL_SECRET)) {
+            //nothing to do
+        //}
     }
 
     @Override
@@ -1155,6 +1159,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     Toast.makeText(MainActivity.this, "Email verification in progress...", Toast.LENGTH_SHORT).show();
                     Messenger.sendEmailRegistrationRequest(MainActivity.this, email, validate, 1);
                 } else {
+                    settings.remove(MainActivity.EMAIL_REGISTRATION_STATUS, NotificationActivationDialogFragment.EMAIL_SECRET);
                     Toast.makeText(MainActivity.this, "No email notifications will be sent...", Toast.LENGTH_LONG).show();
                 }
             } else {
@@ -1231,6 +1236,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     Toast.makeText(MainActivity.this, "Telegram verification in progress...", Toast.LENGTH_LONG).show();
                     Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
                 } else {
+                    settings.remove(MainActivity.SOCIAL_REGISTRATION_STATUS, NotificationActivationDialogFragment.TELEGRAM_SECRET);
                     Toast.makeText(MainActivity.this, "No Telegram notifications will be sent...", Toast.LENGTH_LONG).show();
                 }
             } else {
@@ -1498,10 +1504,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
                     if (!Messenger.isEmailVerified(settings)) {
                         Toast.makeText(MainActivity.this, "Your email address is still unverified! No email notifications will be sent...", Toast.LENGTH_LONG).show();
+                    } else {
+                        Log.d(TAG, "Email is verified!");
                     }
 
                     if (!Messenger.isTelegramVerified(settings)) {
-                        Toast.makeText(MainActivity.this, "Your Telgram char or channel is still unverified! No Telegram notifications will be sent...", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "Your Telegram char or channel is still unverified! No Telegram notifications will be sent...", Toast.LENGTH_LONG).show();
+                    } else {
+                        Log.d(TAG, "Telegram is verified!");
                     }
 
                     if (Network.isNetworkAvailable(MainActivity.this)) {
@@ -1638,8 +1648,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 Network.get(this, getString(R.string.telegramUrl) + "?" + queryString, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
-                        if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
-                            settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET);
+                        if (settings.contains(TELEGRAM_SECRET)) {
+                            settings.remove(TELEGRAM_SECRET);
                             if (responseCode == 200 && results.startsWith("{")) {
                                 String secret = null, status = null;
                                 JsonElement reply = new JsonParser().parse(results);
@@ -1652,7 +1662,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     JsonElement se = reply.getAsJsonObject().get("secret");
                                     if (se != null) {
                                         secret = se.getAsString();
-                                        settings.setString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret);
+                                        settings.setString(TELEGRAM_SECRET, secret);
                                     }
                                     JsonElement cid = reply.getAsJsonObject().get("chatId");
                                     if (cid != null) {
