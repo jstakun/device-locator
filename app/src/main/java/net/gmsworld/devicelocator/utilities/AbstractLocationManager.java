@@ -69,7 +69,7 @@ public abstract class AbstractLocationManager {
             float distance = lastLocation.distanceTo(recentLocationSent);
             distWithAccuracy = distance + lastLocation.getAccuracy();
             Log.d(TAG, "checkRadius compared " + distance + " + " + lastLocation.getAccuracy() + " with " + radius);
-            if (distWithAccuracy > radius && radius > 0 && lastLocation.getAccuracy() < MAX_REASONABLE_ACCURACY) { //radius * 0.9f) {
+            if (distance > 2f && distWithAccuracy > radius && radius > 0 && lastLocation.getAccuracy() < MAX_REASONABLE_ACCURACY) { //radius * 0.9f) {
                 update = true;
                 //TODO if device has changed temporary gps accuracy to balanced change it back to high
             } else if (lastLocation.getTime() - recentLocationSent.getTime() >= 5 * 60 * 1000 && gpsAccuracy >= 1) {

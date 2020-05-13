@@ -920,7 +920,12 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            final int radius = Integer.parseInt(commandTokens[commandTokens.length - 1]);
+            int radius = Integer.parseInt(commandTokens[commandTokens.length - 1]);
+            if (radius < MainActivity.MIN_RADIUS) {
+                radius = MainActivity.MIN_RADIUS;
+            } else if (radius > MainActivity.MAX_RADIUS) {
+                radius = MainActivity.MAX_RADIUS;
+            }
             PreferencesUtils settings = new PreferencesUtils(context);
             settings.setInt("radius", radius);
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, null);
@@ -929,7 +934,12 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            final int radius = Integer.parseInt(commandTokens[1]);
+            int radius = Integer.parseInt(commandTokens[commandTokens.length - 1]);
+            if (radius < MainActivity.MIN_RADIUS) {
+                radius = MainActivity.MIN_RADIUS;
+            } else if (radius > MainActivity.MAX_RADIUS) {
+                radius = MainActivity.MAX_RADIUS;
+            }
             PreferencesUtils settings = new PreferencesUtils(context);
             settings.setInt("radius", radius);
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, null);
@@ -938,7 +948,12 @@ public class Command {
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            final int radius = Integer.parseInt(commandTokens[1]);
+            int radius = Integer.parseInt(commandTokens[commandTokens.length - 1]);
+            if (radius < MainActivity.MIN_RADIUS) {
+                radius = MainActivity.MIN_RADIUS;
+            } else if (radius > MainActivity.MAX_RADIUS) {
+                radius = MainActivity.MAX_RADIUS;
+            }
             PreferencesUtils settings = new PreferencesUtils(context);
             settings.setInt("radius", radius);
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, sender);
@@ -947,7 +962,12 @@ public class Command {
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            final int radius = Integer.parseInt(commandTokens[1]);
+            int radius = Integer.parseInt(commandTokens[commandTokens.length - 1]);
+            if (radius < MainActivity.MIN_RADIUS) {
+                radius = MainActivity.MIN_RADIUS;
+            } else if (radius > MainActivity.MAX_RADIUS) {
+                radius = MainActivity.MAX_RADIUS;
+            }
             PreferencesUtils settings = new PreferencesUtils(context);
             settings.setInt("radius", radius);
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, null);

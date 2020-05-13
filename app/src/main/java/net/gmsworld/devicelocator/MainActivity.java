@@ -116,8 +116,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private static final int SELECT_CONTACT_INTENT = 3;
     private static final int SHARE_ROUTE_MESSAGE = 1;
     private static final int UPDATE_UI_MESSAGE = 2;
-    private static final int MIN_RADIUS = 10; //meters
-    private static final int MAX_RADIUS = 1000;
+
+    public static final int MAX_RADIUS = 1000;
+    public static final int MIN_RADIUS = 10; //meters
 
     public static final String USER_LOGIN = "userLogin";
     public static final String DEVICE_NAME = "deviceName";
