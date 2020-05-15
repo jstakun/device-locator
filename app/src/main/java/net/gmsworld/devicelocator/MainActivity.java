@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
             //check for active Telegram registration
             final String telegramSecret = settings.getString(NotificationActivationDialogFragment.TELEGRAM_SECRET);
-            Log.d(TAG, "Found Telegram Secret "  + telegramSecret);
+            //Log.d(TAG, "Found Telegram Secret "  + telegramSecret);
             if (StringUtils.equals(telegramSecret, "none")) {
                 settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET);
                 final TextView telegramInput = this.findViewById(R.id.telegramId);
