@@ -25,6 +25,7 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.KeyEvent;
@@ -106,8 +107,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.ViewCompat;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
-
-import static net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment.TELEGRAM_SECRET;
 
 public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener, NewVersionDialogFragment.NewVersionDialogListener,
         SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener,
@@ -216,13 +215,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
 
         //show email or telegram registration dialog if still unverified
-        if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
-            notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
-        } else if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
-            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
-            notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
-        }
+        //if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
+        //    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
+        //    notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+        //} else if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
+        //    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+        //    notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+        //}
     }
 
     @Override
@@ -257,12 +256,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             checkForNewVersion();
         }
 
-        //check for active Telegram registration
-        if (settings.contains(TELEGRAM_SECRET)) {
-            final String telegramSecret = settings.getString(TELEGRAM_SECRET);
-            //Log.d(TAG, "Found Telegram Secret "  + telegramSecret);
+        if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
+            //check for active Telegram registration
+            final String telegramSecret = settings.getString(NotificationActivationDialogFragment.TELEGRAM_SECRET);
+            Log.d(TAG, "Found Telegram Secret "  + telegramSecret);
             if (StringUtils.equals(telegramSecret, "none")) {
-                settings.remove(TELEGRAM_SECRET);
+                settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET);
                 final TextView telegramInput = this.findViewById(R.id.telegramId);
                 //paste telegram id from clipboard
                 try {
@@ -283,12 +282,29 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 } catch (Exception e) {
                     Log.e(TAG, "Failed to paste text from clipboard", e);
                 }
-            } else if (StringUtils.isNotEmpty(telegramSecret)) {
-                getTelegramChatId(telegramSecret.trim());
+            } else {
+                try {
+                    final String deviceSecret = new String(Base64.decode(telegramSecret, Base64.URL_SAFE));
+                    if (deviceSecret.startsWith("device:")) {
+                        getTelegramChatId(telegramSecret);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
+
             }
-        } //else if (settings.contains(NotificationActivationDialogFragment.EMAIL_SECRET)) {
-            //nothing to do
-        //}
+        }
+        if (settings.getBoolean("isTrackerShown", false)) {
+            //show email or telegram registration dialog if still unverified
+            if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
+                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
+                notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+            }
+            if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
+                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+            }
+        }
     }
 
     @Override
@@ -362,6 +378,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 findViewById(R.id.ll_tracker_focus).requestFocus();
                 supportInvalidateOptionsMenu();
                 showFirstTimeUsageDialog(true, false);
+                //show email or telegram registration dialog if still unverified
+                if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
+                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
+                    notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                }
+                if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
+                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                    notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                }
                 return true;
             case R.id.devices:
                 Log.d(TAG, "Show Device Manager settings");
@@ -1648,8 +1673,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 Network.get(this, getString(R.string.telegramUrl) + "?" + queryString, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
-                        if (settings.contains(TELEGRAM_SECRET)) {
-                            settings.remove(TELEGRAM_SECRET);
+                        if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
+                            settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET);
                             if (responseCode == 200 && results.startsWith("{")) {
                                 String secret = null, status = null;
                                 JsonElement reply = new JsonParser().parse(results);
@@ -1662,7 +1687,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     JsonElement se = reply.getAsJsonObject().get("secret");
                                     if (se != null) {
                                         secret = se.getAsString();
-                                        settings.setString(TELEGRAM_SECRET, secret);
+                                        settings.setString(NotificationActivationDialogFragment.TELEGRAM_SECRET, secret);
                                     }
                                     JsonElement cid = reply.getAsJsonObject().get("chatId");
                                     if (cid != null) {
