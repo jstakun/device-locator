@@ -1611,7 +1611,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             //first load devices from cache
             ArrayList<Device> userDevices = DevicesUtils.buildDeviceList(settings);
             if (!userDevices.isEmpty()) {
-                Collections.sort(userDevices, new DeviceComparator());
+                Collections.sort(userDevices, new DeviceComparator()); //sort by device creation date
                 populateDeviceList(userDevices);
             }
             //second load device list and set array adapter
