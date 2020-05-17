@@ -801,15 +801,18 @@ public class Messenger {
                 case Command.STOPPED_TRACKER:
                     text = "Device location tracking on device " + deviceId + " is stopped.\nBattery level: " + getBatteryLevel(context);
                     break;
-                case Command.MUTE_FAILED:
-                    text = "Mute failed on device " + deviceId + " due to insufficient privileges!";
+                case Command.RINGER_MODE_FAILED:
+                    text = "Ringer mode change failed on device " + deviceId + " due to insufficient privileges!";
                     command = Command.MUTE_COMMAND;
                     break;
                 case Command.INVALID_PIN:
                     if (extras != null) {
                         String sender = extras.getString("sender", "unknown");
-                        String source = extras.getString("source");
-                        String invalidCommand = extras.getString("invalidCommand");
+                        if (StringUtils.contains(sender, "=")) {
+                            sender = StringUtils.split(sender, "=")[0].trim();
+                        }
+                        final String source = extras.getString("source");
+                        final String invalidCommand = extras.getString("invalidCommand");
                         text = "Command " + invalidCommand + " with invalid pin has been sent to device " + deviceId + " from " + source + " " + sender + ".";
                     } else {
                         text = "Command with invalid pin has been sent to device " + deviceId + ".";

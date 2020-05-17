@@ -1,7 +1,10 @@
 package net.gmsworld.devicelocator.utilities;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.location.Location;
+import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -297,5 +300,21 @@ public abstract class AbstractCommand {
         }
         File auditFile = Files.getFilesDir(context, AUDIT_FILE, false);
         Files.appendLineToFileFromContextDir(auditFile, auditLog, 100, 10);
+    }
+
+    protected static boolean setRingerMode(Context context, int mode) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null && !notificationManager.isNotificationPolicyAccessGranted()) {
+                return false;
+            }
+        }
+        final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        if (audioMode != null) {
+            audioMode.setRingerMode(mode);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

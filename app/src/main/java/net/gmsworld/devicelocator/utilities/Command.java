@@ -1,7 +1,6 @@
 package net.gmsworld.devicelocator.utilities;
 
 import android.annotation.SuppressLint;
-import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -83,7 +82,7 @@ public class Command {
     //not a command
     public final static String LOCK_SCREEN_FAILED = "lockfail";
     public final static String RESET_FAILED = "resetfail";
-    public final static String MUTE_FAILED = "mutefail";
+    public final static String RINGER_MODE_FAILED = "ringerfail";
     public final static String STOPPED_TRACKER = "stopped";
     protected final static String INVALID_PIN = "invalidPin";
     protected final static String INVALID_COMMAND = "invalidCommand";
@@ -727,53 +726,37 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            if (mute(context)) {
+            if (setRingerMode(context, AudioManager.RINGER_MODE_SILENT)) {
                 sendSmsNotification(context, sender, MUTE_COMMAND);
             } else {
-                sendSmsNotification(context, sender, MUTE_FAILED);
+                sendSmsNotification(context, sender, RINGER_MODE_FAILED);
             }
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            if (mute(context)) {
+            if (setRingerMode(context, AudioManager.RINGER_MODE_SILENT)) {
                 sendSocialNotification(context, MUTE_COMMAND, sender, null);
             } else {
-                sendSocialNotification(context, MUTE_FAILED, sender, null);
+                sendSocialNotification(context, RINGER_MODE_FAILED, sender, null);
             }
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            if (mute(context)) {
+            if (setRingerMode(context, AudioManager.RINGER_MODE_SILENT)) {
                 sendAppNotification(context, MUTE_COMMAND, sender);
             } else {
-                sendAppNotification(context, MUTE_FAILED, sender);
+                sendAppNotification(context, RINGER_MODE_FAILED, sender);
             }
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            if (mute(context)) {
+            if (setRingerMode(context, AudioManager.RINGER_MODE_SILENT)) {
                 sendAdmNotification(context, MUTE_COMMAND, sender, null);
             } else {
-                sendAdmNotification(context, MUTE_FAILED, sender, null);
-            }
-        }
-
-        private boolean mute(Context context) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                if (notificationManager != null && !notificationManager.isNotificationPolicyAccessGranted()) {
-                    return false;
-                }
-            }
-            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            if (audioMode != null) {
-                audioMode.setRingerMode(AudioManager.RINGER_MODE_SILENT);
-                return true;
-            } else {
-                return false;
+                sendAdmNotification(context, RINGER_MODE_FAILED, sender, null);
             }
         }
     }
@@ -791,37 +774,37 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            if (audioMode != null) {
-                audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            if (setRingerMode(context, AudioManager.RINGER_MODE_NORMAL)) {
                 sendSmsNotification(context, sender, UNMUTE_COMMAND);
+            } else {
+                sendSmsNotification(context, sender, RINGER_MODE_FAILED);
             }
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            if (audioMode != null) {
-                audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            if (setRingerMode(context, AudioManager.RINGER_MODE_NORMAL)) {
                 sendSocialNotification(context, UNMUTE_COMMAND, sender, null);
+            } else {
+                sendSocialNotification(context, RINGER_MODE_FAILED, sender, null);
             }
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            if (audioMode != null) {
-                audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            if (setRingerMode(context, AudioManager.RINGER_MODE_NORMAL)) {
                 sendAppNotification(context, UNMUTE_COMMAND, sender);
+            } else {
+                sendAppNotification(context, RINGER_MODE_FAILED, sender);
             }
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            final AudioManager audioMode = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-            if (audioMode != null) {
-                audioMode.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+            if (setRingerMode(context, AudioManager.RINGER_MODE_NORMAL)) {
                 sendAdmNotification(context, UNMUTE_COMMAND, sender, null);
+            } else {
+                sendAdmNotification(context, RINGER_MODE_FAILED, sender, null);
             }
         }
     }

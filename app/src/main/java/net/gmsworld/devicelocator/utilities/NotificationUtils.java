@@ -268,8 +268,8 @@ public class NotificationUtils {
             extras.putString("command", Command.START_COMMAND);
         } else if (extras.containsKey("command")) {
             final String commandName = extras.getString("command");
-            if (StringUtils.equals(commandName, Command.MUTE_FAILED)) {
-                cancelCommand = Command.MUTE_FAILED;
+            if (StringUtils.equals(commandName, Command.RINGER_MODE_FAILED)) {
+                cancelCommand = Command.UNMUTE_COMMAND;
                 extras.putString("command", Command.UNMUTE_COMMAND);
             }
         }
