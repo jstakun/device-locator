@@ -163,7 +163,7 @@ public class PermissionsActivity extends AppCompatActivity {
         Switch cameraPermission = findViewById(R.id.camera_permission);
         if (!Permissions.haveCameraPermission(this) || !HiddenCameraUtils.canOverDrawOtherApps(this)) {
             cameraPermission.setChecked(false);
-            settings.setBoolean("hiddenCamera", false);
+            settings.setBoolean(HiddenCaptureImageService.STATUS, false);
         } else {
             cameraPermission.setChecked(true);
         }

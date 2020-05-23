@@ -32,6 +32,7 @@ import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.TelegramSetupDialogFragment;
+import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
@@ -735,7 +736,7 @@ public class Messenger {
                     break;
                 case Command.TAKE_PHOTO_COMMAND:
                     title = context.getString(R.string.message, deviceId) + " - front camera photo";
-                    boolean hiddenCamera = settings.getBoolean("hiddenCamera", false);
+                    final boolean hiddenCamera = settings.getBoolean(HiddenCaptureImageService.STATUS, false);
                     String imageUrl = extras.getString("imageUrl");
                     if (StringUtils.isEmpty(imageUrl) && hiddenCamera) {
                         text = "Front camera photo will be taken on device " + deviceId + ". You should receive link soon.";

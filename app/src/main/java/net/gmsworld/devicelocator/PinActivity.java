@@ -225,7 +225,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             //send failed login notification
             Log.d(TAG, "Wrong pin has been entered to unlock the app. SENDING NOTIFICATION!");
             SmsSenderService.initService(PinActivity.this, true, true, true, null, null, null, DeviceAdminEventReceiver.SOURCE, null);
-            if (settings.getBoolean("hiddenCamera", false) && HiddenCaptureImageService.isNotBusy()) {
+            if (settings.getBoolean(HiddenCaptureImageService.STATUS, false) && HiddenCaptureImageService.isNotBusy()) {
                 Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
                 startService(cameraIntent);
             } else {

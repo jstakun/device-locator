@@ -14,8 +14,10 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
+import net.gmsworld.devicelocator.utilities.GmsSmartLocationManager;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -119,32 +121,27 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             Messenger.sendAcknowledgeMessage(this, phoneNumber, telegramId, email, app);
         }
 
-        if (!isRunning && SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
-
-            isRunning = true;
-
-            //set bestLocation to null and start time
-            startTime = System.currentTimeMillis() / 1000;
-
-            bestLocation = null;
-
-            try {
-                SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
-                        .config(LocationParams.NAVIGATION)
-                        .start(this);
-            } catch (Exception e) {
-                Log.e(TAG, e.getMessage(), e);
-            }
-
-            handler.postDelayed(task, LOCATION_REQUEST_MAX_WAIT_TIME * 1000);
-
-        } else if (!isRunning)  {
-
-            Log.e(TAG, "No GPS providers are available!");
-
-            Messenger.sendLocationErrorMessage(this, phoneNumber, telegramId, email, app);
-        } else {
+        if (isRunning) {
             Log.d(TAG, "GPS Location service is currently running!");
+        } else {
+            if (SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
+                isRunning = true;
+                //set bestLocation to null and start time
+                startTime = System.currentTimeMillis() / 1000;
+                bestLocation = null;
+                try {
+                    SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this))
+                            .config(LocationParams.NAVIGATION).start(this);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
+                handler.postDelayed(task, LOCATION_REQUEST_MAX_WAIT_TIME * 1000);
+            } else if (GmsSmartLocationManager.isLocationEnabled(this)) {
+                Log.e(TAG, "No Location provider is available!");
+                Messenger.sendLocationErrorMessage(this, phoneNumber, telegramId, email, app);
+            } else {
+                Log.e(TAG, getString(R.string.internal_error));
+            }
         }
     }
 

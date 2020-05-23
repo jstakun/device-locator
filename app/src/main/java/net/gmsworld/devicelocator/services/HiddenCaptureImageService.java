@@ -56,6 +56,8 @@ import static android.graphics.Bitmap.CompressFormat.JPEG;
 
 public class HiddenCaptureImageService extends HiddenCameraService implements OnLocationUpdatedListener {
 
+    public static final String STATUS = "hiddenCamera";
+
     private static final String TAG = HiddenCaptureImageService.class.getSimpleName();
     private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
 
@@ -221,7 +223,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                 Log.w(TAG, getString(R.string.no_network_error));
             }
         } else {
-            settings.setBoolean("hiddenCamera", true);
+            settings.setBoolean(STATUS, true);
             boolean deleted = imageFile.delete();
             Log.d(TAG, "Camera photo deleted: " + deleted);
             //TODO user handler like in CommandService
@@ -238,7 +240,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
             case CameraError.ERROR_CAMERA_OPEN_FAILED:
                 //Camera open failed. Probably because another application is using the camera
                 Log.e(TAG, "Cannot open camera.");
-                settings.setBoolean("hiddenCamera", false);
+                settings.setBoolean(STATUS, false);
                 //TODO user handler like in CommandService
                 Toast.makeText(this, "Camera opening failed.", Toast.LENGTH_LONG).show();
                 break;
@@ -292,7 +294,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                 Log.e(TAG, e.getMessage(), e);
             }
         } else {
-            Log.w(TAG, "Cmaera image won't be saved on device due to missing write storage permission!");
+            Log.w(TAG, "Camera image won't be saved on device due to missing write storage permission!");
         }
     }
 

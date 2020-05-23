@@ -47,7 +47,7 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
             Log.d(TAG, "Unable to send notification. No notifiers are set.");
         }
 
-        if (settings.getBoolean("hiddenCamera", false) && HiddenCaptureImageService.isNotBusy()) {
+        if (settings.getBoolean(HiddenCaptureImageService.STATUS, false) && HiddenCaptureImageService.isNotBusy()) {
             Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
             //context.startForegroundService(cameraIntent);
             ContextCompat.startForegroundService(context, cameraIntent);
