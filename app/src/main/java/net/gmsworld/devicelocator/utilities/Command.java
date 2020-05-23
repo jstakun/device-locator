@@ -1099,7 +1099,7 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false) && !HiddenCaptureImageService.isBusy()) {
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false) && HiddenCaptureImageService.isNotBusy()) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
                 cameraIntent.putExtra("sender", sender);
                 context.startService(cameraIntent);
@@ -1109,7 +1109,7 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false) && !HiddenCaptureImageService.isBusy()) {
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false) && HiddenCaptureImageService.isNotBusy()) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
                 context.startService(cameraIntent);
             }
@@ -1118,7 +1118,7 @@ public class Command {
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false) && !HiddenCaptureImageService.isBusy()) {
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false) && HiddenCaptureImageService.isNotBusy()) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
                 cameraIntent.putExtra("app", sender);
                 context.startService(cameraIntent);
@@ -1128,7 +1128,7 @@ public class Command {
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false) && !HiddenCaptureImageService.isBusy()) {
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("hiddenCamera", false) && HiddenCaptureImageService.isNotBusy()) {
                 Intent cameraIntent = new Intent(context, HiddenCaptureImageService.class);
                 context.startService(cameraIntent);
             }

@@ -2,7 +2,6 @@ package net.gmsworld.devicelocator.services;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
@@ -11,7 +10,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -25,6 +23,7 @@ import com.androidhiddencamera.config.CameraResolution;
 import com.androidhiddencamera.config.CameraRotation;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Files;
@@ -32,6 +31,7 @@ import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -65,10 +65,14 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
 
     private static boolean isRunning = false;
 
+    private PreferencesUtils settings;
+
+
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate()");
+        settings = new PreferencesUtils(this);
         SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).oneFix().start(this);
     }
 
@@ -155,7 +159,6 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                 Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
                 if (bitmap != null) {
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
-
                     //final String suffix = ".png";
                     //bitmap.compress(PNG, 0, out);
 
@@ -167,9 +170,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                     //send image to server and send notification with link
 
                     Map<String, String> headers = new HashMap<>();
-
-                    final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-                    String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
+                    String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
                     String uploadUrl = getString(R.string.photoUploadUrl);
                     if (StringUtils.isNotEmpty(tokenStr)) {
                         headers.put("Authorization", "Bearer " + tokenStr);
@@ -201,7 +202,11 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                                 if (StringUtils.isNotEmpty(sender)) {
                                     extras.putString("phoneNumber", sender);
                                 }
-                                extras.putString("telegramId", HiddenCaptureImageService.this.getString(R.string.telegram_notification));
+                                String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
+                                if (!Messenger.isTelegramVerified(settings) || StringUtils.isEmpty(telegramId)) {
+                                    telegramId = getString(R.string.telegram_notification);
+                                }
+                                extras.putString("telegramId", telegramId);
                                 SmsSenderService.initService(HiddenCaptureImageService.this, true, true, true, app, Command.TAKE_PHOTO_COMMAND, null, null, extras);
                                 Files.deleteFileFromCache(imageFile.getName(), HiddenCaptureImageService.this, true);
                             } else {
@@ -216,7 +221,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                 Log.w(TAG, getString(R.string.no_network_error));
             }
         } else {
-            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", true).apply();
+            settings.setBoolean("hiddenCamera", true);
             boolean deleted = imageFile.delete();
             Log.d(TAG, "Camera photo deleted: " + deleted);
             //TODO user handler like in CommandService
@@ -233,7 +238,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
             case CameraError.ERROR_CAMERA_OPEN_FAILED:
                 //Camera open failed. Probably because another application is using the camera
                 Log.e(TAG, "Cannot open camera.");
-                PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("hiddenCamera", false).apply();
+                settings.setBoolean("hiddenCamera", false);
                 //TODO user handler like in CommandService
                 Toast.makeText(this, "Camera opening failed.", Toast.LENGTH_LONG).show();
                 break;
@@ -272,8 +277,8 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
         this.location = location;
     }
 
-    public static boolean isBusy() {
-        return isRunning;
+    public static boolean isNotBusy() {
+        return !isRunning;
     }
 
     private void galleryAddPic(File imageFile) {
