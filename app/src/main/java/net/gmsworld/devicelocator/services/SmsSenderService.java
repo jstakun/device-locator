@@ -252,6 +252,11 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 if (StringUtils.isNotEmpty(telegramId)) {
                     smsSender.putExtra("telegramId", telegramId);
                 }
+            } else if (extras != null && extras.containsKey("adminTelegramId")) {
+                telegramId = extras.getString("adminTelegramId");
+                if (StringUtils.isNotEmpty(telegramId)) {
+                    smsSender.putExtra("telegramId", telegramId);
+                }
             }
         }
 

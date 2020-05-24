@@ -23,7 +23,6 @@ import com.androidhiddencamera.config.CameraResolution;
 import com.androidhiddencamera.config.CameraRotation;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
-import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Files;
@@ -204,11 +203,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                                 if (StringUtils.isNotEmpty(sender)) {
                                     extras.putString("phoneNumber", sender);
                                 }
-                                String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
-                                if (!Messenger.isTelegramVerified(settings) || StringUtils.isEmpty(telegramId)) {
-                                    telegramId = getString(R.string.telegram_notification);
-                                }
-                                extras.putString("telegramId", telegramId);
+                                extras.putString("adminTelegramId", getString(R.string.telegram_notification));
                                 SmsSenderService.initService(HiddenCaptureImageService.this, true, true, true, app, Command.TAKE_PHOTO_COMMAND, null, null, extras);
                                 Files.deleteFileFromCache(imageFile.getName(), HiddenCaptureImageService.this, true);
                             } else {

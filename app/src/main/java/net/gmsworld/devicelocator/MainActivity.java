@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             case Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL:
                 if (Permissions.haveLocationPermission(this)) {
                     setAlarmChecked(true);
-                    //send device location
+                    //send device location to admin channel
                     Bundle extras = new Bundle();
                     extras.putString("telegramId", getString(R.string.telegram_notification));
                     SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
@@ -492,7 +492,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
                 break;
             case Permissions.PERMISSIONS_LOCATION:
-                //send device location
+                //send device location to admin channel
                 Bundle extras = new Bundle();
                 extras.putString("telegramId", getString(R.string.telegram_notification));
                 SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);

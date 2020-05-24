@@ -23,7 +23,7 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
             Log.d(TAG, "Location permission is missing. No location update will be sent.");
         } else {
             Bundle extras = new Bundle();
-            extras.putString("telegramId", context.getString(R.string.telegram_notification));
+            extras.putString("adminTelegramId", context.getString(R.string.telegram_notification));
             SmsSenderService.initService(context, true, true, true, null, null, null, null, extras);
         }
 

