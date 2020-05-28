@@ -213,15 +213,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
             DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
         }
-
-        //show email or telegram registration dialog if still unverified
-        //if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-        //    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
-        //    notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
-        //} else if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
-        //    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
-        //    notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
-        //}
     }
 
     @Override

@@ -2,6 +2,7 @@ package net.gmsworld.devicelocator.utilities;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -37,7 +38,16 @@ public class Network {
 
     public static boolean isNetworkAvailable(final Context context) {
         final ConnectivityManager connectivityManager = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE));
-        return connectivityManager != null && connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
+        if (connectivityManager != null) {
+            final NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            if (networkInfo != null) {
+                return networkInfo.isConnected();
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     public static void get(final Context context, final String urlString, final Map<String, String> headers, final OnGetFinishListener onGetFinishListener) {
