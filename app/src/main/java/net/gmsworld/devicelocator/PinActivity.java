@@ -8,7 +8,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
-import android.text.InputFilter;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.TextWatcher;
@@ -85,26 +84,25 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         final EditText tokenInput = findViewById(R.id.verify_pin_edit);
 
         final String pin = settings.getEncryptedString(DEVICE_PIN);
-        final String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
-        final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
-        final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
-
-        tokenInput.setFilters(new InputFilter[]{new InputFilter.LengthFilter(pin.length())});
 
         tokenInput.addTextChangedListener(new TextWatcher() {
+
+            private int lastLength = 0;
+
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
             }
 
             @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void onTextChanged(CharSequence charSequence,int start, int before, int count) {
                 String input = charSequence.toString();
                 if (StringUtils.equals(input, pin)) {
                     onAuthenticated();
-                } else if (input.length() == pin.length()) {
+                } else if (input.length() >= pin.length() && input.length() >= lastLength) {
                     onFailed(FingerprintHelper.AuthType.Pin);
                 }
+                lastLength = input.length();
             }
 
             @Override
@@ -208,7 +206,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
     @Override
     public void onFailed(FingerprintHelper.AuthType authType) {
         int pinFailedCount = settings.getInt("pinFailedCount");
-        Log.d(TAG, "Invalid credentials " + authType.name());
+        Log.d(TAG, "Invalid credentials type: " + authType.name());
         if (authType == FingerprintHelper.AuthType.Fingerprint) {
             failedFingerprint++;
             if (failedFingerprint == 3) {
@@ -217,14 +215,16 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             } else {
                 Toast.makeText(this, R.string.fingerprint_invalid, Toast.LENGTH_SHORT).show();
             }
-        } else if (authType == FingerprintHelper.AuthType.Pin) {
-            Toast.makeText(this, R.string.pin_invalid, Toast.LENGTH_SHORT).show();
-        }
-        if (pinFailedCount == 2) {
+        } //else if (authType == FingerprintHelper.AuthType.Pin) {
+            //don't show toast
+            //Toast.makeText(this, R.string.pin_invalid, Toast.LENGTH_SHORT).show();
+        //}
+        if (pinFailedCount == 3) {
             pinFailedCount = -1;
             //send failed login notification
-            Log.d(TAG, "Wrong pin has been entered to unlock the app. SENDING NOTIFICATION!");
+            Log.d(TAG, "Invalid pin has been entered to unlock the app. SENDING NOTIFICATION!");
             SmsSenderService.initService(PinActivity.this, true, true, true, null, null, null, DeviceAdminEventReceiver.SOURCE, null);
+            Toast.makeText(this, "You've entered 3 times invalid PIN!", Toast.LENGTH_SHORT).show();
             if (settings.getBoolean(HiddenCaptureImageService.STATUS, false) && HiddenCaptureImageService.isNotBusy()) {
                 Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
                 startService(cameraIntent);
