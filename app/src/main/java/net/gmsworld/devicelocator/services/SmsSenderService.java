@@ -4,13 +4,10 @@ import android.app.IntentService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.MainActivity;
@@ -24,6 +21,7 @@ import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -47,12 +45,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private String email = null;
     private String app = null;
 
-    private boolean keywordReceivedSms = false;
-    private boolean gpsSms = false;
-    private boolean googleMapsSms = false;
-
     private Location bestLocation = null;
     private long startTime = 0;
+
+    private PreferencesUtils settings;
 
     private final Handler handler = new Handler();
 
@@ -72,6 +68,8 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         Log.d(TAG, "onHandleIntent()");
 
         Bundle extras = intent.getExtras();
+
+        settings = new PreferencesUtils(this);
 
         if (extras != null) {
             this.phoneNumber = extras.getString("phoneNumber");
@@ -113,11 +111,9 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private void initSending(String source) {
         Log.d(TAG, "initSending() " + source);
 
-        readSettings();
-
         if (StringUtils.equals(source, DeviceAdminEventReceiver.SOURCE)) {
             Messenger.sendLoginFailedMessage(this, phoneNumber, telegramId, email, app);
-        } else if (keywordReceivedSms) {
+        } else if (settings.getBoolean(SEND_ACKNOWLEDGE_MESSAGE, true)) {
             Messenger.sendAcknowledgeMessage(this, phoneNumber, telegramId, email, app);
         }
 
@@ -151,9 +147,14 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
     @Override
     public void onLocationUpdated(Location location) {
-        Log.d(TAG, "onLocationUpdated()");
+        Log.d(TAG, "onLocationUpdated() " + new Date(location.getTime()));
 
         long currentTime = System.currentTimeMillis() / 1000;
+
+        if (bestLocation == null) {
+            Log.d(TAG, "Setting best location.");
+            bestLocation = location;
+        }
 
         if (currentTime - startTime < LOCATION_REQUEST_MAX_WAIT_TIME) {
 
@@ -165,16 +166,12 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 return;
             }
 
-            if (bestLocation == null) {
+            //if (!bestLocation.getProvider().equals(LocationManager.GPS_PROVIDER) || bestLocation.getProvider().equals(location.getProvider())) {
+            if (location.hasAccuracy() && bestLocation.hasAccuracy() && location.getAccuracy() < bestLocation.getAccuracy()) {
+                Log.d(TAG, "Updating best location.");
                 bestLocation = location;
             }
-
-            if (!bestLocation.getProvider().equals(LocationManager.GPS_PROVIDER) || bestLocation.getProvider().equals(location.getProvider())) {
-                if (location.hasAccuracy() && bestLocation.hasAccuracy() && location.getAccuracy() < bestLocation.getAccuracy()) {
-                    Log.d(TAG, "Updating best location.");
-                    bestLocation = location;
-                }
-            }
+            //}
 
             if (bestLocation.getAccuracy() > AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
                 Log.d(TAG, "Accuracy is " + bestLocation.getAccuracy() + " more than max " + AbstractLocationManager.MAX_REASONABLE_ACCURACY + ", will check again.");
@@ -197,13 +194,13 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             if (bestLocation == null) {
                 Messenger.sendLocationErrorMessage(this, phoneNumber, telegramId, email, app);
             } else {
-                if (gpsSms && isRunning) {
+                if (settings.getBoolean(SEND_LOCATION_MESSAGE, false) && isRunning) {
                     Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), phoneNumber, telegramId, email, app);
                 } else {
                     Log.d(TAG, "Location details message won't be send");
                 }
 
-                if (googleMapsSms && isRunning) {
+                if (settings.getBoolean(SEND_MAP_LINK_MESSAGE, true) && isRunning) {
                     Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId, email, app);
                 } else {
                     Log.d(TAG, "Google Maps link message won't be send");
@@ -217,13 +214,6 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         }
 
         stop();
-    }
-
-    private void readSettings() {
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        keywordReceivedSms = settings.getBoolean(SEND_ACKNOWLEDGE_MESSAGE, true);
-        gpsSms = settings.getBoolean(SEND_LOCATION_MESSAGE, false);
-        googleMapsSms = settings.getBoolean(SEND_MAP_LINK_MESSAGE, true);
     }
 
     public static boolean initService(final Context context, final boolean usePhoneNumber, final boolean useEmail, final boolean useTelegramId,
