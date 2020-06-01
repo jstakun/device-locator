@@ -468,7 +468,7 @@ public class Messenger {
         text += context.getString(R.string.longitude) + " " + latAndLongFormat.format(location.getLongitude()) + "\n";
         text += context.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
 
-        text += "Taken " + new PrettyTime().format(new Date(location.getTime())) + "\n";
+        text += context.getString(R.string.last_seen) + " " + new PrettyTime().format(new Date(location.getTime())) + "\n";
 
         text += getBatteryLevel(context);
 
@@ -499,7 +499,7 @@ public class Messenger {
     public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email, String app) {
         final String deviceId = getDeviceId(context, true);
         String text = deviceId + " location" +
-                "\n" + "Last seen:" + new PrettyTime().format(new Date(location.getTime())) +
+                "\n" + context.getString(R.string.last_seen) + " " + new PrettyTime().format(new Date(location.getTime())) +
                 "\n" + getBatteryLevel(context) +
                 "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
         if (StringUtils.isNotEmpty(phoneNumber)) {

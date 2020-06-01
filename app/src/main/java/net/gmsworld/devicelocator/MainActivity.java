@@ -2063,7 +2063,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 String[] tokens = StringUtils.split(device.geo, " ");
                 if (tokens.length >= 3) { //lat lng (acc) timestamp
                     long timestamp = Long.valueOf(tokens[tokens.length - 1]);
-                    message = "Last seen " + pt.format(new Date(timestamp));
+                    message = getString(R.string.last_seen) + " " + pt.format(new Date(timestamp));
                     if (location != null) {
                         Location deviceLocation = new Location("");
                         deviceLocation.setLatitude(Location.convert(tokens[0]));

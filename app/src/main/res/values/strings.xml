@@ -21,6 +21,7 @@
     <string name="longitude">Longitude:</string>
     <string name="altitude">Altitude:</string>
     <string name="speed">Speed:</string>
+    <string name="last_seen">Last seen:</string>
     <string name="error_getting_location">GPS error. Device %1$s couldn\'t get the location. Please try again!</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>

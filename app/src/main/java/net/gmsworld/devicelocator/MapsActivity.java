@@ -231,7 +231,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     devicesBounds.include(deviceMarker);
 
                     long timestamp = Long.valueOf(geo[geo.length - 1]);
-                    String snippet = "Last seen " + pt.format(new Date(timestamp));
+                    String snippet = getString(R.string.last_seen) + " " + pt.format(new Date(timestamp));
                     Location location = SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).getLastLocation();
                     if (location != null) {
                         Location deviceLocation = new Location("");
