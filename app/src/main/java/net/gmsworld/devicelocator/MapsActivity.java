@@ -227,7 +227,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Device d = devices.get(i);
                 String[] geo = StringUtils.split(d.geo," ");
                 if (geo != null && geo.length > 1) {
-                    LatLng deviceMarker = new LatLng(Double.valueOf(geo[0]), Double.valueOf(geo[1]));
+                    LatLng deviceMarker = new LatLng(Double.parseDouble(geo[0]), Double.parseDouble(geo[1]));
                     devicesBounds.include(deviceMarker);
 
                     long timestamp = Long.valueOf(geo[geo.length - 1]);

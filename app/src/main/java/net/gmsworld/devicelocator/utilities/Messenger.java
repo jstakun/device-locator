@@ -468,10 +468,9 @@ public class Messenger {
         text += context.getString(R.string.longitude) + " " + latAndLongFormat.format(location.getLongitude()) + "\n";
         text += context.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
 
-        PrettyTime p = new PrettyTime();
-        text += "Taken " + p.format(new Date(location.getTime())) + "\n";
+        text += "Taken " + new PrettyTime().format(new Date(location.getTime())) + "\n";
 
-        text += "Battery level: " + getBatteryLevel(context);
+        text += getBatteryLevel(context);
 
         if (location.hasSpeed() && location.getSpeed() > 0f) {
             text += "\n" + context.getString(R.string.speed) + " " + getSpeed(context, location.getSpeed());
@@ -500,7 +499,8 @@ public class Messenger {
     public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email, String app) {
         final String deviceId = getDeviceId(context, true);
         String text = deviceId + " location" +
-                "\n" + "Battery level: " + getBatteryLevel(context) +
+                "\n" + "Last seen:" + new PrettyTime().format(new Date(location.getTime())) +
+                "\n" + getBatteryLevel(context) +
                 "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
@@ -528,7 +528,7 @@ public class Messenger {
         } else {
             text = "Location service is disabled on device " + deviceId + "! Unable to send location. Please enable location service and send the command again.\n";
         }
-        text += "Battery level: " + getBatteryLevel(context);
+        text += getBatteryLevel(context);
 
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
@@ -572,7 +572,7 @@ public class Messenger {
         if (location.hasSpeed() && location.getSpeed() > 0f) {
             message += " and speed " + getSpeed(context, location.getSpeed());
         }
-        message += "\n" + "Battery level: " + getBatteryLevel(context) +
+        message += "\n" + getBatteryLevel(context) +
                 "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
 
         final Map<String, String> headers = new HashMap<>();
@@ -604,7 +604,7 @@ public class Messenger {
         if (StringUtils.isNotEmpty(app)) {
             final String deviceId = getDeviceId(context, true);
             final String message = deviceId + " is in perimeter " + DistanceFormatter.format(perimeter) +
-                             "\n" + "Battery level: " + getBatteryLevel(context) +
+                             "\n" + getBatteryLevel(context) +
                              "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
                              "\n" + perimeter;
             sendCloudMessage(context, location, app, message, null, 1, 2000, headers);
@@ -650,11 +650,12 @@ public class Messenger {
                     } else {
                         text = "Location service is not available. No notifications will be sent. Check permissions and device configuration!";
                     }
-                    text += "\nBattery level: " + getBatteryLevel(context);
+                    text += "\n" + getBatteryLevel(context);
                     break;
                 case Command.STOP_COMMAND:
                     title = context.getString(R.string.app_name) + " stopped location tracking on device " + deviceId;
-                    text = "Device location tracking on device " + deviceId + " has been stopped.\nBattery level: " + getBatteryLevel(context);
+                    text = "Device location tracking on device " + deviceId + " has been stopped."
+                            + "\n" + getBatteryLevel(context);
                     break;
                 case Command.START_COMMAND:
                     title = context.getString(R.string.app_name) + " started location tracking on device " + deviceId;
@@ -678,7 +679,7 @@ public class Messenger {
                     } else {
                         text = "Location service is not available. No notifications will be sent. Check permissions and device configuration!";
                     }
-                    text += "\nBattery level: " + getBatteryLevel(context);
+                    text += getBatteryLevel(context);
                     break;
                 case Command.MUTE_COMMAND:
                     text = deviceId + " has been muted.";
@@ -745,7 +746,7 @@ public class Messenger {
                     } else {
                         text = "Front camera on device " + deviceId + " photo: " + imageUrl;
                     }
-                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    text += "\n" + getBatteryLevel(context);
                     break;
                 case Command.PIN_COMMAND:
                     title = context.getString(R.string.message, deviceId) + " - Security PIN";
@@ -759,24 +760,24 @@ public class Messenger {
                             text += "\n" + secret;
                         }
                     }
-                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    text += "\n" + getBatteryLevel(context);
                     break;
                 case Command.PING_COMMAND:
                     text = "Pong from " + deviceId;
-                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    text += "\n" + getBatteryLevel(context);
                     break;
                 case Command.HELLO_COMMAND:
                     title = "Greetings from " + context.getString(R.string.app_name)  + " installed on device " + deviceId;
                     text = "Hello from " + deviceId;
-                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    text += "\n" + getBatteryLevel(context);
                     break;
                 case Command.RING_COMMAND:
                     text = "You should now hear ringtone from your device " + deviceId;
-                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    text += "\n" + getBatteryLevel(context);
                     break;
                 case Command.RING_OFF_COMMAND:
                     text = "You should now stop hearing ringtone from your device " + deviceId;
-                    text += "\n" + "Battery level: " + getBatteryLevel(context);
+                    text += "\n" + getBatteryLevel(context);
                     break;
                 case Command.CALL_COMMAND:
                     text = "Failed to initiate phone call from device " + deviceId + "!";
@@ -786,11 +787,11 @@ public class Messenger {
                     break;
                 case Command.ABOUT_COMMAND:
                     text = AppUtils.getInstance().getAboutMessage(context) +
-                            "\n" + "Battery level: " + getBatteryLevel(context);
+                            "\n" + getBatteryLevel(context);
                     break;
                 case Command.LOCK_SCREEN_COMMAND:
                     text = "Screen locked successfully on device " + deviceId + "!" +
-                            "\n" + "Battery level: " + getBatteryLevel(context);
+                            "\n" + getBatteryLevel(context);
                     break;
                 case Command.LOCK_SCREEN_FAILED:
                     text = "Screen lock failed on device " + deviceId + " due to insufficient privileges!";
@@ -800,7 +801,8 @@ public class Messenger {
                     text = "Configuration change on device " + deviceId + " has been applied.";
                     break;
                 case Command.STOPPED_TRACKER:
-                    text = "Device location tracking on device " + deviceId + " is stopped.\nBattery level: " + getBatteryLevel(context);
+                    text = "Device location tracking on device " + deviceId + " is stopped."
+                            + "\n" + getBatteryLevel(context);
                     break;
                 case Command.RINGER_MODE_FAILED:
                     text = "Ringer mode change failed on device " + deviceId + " due to insufficient privileges!";
@@ -881,7 +883,7 @@ public class Messenger {
     public static void sendLocationErrorMessage(Context context, String phoneNumber, String telegramId, String email, String app) {
         String deviceId = getDeviceId(context, true);
         String message = context.getString(R.string.error_getting_location, deviceId) +
-                "\n" + "Battery level: " + getBatteryLevel(context);
+                "\n" + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, message);
         }
@@ -902,7 +904,7 @@ public class Messenger {
         String deviceId = getDeviceId(context, true);
         String text = "Failed login attempt to your device " + deviceId + "."
                 + " You should receive device location message soon."
-                + "\n" + "Battery level: " + getBatteryLevel(context);
+                + "\n" + getBatteryLevel(context);
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
         }
@@ -950,7 +952,7 @@ public class Messenger {
         }
     }
 
-    private static int getBatteryLevel(Context context) {
+    private static String getBatteryLevel(Context context) {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = context.registerReceiver(null, ifilter);
 
@@ -959,9 +961,9 @@ public class Messenger {
             int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
             float batteryPct = level / (float) scale;
 
-            return (int) (batteryPct * 100);
+            return "Battery level: " + (int) (batteryPct * 100);
         } else {
-            return -1;
+            return "Battery level: unknown";
         }
     }
 

@@ -61,7 +61,7 @@ public class CommandListActivity extends AppCompatActivity {
             for (int i = commands.size() - 1; i >= 0; i--) {
                 String command = commands.get(i);
                 String[] tokens = StringUtils.split(command, " ");
-                final long timestamp = Long.valueOf(tokens[0]);
+                final long timestamp = Long.parseLong(tokens[0]);
                 final String sender = tokens[1];
                 if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
                     final String deviceName = DevicesUtils.getDeviceName(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
@@ -76,7 +76,7 @@ public class CommandListActivity extends AppCompatActivity {
                     message += " has been sent from " + deviceName + "\n" + pt.format(new Date(timestamp));
                     values.add(message);
                 } else {
-                    final String message = "Command " + tokens[1] + "\n" + "has been sent from unknown\n" + pt.format(new Date(timestamp));
+                    final String message = "Command " + tokens[1] + "\n" + "has been sent from unknown device\n" + pt.format(new Date(timestamp));
                     values.add(message);
                     positions.add(-1);
                 }
