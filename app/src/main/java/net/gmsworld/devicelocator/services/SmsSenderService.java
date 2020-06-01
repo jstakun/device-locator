@@ -55,6 +55,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private final Runnable task = new Runnable() {
         @Override
         public void run () {
+            Log.d(TAG, "Finalizing location task...");
             disableUpdates();
         }
     };
