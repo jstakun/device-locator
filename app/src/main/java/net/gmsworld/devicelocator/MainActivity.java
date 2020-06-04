@@ -196,8 +196,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             findViewById(R.id.sms_notification).setVisibility(View.GONE);
         }
 
-        if (motionDetectorRunning) {
+        if (motionDetectorRunning && Permissions.haveLocationPermission(this)) {
             isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, null, false, RouteTrackingService.Mode.Normal);
+        } else {
+            isTrackingServiceBound = false;
         }
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);

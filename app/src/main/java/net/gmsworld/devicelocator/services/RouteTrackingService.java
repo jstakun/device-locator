@@ -30,8 +30,6 @@ import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.utilities.RouteTrackingServiceUtils;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.lang.ref.WeakReference;
 
 public class RouteTrackingService extends Service {
@@ -86,21 +84,11 @@ public class RouteTrackingService extends Service {
             }
             if (intent.hasExtra(COMMAND)) {
                 final int command = intent.getIntExtra(COMMAND, -1);
-                String phoneNumber = "", email = "", telegramId = "";
                 PreferencesUtils settings = new PreferencesUtils(this);
-                if (command == COMMAND_ROUTE || command == COMMAND_STOP_SHARE) {
-                    phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
-                    if (Messenger.isEmailVerified(settings)) {
-                        email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
-                    }
-                    if (Messenger.isTelegramVerified(settings)) {
-                        telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
-                    }
-                }
+                app = intent.getStringExtra("app");
                 Log.d(TAG, "RouteTrackingService onStartCommand(): " + command);
                 switch (command) {
                     case COMMAND_START:
-                        this.app = intent.getStringExtra("app");
                         boolean resetRoute = intent.getBooleanExtra("resetRoute", false);
                         if (intent.hasExtra("mode")) {
                             mode = Mode.valueOf(intent.getStringExtra("mode"));
@@ -112,10 +100,10 @@ public class RouteTrackingService extends Service {
                         stopTracking();
                         break;
                     case COMMAND_ROUTE:
-                        shareRoute(phoneNumber, telegramId, email, intent.getStringExtra("app"), false);
+                        shareRoute(intent.getExtras(), false);
                         break;
                     case COMMAND_STOP_SHARE:
-                        shareRoute(phoneNumber, telegramId, email, intent.getStringExtra("app"), true);
+                        shareRoute(intent.getExtras(), true);
                         break;
                     case COMMAND_CONFIGURE:
                         //use smart location lib
@@ -202,7 +190,7 @@ public class RouteTrackingService extends Service {
         GmsSmartLocationManager.getInstance().disable(IncomingHandler.class.getName(), this);
     }
 
-    private void shareRoute(final String phoneNumber, final String telegramId, final String email, final String app, final boolean stopSelf) {
+    private void shareRoute(final Bundle extras, final boolean stopSelf) {
         Log.d(TAG, "shareRoute()");
         final int numOfPoints = Files.getRoutePoints(this);
         if (numOfPoints >= 2) {
@@ -211,13 +199,12 @@ public class RouteTrackingService extends Service {
                 public void onGetFinish(String results, int responseCode, String url) {
                 Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                 boolean usePhone = false, useEmail = false, useTelegram = false;
-                if (StringUtils.isNotEmpty(phoneNumber)) {
+                if (extras.containsKey("phoneNumber")) {
                     usePhone = true;
                 } else {
                     useEmail = true;
                     useTelegram = true;
                 }
-                Bundle extras = new Bundle();
                 if (responseCode == 200) {
                     extras.putInt("size", numOfPoints);
                 } else {
@@ -231,13 +218,12 @@ public class RouteTrackingService extends Service {
             });
         } else {
             boolean usePhone = false, useEmail = false, useTelegram = false;
-            if (StringUtils.isNotEmpty(phoneNumber)) {
+            if (extras.containsKey("phoneNumber")) {
                 usePhone = true;
             } else {
                 useEmail = true;
                 useTelegram = true;
             }
-            Bundle extras = new Bundle();
             extras.putInt("size", 0);
             SmsSenderService.initService(RouteTrackingService.this, usePhone, useEmail, useTelegram, app, Command.ROUTE_COMMAND, null, null, extras);
             if (stopSelf) {
@@ -302,12 +288,10 @@ public class RouteTrackingService extends Service {
                                     settings.setLong("notificationSentMillis", System.currentTimeMillis());
                                     String phoneNumber = settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER);
                                     String email = "";
-                                    //Log.d(TAG, "Email registration status: " + settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS));
                                     if (Messenger.isEmailVerified(settings)) {
                                         email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
                                     }
                                     String telegramId = "";
-                                    //Log.d(TAG, "Social registration status: " + settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS));
                                     if (Messenger.isTelegramVerified(settings)) {
                                         telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
                                     }

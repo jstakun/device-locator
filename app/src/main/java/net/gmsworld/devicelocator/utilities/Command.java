@@ -679,37 +679,28 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("phoneNumber", sender);
-            context.startService(routeTracingService);
+            Bundle extras = new Bundle();
+            extras.putString("phoneNumber", sender);
+            RouteTrackingServiceUtils.shareRoute(context, extras);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("telegramId", settings.getString(MainActivity.NOTIFICATION_SOCIAL, ""));
-            routeTracingService.putExtra("email", settings.getString(MainActivity.NOTIFICATION_EMAIL, ""));
-            context.startService(routeTracingService);
+            RouteTrackingServiceUtils.shareRoute(context, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("app", sender);
-            context.startService(routeTracingService);
+            extras.putString("app", sender);
+            RouteTrackingServiceUtils.shareRoute(context, extras);
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
-            routeTracingService.putExtra("telegramId", context.getString(R.string.app_telegram));
-            routeTracingService.putExtra("email", context.getString(R.string.app_email));
-            context.startService(routeTracingService);
+            Bundle extras = new Bundle();
+            extras.putString("telegramId", context.getString(R.string.app_telegram));
+            extras.putString("email", context.getString(R.string.app_email));
+            RouteTrackingServiceUtils.shareRoute(context, extras);
         }
     }
 

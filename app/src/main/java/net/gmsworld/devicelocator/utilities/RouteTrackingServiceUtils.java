@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -24,18 +25,23 @@ public class RouteTrackingServiceUtils {
     public static final String ROUTE_TITLE = "routeTitle";
 
     public static boolean startRouteTrackingService(Context context, ServiceConnection mConnection, int radius, String app, boolean resetRoute, RouteTrackingService.Mode mode) {
-        Intent routeTracingService = new Intent(context, RouteTrackingService.class);
-        routeTracingService.putExtra("radius", radius);
-        routeTracingService.putExtra("resetRoute", resetRoute);
-        routeTracingService.putExtra("mode", mode.name());
-        routeTracingService.putExtra("app", app);
-        routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_START);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(routeTracingService);
+        if (Permissions.haveLocationPermission(context)) {
+            Intent routeTracingService = new Intent(context, RouteTrackingService.class);
+            routeTracingService.putExtra("radius", radius);
+            routeTracingService.putExtra("resetRoute", resetRoute);
+            routeTracingService.putExtra("mode", mode.name());
+            routeTracingService.putExtra("app", app);
+            routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_START);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(routeTracingService);
+            } else {
+                context.startService(routeTracingService);
+            }
+            return mConnection != null && context.bindService(routeTracingService, mConnection, Context.BIND_AUTO_CREATE);
         } else {
-            context.startService(routeTracingService);
+            Log.e(TAG, "Unable to start route tracking service due to lack of Location permission!");
+            return false;
         }
-        return mConnection != null && context.bindService(routeTracingService, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     public static void stopRouteTrackingService(Context context, ServiceConnection mConnection, boolean isBound, boolean shareRoute, String title, String app) {
@@ -65,6 +71,16 @@ public class RouteTrackingServiceUtils {
             routeTracingService.putExtra(RouteTrackingService.COMMAND, command);
             context.startService(routeTracingService);
         }
+    }
+
+    public static void shareRoute(Context context, Bundle extras) {
+        Intent routeTracingService = new Intent(context, RouteTrackingService.class);
+        routeTracingService.putExtra(RouteTrackingService.COMMAND, RouteTrackingService.COMMAND_ROUTE);
+        if (extras != null && !extras.isEmpty()) {
+            routeTracingService.putExtras(extras);
+        }
+        context.startService(routeTracingService);
+
     }
 
     public static void unbindRouteTrackingService(Context context, ServiceConnection mConnection, boolean isBound) {
