@@ -3,6 +3,7 @@ package net.gmsworld.devicelocator;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -289,6 +290,11 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
             } else if (routePoints.size() == 1) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
+            }
+        } else if (mMap != null && routePoints.isEmpty()) {
+            Location myLocation = mMap.getMyLocation();
+            if (myLocation != null) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()), 14f));
             }
         }
     }

@@ -29,6 +29,7 @@ import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
+import org.acra.ACRA;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Constructor;
@@ -1396,26 +1397,41 @@ public class Command {
     private static final class AboutCommand extends AbstractCommand {
 
         public AboutCommand() {
-            super(ABOUT_COMMAND, "ab", Finder.EQUALS);
+            super(ABOUT_COMMAND, "ab", Finder.STARTS);
+        }
+
+        @Override
+        public boolean validateTokens() {
+            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "l", "log"));
+        }
+
+        private void sendLog() {
+            if (commandTokens.length >= 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("log") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("l"))) {
+                ACRA.getErrorReporter().handleSilentException(null);
+            }
         }
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
+            sendLog();
             sendSmsNotification(context, sender, ABOUT_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
+            sendLog();
             sendSocialNotification(context, ABOUT_COMMAND, sender, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
+            sendLog();
             sendAppNotification(context, ABOUT_COMMAND, sender);
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
+            sendLog();
             sendAdmNotification(context, ABOUT_COMMAND, sender, null);
         }
     }
