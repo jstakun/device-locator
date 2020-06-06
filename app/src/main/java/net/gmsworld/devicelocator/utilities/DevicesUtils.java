@@ -2,6 +2,7 @@ package net.gmsworld.devicelocator.utilities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.location.Location;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.TextView;
@@ -194,6 +195,26 @@ public class DevicesUtils {
             }
         }
         return -1;
+    }
+
+    public static void sendGeo(final Activity context, final PreferencesUtils settings, final String thisDeviceImei, final Location location) {
+        if (Network.isNetworkAvailable(context)) {
+            final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+            final String geo = "geo:" + location.getLatitude() + " " + location.getLongitude() + " " + location.getAccuracy();
+            final String content = "imei=" + thisDeviceImei + "&flex=" + geo;
+
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer " + tokenStr);
+
+            Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    loadDeviceList(context, settings, context);
+                }
+            });
+        } else {
+            Log.e(TAG, "No network available. Failed to send device location!");
+        }
     }
 
 }
