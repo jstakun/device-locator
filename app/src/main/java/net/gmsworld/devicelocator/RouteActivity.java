@@ -96,6 +96,12 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                         } else {
                             Log.d(TAG, "No route points found!");
                             Toast.makeText(RouteActivity.this, "No route points saved yet!", Toast.LENGTH_LONG).show();
+                            if (mMap != null) {
+                                Location myLocation = mMap.getMyLocation();
+                                if (myLocation != null) {
+                                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()), 14f));
+                                }
+                            }
                         }
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage(), e);
@@ -290,11 +296,6 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
             } else if (routePoints.size() == 1) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
-            }
-        } else if (mMap != null && routePoints.isEmpty()) {
-            Location myLocation = mMap.getMyLocation();
-            if (myLocation != null) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()), 14f));
             }
         }
     }
