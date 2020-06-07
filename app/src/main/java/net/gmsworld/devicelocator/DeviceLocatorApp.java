@@ -57,6 +57,7 @@ public class DeviceLocatorApp extends Application {
                     .setHttpHeaders(headers)
                     .setResToastText(R.string.crash_error)
                     .setSocketTimeout(30000)
+                    .setLogcatArguments( "-t", "250", "-v", "time", "net.gmsworld.devicelocator:D", "*.S")
                     .build();
             ACRA.init(this, config);
         } catch (Exception e) {
