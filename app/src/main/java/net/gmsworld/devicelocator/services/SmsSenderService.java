@@ -196,12 +196,14 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 Messenger.sendLocationErrorMessage(this, phoneNumber, telegramId, email, app);
             } else {
                 if (settings.getBoolean(SEND_LOCATION_MESSAGE, false) && isRunning) {
+                    Log.d(TAG, "Sending Location details message...");
                     Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), phoneNumber, telegramId, email, app);
                 } else {
                     Log.d(TAG, "Location details message won't be send");
                 }
 
                 if (settings.getBoolean(SEND_MAP_LINK_MESSAGE, true) && isRunning) {
+                    Log.d(TAG, "Sending Google Maps link message...");
                     Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId, email, app);
                 } else {
                     Log.d(TAG, "Google Maps link message won't be send");
