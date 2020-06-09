@@ -81,9 +81,9 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
 
         //-----------------------------------------------------------------
 
-        final EditText tokenInput = findViewById(R.id.verify_pin_edit);
-
         final String pin = settings.getEncryptedString(DEVICE_PIN);
+
+        final EditText tokenInput = findViewById(R.id.verify_pin_edit);
 
         tokenInput.addTextChangedListener(new TextWatcher() {
 
@@ -173,6 +173,8 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         if (fingerprintHelper != null) {
             fingerprintHelper.stopListening();
         }
+        final EditText tokenInput = findViewById(R.id.verify_pin_edit);
+        tokenInput.setText("");
     }
 
     @Override
