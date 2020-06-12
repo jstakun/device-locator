@@ -80,12 +80,14 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy()");
         SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).stop();
     }
 
     @SuppressLint("MissingPermission")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand()");
         isTest = intent.getBooleanExtra("test", false);
         sender = intent.getStringExtra("sender");
         app = intent.getStringExtra("app");
@@ -294,6 +296,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
     }
 
     private void stop() {
+        stopCamera();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             stopForeground(true);
         } else {
