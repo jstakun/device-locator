@@ -735,11 +735,11 @@ public class Messenger {
                     final boolean hiddenCamera = settings.getBoolean(HiddenCaptureImageService.STATUS, false);
                     String imageUrl = extras.getString("imageUrl");
                     if (StringUtils.isEmpty(imageUrl) && hiddenCamera) {
-                        text = "Front camera photo will be taken on device " + deviceId + ". You should receive link soon.";
+                        text = "Front camera photo will be taken on the device " + deviceId + ". You should receive link soon.";
                     } else if (StringUtils.isEmpty(imageUrl) && !hiddenCamera) {
-                        text = "Front camera is disabled on device " + deviceId + "! No photo will be taken.";
+                        text = "Front camera is disabled on the device " + deviceId + "! No photo will be taken.";
                     } else {
-                        text = "Front camera on device " + deviceId + " photo: " + imageUrl;
+                        text = "Front camera photo taken on the device " + deviceId + ": " + imageUrl;
                     }
                     text += getBatteryLevel(context);
                     break;

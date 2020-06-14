@@ -12,8 +12,10 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -49,6 +51,7 @@ public class LoginActivity extends AppCompatActivity  {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private Toast loginToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +139,7 @@ public class LoginActivity extends AppCompatActivity  {
                 mAuthTask = new UserLoginTask(email, password, this);
                 mAuthTask.execute((Void) null);
             } else {
-                Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                showToast(R.string.no_network_error);
             }
         }
     }
@@ -145,7 +148,7 @@ public class LoginActivity extends AppCompatActivity  {
         String email = mEmailView.getText().toString();
         if (StringUtils.isNotEmpty(email)) {
             if (Network.isNetworkAvailable(this)) {
-                Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
+                showToast(R.string.please_wait);
                 PreferencesUtils settings = new PreferencesUtils(this);
                 final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
                 if (StringUtils.isNotEmpty(tokenStr)) {
@@ -171,14 +174,14 @@ public class LoginActivity extends AppCompatActivity  {
                                     }
                                 }
                                 if (StringUtils.equals(status, "ok")) {
-                                    Toast.makeText(LoginActivity.this, "Please check your email inbox for password reset instructions", Toast.LENGTH_LONG).show();
+                                    showToast(R.string.check_email_message);
                                 } else {
-                                    Toast.makeText(LoginActivity.this, R.string.internal_error, Toast.LENGTH_LONG).show();
+                                    showToast(R.string.internal_error);
                                 }
                             } else if (responseCode == 400) {
-                                Toast.makeText(LoginActivity.this, "Failed to reset password. Is your login valid?", Toast.LENGTH_LONG).show();
+                                showToast(R.string.failed_reset);
                             } else {
-                                Toast.makeText(LoginActivity.this, R.string.internal_error, Toast.LENGTH_LONG).show();
+                                showToast(R.string.internal_error);
                             }
                         }
                     });
@@ -191,21 +194,21 @@ public class LoginActivity extends AppCompatActivity  {
                                 if (StringUtils.isNotEmpty(Messenger.getToken(LoginActivity.this, results))) {
                                     resetPassword(v);
                                 } else {
-                                    Toast.makeText(LoginActivity.this, R.string.internal_error, Toast.LENGTH_LONG).show();
+                                    showToast(R.string.internal_error);
                                     Log.e(TAG, "Failed to parse token!");
                                 }
                             } else {
-                                Toast.makeText(LoginActivity.this, R.string.internal_error, Toast.LENGTH_LONG).show();
+                                showToast(R.string.internal_error);
                                 Log.d(TAG, "Failed to receive token: " + results);
                             }
                         }
                     });
                 }
             } else {
-                Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                showToast(R.string.no_network_error);
             }
         } else {
-            Toast.makeText(this, "Please enter your login", Toast.LENGTH_LONG).show();
+            showToast(R.string.enter_login);
         }
     }
 
@@ -240,7 +243,23 @@ public class LoginActivity extends AppCompatActivity  {
             });
     }
 
-    static class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    private void showToast(int resId) {
+        if (loginToast != null) {
+            loginToast.cancel();
+        }
+
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_container));
+        TextView toastText = layout.findViewById(R.id.toast_text);
+        toastText.setText(resId);
+
+        loginToast = new Toast(this);
+        loginToast.setDuration(Toast.LENGTH_LONG);
+        loginToast.setView(layout);
+        loginToast.show();
+    }
+
+    private static class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
         private final String mPassword;
@@ -273,15 +292,15 @@ public class LoginActivity extends AppCompatActivity  {
                                 try {
                                     String pwd = android.util.Base64.encodeToString(SCUtils.encrypt(mPassword.getBytes(), activity), android.util.Base64.NO_PADDING);
                                     createAccount(mEmail, pwd, gmsToken, activity);
-                                    Toast.makeText(activity, "Login successful!", Toast.LENGTH_LONG).show();
+                                    activity.showToast(R.string.login_successful);
                                     activity.finish();
                                 } catch (Exception e) {
                                     Log.e(TAG, "Unable to encrypt password", e);
-                                    Toast.makeText(activity, "Internal error. Click SIGN-IN button again.", Toast.LENGTH_LONG).show();
+                                    activity.showToast(R.string.sign_in_error);
                                 }
                             } else {
-                               Log.e(TAG, "Oops! Something went wrong. Token has been empty!");
-                               Toast.makeText(activity, "Internal error. Click SIGN-IN button again.", Toast.LENGTH_LONG).show();
+                                Log.e(TAG, "Oops! Something went wrong. Token has been empty!");
+                                activity.showToast(R.string.sign_in_error);
                             }
                         } else {
                             activity.mPasswordView.setError(activity.getString(R.string.error_incorrect_password));

@@ -81,12 +81,15 @@
 
     <!-- Pin Activity -->
     <string name="pin_link">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;/a>&lt;/font></string>
+    <string name="pin_enter_valid">Please enter valid PIN!</string>
+    <string name="pin_enter">Please enter PIN</string>
     <string name="pin_sent_ok">Security PIN has been sent to notifiers</string>
-    <string name="pin_invalid">Invalid PIN!</string>
+    <string name="pin_invalid">Invalid PIN entered!</string>
     <string name="pin_recover_ok">Please send this email message without modification and we will send you back your Security PIN</string>
     <string name="pin_recover_fail">Please first install email client on your device and try again!</string>
     <string name="pin_recover_mail_title">Security PIN from device %1$s recovery</string>
     <string name="pin_recover_mail_body">Please send me back Security PIN from device %1$s.\nRequest id: %2$s</string>
+    <string name="pin_invalid_entered">You\'ve entered 3 times invalid PIN!</string>
     <string name="fingerprint_invalid">Unrecognized fingerprint!</string>
 
     <!-- Command Activity -->
@@ -108,6 +111,13 @@
     <string name="title_activity_login">Sign in</string>
     <string name="reset_confirmation">This command will reset device to factory defaults and will wipe all data and applications from the device! Are you sure?</string>
     <string name="social_link">Send using Telegram Messenger</string>
+    <string name="enter_command_params">Please enter valid command parameters!</string>
+    <string name="no_device">No device selected!</string>
+    <string name="command_sent_to_device">Command %1$s has been sent to the device %2$s!</string>
+    <string name="command_failed_to_device">Failed to send command %1$s to the device %2$s!</string>
+    <string name="command_failed_device_gone">Failed to send command %2$s to the device %2$s! Is %3$s installed on this device?"</string>
+    <string name="command_failed_device_offline">It seems device %1$s has been offline recently. Retry if no reply soon!</string>
+    <string name="please_auth">Please authenticate before sending command</string>
 
     <!-- Login Activity -->
     <string name="error_invalid_email">This login is invalid</string>
@@ -124,6 +134,11 @@
     <string name="browser_button">Open in browser</string>
     <string name="resend_command">Send again</string>
     <string name="please_wait">Please wait…</string>
+    <string name="failed_reset">Failed to reset password. Is your login valid?</string>
+    <string name="sign_in_error">Oops! Something went wrong. Click SIGN-IN button again.</string>
+    <string name="check_email_message">Please check your email inbox for password reset instructions</string>
+    <string name="enter_login">Please enter your login</string>
+    <string name="login_successful">Login successful!</string>
 
     <!-- Permissions Activity -->
     <string name="title_activity_permissions">Permissions</string>
@@ -144,26 +159,28 @@
     <string name="Manifest_permission_READ_PHONE_STATE">Allow to read device IMEI number for device identification</string>
     <string name="Manifest_permission_WRITE_EXTERNAL_STORAGE">Allow saving camera pictures in device photo gallery</string>
     <string name="reset_permission">Allow Reset device to factory defaults command</string>
+
     <string name="forget_me">Forget me</string>
     <string name="send_code_again">Send code again</string>
     <string name="activation_code">Activation code</string>
     <string name="sms_notification_warning">&lt;font color="#808080">SMS notifications will be sent from this device. This could generate additional costs! Is this OK for you?&lt;/font></string>
     <string name="remove_device_message">&lt;font color="#808080">Remove device %1$s from the list?&lt;/font></string>
-    <string name="enter_pin">Please enter valid PIN!</string>
     <string name="telegram_hint">\@telegram_id or number id</string>
     <string name="email_notification_message">&lt;font color="#808080">Do you want to receive notifications to %1$s?&lt;/font></string>
 
     <string name="title_activity_ringing">Ringing Activity</string>
 
     <string name="route_share_text">Follow device %1$s at %2$s</string>
+
     <string name="command_log">Command Log</string>
     <string name="commandEmpty">No commands has been sent to this device yet!</string>
-    <string name="no_pin_saved">Unable to send command to the device %1$s because PIN is not saved!</string>
+
+    <string name="pin_not_saved">Unable to send command to the device %1$s because PIN is not saved!</string>
+
     <string name="settings_alarm">Periodically save location</string>
     <plurals name="alarm_interval">
         <item quantity="one">Device location will be saved in an interval of %d hour</item>
         <item quantity="other">Device location will be saved in an interval of %d hours</item>
     </plurals>
     <string name="alarm_settings_suffix">. Next %1$s</string>
-
 </resources>

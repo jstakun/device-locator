@@ -341,12 +341,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 newIntent.putExtra("args", "silent");
                                 startService(newIntent);
                             } else {
-                                Toast.makeText(MapsActivity.this, MapsActivity.this.getString(R.string.no_pin_saved, device.name), Toast.LENGTH_LONG).show();
+                                Toast.makeText(MapsActivity.this, MapsActivity.this.getString(R.string.pin_not_saved, device.name), Toast.LENGTH_LONG).show();
                             }
                         }
                     }
                 }
-
             }
         });
     }

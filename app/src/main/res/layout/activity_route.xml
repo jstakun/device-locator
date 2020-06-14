@@ -13,7 +13,7 @@
         android:id="@+id/shareRoute"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/mypos_share"
+        android:background="@drawable/mypos_shape"
         android:contentDescription="Locate all device"
         android:src="@drawable/ic_share_gray"
         android:layout_gravity="bottom|left"

@@ -830,8 +830,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
 
             public void onStopTrackingTouch(SeekBar seekBar) {
-                //Toast.makeText(MainActivity.this, "Radius has been set to " + progressChangedValue + " meters.", Toast.LENGTH_SHORT).show();
-                //minimal value is 10
                 if (progressChangedValue < MIN_RADIUS) {
                     progressChangedValue = MIN_RADIUS;
                 }
@@ -1588,7 +1586,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (!accountNames.isEmpty()) {
             showEmailNotificationDialogFragment(accountNames.toArray(new String[accountNames.size()]));
         } else {
-            Toast.makeText(MainActivity.this, "No email addresses are registered in this device. Please enter a new one!", Toast.LENGTH_LONG).show();
+            Toast.makeText(MainActivity.this, "No email addresses are registered on this device. Please enter a new one!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -2027,7 +2025,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     //newIntent.putExtra("args", "silent");
                     startService(newIntent);
                 } else {
-                    Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.no_pin_saved, device.name), Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.pin_not_saved, device.name), Toast.LENGTH_LONG).show();
                 }
                 if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext()) == ConnectionResult.SUCCESS) {
                     Intent mapIntent = new Intent(MainActivity.this, MapsActivity.class);

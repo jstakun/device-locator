@@ -6,6 +6,9 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import net.gmsworld.devicelocator.CommandActivity;
@@ -43,6 +46,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     private static final List<String> commandsInProgress = new ArrayList<>();
 
     private Handler toastHandler;
+
+    private Toast commandToast;
 
     public CommandService() {
         super(TAG);
@@ -87,7 +92,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
         if (PinActivity.isAuthRequired(prefs)) {
             Log.d(TAG, "User should authenticate again!");
-            showToast("Please authenticate before sending command");
+            showToast(R.string.please_auth);
             Intent authIntent = new Intent(this, PinActivity.class);
             authIntent.putExtras(extras);
             authIntent.setAction(AUTH_NEEDED);
@@ -152,7 +157,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 }
                 sendCommand(content, command, imei, name, prefs, deviceId);
             } else {
-                showToast("Command " + command + " has been sent to the device " + (StringUtils.isNotEmpty(name) ? name : imei) + "!");
+                showToast(R.string.command_sent_to_device, command, (StringUtils.isNotEmpty(name) ? name : imei));
             }
         }
     }
@@ -171,11 +176,11 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                     public void onGetFinish(String results, int responseCode, String url) {
                         final String deviceName = (StringUtils.isNotEmpty(name) ? name : imei);
                         if (responseCode == 200) {
-                            showToast("Command " + StringUtils.capitalize(command) + " has been sent to the device " + deviceName + "!");
+                            showToast(R.string.command_sent_to_device, StringUtils.capitalize(command), deviceName);
                         } else if (responseCode == 404) {
-                            showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + ". Is " + CommandService.this.getString(R.string.app_name) + " installed on this device?");
+                            showToast(R.string.command_failed_device_gone, StringUtils.capitalize(command), deviceName, CommandService.this.getString(R.string.app_name));
                         } else if (responseCode == 410) {
-                            showToast("It seems device " + deviceName + " has been offline recently. Retry if no reply soon!");
+                            showToast(R.string.command_failed_device_offline,deviceName);
                         } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
                             //show dialog with action=reset_quota appended to queryString
                             //JsonElement reply = new JsonParser().parse(results);
@@ -189,7 +194,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                             newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(newIntent);
                         } else {
-                            showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + "!");
+                            showToast(R.string.command_failed_to_device, StringUtils.capitalize(command), deviceName);
                         }
                         commandsInProgress.remove(imei + "_" + command);
                     }
@@ -214,20 +219,23 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         }
     }
 
-    private void showToast(final String message) {
+    private void showToast(final int messageId, final Object... args) {
         toastHandler.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
-            }
-        });
-    }
+                if (commandToast != null) {
+                    commandToast.cancel();
+                }
 
-    private void showToast(final int messageId) {
-        toastHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(), messageId, Toast.LENGTH_LONG).show();
+                LayoutInflater inflater = LayoutInflater.from(CommandService.this);
+                View layout = inflater.inflate(R.layout.toast_layout, null);
+                TextView toastText = layout.findViewById(R.id.toast_text);
+                toastText.setText(getString(messageId, args));
+
+                commandToast = new Toast(CommandService.this);
+                commandToast.setDuration(Toast.LENGTH_LONG);
+                commandToast.setView(layout);
+                commandToast.show();
             }
         });
     }

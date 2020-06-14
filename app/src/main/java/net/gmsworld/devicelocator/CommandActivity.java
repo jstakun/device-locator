@@ -8,7 +8,9 @@ import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -47,6 +49,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
     private static final String TAG = CommandActivity.class.getSimpleName();
 
     public static final String PIN_PREFIX = "pin_";
+    private Toast commandToast;
 
     private FirebaseAnalytics firebaseAnalytics;
     private Device device;
@@ -62,7 +65,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         final List<Device> devices = getIntent().getParcelableArrayListExtra("devices");
 
         if (devices == null || devices.isEmpty()) {
-            Toast.makeText(this, R.string.crash_error, Toast.LENGTH_LONG).show();
+            showToast(R.string.crash_error);
             return;
         }
 
@@ -228,10 +231,10 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
     private boolean isValidCommand(String pin, String command, String commandArgs) {
         if (pin.length() == 0) {
-            Toast.makeText(CommandActivity.this, "Please enter PIN!", Toast.LENGTH_SHORT).show();
+            showToast(R.string.pin_enter);
             return false;
         } else if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
-            Toast.makeText(CommandActivity.this,"Please enter valid PIN!", Toast.LENGTH_SHORT).show();
+            showToast(R.string.pin_enter_valid);
             return false;
         } else if (StringUtils.isNotEmpty(device.name) || StringUtils.isNotEmpty(device.imei)) {
             //check if command requires args and validate args
@@ -241,13 +244,13 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                     c.setCommandTokens(StringUtils.split(command + " " + commandArgs, " "));
                 }
                 if (c.hasParameters() && !c.validateTokens()) {
-                    Toast.makeText(CommandActivity.this,"Please provide valid command parameters!", Toast.LENGTH_SHORT).show();
+                    showToast(R.string.enter_command_params);
                     return false;
                 }
             }
             return true;
         } else {
-            Toast.makeText(this, "No device selected!", Toast.LENGTH_LONG).show();
+            showToast(R.string.no_device);
             return false;
         }
     }
@@ -281,13 +284,13 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                     sendCommand(command, newIntent);
                 }
             } else {
-                Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+                showToast(R.string.no_network_error);
             }
         }
     }
 
     public void sendCommand(String command, Intent intent) {
-        Toast.makeText(CommandActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
+        showToast(R.string.please_wait);
         firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
         startService(intent);
     }
@@ -308,5 +311,21 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 }
             }
         }
+    }
+
+    private void showToast(int resId) {
+        if (commandToast != null) {
+            commandToast.cancel();
+        }
+
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_container));
+        TextView toastText = layout.findViewById(R.id.toast_text);
+        toastText.setText(resId);
+
+        commandToast = new Toast(this);
+        commandToast.setDuration(Toast.LENGTH_LONG);
+        commandToast.setView(layout);
+        commandToast.show();
     }
 }
