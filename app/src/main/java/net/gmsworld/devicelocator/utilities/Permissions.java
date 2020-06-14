@@ -22,52 +22,16 @@ import androidx.core.content.ContextCompat;
 public class Permissions {
 
     public static final int PERMISSIONS_REQUEST_GET_ACCOUNTS = 1001;
-
     public static final int PERMISSIONS_REQUEST_SMS_CONTROL = 1002;
-
     public static final int PERMISSIONS_REQUEST_TRACKER_CONTROL = 1003;
-
     public static final int PERMISSIONS_REQUEST_CONTACTS = 1004;
-
     public static final int PERMISSIONS_REQUEST_CALL = 1005;
-
     public static final int PERMISSIONS_WRITE_STORAGE = 1006;
-
     public static final int PERMISSIONS_REQUEST_ALARM_CONTROL = 1007;
-
     public static final int PERMISSIONS_REQUEST_GET_EMAIL = 1008;
-
     public static final int PERMISSIONS_LOCATION = 1009;
 
     private static final String TAG = Permissions.class.getSimpleName();
-
-    /*public static void checkAndRequestPermissionsAtStartup(Activity activity) {
-        ArrayList<String> permissions = new ArrayList<>();
-        permissions.add(0, Manifest.permission.SEND_SMS);
-        permissions.add(1, Manifest.permission.ACCESS_FINE_LOCATION);
-        permissions.add(2, Manifest.permission.READ_CONTACTS);
-        permissions.add(3, Manifest.permission.READ_PHONE_STATE);
-        permissions.add(4, Manifest.permission.MODIFY_AUDIO_SETTINGS);
-        permissions.add(5, Manifest.permission.CALL_PHONE);
-        permissions.add(6, Manifest.permission.BIND_DEVICE_ADMIN);
-        permissions.add(7, Manifest.permission.GET_ACCOUNTS);
-
-        ArrayList<String> neededPermissions = new ArrayList<>();
-        for (int i = 0; i < permissions.size(); i++) {
-            if (ContextCompat.checkSelfPermission(activity, permissions.get(i)) != PackageManager.PERMISSION_GRANTED) {
-                neededPermissions.add(permissions.get(i));
-            }
-        }
-
-        if(neededPermissions.size() == 0) {
-            return;
-        }
-
-        String[] arr = new String[neededPermissions.size()];
-        arr = neededPermissions.toArray(arr);
-
-        ActivityCompat.requestPermissions(activity, arr, 1);
-    }*/
 
     public static void requestSendSMSAndLocationPermission(Activity activity, int requestCode) {
         try {

@@ -15,15 +15,12 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.services.CommandService;
@@ -34,6 +31,7 @@ import net.gmsworld.devicelocator.utilities.FingerprintHelper;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +46,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
     private static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
     public static final String DEVICE_PIN = "token";
 
-    private Toast pinToast;
+    private Toaster toaster;
 
     private FingerprintHelper fingerprintHelper;
     private PreferencesUtils settings;
@@ -67,6 +65,8 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         }
 
         settings = new PreferencesUtils(this);
+
+        toaster = new Toaster(this);
 
         //fingerprint authentication
 
@@ -119,7 +119,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    showToast(R.string.pin_invalid);
+                    toaster.showActivityToast(R.string.pin_invalid);
                     tokenInput.setText("");
                 }
                 return false;
@@ -133,7 +133,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             public void onLinkClick(String url) {
                 if (Network.isNetworkAvailable(PinActivity.this)) {
                     if (SmsSenderService.initService(PinActivity.this, true, true, true, null, Command.PIN_COMMAND, null, null, null)) {
-                        showToast(R.string.pin_sent_ok);
+                        toaster.showActivityToast(R.string.pin_sent_ok);
                     } else {
                         //1. send pin to app admin
                         final String secret = RandomStringUtils.random(16, true, true);
@@ -144,13 +144,13 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                         //2. send email to app admin
                         final String deviceName = Messenger.getDeviceId(PinActivity.this, true);
                         if (Messenger.composeEmail(PinActivity.this, new String[]{getString(R.string.app_email)}, getString(R.string.pin_recover_mail_title, deviceName), getString(R.string.pin_recover_mail_body, deviceName, secret), false)) {
-                            showToast(R.string.pin_recover_ok);
+                            toaster.showActivityToast(R.string.pin_recover_ok);
                         } else {
-                            showToast(R.string.pin_recover_fail);
+                            toaster.showActivityToast(R.string.pin_recover_fail);
                         }
                     }
                 } else {
-                    showToast(R.string.no_network_error);
+                    toaster.showActivityToast(R.string.no_network_error);
                 }
             }
         });
@@ -188,9 +188,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
         }
 
-        if (pinToast != null) {
-            pinToast.cancel();
-        }
+        toaster.cancel();
 
         if (StringUtils.equals(action, CommandService.AUTH_NEEDED)) {
             Intent intent = new Intent(this, CommandService.class);
@@ -221,9 +219,9 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             failedFingerprint++;
             if (failedFingerprint == 3) {
                 findViewById(R.id.deviceFingerprintCard).setVisibility(View.GONE);
-                showToast(R.string.pin_enter_valid);
+                toaster.showActivityToast(R.string.pin_enter_valid);
             } else {
-                showToast(R.string.fingerprint_invalid);
+                toaster.showActivityToast(R.string.fingerprint_invalid);
             }
         }
         if (pinFailedCount == 3) {
@@ -231,7 +229,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             //send failed login notification
             Log.d(TAG, "Invalid pin has been entered to unlock the app. SENDING NOTIFICATION!");
             SmsSenderService.initService(PinActivity.this, true, true, true, null, null, null, DeviceAdminEventReceiver.SOURCE, null);
-            showToast(R.string.pin_invalid_entered);
+            toaster.showActivityToast(R.string.pin_invalid_entered);
             if (settings.getBoolean(HiddenCaptureImageService.STATUS, false) && HiddenCaptureImageService.isNotBusy()) {
                 Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
                 startService(cameraIntent);
@@ -240,22 +238,6 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             }
         }
         settings.setInt("pinFailedCount", pinFailedCount + 1);
-    }
-
-    private void showToast(int resId) {
-        if (pinToast != null) {
-            pinToast.cancel();
-        }
-
-        LayoutInflater inflater = getLayoutInflater();
-        View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_container));
-        TextView toastText = layout.findViewById(R.id.toast_text);
-        toastText.setText(resId);
-
-        pinToast = new Toast(this);
-        pinToast.setDuration(Toast.LENGTH_LONG);
-        pinToast.setView(layout);
-        pinToast.show();
     }
 
     private abstract class TextViewLinkHandler extends LinkMovementMethod {

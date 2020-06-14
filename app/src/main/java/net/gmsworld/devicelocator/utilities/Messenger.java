@@ -1036,7 +1036,7 @@ public class Messenger {
                                 Activity activity = (Activity)context;
                                 if (!activity.isFinishing()) {
                                     try {
-                                        NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                                        NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, new Toaster(activity));
                                         notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                     } catch (Exception e) {
                                         Log.e(TAG, e.getMessage(), e);
@@ -1130,7 +1130,7 @@ public class Messenger {
                                     Activity activity = (Activity) context;
                                     if (!activity.isFinishing()) {
                                         try {
-                                            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
+                                            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, new Toaster(activity));
                                             notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                         } catch (Exception e) {
                                             Log.e(TAG, e.getMessage(), e);

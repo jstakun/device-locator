@@ -40,7 +40,6 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "DlFirebaseMsgService";
 
     public static final String FIREBASE_TOKEN = "firebaseToken";
-
     public static final String NEW_FIREBASE_TOKEN = "newFirebaseToken";
 
     private FirebaseAnalytics firebaseAnalytics;

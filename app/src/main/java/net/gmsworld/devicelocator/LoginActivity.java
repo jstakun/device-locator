@@ -12,15 +12,12 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -30,6 +27,7 @@ import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.utilities.SCUtils;
+import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.lang3.StringUtils;
 import org.spongycastle.util.encoders.Base64;
@@ -51,7 +49,7 @@ public class LoginActivity extends AppCompatActivity  {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-    private Toast loginToast;
+    private Toaster toaster;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +89,8 @@ public class LoginActivity extends AppCompatActivity  {
 
         TextView reset = findViewById(R.id.reset);
         reset.setText(Html.fromHtml(getString(R.string.resetLink)));
+
+        toaster = new Toaster(this);
     }
 
     private void attemptLogin() {
@@ -139,7 +139,7 @@ public class LoginActivity extends AppCompatActivity  {
                 mAuthTask = new UserLoginTask(email, password, this);
                 mAuthTask.execute((Void) null);
             } else {
-                showToast(R.string.no_network_error);
+                toaster.showActivityToast(R.string.no_network_error);
             }
         }
     }
@@ -148,7 +148,7 @@ public class LoginActivity extends AppCompatActivity  {
         String email = mEmailView.getText().toString();
         if (StringUtils.isNotEmpty(email)) {
             if (Network.isNetworkAvailable(this)) {
-                showToast(R.string.please_wait);
+                toaster.showActivityToast(R.string.please_wait);
                 PreferencesUtils settings = new PreferencesUtils(this);
                 final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
                 if (StringUtils.isNotEmpty(tokenStr)) {
@@ -174,14 +174,14 @@ public class LoginActivity extends AppCompatActivity  {
                                     }
                                 }
                                 if (StringUtils.equals(status, "ok")) {
-                                    showToast(R.string.check_email_message);
+                                    toaster.showActivityToast(R.string.check_email_message);
                                 } else {
-                                    showToast(R.string.internal_error);
+                                    toaster.showActivityToast(R.string.internal_error);
                                 }
                             } else if (responseCode == 400) {
-                                showToast(R.string.failed_reset);
+                                toaster.showActivityToast(R.string.failed_reset);
                             } else {
-                                showToast(R.string.internal_error);
+                                toaster.showActivityToast(R.string.internal_error);
                             }
                         }
                     });
@@ -194,21 +194,21 @@ public class LoginActivity extends AppCompatActivity  {
                                 if (StringUtils.isNotEmpty(Messenger.getToken(LoginActivity.this, results))) {
                                     resetPassword(v);
                                 } else {
-                                    showToast(R.string.internal_error);
+                                    toaster.showActivityToast(R.string.internal_error);
                                     Log.e(TAG, "Failed to parse token!");
                                 }
                             } else {
-                                showToast(R.string.internal_error);
+                                toaster.showActivityToast(R.string.internal_error);
                                 Log.d(TAG, "Failed to receive token: " + results);
                             }
                         }
                     });
                 }
             } else {
-                showToast(R.string.no_network_error);
+                toaster.showActivityToast(R.string.no_network_error);
             }
         } else {
-            showToast(R.string.enter_login);
+            toaster.showActivityToast(R.string.enter_login);
         }
     }
 
@@ -241,22 +241,6 @@ public class LoginActivity extends AppCompatActivity  {
                 public void onAnimationEnd(Animator animation) {
                     mProgressView.setVisibility(show ? View.VISIBLE : View.GONE); }
             });
-    }
-
-    private void showToast(int resId) {
-        if (loginToast != null) {
-            loginToast.cancel();
-        }
-
-        LayoutInflater inflater = getLayoutInflater();
-        View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_container));
-        TextView toastText = layout.findViewById(R.id.toast_text);
-        toastText.setText(resId);
-
-        loginToast = new Toast(this);
-        loginToast.setDuration(Toast.LENGTH_LONG);
-        loginToast.setView(layout);
-        loginToast.show();
     }
 
     private static class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
@@ -292,15 +276,15 @@ public class LoginActivity extends AppCompatActivity  {
                                 try {
                                     String pwd = android.util.Base64.encodeToString(SCUtils.encrypt(mPassword.getBytes(), activity), android.util.Base64.NO_PADDING);
                                     createAccount(mEmail, pwd, gmsToken, activity);
-                                    activity.showToast(R.string.login_successful);
+                                    activity.toaster.showActivityToast(R.string.login_successful);
                                     activity.finish();
                                 } catch (Exception e) {
                                     Log.e(TAG, "Unable to encrypt password", e);
-                                    activity.showToast(R.string.sign_in_error);
+                                    activity.toaster.showActivityToast(R.string.sign_in_error);
                                 }
                             } else {
                                 Log.e(TAG, "Oops! Something went wrong. Token has been empty!");
-                                activity.showToast(R.string.sign_in_error);
+                                activity.toaster.showActivityToast(R.string.sign_in_error);
                             }
                         } else {
                             activity.mPasswordView.setError(activity.getString(R.string.error_incorrect_password));

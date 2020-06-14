@@ -12,7 +12,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,6 +33,7 @@ import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.lang3.StringUtils;
 import org.ocpsoft.prettytime.PrettyTime;
@@ -56,18 +56,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private PreferencesUtils settings;
 
     private ArrayList<Device> devices;
-
     private String deviceImei = null;
-
     private String thisDeviceImei = null;
-
     private long devicesTimestamp = -1;
-
     private float currentZoom = -1f;
-
     private final PrettyTime pt = new PrettyTime();
-
     private Location bestLocation;
+    private Toaster toaster;
 
     private final Handler handler = new Handler();
 
@@ -99,9 +94,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         settings = new PreferencesUtils(this);
-
+        toaster = new Toaster(this);
         thisDeviceImei = Messenger.getDeviceId(this, false);
-
         deviceImei = getIntent().getStringExtra("imei");
     }
 
@@ -327,7 +321,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onClick(View view) {
 
                 if (devices != null && devices.size() > 1) {
-                    Toast.makeText(MapsActivity.this, R.string.please_wait, Toast.LENGTH_LONG).show();
+                    toaster.showActivityToast(R.string.please_wait);
                     for (Device device : devices) {
                         if (!StringUtils.equals(device.imei, thisDeviceImei)) {
                             if (settings.contains(CommandActivity.PIN_PREFIX + device.imei)) {
@@ -341,7 +335,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 newIntent.putExtra("args", "silent");
                                 startService(newIntent);
                             } else {
-                                Toast.makeText(MapsActivity.this, MapsActivity.this.getString(R.string.pin_not_saved, device.name), Toast.LENGTH_LONG).show();
+                                toaster.showActivityToast(MapsActivity.this.getString(R.string.pin_not_saved, device.name));
                             }
                         }
                     }

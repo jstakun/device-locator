@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
@@ -19,6 +18,7 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -36,14 +36,17 @@ public class NotificationActivationDialogFragment extends DialogFragment {
 
     public static final String TAG = "NotificationActivationDialog";
 
+    private Toaster toaster;
+
     //default mode is Email
     private Mode mode = Mode.Email;
 
-    public static NotificationActivationDialogFragment newInstance(Mode mode) {
+    public static NotificationActivationDialogFragment newInstance(Mode mode, Toaster toaster) {
         NotificationActivationDialogFragment frag = new NotificationActivationDialogFragment();
         if (mode != null) {
             frag.mode = mode;
         }
+        frag.toaster = toaster;
         return frag;
     }
 
@@ -89,7 +92,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                         String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
                         Map<String, String> headers = new HashMap<>();
                         headers.put("Authorization", "Bearer " + tokenStr);
-                        Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_LONG).show();
+                        toaster.showActivityToast(R.string.please_wait);
                         final String verifyUrl = getActivity().getString(R.string.verifyUrl) + "/" + secret;
                         final Context context = getActivity();
                         Network.get(context, verifyUrl, headers, new Network.OnGetFinishListener() {
@@ -97,26 +100,26 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                             public void onGetFinish(String results, int responseCode, String url) {
                                 if (responseCode == 200) {
                                     if (mode == Mode.Telegram) {
-                                        Toast.makeText(context, "Your Telegram chat or channel has been verified.", Toast.LENGTH_LONG).show();
+                                        toaster.showActivityToast("Your Telegram chat or channel has been verified.");
                                         settings.setString(MainActivity.SOCIAL_REGISTRATION_STATUS, "verified");
                                         settings.remove(TELEGRAM_SECRET, TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT);
                                     } else {
-                                        Toast.makeText(context, "Your email address has been verified.", Toast.LENGTH_LONG).show();
+                                        toaster.showActivityToast("Your email address has been verified.");
                                         settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, "verified");
                                         settings.remove(EMAIL_SECRET);
                                     }
                                 } else {
                                     if (mode == Mode.Telegram) {
-                                        Toast.makeText(context, "Failed to verify Telegram chat or channel! Please try again in a few moments.", Toast.LENGTH_SHORT).show();
+                                        toaster.showActivityToast("Failed to verify Telegram chat or channel! Please try again in a few moments.");
                                     } else {
-                                        Toast.makeText(context, "Failed to verify email address! Please try again in a few moments.", Toast.LENGTH_SHORT).show();
+                                        toaster.showActivityToast("Failed to verify email address! Please try again in a few moments.");
                                     }
                                 }
                             }
                         });
                         NotificationActivationDialogFragment.this.dismiss();
                     } else {
-                        Toast.makeText(getActivity(), "No network available. Failed to verify!", Toast.LENGTH_SHORT).show();
+                        toaster.showActivityToast("No network available. Failed to verify!");
                     }
                 }
             }
@@ -136,20 +139,20 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                             final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
                             if (StringUtils.isNotEmpty(telegramId)) {
                                 Messenger.sendTelegramRegistrationRequest(getActivity(), telegramId, 1);
-                                Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_LONG).show();
+                                toaster.showActivityToast(R.string.please_wait);
                                 NotificationActivationDialogFragment.this.dismiss();
                             } else {
-                                Toast.makeText(getActivity(), "Failed to send Telegram channel or chat registration request!", Toast.LENGTH_SHORT).show();
+                                toaster.showActivityToast("Failed to send Telegram channel or chat registration request!");
                             }
                         } else {
                             //send registration email again
                             final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
                             if (StringUtils.isNotEmpty(email)) {
                                 Messenger.sendEmailRegistrationRequest(getActivity(), email, true, 1);
-                                Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_LONG).show();
+                                toaster.showActivityToast(R.string.please_wait);
                                 NotificationActivationDialogFragment.this.dismiss();
                             } else {
-                                Toast.makeText(getActivity(), "Failed to send email registration request!", Toast.LENGTH_SHORT).show();
+                                toaster.showActivityToast("Failed to send email registration request!");
                             }
                         }
                     }

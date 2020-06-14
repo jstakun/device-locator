@@ -12,7 +12,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Switch;
-import android.widget.Toast;
 
 import com.androidhiddencamera.HiddenCameraUtils;
 
@@ -27,6 +26,7 @@ import net.gmsworld.devicelocator.utilities.FingerprintHelper;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,12 +46,14 @@ public class PermissionsActivity extends AppCompatActivity {
     private static final int RESET_PERMISSION = 6;
 
     private PreferencesUtils settings;
+    private Toaster toaster;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_permissions);
         settings = new PreferencesUtils(this);
+        toaster = new Toaster(this);
 
         final Toolbar toolbar = findViewById(R.id.smsToolbar);
         setSupportActionBar(toolbar);
@@ -70,7 +72,7 @@ public class PermissionsActivity extends AppCompatActivity {
         if (requestCode == DEVICE_ADMIN && resultCode == RESULT_OK) {
             Log.d(TAG, "Device Admin callback");
             if (StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_EMAIL)) && StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_SOCIAL)) && StringUtils.isEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
-                Toast.makeText(this, R.string.notifiers_missing, Toast.LENGTH_LONG).show();
+                toaster.showActivityToast(R.string.notifiers_missing);
                 Intent mainIntent = new Intent(this, MainActivity.class);
                 mainIntent.setAction(MainActivity.ACTION_DEVICE_TRACKER_NOTIFICATION);
                 startActivity(mainIntent);
@@ -82,7 +84,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 onCameraPermissionChecked(true);
             }
         } else if ((requestCode == DEVICE_ADMIN || requestCode == RESET_PERMISSION) && resultCode == RESULT_CANCELED) {
-            Toast.makeText(this, "Select checkbox next to " + getString(R.string.app_name), Toast.LENGTH_LONG).show();
+            toaster.showActivityToast("Select checkbox next to " + getString(R.string.app_name));
             Permissions.startDeviceAdminIntent(this);
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -285,14 +287,14 @@ public class PermissionsActivity extends AppCompatActivity {
                 try {
                     Permissions.startManageOverlayIntent(this, 0);
                 } catch (Exception e) {
-                    Toast.makeText(this, "This permission is enabled by default on your device.", Toast.LENGTH_LONG).show();
+                    toaster.showActivityToast("This permission is enabled by default on your device.");
                 }
                 break;
             case R.id.notification_policy_access_permission:
                 try {
                     Permissions.startNotificationPolicyAccessIntent(this);
                 } catch (Exception e) {
-                    Toast.makeText(this, "This permission is enabled by default on your device.", Toast.LENGTH_LONG).show();
+                    toaster.showActivityToast( "This permission is enabled by default on your device.");
                 }
                 break;
             case R.id.access_fine_location_permission:
@@ -328,7 +330,7 @@ public class PermissionsActivity extends AppCompatActivity {
                     } else if (!checked && fingerprintManager != null && fingerprintManager.isHardwareDetected() && Permissions.haveFingerprintPermission(this)) {
                         Permissions.startSettingsIntent(this, "Biometric");
                     } else if (fingerprintManager == null || !fingerprintManager.isHardwareDetected()) {
-                        Toast.makeText(this, "Your device has no fingerprint reader!", Toast.LENGTH_LONG).show();
+                        toaster.showActivityToast("Your device has no fingerprint reader!");
                     }
                 }
                 break;
@@ -365,7 +367,7 @@ public class PermissionsActivity extends AppCompatActivity {
             case R.id.settings_sms_without_pin:
                 settings.setBoolean("settings_sms_without_pin", checked);
                 if (!checked) {
-                    Toast.makeText(this, "Be careful. From now on Security PIN is not required to send command to your device!", Toast.LENGTH_LONG).show();
+                    toaster.showActivityToast( "Be careful. From now on Security PIN is not required to send command to your device!");
                 }
                 break;
             case R.id.write_storage_permission:
@@ -383,7 +385,7 @@ public class PermissionsActivity extends AppCompatActivity {
         if (checked) {
             Log.d(TAG, "Camera is currently off");
             if (!HiddenCameraUtils.canOverDrawOtherApps(this)) {
-                Toast.makeText(this, "In order to use Camera please first grant drawing over other applications permission.", Toast.LENGTH_LONG).show();
+                toaster.showActivityToast( "In order to use Camera please first grant drawing over other applications permission.");
                 Permissions.startManageOverlayIntent(this, MANAGE_OVERLAY_WITH_CAMERA);
             } else if (Permissions.haveCameraPermission(this)) {
                 startCameraTest();
@@ -397,7 +399,7 @@ public class PermissionsActivity extends AppCompatActivity {
     }
 
     private void startCameraTest() {
-        Toast.makeText(this, "Please wait. I'm checking your camera now...", Toast.LENGTH_LONG).show();
+        toaster.showActivityToast( "Please wait. I'm checking your camera now...");
         Intent cameraIntent = new Intent(this, HiddenCaptureImageService.class);
         cameraIntent.putExtra("test", true);
         startService(cameraIntent);

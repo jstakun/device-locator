@@ -73,10 +73,10 @@ public class CommandListActivity extends AppCompatActivity {
                     } else {
                         message = "Command " + tokens[2];
                     }
-                    message += " has been sent from " + deviceName + "\n" + pt.format(new Date(timestamp));
+                    message += " has been received from " + deviceName + "\n" + pt.format(new Date(timestamp));
                     values.add(message);
                 } else {
-                    final String message = "Command " + tokens[1] + "\n" + "has been sent from unknown device\n" + pt.format(new Date(timestamp));
+                    final String message = "Command " + tokens[1] + "\n" + "has been received from unknown device\n" + pt.format(new Date(timestamp));
                     values.add(message);
                     positions.add(-1);
                 }

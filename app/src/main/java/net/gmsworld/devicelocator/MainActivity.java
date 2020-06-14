@@ -49,7 +49,6 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -86,6 +85,7 @@ import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.utilities.RouteTrackingServiceUtils;
+import net.gmsworld.devicelocator.utilities.Toaster;
 import net.gmsworld.devicelocator.views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private final PrettyTime pt = new PrettyTime();
     private BroadcastReceiver onDownloadComplete = null;
 
-    private Toast mainToast;
+    private Toaster toaster;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +154,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         Log.d(TAG, "onCreate()");
 
         settings = new PreferencesUtils(this);
+
+        toaster = new Toaster(this);
 
         setContentView(R.layout.activity_main);
 
@@ -292,11 +294,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (settings.getBoolean("isTrackerShown", false)) {
             //show email or telegram registration dialog if still unverified
             if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
+                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, toaster);
                 notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
             }
             if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
-                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, toaster);
                 notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
             }
         }
@@ -336,7 +338,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 phoneNumberInput.setText(newPhoneNumber);
                 registerPhoneNumber(phoneNumberInput);
             } else {
-                showToast("If you want to start receiving sms notifications please select phone number from contacts list");
+                toaster.showActivityToast("If you want to start receiving sms notifications please select phone number from contacts list");
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -375,11 +377,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 showFirstTimeUsageDialog(true, false);
                 //show email or telegram registration dialog if still unverified
                 if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email);
+                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, toaster);
                     notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
                 }
                 if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
-                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, toaster);
                     notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
                 }
                 return true;
@@ -445,14 +447,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (Permissions.haveSendSMSPermission(this)) {
                     toggleRunning();
                 } else {
-                    showToast(R.string.send_sms_permission);
+                    toaster.showActivityToast(R.string.send_sms_permission);
                 }
                 break;
             case Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL:
                 if (Permissions.haveLocationPermission(this)) {
                     toggleMotionDetectorRunning();
                 } else {
-                    showToast(R.string.send_location_permission);
+                    toaster.showActivityToast(R.string.send_location_permission);
                 }
                 break;
             case Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL:
@@ -463,12 +465,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     extras.putString("telegramId", getString(R.string.telegram_notification));
                     SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
                 } else {
-                    showToast(R.string.send_location_permission);
+                    toaster.showActivityToast(R.string.send_location_permission);
                 }
                 break;
             case Permissions.PERMISSIONS_REQUEST_CALL:
                 if (!Permissions.haveCallPhonePermission(this)) {
-                    showToast("Call command won't work without this permission!");
+                    toaster.showActivityToast("Call command won't work without this permission!");
                 }
                 break;
             case Permissions.PERMISSIONS_REQUEST_CONTACTS:
@@ -581,9 +583,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             case R.id.settings_verify_pin:
                 settings.setBoolean("settings_verify_pin", checked);
                 if (checked && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email) && StringUtils.isNotEmpty(phoneNumber)) {
-                    showToast("Please remember your Security PIN and configure Notification settings in order to be able to recover forgotten Security PIN.");
+                    toaster.showActivityToast("Please remember your Security PIN and configure Notification settings in order to be able to recover forgotten Security PIN.");
                 } else if (checked) {
-                    showToast( "Please remember your Security PIN");
+                    toaster.showActivityToast( "Please remember your Security PIN");
                 }
                 break;
             case R.id.settings_alarm:
@@ -686,7 +688,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         //check if location settings are enabled
         if (running && !GmsSmartLocationManager.isLocationEnabled(this)) {
             startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-            showToast("Please enable location services in order to receive device location updates!");
+            toaster.showActivityToast("Please enable location services in order to receive device location updates!");
         }
 
         if (running) {
@@ -721,7 +723,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             launchMotionDetectorService();
             //check if location service is enabled
             if (!GmsSmartLocationManager.isLocationEnabled(this)) {
-                showToast("Please enable location services in order to receive device location updates!");
+                toaster.showActivityToast("Please enable location services in order to receive device location updates!");
                 startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
             }
         } else {
@@ -781,7 +783,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
                     if (v.getText().length() < PinActivity.PIN_MIN_LENGTH) {
-                        showToast(R.string.pin_length_error);
+                        toaster.showActivityToast(R.string.pin_length_error);
                         v.setText(pin);
                     }
                 }
@@ -798,7 +800,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         case KeyEvent.KEYCODE_BACK:
                             TextView tokenInput = (TextView) v;
                             if (tokenInput.getText().length() < PinActivity.PIN_MIN_LENGTH) {
-                                showToast(R.string.pin_length_error);
+                                toaster.showActivityToast(R.string.pin_length_error);
                                 tokenInput.setText(pin);
                             }
                             break;
@@ -983,7 +985,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
             if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && !silent) {
                 if (requestPermission) {
-                    showToast("Please grant this permission to list accounts registered on this device");
+                    toaster.showActivityToast("Please grant this permission to list accounts registered on this device");
                     Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
                 } else {
                     LoginDialogFragment.newInstance().show(getFragmentManager(), LoginDialogFragment.TAG);
@@ -1006,11 +1008,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
             if (!DlFirebaseMessagingService.sendRegistrationToServer(this, newUserLogin, deviceName, false)) {
                 if (!silent) {
-                    showToast("Your device can't be registered at the moment!");
+                    toaster.showActivityToast("Your device can't be registered at the moment!");
                 }
             } else {
                 if (!silent) {
-                    showToast(R.string.devices_list_loading);
+                    toaster.showActivityToast(R.string.devices_list_loading);
                     if (!Permissions.haveLocationPermission(this)) {
                         Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
                     }
@@ -1080,14 +1082,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     settings.setString(DEVICE_NAME, normalizedDeviceName);
                 }
                 if (!silent) {
-                    showToast(R.string.devices_list_loading);
+                    toaster.showActivityToast(R.string.devices_list_loading);
                     if (!Permissions.haveLocationPermission(this)) {
                         Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
                     }
                 }
             } else {
                 if (!silent) {
-                    showToast("Your device can't be registered at the moment!");
+                    toaster.showActivityToast("Your device can't be registered at the moment!");
                 }
             }
         }
@@ -1115,7 +1117,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     String pasteData = item.getText().toString();
                                     if (!StringUtils.equals(pasteData, email) && Patterns.EMAIL_ADDRESS.matcher(pasteData).matches()) {
                                         emailInput.setText(pasteData);
-                                        showToast("Pasted email address from clipboard!");
+                                        toaster.showActivityToast("Pasted email address from clipboard!");
                                         break;
                                     }
                                 }
@@ -1172,18 +1174,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
 
                 if (StringUtils.isNotEmpty(email)) {
-                    showToast( "Email verification in progress...");
+                    toaster.showActivityToast( "Email verification in progress...");
                     Messenger.sendEmailRegistrationRequest(MainActivity.this, email, validate, 1);
                 } else {
                     settings.remove(MainActivity.EMAIL_REGISTRATION_STATUS, NotificationActivationDialogFragment.EMAIL_SECRET);
-                    showToast("No email notifications will be sent...");
+                    toaster.showActivityToast("No email notifications will be sent...");
                 }
             } else {
-                showToast(R.string.no_network_error);
+                toaster.showActivityToast(R.string.no_network_error);
                 emailInput.setText("");
             }
         } else if (!StringUtils.equals(email, newEmailAddress)) {
-            showToast("Please enter valid email address!");
+            toaster.showActivityToast("Please enter valid email address!");
             emailInput.setText("");
         }
     }
@@ -1249,18 +1251,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
 
                 if (StringUtils.isNotEmpty(telegramId)) {
-                    showToast( "Telegram verification in progress...");
+                    toaster.showActivityToast( "Telegram verification in progress...");
                     Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
                 } else {
                     settings.remove(MainActivity.SOCIAL_REGISTRATION_STATUS, NotificationActivationDialogFragment.TELEGRAM_SECRET);
-                    showToast("No Telegram notifications will be sent...");
+                    toaster.showActivityToast("No Telegram notifications will be sent...");
                 }
             } else {
-                showToast(R.string.no_network_error);
+                toaster.showActivityToast(R.string.no_network_error);
                 telegramInput.setText("");
             }
         } else if (!StringUtils.equals(telegramId, newTelegramId)) {
-            showToast("Make sure to specify valid Telegram chat id!");
+            toaster.showActivityToast("Make sure to specify valid Telegram chat id!");
             telegramInput.setText("");
         }
     }
@@ -1319,7 +1321,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
             if (!Permissions.haveSendSMSPermission(this)) {
                 Permissions.requestSendSMSAndLocationPermission(this, 0);
-                showToast(R.string.send_sms_permission);
+                toaster.showActivityToast(R.string.send_sms_permission);
             } else if (StringUtils.isNotEmpty(phoneNumber)) {
                 try {
                     SmsNotificationWarningDialogFragment smsWarningDialog = SmsNotificationWarningDialogFragment.newInstance(this);
@@ -1328,10 +1330,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     Log.e(TAG, e.getMessage(), e);
                 }
             } else {
-                showToast("No SMS notifications will be sent...");
+                toaster.showActivityToast("No SMS notifications will be sent...");
             }
         } else if (!StringUtils.equals(phoneNumber, newPhoneNumber)) {
-            showToast("Please enter valid phone number!");
+            toaster.showActivityToast("Please enter valid phone number!");
             phoneNumberInput.setText("");
         }
     }
@@ -1354,7 +1356,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         }
                     });
                 } else {
-                    showToast("No route is saved yet!");
+                    toaster.showActivityToast("No route is saved yet!");
                 }
             }
         });
@@ -1430,7 +1432,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         saveData();
         updateUI();
         isTrackingServiceBound = RouteTrackingServiceUtils.startRouteTrackingService(this, null, radius, null, true, RouteTrackingService.Mode.Normal);
-        showToast(getString(R.string.motion_confirm, radius));
+        toaster.showActivityToast(getString(R.string.motion_confirm, radius));
     }
 
     private void initRunningButton() {
@@ -1457,7 +1459,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             @Override
             public void onClick(View view) {
                 if (StringUtils.isEmpty(email) && StringUtils.isEmpty(phoneNumber) && StringUtils.isEmpty(telegramId)) {
-                    showToast(R.string.motion_confirm_empty, radius);
+                    toaster.showActivityToast(R.string.motion_confirm_empty, radius);
                     title.setChecked(false);
                     //findViewById(R.id.radiusBar).setEnabled(false);
                 } else {
@@ -1490,7 +1492,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 startActivityForResult(intent, SELECT_CONTACT_INTENT);
                 MainActivity.this.clearFocus();
             } catch (ActivityNotFoundException e) {
-                showToast( "Failed to open Contacts list!");
+                toaster.showActivityToast( "Failed to open Contacts list!");
             }
         }
     }
@@ -1513,19 +1515,19 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             @Override
             public void onClick(View view) {
                 if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
-                    showToast(R.string.please_wait);
+                    toaster.showActivityToast(R.string.please_wait);
                     registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
                     registerEmail((TextView) findViewById(R.id.email), true,false);
                     registerTelegram((TextView) findViewById(R.id.telegramId));
 
                     if (!Messenger.isEmailVerified(settings)) {
-                        showToast("Your email address is still unverified! No email notifications will be sent...");
+                        toaster.showActivityToast("Your email address is still unverified! No email notifications will be sent...");
                     } else {
                         Log.d(TAG, "Email is verified!");
                     }
 
                     if (!Messenger.isTelegramVerified(settings)) {
-                        showToast("Your Telegram char or channel is still unverified! No Telegram notifications will be sent...");
+                        toaster.showActivityToast("Your Telegram char or channel is still unverified! No Telegram notifications will be sent...");
                     } else {
                         Log.d(TAG, "Telegram is verified!");
                     }
@@ -1533,10 +1535,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     if (Network.isNetworkAvailable(MainActivity.this)) {
                         SmsSenderService.initService(MainActivity.this, true, true, true, null, Command.HELLO_COMMAND, null, null, null);
                     } else {
-                        showToast(getString(R.string.no_network_error));
+                        toaster.showActivityToast(getString(R.string.no_network_error));
                     }
                 } else {
-                    showToast("Please provide notification settings above.");
+                    toaster.showActivityToast("Please provide notification settings above.");
                 }
             }
         });
@@ -1551,7 +1553,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (Permissions.haveGetAccountsPermission(MainActivity.this)) {
                     initEmailListDialog();
                 } else {
-                    showToast("Please grant this permission to list accounts registered on this device");
+                    toaster.showActivityToast("Please grant this permission to list accounts registered on this device");
                     Permissions.requestGetAccountsPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_GET_EMAIL);
                 }
             }
@@ -1586,7 +1588,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (!accountNames.isEmpty()) {
             showEmailNotificationDialogFragment(accountNames.toArray(new String[accountNames.size()]));
         } else {
-            showToast("No email addresses are registered on this device. Please enter a new one!");
+            toaster.showActivityToast("No email addresses are registered on this device. Please enter a new one!");
         }
     }
 
@@ -1633,7 +1635,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 public void onGetFinish(String results, int responseCode, String url) {
                     if (responseCode == 200) {
                         if (!silent) {
-                            showToast( R.string.device_removed);
+                            toaster.showActivityToast( R.string.device_removed);
                         }
                         //current device has been removed
                         if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
@@ -1644,12 +1646,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         }
                         initDeviceList();
                     } else if (!silent) {
-                        showToast(R.string.device_remove_failed);
+                        toaster.showActivityToast(R.string.device_remove_failed);
                     }
                 }
             });
         } else {
-            showToast("No network available. Failed to remove device!");
+            toaster.showActivityToast("No network available. Failed to remove device!");
         }
     }
 
@@ -1690,13 +1692,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     }
                                 }
                                 if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
-                                    showToast( "Your Telegram chat or channel is already verified.");
+                                    toaster.showActivityToast( "Your Telegram chat or channel is already verified.");
                                 } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                                     //show dialog to enter activation code sent to user
                                     if (StringUtils.isNotEmpty(secret)) {
                                         if (!MainActivity.this.isFinishing()) {
                                             try {
-                                                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram);
+                                                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, toaster);
                                                 notificationActivationDialogFragment.show(MainActivity.this.getFragmentManager(), NotificationActivationDialogFragment.TAG);
                                             } catch (Exception e) {
                                                 Log.e(TAG, e.getMessage(), e);
@@ -1731,7 +1733,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 });
             }
         } else {
-            showToast(R.string.no_network_error);
+            toaster.showActivityToast(R.string.no_network_error);
         }
     }
 
@@ -1847,7 +1849,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         final DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         final long downloadId = manager.enqueue(request);
 
-        showToast(R.string.please_wait);
+        toaster.showActivityToast(R.string.please_wait);
 
         //set BroadcastReceiver to install app when .apk is downloaded
         onDownloadComplete = new BroadcastReceiver() {
@@ -1867,33 +1869,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                             Log.e(TAG, ex.getMessage(), ex);
                         }
                     }
-                    showToast(getString(R.string.app_name) + " Full version has been downloaded. Please uninstall Google Play version and install Full version.");
+                    toaster.showActivityToast(getString(R.string.app_name) + " Full version has been downloaded. Please uninstall Google Play version and install Full version.");
                     unregisterReceiver(this);
                 }
             }
         };
         //register receiver for when .apk download is compete
         registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
-    }
-
-    private void showToast(int resId, Object... args) {
-        showToast(getString(resId, args));
-    }
-
-    private void showToast(String text) {
-        if (mainToast != null) {
-            mainToast.cancel();
-        }
-
-        LayoutInflater inflater = getLayoutInflater();
-        View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_container));
-        TextView toastText = layout.findViewById(R.id.toast_text);
-        toastText.setText(text);
-
-        mainToast = new Toast(this);
-        mainToast.setDuration(Toast.LENGTH_LONG);
-        mainToast.setView(layout);
-        mainToast.show();
     }
 
     // -----------------------------------------------------------------------------------
@@ -1918,7 +1900,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         if (clipboard != null) {
                             ClipData urlClip = ClipData.newPlainText("text", showRouteUrl);
                             clipboard.setPrimaryClip(urlClip);
-                            activity.showToast("Route has been uploaded to server and route map url has been saved to clipboard.");
+                            activity.toaster.showActivityToast("Route has been uploaded to server and route map url has been saved to clipboard.");
                         }
                         String[] discs = StringUtils.split(showRouteUrl, "/");
                         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity) == ConnectionResult.SUCCESS) {
@@ -1944,9 +1926,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         sendIntent.setType("text/plain");
                         activity.startActivity(sendIntent);
                     } else if (responseCode == 400) {
-                        activity.showToast("Route upload failed due to invalid route file!");
+                        activity.toaster.showActivityToast("Route upload failed due to invalid route file!");
                     } else {
-                        activity.showToast("Route upload failed. Please try again in a few moments!");
+                        activity.toaster.showActivityToast("Route upload failed. Please try again in a few moments!");
                     }
                 } else if (msg.what == UPDATE_UI_MESSAGE) {
                     activity.updateUI();
@@ -2045,7 +2027,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     //newIntent.putExtra("args", "silent");
                     startService(newIntent);
                 } else {
-                    Toast.makeText(MainActivity.this, MainActivity.this.getString(R.string.pin_not_saved, device.name), Toast.LENGTH_LONG).show();
+                    toaster.showActivityToast(R.string.pin_not_saved, device.name);
                 }
                 if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getApplicationContext()) == ConnectionResult.SUCCESS) {
                     Intent mapIntent = new Intent(MainActivity.this, MapsActivity.class);

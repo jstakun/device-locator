@@ -5,11 +5,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Html;
-import android.widget.Toast;
 
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.Toaster;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,22 +19,25 @@ import androidx.fragment.app.DialogFragment;
 
 public class QuotaLimitNotificationDialogFragment extends DialogFragment {
 
-    private String commandName, queryString, tokenStr, deviceId, deviceName;
+    private String commandName, queryString, tokenStr, deviceName;
+
+    private Toaster toaster;
 
     public static final String TAG = "QuotaLimitDialog";
 
     public QuotaLimitNotificationDialogFragment() {}
 
-    public static QuotaLimitNotificationDialogFragment newInstance(String commandName, String queryString, String tokenStr, String deviceName) {
-        QuotaLimitNotificationDialogFragment newQuotaLimitNotificationDialog = new QuotaLimitNotificationDialogFragment(commandName, queryString, tokenStr, deviceName);
+    public static QuotaLimitNotificationDialogFragment newInstance(String commandName, String queryString, String tokenStr, String deviceName, Toaster toaster) {
+        QuotaLimitNotificationDialogFragment newQuotaLimitNotificationDialog = new QuotaLimitNotificationDialogFragment(commandName, queryString, tokenStr, deviceName, toaster);
         return newQuotaLimitNotificationDialog;
     }
 
-    public QuotaLimitNotificationDialogFragment(String commandName, String queryString, String tokenStr, String deviceName) {
+    public QuotaLimitNotificationDialogFragment(String commandName, String queryString, String tokenStr, String deviceName, Toaster toaster) {
         this.commandName = commandName;
         this.queryString = queryString;
         this.tokenStr = tokenStr;
         this.deviceName = deviceName;
+        this.toaster = toaster;
     }
 
     @Override
@@ -73,14 +76,14 @@ public class QuotaLimitNotificationDialogFragment extends DialogFragment {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
-                            Toast.makeText(context, "Quota limit for command " + commandName + " has been reset!", Toast.LENGTH_LONG).show();
+                            toaster.showActivityToast("Quota limit for command " + commandName + " has been reset!");
                         } else {
-                            Toast.makeText(context, "Failed to reset quota. Please send command " + commandName + "again!", Toast.LENGTH_LONG).show();
+                            toaster.showActivityToast("Failed to reset quota. Please send command " + commandName + "again!");
                         }
                     }
                 });
         } else {
-            Toast.makeText(context, R.string.no_network_error, Toast.LENGTH_LONG).show();
+            toaster.showActivityToast(R.string.no_network_error);
         }
     }
 }

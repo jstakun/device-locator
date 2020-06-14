@@ -4,12 +4,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import net.gmsworld.devicelocator.CommandActivity;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
@@ -21,6 +16,7 @@ import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.Toaster;
 import net.gmsworld.devicelocator.views.QuotaResetDialogActivity;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,27 +33,23 @@ import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWith
 
 public class CommandService extends IntentService implements OnLocationUpdatedListener {
 
-    private final static String TAG = CommandService.class.getSimpleName();
-
     public static final String AUTH_NEEDED = "authNeeded";
-
     public static final String LAST_COMMAND_SUFFIX = "_lastCommand";
 
+    private final static String TAG = CommandService.class.getSimpleName();
     private static final List<String> commandsInProgress = new ArrayList<>();
 
-    private Handler toastHandler;
-
-    private Toast commandToast;
+    private Toaster toaster;
 
     public CommandService() {
         super(TAG);
+        toaster = new Toaster(this);
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate()");
-        toastHandler = new Handler(getMainLooper());
         SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).oneFix().start(this);
     }
 
@@ -82,17 +74,17 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
         if (extras == null) {
             Log.e(TAG, "Missing command details!");
-            showToast(R.string.internal_error);
+            toaster.showServiceToast(R.string.internal_error);
             return;
         }
 
         final PreferencesUtils prefs = new PreferencesUtils(this);
 
-        showToast(R.string.please_wait);
+        toaster.showServiceToast(R.string.please_wait);
 
         if (PinActivity.isAuthRequired(prefs)) {
             Log.d(TAG, "User should authenticate again!");
-            showToast(R.string.please_auth);
+            toaster.showServiceToast(R.string.please_auth);
             Intent authIntent = new Intent(this, PinActivity.class);
             authIntent.putExtras(extras);
             authIntent.setAction(AUTH_NEEDED);
@@ -157,7 +149,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 }
                 sendCommand(content, command, imei, name, prefs, deviceId);
             } else {
-                showToast(R.string.command_sent_to_device, command, (StringUtils.isNotEmpty(name) ? name : imei));
+                toaster.showServiceToast(R.string.command_sent_to_device, command, (StringUtils.isNotEmpty(name) ? name : imei));
             }
         }
     }
@@ -176,11 +168,11 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                     public void onGetFinish(String results, int responseCode, String url) {
                         final String deviceName = (StringUtils.isNotEmpty(name) ? name : imei);
                         if (responseCode == 200) {
-                            showToast(R.string.command_sent_to_device, StringUtils.capitalize(command), deviceName);
+                            toaster.showServiceToast(R.string.command_sent_to_device, StringUtils.capitalize(command), deviceName);
                         } else if (responseCode == 404) {
-                            showToast(R.string.command_failed_device_gone, StringUtils.capitalize(command), deviceName, CommandService.this.getString(R.string.app_name));
+                            toaster.showServiceToast(R.string.command_failed_device_gone, StringUtils.capitalize(command), deviceName, CommandService.this.getString(R.string.app_name));
                         } else if (responseCode == 410) {
-                            showToast(R.string.command_failed_device_offline,deviceName);
+                            toaster.showServiceToast(R.string.command_failed_device_offline,deviceName);
                         } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
                             //show dialog with action=reset_quota appended to queryString
                             //JsonElement reply = new JsonParser().parse(results);
@@ -194,7 +186,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                             newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(newIntent);
                         } else {
-                            showToast(R.string.command_failed_to_device, StringUtils.capitalize(command), deviceName);
+                            toaster.showServiceToast(R.string.command_failed_to_device, StringUtils.capitalize(command), deviceName);
                         }
                         commandsInProgress.remove(imei + "_" + command);
                     }
@@ -215,28 +207,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 });
             }
         } else {
-            showToast(R.string.no_network_error);
+            toaster.showServiceToast(R.string.no_network_error);
         }
-    }
-
-    private void showToast(final int messageId, final Object... args) {
-        toastHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                if (commandToast != null) {
-                    commandToast.cancel();
-                }
-
-                LayoutInflater inflater = LayoutInflater.from(CommandService.this);
-                View layout = inflater.inflate(R.layout.toast_layout, null);
-                TextView toastText = layout.findViewById(R.id.toast_text);
-                toastText.setText(getString(messageId, args));
-
-                commandToast = new Toast(CommandService.this);
-                commandToast.setDuration(Toast.LENGTH_LONG);
-                commandToast.setView(layout);
-                commandToast.show();
-            }
-        });
     }
 }

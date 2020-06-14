@@ -8,9 +8,7 @@ import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -18,7 +16,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -31,6 +28,7 @@ import net.gmsworld.devicelocator.utilities.LinkMovementMethodFixed;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.Toaster;
 import net.gmsworld.devicelocator.views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,11 +47,11 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
     private static final String TAG = CommandActivity.class.getSimpleName();
 
     public static final String PIN_PREFIX = "pin_";
-    private Toast commandToast;
 
     private FirebaseAnalytics firebaseAnalytics;
     private Device device;
     private PreferencesUtils settings;
+    private Toaster toaster;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +60,12 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
         settings = new PreferencesUtils(this);
 
+        toaster = new Toaster(this);
+
         final List<Device> devices = getIntent().getParcelableArrayListExtra("devices");
 
         if (devices == null || devices.isEmpty()) {
-            showToast(R.string.crash_error);
+            toaster.showActivityToast(R.string.crash_error);
             return;
         }
 
@@ -231,10 +231,10 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
 
     private boolean isValidCommand(String pin, String command, String commandArgs) {
         if (pin.length() == 0) {
-            showToast(R.string.pin_enter);
+            toaster.showActivityToast(R.string.pin_enter);
             return false;
         } else if (pin.length() < PinActivity.PIN_MIN_LENGTH) {
-            showToast(R.string.pin_enter_valid);
+            toaster.showActivityToast(R.string.pin_enter_valid);
             return false;
         } else if (StringUtils.isNotEmpty(device.name) || StringUtils.isNotEmpty(device.imei)) {
             //check if command requires args and validate args
@@ -244,13 +244,13 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                     c.setCommandTokens(StringUtils.split(command + " " + commandArgs, " "));
                 }
                 if (c.hasParameters() && !c.validateTokens()) {
-                    showToast(R.string.enter_command_params);
+                    toaster.showActivityToast(R.string.enter_command_params);
                     return false;
                 }
             }
             return true;
         } else {
-            showToast(R.string.no_device);
+            toaster.showActivityToast(R.string.no_device);
             return false;
         }
     }
@@ -284,13 +284,13 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                     sendCommand(command, newIntent);
                 }
             } else {
-                showToast(R.string.no_network_error);
+                toaster.showActivityToast(R.string.no_network_error);
             }
         }
     }
 
     public void sendCommand(String command, Intent intent) {
-        showToast(R.string.please_wait);
+        toaster.showActivityToast(R.string.please_wait);
         firebaseAnalytics.logEvent("cloud_command_sent_" + command.toLowerCase(), new Bundle());
         startService(intent);
     }
@@ -311,21 +311,5 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 }
             }
         }
-    }
-
-    private void showToast(int resId) {
-        if (commandToast != null) {
-            commandToast.cancel();
-        }
-
-        LayoutInflater inflater = getLayoutInflater();
-        View layout = inflater.inflate(R.layout.toast_layout, (ViewGroup) findViewById(R.id.toast_container));
-        TextView toastText = layout.findViewById(R.id.toast_text);
-        toastText.setText(resId);
-
-        commandToast = new Toast(this);
-        commandToast.setDuration(Toast.LENGTH_LONG);
-        commandToast.setView(layout);
-        commandToast.show();
     }
 }

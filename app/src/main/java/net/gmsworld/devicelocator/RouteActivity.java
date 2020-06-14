@@ -12,7 +12,6 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,6 +37,7 @@ import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,27 +55,23 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
     private static final String TAG = RouteActivity.class.getSimpleName();
 
     private PreferencesUtils settings;
-
     private GoogleMap mMap;
-
     private Location bestLocation;
 
     private String deviceImei = null, routeId = null, thisDeviceImei = null, now = null, deviceName = null;
-
-    private final List<LatLng> routePoints = new ArrayList<>();
-
     private Integer time;
-
     private Double distance;
 
+    private final List<LatLng> routePoints = new ArrayList<>();
     private final Handler handler = new Handler();
-
     private final Runnable r = new Runnable() {
         @Override
         public void run() {
             getRoutePoints(listener);
         }
     };
+
+    private Toaster toaster;
 
     private final Network.OnGetFinishListener listener = new Network.OnGetFinishListener() {
         @Override
@@ -107,7 +103,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                             }
                         } else {
                             Log.d(TAG, "No route points found!");
-                            Toast.makeText(RouteActivity.this, "No route points saved yet!", Toast.LENGTH_LONG).show();
+                            toaster.showActivityToast("No route points saved yet!");
                         }
                     } catch (Exception e) {
                         Log.e(TAG, e.getMessage(), e);
@@ -126,6 +122,8 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         settings = new PreferencesUtils(this);
+
+        toaster = new Toaster(this);
 
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -236,15 +234,15 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 if (StringUtils.equals(now, "true")) {
                     queryString += "&now=true";
                 } else {
-                    Toast.makeText(this, R.string.please_wait, Toast.LENGTH_LONG).show();
+                    toaster.showActivityToast(R.string.please_wait);
                 }
                 //Log.d(TAG, "Calling " + queryString);
                 Network.get(this, getString(R.string.routeProviderUrl) + "?" + queryString, null, onGetFinishListener);
             } else {
-                Toast.makeText(this, R.string.internal_error, Toast.LENGTH_LONG).show();
+                toaster.showActivityToast(R.string.internal_error);
             }
         } else {
-            Toast.makeText(this, R.string.no_network_error, Toast.LENGTH_LONG).show();
+            toaster.showActivityToast(R.string.no_network_error);
         }
 
         handler.removeCallbacks(r);

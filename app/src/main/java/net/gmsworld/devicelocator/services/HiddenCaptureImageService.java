@@ -11,7 +11,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.androidhiddencamera.CameraConfig;
 import com.androidhiddencamera.CameraError;
@@ -31,6 +30,7 @@ import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -67,13 +67,14 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
     private static boolean isRunning = false;
 
     private PreferencesUtils settings;
-
+    private Toaster toaster;
 
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate()");
         settings = new PreferencesUtils(this);
+        toaster = new Toaster(this);
         SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).oneFix().start(this);
     }
 
@@ -223,8 +224,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
             settings.setBoolean(STATUS, true);
             boolean deleted = imageFile.delete();
             Log.d(TAG, "Camera photo deleted: " + deleted);
-            //TODO user handler like in CommandService
-            Toast.makeText(this, "Camera enabled!", Toast.LENGTH_LONG).show();
+            toaster.showServiceToast("Camera enabled!");
         }
 
         isRunning = false;
@@ -238,8 +238,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                 //Camera open failed. Probably because another application is using the camera
                 Log.e(TAG, "Cannot open camera.");
                 settings.setBoolean(STATUS, false);
-                //TODO user handler like in CommandService
-                Toast.makeText(this, "Camera opening failed.", Toast.LENGTH_LONG).show();
+                toaster.showServiceToast("Camera opening failed.");
                 break;
             case CameraError.ERROR_IMAGE_WRITE_FAILED:
                 //Image write failed. Please check if you have provided WRITE_EXTERNAL_STORAGE permission

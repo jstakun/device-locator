@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.fragments.QuotaLimitNotificationDialogFragment;
+import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,7 +27,7 @@ public class QuotaResetDialogActivity extends AppCompatActivity {
             final String token = intent.getStringExtra("token");
             final String deviceName = intent.getStringExtra("deviceName");
             if (StringUtils.isNotEmpty(command) && StringUtils.isNotEmpty(queryString) && StringUtils.isNotEmpty(token) && StringUtils.isNotEmpty(deviceName)) {
-                QuotaLimitNotificationDialogFragment frag = QuotaLimitNotificationDialogFragment.newInstance(StringUtils.capitalize(command), queryString, token, deviceName);
+                QuotaLimitNotificationDialogFragment frag = QuotaLimitNotificationDialogFragment.newInstance(StringUtils.capitalize(command), queryString, token, deviceName, new Toaster(this));
                 frag.show(getSupportFragmentManager(), QuotaLimitNotificationDialogFragment.TAG);
             } else {
                 Log.e(TAG, "Missing required parameters");
