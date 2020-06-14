@@ -78,6 +78,8 @@
     <string name="telegram_invalid_id">Oops! Your Telegram chat or channel id seems to be wrong. Please register again your Telegram chat or channel!</string>
     <string name="telegram_internal_error">Oops! Failed to sent Telegram notification. Something went wrong on our side!</string>
     <string name="internal_error">Oops! Something went wrong on our side. Please try again!</string>
+    <string name="device_removed">Device has been removed!</string>
+    <string name="device_remove_failed">Failed to remove device!</string>
 
     <!-- Pin Activity -->
     <string name="pin_link">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;/a>&lt;/font></string>

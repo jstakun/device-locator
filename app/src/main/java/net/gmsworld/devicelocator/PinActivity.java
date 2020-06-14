@@ -188,6 +188,10 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
         }
 
+        if (pinToast != null) {
+            pinToast.cancel();
+        }
+
         if (StringUtils.equals(action, CommandService.AUTH_NEEDED)) {
             Intent intent = new Intent(this, CommandService.class);
             intent.putExtras(extras);
