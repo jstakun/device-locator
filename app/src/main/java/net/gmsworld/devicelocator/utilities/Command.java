@@ -890,7 +890,7 @@ public class Command {
                     Log.e(TAG, "Wrong radius: " + commandTokens[commandTokens.length - 1]);
                 }
             }
-            return radius > 0;
+            return radius >= MainActivity.MIN_RADIUS && radius <= MainActivity.MAX_RADIUS;
         }
 
         @Override
@@ -1686,7 +1686,7 @@ public class Command {
                 Log.e(TAG, e.getMessage(), e);
             }
             if (StringUtils.isNotEmpty(message)) {
-                if (StringUtils.containsIgnoreCase(message, "perimeter")) {
+                if (StringUtils.containsIgnoreCase(message, "perimeter")) { //check if sender device is in perimeter
                     String[] tokens = StringUtils.split(message, "\n");
                     if (tokens.length > 1 && StringUtils.isNumeric(tokens[tokens.length - 1])) {
                         int perimeter = Integer.valueOf(tokens[tokens.length - 1]);
@@ -1727,7 +1727,7 @@ public class Command {
                     Log.e(TAG, "Wrong perimeter radius: " + commandTokens[commandTokens.length - 1]);
                 }
             }
-            return radius > 0;
+            return radius >= MainActivity.MIN_RADIUS && radius <= MainActivity.MAX_RADIUS;
         }
 
         @Override
@@ -1750,11 +1750,16 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (Permissions.haveLocationPermission(context)) {
-                final int perimeter = Integer.parseInt(commandTokens[1]);
                 PreferencesUtils settings = new PreferencesUtils(context);
                 final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, sender, true, RouteTrackingService.Mode.Perimeter);
                 settings.setBoolean("motionDetectorRunning", true);
+                int perimeter = Integer.parseInt(commandTokens[1]);
+                if (radius < MainActivity.MIN_RADIUS) {
+                    perimeter = MainActivity.MIN_RADIUS;
+                } else if (radius > MainActivity.MAX_RADIUS) {
+                    perimeter = MainActivity.MAX_RADIUS;
+                }
                 settings.setInt("perimeter", perimeter);
             } else {
                 Log.e(TAG, "Unable to start perimeter service due to lack of Location permission");
