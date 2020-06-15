@@ -21,8 +21,11 @@ import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -32,6 +35,7 @@ import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.TelegramSetupDialogFragment;
+import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
@@ -48,6 +52,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import androidx.annotation.NonNull;
 
 /**
  * Created by jstakun on 5/6/17.
@@ -91,7 +97,7 @@ public class Messenger {
         }
         if (StringUtils.isNotEmpty(status)) {
             Log.d(TAG, status);
-            Toast.makeText(context, status, Toast.LENGTH_LONG).show();
+            Toaster.showToast(context, status);
         }
     }
 
@@ -184,10 +190,9 @@ public class Messenger {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     if (responseCode == 200) {
-                        //Toast.makeText(context, "Command has been sent!", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "Message has been sent to the cloud!");
                     } else if (responseCode >= 400 && responseCode < 500) {
-                        Toast.makeText(context, "Command has been rejected due to quota limit! Please try again after some time or contact " + context.getString(R.string.app_email), Toast.LENGTH_SHORT).show();
+                        Toaster.showToast(context, "Command has been rejected due to quota limit! Please try again after some time or contact " + context.getString(R.string.app_email));
                         Log.e(TAG, "Message has been rejected by server!");
                     } else if (responseCode == 500 && retryCount > 0) {
                         new Handler().postDelayed(new Runnable() {
@@ -282,9 +287,9 @@ public class Messenger {
                                     emailInput.setText("");
                                 }
                             }
-                            Toast.makeText(context, R.string.email_unverified_error, Toast.LENGTH_LONG).show();
+                            Toaster.showToast(context, R.string.email_unverified_error);
                         } else {
-                            Toast.makeText(context, R.string.email_internal_error, Toast.LENGTH_LONG).show();
+                            Toaster.showToast(context, R.string.email_internal_error);
                         }
                     }
                 }
@@ -373,7 +378,7 @@ public class Messenger {
                                     telegramInput.setText("");
                                 }
                             }
-                            Toast.makeText(context, R.string.telegram_unverified_error, Toast.LENGTH_LONG).show();
+                            Toaster.showToast(context, R.string.telegram_unverified_error);
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
                             if (context instanceof Activity) {
@@ -382,12 +387,12 @@ public class Messenger {
                                     telegramInput.setText("");
                                 }
                             }
-                            Toast.makeText(context, R.string.telegram_invalid_id, Toast.LENGTH_LONG).show();
+                            Toaster.showToast(context, R.string.telegram_invalid_id);
                         } else {
-                            Toast.makeText(context, R.string.telegram_internal_error, Toast.LENGTH_LONG).show();
+                            Toaster.showToast(context, R.string.telegram_internal_error);
                         }
                     } else if (responseCode >= 400) {
-                        Toast.makeText(context, R.string.telegram_internal_error, Toast.LENGTH_LONG).show();
+                        Toaster.showToast(context, R.string.telegram_internal_error);
                     }
                 }
             });
@@ -1028,7 +1033,7 @@ public class Messenger {
                     }
                     if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                         settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET, TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT);
-                        Toast.makeText(context, "Your Telegram chat or channel is already verified.", Toast.LENGTH_LONG).show();
+                        Toaster.showToast(context, "Your Telegram chat or channel is already verified.");
                     } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                         //show dialog to enter activation code sent to user
                         if (StringUtils.isNotEmpty(secret)) {
@@ -1089,7 +1094,7 @@ public class Messenger {
             }
             telegramInput.requestFocus();
             if (StringUtils.isNotEmpty(message)) {
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+                Toaster.showToast(context, message);
             }
         }
     }
@@ -1122,7 +1127,7 @@ public class Messenger {
                         settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, status);
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             settings.remove(NotificationActivationDialogFragment.EMAIL_SECRET);
-                            Toast.makeText(context, "Your email address is already verified.", Toast.LENGTH_SHORT).show();
+                            Toaster.showToast(context, "Your email address is already verified.");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
@@ -1166,7 +1171,127 @@ public class Messenger {
                 emailInput.setText("");
             }
             emailInput.requestFocus();
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+            Toaster.showToast(context, message);
+        }
+    }
+
+    public static boolean sendRegistrationToServer(final Context context, final String firebaseToken, final String username, final String deviceName) {
+        if (StringUtils.isNotEmpty(firebaseToken) && !StringUtils.equalsIgnoreCase(firebaseToken, "BLACKLISTED")) {
+            final String tokenStr = PreferenceManager.getDefaultSharedPreferences(context).getString(DeviceLocatorApp.GMS_TOKEN, "");
+            if (StringUtils.isNotEmpty(tokenStr)) {
+                sendRegistrationToServer(context, firebaseToken, username, deviceName, tokenStr);
+            } else {
+                String queryString = "scope=dl&user=" + Messenger.getDeviceId(context, false);
+                Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        if (responseCode == 200) {
+                            sendRegistrationToServer(context, firebaseToken, username, deviceName, Messenger.getToken(context, results));
+                        } else {
+                            Log.d(TAG, "Failed to receive token: " + results);
+                        }
+                    }
+                });
+            }
+            return true;
+        } else {
+            Log.e(TAG, "This device can't be registered with token: " + firebaseToken);
+            return false;
+        }
+    }
+
+    public static boolean sendRegistrationToServer(final Context context, final String username, final String deviceName, final boolean silent) {
+        if (Network.isNetworkAvailable(context)) {
+            final String firebaseToken = PreferenceManager.getDefaultSharedPreferences(context).getString(DlFirebaseMessagingService.FIREBASE_TOKEN, "");
+            if (StringUtils.isEmpty(firebaseToken)) {
+                Task<InstanceIdResult> result = FirebaseInstanceId.getInstance().getInstanceId();
+
+                result.addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (task.isSuccessful()) {
+                            // Task completed successfully
+                            InstanceIdResult result = task.getResult();
+                            if (result != null) {
+                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, result.getToken()).apply();
+                                sendRegistrationToServer(context, result.getToken(), username, deviceName);
+                            }
+                        } else {
+                            // Task failed with an exception
+                            Exception exception = task.getException();
+                            Log.e(TAG, "Failed to receive Firebase token!", exception);
+                            if (!silent) {
+                                Toaster.showToast(context, "Failed to synchronize device. Please restart " + context.getString(R.string.app_name) + " and try again!");
+                            }
+                        }
+                    }
+                });
+
+                return true;
+            } else {
+                return sendRegistrationToServer(context, firebaseToken, username, deviceName);
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private static void sendRegistrationToServer(final Context context, final String firebaseToken, final String username, final String deviceName, final String gmsTokenStr) {
+        try {
+            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+            if (!StringUtils.equalsIgnoreCase(firebaseToken, "BLACKLISTED")) {
+                String imei = Messenger.getDeviceId(context, false);
+                String content = "imei=" + imei;
+                if (StringUtils.equalsIgnoreCase(imei, "unknown")) {
+                    Log.e(TAG, "Invalid imei");
+                    return;
+                }
+                if (StringUtils.isNotBlank(firebaseToken)) {
+                    content += "&token=" + firebaseToken;
+                }
+                if (StringUtils.isNotBlank(username)) {
+                    content += "&username=" + username;
+                }
+                if (StringUtils.isNotBlank(deviceName)) {
+                    content += "&name=" + deviceName;
+                }
+
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + gmsTokenStr);
+
+                Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
+                    @Override
+                    public void onGetFinish(String results, int responseCode, String url) {
+                        if (responseCode == 200) {
+                            //save firebase token only if it was successfully registered by the server
+                            if (StringUtils.isNotBlank(firebaseToken)) {
+                                settings.edit().putString(DlFirebaseMessagingService.FIREBASE_TOKEN, firebaseToken).remove(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN).apply();
+                                Log.d(TAG, "Firebase token is set");
+                            }
+                            if (username != null) {
+                                settings.edit().putString(MainActivity.USER_LOGIN, username).apply();
+                                Log.d(TAG, "User login is set");
+                                if (context instanceof MainActivity) {
+                                    ((MainActivity)context).initDeviceList();
+                                }
+                            }
+                            if (deviceName != null) {
+                                settings.edit().putString(MainActivity.DEVICE_NAME, deviceName).apply();
+                                Log.d(TAG, "Device name is set");
+                                if (context instanceof MainActivity) {
+                                    ((MainActivity)context).initDeviceList();
+                                }
+                            }
+                        } else {
+                            Toaster.showToast(context, "Device registration failed! Please restart Device Manager and try again.");
+                        }
+                    }
+                });
+            } else {
+                Log.e(TAG, "Invalid token: " + firebaseToken);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e);
         }
     }
 
@@ -1224,7 +1349,7 @@ public class Messenger {
             return true;
         } else {
             if (showToast) {
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+                Toaster.showToast(context, message);
             }
             return false;
         }
@@ -1304,15 +1429,15 @@ public class Messenger {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(NotificationActivationDialogFragment.TELEGRAM_SECRET, deviceSecret).apply();
             context.startActivity(intent);
             if (appInstalled) {
-                Toast.makeText(context, "Please push Start button", Toast.LENGTH_SHORT).show();
+                Toaster.showToast(context, "Please push Start button");
             } else {
-                Toast.makeText(context, "Enter command /id", Toast.LENGTH_LONG).show();
+                Toaster.showToast(context, "Enter command /id");
             }
         } catch (PackageManager.NameNotFoundException e) {
-            Toast.makeText(context, "This function requires installed Telegram Messenger or Web Browser on your device.", Toast.LENGTH_LONG).show();
+            Toaster.showToast(context, "This function requires installed Telegram Messenger or Web Browser on your device.");
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);
-            Toast.makeText(context, "Failed ot start Telegram Messenger.", Toast.LENGTH_LONG).show();
+            Toaster.showToast(context, "Failed ot start Telegram Messenger.");
         }
     }
 
@@ -1322,7 +1447,7 @@ public class Messenger {
         intent.putExtra(Intent.EXTRA_TEXT, message);
         intent.setPackage(TELEGRAM_PACKAGE);
         context.startActivity(intent);
-        Toast.makeText(context, "Find Device Locator bot", Toast.LENGTH_LONG).show();
+        Toaster.showToast(context, "Find Device Locator bot");
     }
 
     /*public static void sendMessengerMessage(Context context, String message) {

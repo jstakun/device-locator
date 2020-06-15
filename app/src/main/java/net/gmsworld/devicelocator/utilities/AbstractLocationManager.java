@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -148,7 +147,7 @@ public abstract class AbstractLocationManager {
         if (l != null) {
             Log.d(TAG, "Route point will be added to data store");
             if (routeFile != null) {
-                String line = location.getLatitude() + "," + location.getLongitude() + "," + System.currentTimeMillis();
+                final String line = location.getLatitude() + "," + location.getLongitude() + "," + System.currentTimeMillis();
                 Files.appendLineToFileFromContextDir(routeFile, line, 10000, 1000);
             } else {
                 Log.e(TAG, "Route file object is null. I'm unable to persist route point!");
@@ -256,11 +255,11 @@ public abstract class AbstractLocationManager {
         if (Network.isNetworkAvailable(activity)) {
             new RouteUploadTask(activity, isBackground, onGetFinishListener).execute();
         } else {
-            Toast.makeText(activity, R.string.no_network_error, Toast.LENGTH_LONG).show();
+            Toaster.showToast(activity, R.string.no_network_error);
         }
     }
 
-    static class RouteUploadTask extends AsyncTask<Void, Integer, Integer> {
+    private static class RouteUploadTask extends AsyncTask<Void, Integer, Integer> {
         private final WeakReference<Context> callerActivity;
         private final Network.OnGetFinishListener onGetFinishListener;
         private final boolean isBackground;
@@ -278,7 +277,7 @@ public abstract class AbstractLocationManager {
                 if (activity == null) {
                     return;
                 }
-                Toast.makeText(activity, "Route sharing task has been started...", Toast.LENGTH_LONG).show();
+                Toaster.showToast(activity, "Route sharing task has been started...");
             }
         }
 
@@ -299,7 +298,7 @@ public abstract class AbstractLocationManager {
                 return;
             }
             if (routeSize <= 1 && !isBackground) {
-                Toast.makeText(activity, "No route is saved yet. Please make sure device location tracking is started and try again after some time.", Toast.LENGTH_LONG).show();
+                Toaster.showToast(activity, "No route is saved yet. Please make sure device location tracking is started and try again after some time.");
             }
         }
 

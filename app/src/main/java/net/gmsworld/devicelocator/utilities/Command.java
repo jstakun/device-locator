@@ -24,7 +24,6 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.RingingActivity;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
-import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
@@ -1866,7 +1865,7 @@ public class Command {
                     String newDeviceName = token.substring(3);
                     if (!StringUtils.equals(settings.getString(MainActivity.DEVICE_NAME, ""), newDeviceName)) {
                         String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-');
-                        if (DlFirebaseMessagingService.sendRegistrationToServer(context, settings.getString(MainActivity.USER_LOGIN, ""), normalizedDeviceName, true)) {
+                        if (Messenger.sendRegistrationToServer(context, settings.getString(MainActivity.USER_LOGIN, ""), normalizedDeviceName, true)) {
                             settings.edit().putString(MainActivity.DEVICE_NAME, normalizedDeviceName).apply();
                         } else {
                             Log.e(TAG, "Failed to register device on server");

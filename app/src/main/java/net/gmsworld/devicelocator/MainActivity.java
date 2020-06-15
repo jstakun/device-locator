@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 deviceName = Messenger.getDefaultDeviceName();
                 settings.setString(DEVICE_NAME, deviceName);
             }
-            DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
+            Messenger.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
         }
     }
 
@@ -660,7 +660,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     deviceName = Messenger.getDefaultDeviceName();
                     settings.setString(DEVICE_NAME, deviceName);
                 }
-                DlFirebaseMessagingService.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
+                Messenger.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
             } else if (StringUtils.isNotEmpty(firebaseToken)) {
                 Log.d(TAG, "Firebase token already set");
             } else {
@@ -1006,7 +1006,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 deviceName = Messenger.getDefaultDeviceName();
                 settings.setString(DEVICE_NAME, deviceName);
             }
-            if (!DlFirebaseMessagingService.sendRegistrationToServer(this, newUserLogin, deviceName, false)) {
+            if (!Messenger.sendRegistrationToServer(this, newUserLogin, deviceName, false)) {
                 if (!silent) {
                     toaster.showActivityToast("Your device can't be registered at the moment!");
                 }
@@ -1075,7 +1075,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
             String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-').replace(',', '-');
-            if (DlFirebaseMessagingService.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName, false)) {
+            if (Messenger.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName, false)) {
                 if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
                     EditText deviceNameEdit = findViewById(R.id.deviceName);
                     deviceNameEdit.setText(normalizedDeviceName);

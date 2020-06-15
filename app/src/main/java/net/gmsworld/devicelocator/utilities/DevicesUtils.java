@@ -6,7 +6,6 @@ import android.location.Location;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -17,7 +16,6 @@ import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.model.Device;
-import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -144,23 +142,23 @@ public class DevicesUtils {
         });
     }
 
-    public static void registerDevice(Context context, PreferencesUtils settings) {
+    public static void registerDevice(Activity context, PreferencesUtils settings, Toaster toaster) {
         final String userLogin = settings.getString(MainActivity.USER_LOGIN);
         if (StringUtils.isNotEmpty(userLogin)) {
-            Toast.makeText(context, "Synchronizing device...", Toast.LENGTH_LONG).show();
+            toaster.showActivityToast(R.string.devices_list_loading);
         }
         String deviceName = settings.getString(MainActivity.DEVICE_NAME);
         if (StringUtils.isEmpty(deviceName)) {
             deviceName = Messenger.getDefaultDeviceName();
             settings.setString(MainActivity.DEVICE_NAME, deviceName);
         }
-        if (DlFirebaseMessagingService.sendRegistrationToServer(context, userLogin, deviceName, true)) {
+        if (Messenger.sendRegistrationToServer(context, userLogin, deviceName, true)) {
             //delete old device
             if (settings.contains(CURRENT_DEVICE_ID)) {
                 deleteDevice(context, settings, settings.getString(CURRENT_DEVICE_ID));
             }
         } else {
-            Toast.makeText(context, "Your device can't be registered at the moment!", Toast.LENGTH_LONG).show();
+            toaster.showActivityToast("Your device can't be registered at the moment!");
         }
     }
 
