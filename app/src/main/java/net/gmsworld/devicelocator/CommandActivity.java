@@ -1,5 +1,6 @@
 package net.gmsworld.devicelocator;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.location.Location;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -256,6 +258,10 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
     }
 
     private void sendCommand(String pin, String command, String commandArgs, boolean sendSocial) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
+        }
         if (isValidCommand(pin, command, commandArgs)) {
             if (sendSocial) {
                 //command pin imei -p args

@@ -605,7 +605,7 @@ public class Messenger {
         final int perimeter = settings.getInt("perimeter", RouteTrackingService.DEFAULT_PERIMETER);
         if (StringUtils.isNotEmpty(app)) {
             final String deviceId = getDeviceId(context, true);
-            final String message = deviceId + " is in perimeter " + DistanceFormatter.format(perimeter) + getBatteryLevel(context) +
+            final String message = deviceId + " is within the perimeter of " + DistanceFormatter.format(perimeter) + getBatteryLevel(context) +
                              "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.') +
                              "\n" + perimeter;
             sendCloudMessage(context, location, app, message, null, 1, 2000, headers);
