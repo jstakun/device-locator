@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -44,7 +45,7 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
         Log.d(TAG, "Wrong password has been entered to unlock this device. SENDING NOTIFICATION!");
         PreferencesUtils settings = new PreferencesUtils(context);
         if (!SmsSenderService.initService(context, true, true, true, null, null, null, SOURCE, null)) {
-            Log.d(TAG, "Unable to send notification. No notifiers are set.");
+            Log.d(TAG, context.getString(R.string.notifiers_error));
         }
 
         if (settings.getBoolean(HiddenCaptureImageService.STATUS, false) && HiddenCaptureImageService.isNotBusy()) {

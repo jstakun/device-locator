@@ -266,7 +266,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
         }
 
         if (StringUtils.isEmpty(phoneNumber) && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email) && StringUtils.isEmpty(app)) {
-            Log.d(TAG, "No notifiers set. Notification won't be sent!");
+            Log.d(TAG, context.getString(R.string.notifiers_error));
             return false;
         } else {
             if (StringUtils.isNotEmpty(app)) {

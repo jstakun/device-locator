@@ -1533,12 +1533,16 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     }
 
                     if (Network.isNetworkAvailable(MainActivity.this)) {
-                        SmsSenderService.initService(MainActivity.this, true, true, true, null, Command.HELLO_COMMAND, null, null, null);
+                        if (SmsSenderService.initService(MainActivity.this, true, true, true, null, Command.HELLO_COMMAND, null, null, null)) {
+                            toaster.showActivityToast("Notification sent.");
+                        } else {
+                            toaster.showActivityToast(R.string.notifiers_error);
+                        }
                     } else {
                         toaster.showActivityToast(getString(R.string.no_network_error));
                     }
                 } else {
-                    toaster.showActivityToast("Please provide notification settings above.");
+                    toaster.showActivityToast("Please provide Notification settings above.");
                 }
             }
         });
