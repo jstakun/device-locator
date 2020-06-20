@@ -149,7 +149,7 @@ public class CommandListActivity extends AppCompatActivity {
         CommandListActivity.this.startActivity(intent);
     }
 
-    private class CommandArrayAdapter extends ArrayAdapter<String> {
+    private static class CommandArrayAdapter extends ArrayAdapter<String> {
 
         final List<Integer> deviceIds;
 

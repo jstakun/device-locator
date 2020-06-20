@@ -89,12 +89,10 @@ public final class HiddenCameraUtils {
      * @param context context
      * @return true if the device has front camera.
      */
-    @SuppressWarnings("deprecation")
     public static boolean isFrontCameraAvailable(@NonNull Context context) {
         int numCameras = Camera.getNumberOfCameras();
         return numCameras > 0 && context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
     }
-
 
     /**
      * Rotate the bitmap by 90 degree.

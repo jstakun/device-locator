@@ -2102,7 +2102,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
     }
 
-    private class DeviceComparator implements Comparator<Device> {
+    private static class DeviceComparator implements Comparator<Device> {
 
         @Override
         public int compare(Device device, Device device2) {

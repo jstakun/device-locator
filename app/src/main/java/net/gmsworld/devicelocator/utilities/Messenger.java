@@ -802,32 +802,24 @@ public class Messenger {
                     command = Command.MUTE_COMMAND;
                     break;
                 case Command.INVALID_PIN:
-                    if (extras != null) {
-                        String sender = extras.getString("sender", "unknown");
-                        if (StringUtils.contains(sender, "=")) {
-                            sender = StringUtils.split(sender, "=")[0].trim();
-                        }
-                        final String source = extras.getString("source");
-                        final String invalidCommand = extras.getString("invalidCommand");
-                        text = "Command " + invalidCommand + " with invalid pin has been sent to device " + deviceId + " from " + source + " " + sender + ".";
-                    } else {
-                        text = "Command with invalid pin has been sent to device " + deviceId + ".";
+                    String sender = extras.getString("sender", "unknown");
+                    if (StringUtils.contains(sender, "=")) {
+                        sender = StringUtils.split(sender, "=")[0].trim();
                     }
+                    final String source = extras.getString("source");
+                    final String invalidCommand = extras.getString("invalidCommand");
+                    text = "Command " + invalidCommand + " with invalid pin has been sent to device " + deviceId + " from " + source + " " + sender + ".";
                     break;
                 case Command.INVALID_COMMAND:
                     final String deviceName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), deviceId);
-                    if (extras != null) {
-                        String sender = extras.getString("sender", "unknown");
-                        if (sender.contains("=")) {
-                            sender = sender.split("=")[0].trim();
-                        }
-                        final String senderName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), sender);
-                        final String source = extras.getString("source");
-                        final String invalidCommand = extras.getString("invalidCommand");
-                        text = "Invalid command " + invalidCommand + " has been sent to device " + deviceName + " from " + source + " " + senderName + ".";
-                    } else {
-                        text = "Invalid command has been sent to device " + deviceName + ".";
+                    String senderr = extras.getString("sender", "unknown");
+                    if (senderr.contains("=")) {
+                        senderr = senderr.split("=")[0].trim();
                     }
+                    final String senderName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), senderr);
+                    final String sourcee = extras.getString("source");
+                    final String invalidCommandd = extras.getString("invalidCommand");
+                    text = "Invalid command " + invalidCommandd + " has been sent to device " + deviceName + " from " + sourcee + " " + senderName + ".";
                     break;
                 case Command.RESET_COMMAND:
                     text = "Reset to factory defaults on device " + deviceId + " has been started.";

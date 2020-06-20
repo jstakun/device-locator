@@ -26,7 +26,7 @@ public class LocationAlarmUtils {
             AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);
 
-            if (forceReset || (PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null)) {
+            if (alarmMgr != null && (forceReset || (PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null))) {
                 final long triggerAtMillis = System.currentTimeMillis() + alarmInterval;
                 Log.d(TAG, "Creating Location Alarm to be triggered at " + new Date(triggerAtMillis));
                 final PendingIntent operation = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -59,7 +59,7 @@ public class LocationAlarmUtils {
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);
         PendingIntent intent = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE);
-        if (intent != null) {
+        if (intent != null && alarmMgr != null) {
             alarmMgr.cancel(intent);
         }
         PreferencesUtils settings = new PreferencesUtils(context);

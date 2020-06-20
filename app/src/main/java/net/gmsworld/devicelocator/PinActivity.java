@@ -240,7 +240,14 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         settings.setInt("pinFailedCount", pinFailedCount + 1);
     }
 
-    private abstract class TextViewLinkHandler extends LinkMovementMethod {
+    public static boolean isAuthRequired(PreferencesUtils prefs) {
+        final String pin =  prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+        final long pinVerificationMillis =  prefs.getLong("pinVerificationMillis");
+        final boolean settingsVerifyPin =  prefs.getBoolean("settings_verify_pin", false);
+        return (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS);
+    }
+
+    private abstract static class TextViewLinkHandler extends LinkMovementMethod {
 
         public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
             if (event.getAction() != MotionEvent.ACTION_UP)
@@ -267,12 +274,5 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         }
 
         protected abstract void onLinkClick(String url);
-    }
-
-    public static boolean isAuthRequired(PreferencesUtils prefs) {
-        final String pin =  prefs.getEncryptedString(PinActivity.DEVICE_PIN);
-        final long pinVerificationMillis =  prefs.getLong("pinVerificationMillis");
-        final boolean settingsVerifyPin =  prefs.getBoolean("settings_verify_pin", false);
-        return (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS);
     }
 }

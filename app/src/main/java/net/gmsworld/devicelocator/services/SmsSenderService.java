@@ -289,11 +289,13 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 smsSender.putExtras(extras);
             }
 
+            ComponentName name;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                ComponentName name = context.startForegroundService(smsSender);
-                Log.d(TAG, "Service " + name.getClassName() + " started...");
+                name = context.startForegroundService(smsSender);
             } else {
-                ComponentName name = context.startService(smsSender);
+                name = context.startService(smsSender);
+            }
+            if (name != null) {
                 Log.d(TAG, "Service " + name.getClassName() + " started...");
             }
 
