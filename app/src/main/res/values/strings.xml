@@ -123,9 +123,9 @@
     <string name="please_auth">Please authenticate before sending command</string>
 
     <!-- Login Activity -->
-    <string name="error_invalid_email">This login is invalid</string>
-    <string name="error_invalid_password">This password is invalid</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_invalid_email">Login is invalid</string>
+    <string name="error_invalid_password">Password is invalid</string>
+    <string name="error_incorrect_password">Password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
