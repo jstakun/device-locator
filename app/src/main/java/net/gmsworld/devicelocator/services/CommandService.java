@@ -108,7 +108,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 return;
             }
 
-            Log.d(TAG, "Command " + cmd + " will be send to device " + imei + "...");
+            Log.d(TAG, "Command " + cmd + " will be send to the device " + imei + "...");
 
             prefs.setString(imei + LAST_COMMAND_SUFFIX, command);
 
@@ -157,6 +157,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils settings, final String deviceId) {
         if (Network.isNetworkAvailable(this)) {
             commandsInProgress.add(imei + "_" + command);
+            Log.d(TAG, "Sending command " + command + " to the device " + imei);
             final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
             headers.put("X-GMS-AppId", "2");

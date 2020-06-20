@@ -326,6 +326,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if (!StringUtils.equals(device.imei, thisDeviceImei)) {
                             if (settings.contains(CommandActivity.PIN_PREFIX + device.imei)) {
                                 //send locate command to deviceImei
+                                Log.d(TAG, "Sending locate command to the device " + device.name);
                                 String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + device.imei);
                                 Intent newIntent = new Intent(MapsActivity.this, CommandService.class);
                                 newIntent.putExtra("command", "locate");
