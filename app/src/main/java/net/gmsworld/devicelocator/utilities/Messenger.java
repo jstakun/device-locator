@@ -471,17 +471,18 @@ public class Messenger {
 
         text += context.getString(R.string.latitude) + " " + latAndLongFormat.format(location.getLatitude()) + "\n";
         text += context.getString(R.string.longitude) + " " + latAndLongFormat.format(location.getLongitude()) + "\n";
-        text += context.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + "m\n";
-
-        text += context.getString(R.string.last_seen) + " " + new PrettyTime().format(new Date(location.getTime())) + getBatteryLevel(context);
-
-        if (location.hasSpeed() && location.getSpeed() > 0f) {
-            text += "\n" + context.getString(R.string.speed) + " " + getSpeed(context, location.getSpeed());
-        }
+        text += context.getString(R.string.accuracy) + " " + Math.round(location.getAccuracy()) + " m\n";
 
         if (location.hasAltitude() && location.getAltitude() != 0) {
-            text += "\n" + context.getString(R.string.altitude) + " " + ((int) location.getAltitude()) + "m";
+            text += context.getString(R.string.altitude) + " " + ((int) location.getAltitude()) + " m\n";
         }
+
+        if (location.hasSpeed() && location.getSpeed() > 0f) {
+            text += context.getString(R.string.speed) + " " + getSpeed(context, location.getSpeed()) + "\n";
+        }
+
+        text += context.getString(R.string.last_seen) + " " + new PrettyTime().format(new Date(location.getTime()))
+                + getBatteryLevel(context);
 
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
@@ -926,13 +927,13 @@ public class Messenger {
         try {
             l = context.getResources().getConfiguration().locale;
         } catch (Exception e) { //might cause NPE on some devices
-            l = java.util.Locale.getDefault();
+            l = java.util .Locale.getDefault();
         }
 
         if (l != null && StringUtils.equalsAny(l.getISO3Country(), "USA", "GBR")) {
-            return (int) (speed * 2.23694) + "MPH";
+            return (int) (speed * 2.23694) + " mph";
         } else {
-            return (int) (speed * 3.6) + "KM/H";
+            return (int) (speed * 3.6) + " km/h";
         }
     }
 
