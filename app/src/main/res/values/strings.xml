@@ -178,6 +178,8 @@
     <string name="command_log">Command Log</string>
     <string name="commandEmpty">No commands has been sent to this device yet!</string>
 
+    <string name="privacy_policy">Privacy Policy</string>
+
     <string name="pin_not_saved">Unable to send command to the device %1$s because PIN is not saved!</string>
 
     <string name="settings_alarm">Periodically save location</string>
