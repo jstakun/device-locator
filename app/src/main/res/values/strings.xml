@@ -163,6 +163,16 @@
     <string name="Manifest_permission_WRITE_EXTERNAL_STORAGE">Allow saving camera pictures in device photo gallery</string>
     <string name="reset_permission">Allow Reset device to factory defaults command</string>
 
+    <!-- Register Activity -->
+    <string name="privacy_policy_text">Please read our &lt;a href="http://www.gms-world.net/privacy.jsp">Privacy Policy&lt;/a></string>
+    <string name="register_email_text">In order to receive your device location notifications please enter your email address</string>
+    <string name="privacy_policy_toast">First please accept our Privacy Policy</string>
+    <string name="configure_email_notification_text">Configure email notification</string>
+    <string name="register_text">Register</string>
+    <string name="privacy_policy_accept">I accept aforementioned Privacy Policy</string>
+
+    <!-- -->
+
     <string name="forget_me">Forget me</string>
     <string name="send_code_again">Send code again</string>
     <string name="activation_code">Activation code</string>
@@ -188,4 +198,5 @@
         <item quantity="other">Device location will be saved in an interval of %d hours.</item>
     </plurals>
     <string name="alarm_settings_suffix">Next %1$s</string>
+
 </resources>

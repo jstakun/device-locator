@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initTelegramButton();
         initTokenInput();
         initPingButton();
-        initMailButton();
+        initEmailButton();
         initDeviceNameInput();
         initUserLoginInput(false, true);
 
@@ -406,9 +406,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             case R.id.commandLog:
                 startActivity(new Intent(this, CommandListActivity.class));
                 return true;
-            case R.id.privacyPolicy:
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.privacyPolicyUrl))));
-                return true;
+            //case R.id.privacyPolicy:
+            //    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.privacyPolicyUrl))));
+            //    return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -1551,7 +1551,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         });
     }
 
-    private void initMailButton() {
+    private void initEmailButton() {
         final ImageButton emailButton = this.findViewById(R.id.email_button);
 
         emailButton.setOnClickListener(new View.OnClickListener() {
@@ -1575,7 +1575,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             accountNames.add(userLogin);
         }
 
-            Account[] dlAccounts = AccountManager.get(this).getAccountsByType(getString(R.string.account_type));
+        Account[] dlAccounts = AccountManager.get(this).getAccountsByType(getString(R.string.account_type));
         for (Account a : dlAccounts) {
             if (!accountNames.contains(a.name)) {
                 accountNames.add(a.name);

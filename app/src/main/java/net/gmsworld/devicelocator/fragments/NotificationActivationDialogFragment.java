@@ -38,8 +38,14 @@ public class NotificationActivationDialogFragment extends DialogFragment {
 
     private Toaster toaster;
 
+    private NotificationActivationDialogListener initListener;
+
     //default mode is Email
     private Mode mode = Mode.Email;
+
+    public interface NotificationActivationDialogListener {
+        void openMainActivity();
+    }
 
     public static NotificationActivationDialogFragment newInstance(Mode mode, Toaster toaster) {
         NotificationActivationDialogFragment frag = new NotificationActivationDialogFragment();
@@ -47,6 +53,12 @@ public class NotificationActivationDialogFragment extends DialogFragment {
             frag.mode = mode;
         }
         frag.toaster = toaster;
+        return frag;
+    }
+
+    public static NotificationActivationDialogFragment newInstance(Mode mode, Toaster toaster, NotificationActivationDialogListener initListener) {
+        NotificationActivationDialogFragment frag = newInstance(mode, toaster);
+        frag.initListener = initListener;
         return frag;
     }
 
@@ -107,6 +119,9 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                                         toaster.showActivityToast("Your email address has been verified.");
                                         settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, "verified");
                                         settings.remove(EMAIL_SECRET);
+                                    }
+                                    if (initListener != null) {
+                                        initListener.openMainActivity();
                                     }
                                 } else {
                                     if (mode == Mode.Telegram) {

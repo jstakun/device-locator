@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 public class LauncherActivity extends Activity {
@@ -19,7 +20,11 @@ public class LauncherActivity extends Activity {
 
         Intent showIntent;
 
-        if (PinActivity.isAuthRequired(new PreferencesUtils(this))) {
+        PreferencesUtils settings = new PreferencesUtils(this);
+
+        if (!Messenger.isEmailVerified(settings)) {
+            showIntent = new Intent(this, RegisterActivity.class);
+        } else if (PinActivity.isAuthRequired(settings)) {
             showIntent = new Intent(this, PinActivity.class);
         } else {
             showIntent = new Intent(this, MainActivity.class);

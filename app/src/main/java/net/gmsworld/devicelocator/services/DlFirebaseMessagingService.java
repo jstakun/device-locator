@@ -18,6 +18,7 @@ import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.URLDecoder;
 import java.util.Map;
 
 import static net.gmsworld.devicelocator.utilities.Messenger.CID_SEPARATOR;
@@ -52,10 +53,14 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                 String command = message.get("command");
                 command += pinRead;
                 if (message.containsKey("args")) {
-                    String args = message.get("args");
-                    command += " " + args;
-                    extras.putString("args", args);
-                    Log.d(TAG, "Found args string: " + args);
+                    try {
+                        final String args = message.get("args");
+                        command += " " + URLDecoder.decode(args, "UTF-8");
+                        extras.putString("args", args);
+                        Log.d(TAG, "Found args string: " + args);
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getMessage(), e);
+                    }
                 }
 
                 //flex

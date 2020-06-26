@@ -33,6 +33,7 @@ import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.RegisterActivity;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.TelegramSetupDialogFragment;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
@@ -1122,6 +1123,10 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             settings.remove(NotificationActivationDialogFragment.EMAIL_SECRET);
                             Toaster.showToast(context, "Your email address is already verified.");
+                            if (context instanceof RegisterActivity) {
+                                RegisterActivity activity = (RegisterActivity) context;
+                                activity.openMainActivity();
+                            }
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
@@ -1460,11 +1465,11 @@ public class Messenger {
     }*/
 
     public static boolean isEmailVerified(PreferencesUtils settings) {
-        return !settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified", "registered", "sent");
+        return (!settings.contains(MainActivity.EMAIL_REGISTRATION_STATUS) && settings.contains(MainActivity.NOTIFICATION_EMAIL)) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.EMAIL_REGISTRATION_STATUS), "verified", "registered", "sent");
     }
 
     public static boolean isTelegramVerified(PreferencesUtils settings) {
-        return !settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified", "registered", "sent");
+        return (!settings.contains(MainActivity.SOCIAL_REGISTRATION_STATUS) && settings.contains(MainActivity.NOTIFICATION_SOCIAL)) || StringUtils.equalsAnyIgnoreCase(settings.getString(MainActivity.SOCIAL_REGISTRATION_STATUS), "verified", "registered", "sent");
     }
 
     public static boolean isAppInstalled(Context context, String packageName) {
