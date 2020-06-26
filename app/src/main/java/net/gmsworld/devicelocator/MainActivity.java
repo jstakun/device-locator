@@ -1188,7 +1188,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 emailInput.setText("");
             }
         } else if (!StringUtils.equals(email, newEmailAddress)) {
-            toaster.showActivityToast("Please enter valid email address!");
+            toaster.showActivityToast(R.string.email_invalid_error);
             emailInput.setText("");
         }
     }

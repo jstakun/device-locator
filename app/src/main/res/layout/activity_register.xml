@@ -79,7 +79,18 @@
                         android:paddingTop="16dp"
                         android:paddingBottom="16dp"
                         android:text="@string/privacy_policy_accept"
-                        android:textColor="@color/gray" />
+                        android:textColor="@color/gray"
+                        android:onClick="onSwitchSelected" />
+
+                    <Switch
+                        android:id="@+id/location_policy"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:text="@string/location_policy_accept"
+                        android:textColor="@color/gray"
+                        android:onClick="onSwitchSelected"/>
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -91,7 +102,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerHorizontal="true"
                             android:backgroundTint="@color/colorPrimary"
-                            android:paddingTop="16dp"
+                            android:padding="8dp"
                             android:text="@string/register_text"
                             android:textColor="@android:color/white" />
 

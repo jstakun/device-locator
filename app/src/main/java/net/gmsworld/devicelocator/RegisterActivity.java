@@ -32,9 +32,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class RegisterActivity extends AppCompatActivity implements NotificationActivationDialogFragment.NotificationActivationDialogListener, EmailNotificationDialogFragment.EmailNotificationDialogListener {
 
-    private PreferencesUtils settings;
+    public static final String PRIVACY_POLICY = "privacy_policy";
 
     private static final String TAG = RegisterActivity.class.getSimpleName();
+
+    private PreferencesUtils settings;
 
     private Toaster toaster;
 
@@ -54,18 +56,38 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         initEmailButton();
 
         initRegisterButton();
+
+        initEmailInput();
+    }
+
+    public void onSwitchSelected(View view) {
+        boolean checked = ((Switch) view).isChecked();
+
+        switch (view.getId()) {
+            case R.id.privacy_policy:
+                settings.setBoolean(PRIVACY_POLICY, checked);
+                break;
+            case R.id.location_policy:
+                if (checked && !Permissions.haveLocationPermission(this)) {
+                    Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                } else if (!checked) {
+                    Permissions.startSettingsIntent(this , "Location");
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        final TextView email = findViewById(R.id.email);
+        Switch privacyPolicyPermission = findViewById(R.id.privacy_policy);
+        privacyPolicyPermission.setChecked(settings.getBoolean(PRIVACY_POLICY, false));
 
-        if (StringUtils.isNotEmpty(email.getText().toString()) && !Messenger.isEmailVerified(settings)) {
-            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, toaster, this);
-            notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
-        }
+        Switch accessFineLocationPermission = findViewById(R.id.location_policy);
+        accessFineLocationPermission.setChecked(Permissions.haveLocationPermission(this));
     }
 
     @Override
@@ -78,7 +100,6 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 break;
             default:
                 break;
-
         }
     }
 
@@ -125,6 +146,19 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         }
     }
 
+    private void initEmailInput() {
+        final TextView emailInput = findViewById(R.id.email);
+        final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
+        if (StringUtils.isNotEmpty(email)) {
+            emailInput.setText(email);
+        }
+
+        if (StringUtils.isNotEmpty(email) && !Messenger.isEmailVerified(settings)) {
+            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, toaster, this);
+            notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+        }
+    }
+
     private void showEmailNotificationDialogFragment(final String[] userLogins) {
         EmailNotificationDialogFragment emailNotificationDialogFragment = EmailNotificationDialogFragment.newInstance(this, userLogins);
         emailNotificationDialogFragment.show(getFragmentManager(), EmailNotificationDialogFragment.TAG);
@@ -135,12 +169,21 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Switch privacyPolicy = (Switch)findViewById(R.id.privacy_policy);
-                if (privacyPolicy.isChecked()) {
-                    final TextView email = findViewById(R.id.email);
-                    registerEmail(email, true, true);
+                final TextView email = findViewById(R.id.email);
+                final String newEmailAddress = email.getText().toString();
+                if (StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) {
+                    if (settings.getBoolean(PRIVACY_POLICY, false)) {
+                        if (Permissions.haveLocationPermission(RegisterActivity.this)) {
+                            registerEmail(email, true, true);
+                        } else {
+                            toaster.showActivityToast(R.string.location_policy_toast);
+                        }
+                    } else {
+                        toaster.showActivityToast(R.string.privacy_policy_toast);
+                    }
                 } else {
-                    toaster.showActivityToast(R.string.privacy_policy_toast);
+                    toaster.showActivityToast(R.string.email_invalid_error);
+                    email.setText("");
                 }
             }
         });
@@ -154,7 +197,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
     @Override
     public void registerEmail(TextView emailInput, boolean validate, boolean sendRequest) {
-        String newEmailAddress = emailInput.getText().toString();
+        final String newEmailAddress = emailInput.getText().toString();
         if (StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) {
             if (sendRequest) {
                 if (Network.isNetworkAvailable(RegisterActivity.this)) {
@@ -168,7 +211,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 }
             }
         } else {
-            toaster.showActivityToast("Please enter valid email address!");
+            toaster.showActivityToast(R.string.email_invalid_error);
             emailInput.setText("");
         }
     }

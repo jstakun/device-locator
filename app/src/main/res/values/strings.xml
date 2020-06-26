@@ -164,15 +164,18 @@
     <string name="reset_permission">Allow Reset device to factory defaults command</string>
 
     <!-- Register Activity -->
-    <string name="privacy_policy_text">Please read our &lt;a href="http://www.gms-world.net/privacy.jsp">Privacy Policy&lt;/a></string>
-    <string name="register_email_text">In order to receive your device location notifications please enter your email address</string>
-    <string name="privacy_policy_toast">First please accept our Privacy Policy</string>
+    <string name="privacy_policy_text">&lt;a href="http://www.gms-world.net/privacy.jsp">Privacy Policy&lt;/a></string>
+    <string name="register_email_text">In order to receive location notifications from this device please enter your email address:</string>
+    <string name="privacy_policy_toast">Please accept our Privacy Policy</string>
     <string name="configure_email_notification_text">Configure email notification</string>
     <string name="register_text">Register</string>
     <string name="privacy_policy_accept">I accept aforementioned Privacy Policy</string>
+    <string name="location_policy_accept">Grant this device location access permission</string>
+    <string name="location_policy_toast">Please grant device location access permission</string>
 
     <!-- -->
 
+    <string name="email_invalid_error">Please enter valid email address!</string>
     <string name="forget_me">Forget me</string>
     <string name="send_code_again">Send code again</string>
     <string name="activation_code">Activation code</string>
