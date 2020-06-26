@@ -190,6 +190,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
     }
 
     public void openMainActivity() {
+        toaster.cancel();
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
