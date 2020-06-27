@@ -1134,8 +1134,13 @@ public class Messenger {
                                     Activity activity = (Activity) context;
                                     if (!activity.isFinishing()) {
                                         try {
-                                            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, new Toaster(activity));
-                                            notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                            if (activity instanceof RegisterActivity) {
+                                                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, new Toaster(activity), (RegisterActivity)activity);
+                                                notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                            } else {
+                                                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, new Toaster(activity));
+                                                notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                                            }
                                         } catch (Exception e) {
                                             Log.e(TAG, e.getMessage(), e);
                                         }

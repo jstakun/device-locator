@@ -149,7 +149,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         if (!accountNames.isEmpty()) {
             showEmailNotificationDialogFragment(accountNames.toArray(new String[accountNames.size()]));
         } else {
-            toaster.showActivityToast("No email addresses are registered on this device. Please enter a new one!");
+            toaster.showActivityToast("No email addresses are registered on this device. Please enter new one!");
         }
     }
 
@@ -197,7 +197,9 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
     }
 
     public void openMainActivity() {
+        Log.d(TAG, "openMainActivity()");
         toaster.cancel();
+        settings.setString(MainActivity.USER_LOGIN, settings.getString(MainActivity.NOTIFICATION_EMAIL));
         Intent intent = new Intent(this, MainActivity.class);
         intent.setAction(MainActivity.ACTION_DEVICE_MANAGER);
         startActivity(intent);

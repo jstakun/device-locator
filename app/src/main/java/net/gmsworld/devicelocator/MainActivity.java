@@ -910,8 +910,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         userAccounts.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
+                Log.d(TAG, "setOnTouchListener");
                 view.performClick();
-                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && userAccounts.getAdapter() == null) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && (userAccounts.getAdapter() == null || userAccounts.getAdapter().getCount() == 1)) {
                     initUserLoginInput(true, false);
                 }
                 return false;
@@ -944,44 +945,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     }
                 }
             }
-
-            int index = 0;
-            if (accountNames.size() > 1) {
-                String userLogin = settings.getString(USER_LOGIN);
-                if (StringUtils.isNotEmpty(userLogin)) {
-                    for (int i = 0; i < accountNames.size(); i++) {
-                        if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
-                            index = i;
-                            break;
-                        }
-                    }
-                } else {
-                    index = 1;
-                }
-            } else if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE) {
-                //show dialog with info What to do if no account is created
+            if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && accountNames.size() == 1) {
+                //show dialog with info What to do if no account is available created
                 LoginDialogFragment.newInstance().show(getFragmentManager(), LoginDialogFragment.TAG);
                 if (settings.contains(USER_LOGIN)) {
                     settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
                     onDeleteDevice(Messenger.getDeviceId(this, false), true);
                 }
             }
-
-            final CommandArrayAdapter accs = new CommandArrayAdapter(this, R.layout.command_row, accountNames);
-            userAccounts.setAdapter(accs);
-
-            if (index > 0) {
-                userAccounts.setSelection(index);
-            }
-
-            userAccounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    registerUserLogin(userAccounts, false);
-                }
-
-                public void onNothingSelected(AdapterView<?> adapterView) {
-                }
-            });
         } else {
             //Log.d(TAG, "Device settings view is visible");
             if (settings.contains(USER_LOGIN) && settings.contains(DevicesUtils.USER_DEVICES)) {
@@ -997,6 +968,37 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             }
         }
+
+        int index = 0;
+        if (accountNames.size() > 1) {
+            String userLogin = settings.getString(USER_LOGIN);
+            if (StringUtils.isNotEmpty(userLogin)) {
+                for (int i = 0; i < accountNames.size(); i++) {
+                    if (StringUtils.equalsIgnoreCase(userLogin, accountNames.get(i))) {
+                        index = i;
+                        break;
+                    }
+                }
+            } else {
+                index = 1;
+            }
+        }
+
+        final CommandArrayAdapter accs = new CommandArrayAdapter(this, R.layout.command_row, accountNames);
+        userAccounts.setAdapter(accs);
+
+        if (index > 0) {
+            userAccounts.setSelection(index);
+        }
+
+        userAccounts.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                registerUserLogin(userAccounts, false);
+            }
+
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
     }
 
     private synchronized void registerUserLogin(Spinner userLoginSpinner, boolean silent) {
@@ -1597,7 +1599,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (!accountNames.isEmpty()) {
             showEmailNotificationDialogFragment(accountNames.toArray(new String[accountNames.size()]));
         } else {
-            toaster.showActivityToast("No email addresses are registered on this device. Please enter a new one!");
+            toaster.showActivityToast("No email addresses are registered on this device. Please enter new one!");
         }
     }
 
