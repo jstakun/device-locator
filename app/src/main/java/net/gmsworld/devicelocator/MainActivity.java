@@ -946,7 +946,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             }
             if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && accountNames.size() == 1) {
-                //show dialog with info What to do if no account is available created
+                //show dialog with info What to do if no accounts are registered on the device
                 LoginDialogFragment.newInstance().show(getFragmentManager(), LoginDialogFragment.TAG);
                 if (settings.contains(USER_LOGIN)) {
                     settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
@@ -954,7 +954,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             }
         } else {
-            //Log.d(TAG, "Device settings view is visible");
             if (settings.contains(USER_LOGIN) && settings.contains(DevicesUtils.USER_DEVICES)) {
                 settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
                 onDeleteDevice(Messenger.getDeviceId(this, false), true);
@@ -1124,7 +1123,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                     String pasteData = item.getText().toString();
                                     if (!StringUtils.equals(pasteData, email) && Patterns.EMAIL_ADDRESS.matcher(pasteData).matches()) {
                                         emailInput.setText(pasteData);
-                                        toaster.showActivityToast("Pasted email address from clipboard!");
+                                        toaster.showActivityToast("Email address has been pasted from clipboard");
                                         break;
                                     }
                                 }

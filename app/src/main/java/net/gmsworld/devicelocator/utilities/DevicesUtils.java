@@ -79,6 +79,7 @@ public class DevicesUtils {
                                             deviceSet.add(device.toString());
                                         }
                                         PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet(USER_DEVICES, deviceSet).putLong(USER_DEVICES_TIMESTAMP, System.currentTimeMillis()).apply();
+                                        //TODO refactor this code to use interface
                                         if (callerActivity != null) {
                                             if (callerActivity instanceof MainActivity) {
                                                 ((MainActivity)callerActivity).populateDeviceList(userDevices);

@@ -970,6 +970,7 @@ public class Messenger {
                             sendEmailRegistrationRequest(context, email, validate, retryCount - 1);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
+                            settings.edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, "unverified").commit();
                         }
                     }
                 });
@@ -993,6 +994,7 @@ public class Messenger {
                         } else if (responseCode == 500 && retryCount > 0) {
                             sendTelegramRegistrationRequest(context, telegramId, retryCount - 1);
                         } else {
+                            settings.edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "unverified").commit();
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
                     }
@@ -1123,6 +1125,7 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             settings.remove(NotificationActivationDialogFragment.EMAIL_SECRET);
                             Toaster.showToast(context, "Your email address is already verified.");
+                            //TODO refactor this code to use interface
                             if (context instanceof RegisterActivity) {
                                 RegisterActivity activity = (RegisterActivity) context;
                                 activity.openMainActivity();
@@ -1130,6 +1133,7 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
+                                //TODO refactor this code to use interface
                                 if (context instanceof Activity) {
                                     Activity activity = (Activity) context;
                                     if (!activity.isFinishing()) {
@@ -1275,6 +1279,7 @@ public class Messenger {
                             if (username != null) {
                                 settings.edit().putString(MainActivity.USER_LOGIN, username).apply();
                                 Log.d(TAG, "User login is set");
+                                //TODO refactor this code to use interface
                                 if (context instanceof MainActivity) {
                                     ((MainActivity)context).initDeviceList();
                                 }
@@ -1282,6 +1287,7 @@ public class Messenger {
                             if (deviceName != null) {
                                 settings.edit().putString(MainActivity.DEVICE_NAME, deviceName).apply();
                                 Log.d(TAG, "Device name is set");
+                                //TODO refactor this code to use interface
                                 if (context instanceof MainActivity) {
                                     ((MainActivity)context).initDeviceList();
                                 }

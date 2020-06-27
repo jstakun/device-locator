@@ -2,11 +2,14 @@ package net.gmsworld.devicelocator.fragments;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -34,7 +37,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
     public static final String EMAIL_SECRET = "emailSecret";
     public static final String TELEGRAM_SECRET = "telegramSecret";
 
-    public static final String TAG = "NotificationActivationDialog";
+    public static final String TAG = "NotifActivationDialog";
 
     private Toaster toaster;
 
@@ -88,7 +91,37 @@ public class NotificationActivationDialogFragment extends DialogFragment {
         }
         final String activationCode = acc;
 
-        EditText activationCodeInput = dialogView.findViewById(R.id.activationCode);
+        final EditText activationCodeInput = dialogView.findViewById(R.id.activationCode);
+
+        activationCodeInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    String currentText = activationCodeInput.getText().toString();
+                    if (currentText.isEmpty()) {
+                        //paste code from clipboard
+                        try {
+                            ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+                            if (clipboard != null && clipboard.hasPrimaryClip()) {
+                                int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
+                                for (int i = 0; i < clipboardItemCount; i++) {
+                                    ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
+                                    final String code = item.getText().toString();
+                                    if (code.length() == 4 && StringUtils.equals(code, activationCode)) {
+                                        activationCodeInput.setText(code);
+                                        toaster.showActivityToast("Code has been pasted from clipboard");
+                                        onEnteredActivationCode(settings, secret);
+                                        break;
+                                    }
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, e.getMessage(), e);
+                        }
+                    }
+                }
+            }
+        });
 
         activationCodeInput.addTextChangedListener(new TextWatcher() {
             @Override
@@ -100,42 +133,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
             public void onTextChanged(CharSequence code, int i, int i1, int i2) {
                 //Log.d(TAG, "Comparing " + code + " with " + activationCode);
                 if (code.length() == 4 && StringUtils.equals(code, activationCode)) {
-                    if (Network.isNetworkAvailable(getActivity())) {
-                        String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
-                        Map<String, String> headers = new HashMap<>();
-                        headers.put("Authorization", "Bearer " + tokenStr);
-                        toaster.showActivityToast(R.string.please_wait);
-                        final String verifyUrl = getActivity().getString(R.string.verifyUrl) + "/" + secret;
-                        final Context context = getActivity();
-                        Network.get(context, verifyUrl, headers, new Network.OnGetFinishListener() {
-                            @Override
-                            public void onGetFinish(String results, int responseCode, String url) {
-                                if (responseCode == 200) {
-                                    if (mode == Mode.Telegram) {
-                                        toaster.showActivityToast("Your Telegram chat or channel has been verified.");
-                                        settings.setString(MainActivity.SOCIAL_REGISTRATION_STATUS, "verified");
-                                        settings.remove(TELEGRAM_SECRET, TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT);
-                                    } else {
-                                        toaster.showActivityToast("Your email address has been verified.");
-                                        settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, "verified");
-                                        settings.remove(EMAIL_SECRET);
-                                    }
-                                    if (initListener != null) {
-                                        initListener.openMainActivity();
-                                    }
-                                } else {
-                                    if (mode == Mode.Telegram) {
-                                        toaster.showActivityToast("Failed to verify Telegram chat or channel! Please try again in a few moments.");
-                                    } else {
-                                        toaster.showActivityToast("Failed to verify email address! Please try again in a few moments.");
-                                    }
-                                }
-                            }
-                        });
-                        NotificationActivationDialogFragment.this.dismiss();
-                    } else {
-                        toaster.showActivityToast("No network available. Failed to verify!");
-                    }
+                    onEnteredActivationCode(settings, secret);
                 }
             }
 
@@ -144,6 +142,8 @@ public class NotificationActivationDialogFragment extends DialogFragment {
 
             }
         });
+
+        activationCodeInput.requestFocus();
 
         builder.setView(dialogView)
                 .setPositiveButton(R.string.send_code_again, new DialogInterface.OnClickListener() {
@@ -187,5 +187,44 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                 });
 
         return builder.create();
+    }
+
+    private void onEnteredActivationCode(final PreferencesUtils settings, String secret) {
+        if (Network.isNetworkAvailable(getActivity())) {
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer " + tokenStr);
+            toaster.showActivityToast(R.string.please_wait);
+            final String verifyUrl = getActivity().getString(R.string.verifyUrl) + "/" + secret;
+            final Context context = getActivity();
+            Network.get(context, verifyUrl, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    if (responseCode == 200) {
+                        if (mode == Mode.Telegram) {
+                            toaster.showActivityToast("Your Telegram chat or channel has been verified.");
+                            settings.setString(MainActivity.SOCIAL_REGISTRATION_STATUS, "verified");
+                            settings.remove(TELEGRAM_SECRET, TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT);
+                        } else {
+                            toaster.showActivityToast("Your email address has been verified.");
+                            settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, "verified");
+                            settings.remove(EMAIL_SECRET);
+                        }
+                        if (initListener != null) {
+                            initListener.openMainActivity();
+                        }
+                    } else {
+                        if (mode == Mode.Telegram) {
+                            toaster.showActivityToast("Failed to verify Telegram chat or channel! Please try again in a few moments.");
+                        } else {
+                            toaster.showActivityToast("Failed to verify email address! Please try again in a few moments.");
+                        }
+                    }
+                }
+            });
+            NotificationActivationDialogFragment.this.dismiss();
+        } else {
+            toaster.showActivityToast("No network available. Failed to verify!");
+        }
     }
 }
