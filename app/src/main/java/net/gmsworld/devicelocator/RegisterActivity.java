@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import net.gmsworld.devicelocator.fragments.EmailNotificationDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
+import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.LinkMovementMethodFixed;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
@@ -97,6 +98,12 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 if (Permissions.haveGetAccountsPermission(this)) {
                     initEmailListDialog();
                 }
+                break;
+            case Permissions.PERMISSIONS_LOCATION:
+                //send device location to admin channel
+                Bundle extras = new Bundle();
+                extras.putString("telegramId", getString(R.string.telegram_notification));
+                SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
                 break;
             default:
                 break;
@@ -192,6 +199,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
     public void openMainActivity() {
         toaster.cancel();
         Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction(MainActivity.ACTION_DEVICE_MANAGER);
         startActivity(intent);
         finish();
     }

@@ -503,6 +503,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void showCard(String action) {
+        Log.d(TAG, "showCard(" + action + ")");
         boolean isTrackerShown = settings.getBoolean("isTrackerShown", false);
         boolean isDeviceManagerShown = settings.getBoolean("isDeviceManagerShown", false);
 
@@ -520,6 +521,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     findViewById(R.id.email).requestFocus();
                     break;
                 case ACTION_DEVICE_MANAGER:
+                    isTrackerShown = false;
                     isDeviceManagerShown = true;
                     settings.setBoolean("isTrackerShown", false);
                     settings.setBoolean("isDeviceManagerShown", true);

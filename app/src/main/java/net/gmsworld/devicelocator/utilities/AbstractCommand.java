@@ -294,7 +294,7 @@ public abstract class AbstractCommand {
         if (StringUtils.isNotEmpty(from)) {
             auditLog += Messenger.CID_SEPARATOR + from + " ";
         }
-        auditLog += command;
+        auditLog += command + " 0";
         if (StringUtils.isNotEmpty(message)) {
             auditLog += " " + message;
         }

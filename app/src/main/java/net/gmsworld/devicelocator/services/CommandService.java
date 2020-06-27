@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator.services;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.AppUtils;
+import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
@@ -21,6 +23,7 @@ import net.gmsworld.devicelocator.views.QuotaResetDialogActivity;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +33,8 @@ import java.util.Map;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
+
+import static net.gmsworld.devicelocator.utilities.AbstractCommand.AUDIT_FILE;
 
 public class CommandService extends IntentService implements OnLocationUpdatedListener {
 
@@ -157,7 +162,9 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils settings, final String deviceId) {
         if (Network.isNetworkAvailable(this)) {
             commandsInProgress.add(imei + "_" + command);
-            Log.d(TAG, "Sending command " + command + " to the device " + imei);
+            final String deviceName = (StringUtils.isNotEmpty(name) ? name : imei);
+            auditCommand(this, command, deviceName);
+            Log.d(TAG, "Sending command " + command + " to " + imei);
             final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
             headers.put("X-GMS-AppId", "2");
@@ -167,7 +174,6 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 Network.post(this, getString(R.string.deviceManagerUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
-                        final String deviceName = (StringUtils.isNotEmpty(name) ? name : imei);
                         if (responseCode == 200) {
                             toaster.showServiceToast(R.string.command_sent_to_device, StringUtils.capitalize(command), deviceName);
                         } else if (responseCode == 404) {
@@ -210,5 +216,15 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         } else {
             toaster.showServiceToast(R.string.no_network_error);
         }
+    }
+
+    private void auditCommand(Context context, final String command, final String to) {
+        String auditLog = System.currentTimeMillis() + " ";
+        if (StringUtils.isNotEmpty(to)) {
+            auditLog += Messenger.CID_SEPARATOR + to + " ";
+        }
+        auditLog += command + " 1";
+        File auditFile = Files.getFilesDir(context, AUDIT_FILE, false);
+        Files.appendLineToFileFromContextDir(auditFile, auditLog, 100, 10);
     }
 }

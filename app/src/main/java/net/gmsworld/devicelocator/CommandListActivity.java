@@ -60,25 +60,44 @@ public class CommandListActivity extends AppCompatActivity {
 
             for (int i = commands.size() - 1; i >= 0; i--) {
                 String command = commands.get(i);
-                String[] tokens = StringUtils.split(command, " ");
+                //timestamp sender/to command type message
+                //type: 0 - received, 1 - sent
+                final String[] tokens = StringUtils.split(command, " ");
                 final long timestamp = Long.parseLong(tokens[0]);
-                final String sender = tokens[1];
-                if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
-                    final String deviceName = DevicesUtils.getDeviceName(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
-                    positions.add(DevicesUtils.getDevicePosition(devices, sender.substring(Messenger.CID_SEPARATOR.length())));
-                    String commandName = tokens[2];
-                    String message;
-                    if (StringUtils.startsWith(commandName, "replyto:")) {
-                        message = "Reply to command " + commandName.substring(8);
-                    } else {
-                        message = "Command " + tokens[2];
+                String sender = tokens[1];
+                final String commandName = tokens[2];
+                final String type = tokens[3];
+                String message = null;
+                int position = -1;
+                if (StringUtils.equals(type, "1")) {
+                    if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
+                        sender = sender.substring(Messenger.CID_SEPARATOR.length());
                     }
-                    message += " has been received from " + deviceName + "\n" + pt.format(new Date(timestamp));
-                    values.add(message);
+                    message = "Command " + StringUtils.capitalize(commandName) + " has been sent to " + sender + "\n" + pt.format(new Date(timestamp));
+                    position = DevicesUtils.getDevicePosition(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
                 } else {
-                    final String message = "Command " + tokens[1] + "\n" + "has been received from unknown device\n" + pt.format(new Date(timestamp));
+                    if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
+                        final String deviceName = DevicesUtils.getDeviceName(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
+                        position = DevicesUtils.getDevicePosition(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
+                        if (StringUtils.startsWith(commandName, "replyto:")) {
+                            message = "Reply to command " + StringUtils.capitalize(commandName.substring(8));
+                        } else {
+                            if (commandName.endsWith("dlapp")) {
+                                message = "Command " + StringUtils.capitalize(commandName.substring(0, commandName.length()-5));
+                            } else {
+                                message = "Command " + StringUtils.capitalize(commandName);
+                            }
+                        }
+                        message += " has been received from " + deviceName + "\n" + pt.format(new Date(timestamp));
+                    } else {
+                        //old format - leave it as it is
+                        message = "Command " + sender + "\n" + "has been received from unknown device\n" + pt.format(new Date(timestamp));
+                        position = -1;
+                    }
+                }
+                if (message != null) {
                     values.add(message);
-                    positions.add(-1);
+                    positions.add(position);
                 }
             }
 
@@ -104,9 +123,7 @@ public class CommandListActivity extends AppCompatActivity {
         //Log.d(TAG, "onCreateOptionsMenu()");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
-
         menu.findItem(R.id.commandLog).setVisible(false);
-
         return true;
     }
 
@@ -167,6 +184,5 @@ public class CommandListActivity extends AppCompatActivity {
         public boolean hasStableIds() {
             return true;
         }
-
     }
 }
