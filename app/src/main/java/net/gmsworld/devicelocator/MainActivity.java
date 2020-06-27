@@ -206,8 +206,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             isTrackingServiceBound = false;
         }
 
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-
         //register firebase token if has changed and not set to server
         final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
         final String newFirebaseToken = settings.getString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN);
@@ -219,6 +217,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
             Messenger.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
         }
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        firebaseAnalytics.logEvent("main_activity", new Bundle());
     }
 
     @Override
@@ -688,7 +689,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         Bundle bundle = new Bundle();
         bundle.putBoolean("running", this.running);
-        firebaseAnalytics.logEvent("sms_control", bundle);
+        firebaseAnalytics.logEvent("main_activity_sms_control", bundle);
 
         //check if location settings are enabled
         if (running && !GmsSmartLocationManager.isLocationEnabled(this)) {
@@ -718,7 +719,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         Bundle bundle = new Bundle();
         bundle.putBoolean("running", this.motionDetectorRunning);
-        firebaseAnalytics.logEvent("device_tracker", bundle);
+        firebaseAnalytics.logEvent("main_activity_device_tracker", bundle);
 
         toogleLocationDetector();
     }
@@ -1006,7 +1007,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (!StringUtils.equals(userLogin, newUserLogin)) {
             Bundle bundle = new Bundle();
             bundle.putBoolean("running", StringUtils.isNotEmpty(newUserLogin));
-            firebaseAnalytics.logEvent("device_manager", bundle);
+            firebaseAnalytics.logEvent("main_activity_device_manager", bundle);
             String deviceName = settings.getString(DEVICE_NAME);
             if (StringUtils.isEmpty(deviceName)) {
                 deviceName = Messenger.getDefaultDeviceName();

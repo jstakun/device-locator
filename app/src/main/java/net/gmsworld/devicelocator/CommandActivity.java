@@ -205,6 +205,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         findViewById(R.id.commandView).requestFocus();
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        firebaseAnalytics.logEvent("command_activity", new Bundle());
     }
 
     @Override

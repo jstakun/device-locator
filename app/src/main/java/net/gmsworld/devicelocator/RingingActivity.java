@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -40,6 +42,8 @@ public class RingingActivity extends AppCompatActivity {
         });
 
         ViewCompat.setBackgroundTintList(stopRingingButton, ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+
+        FirebaseAnalytics.getInstance(this).logEvent("ringing_activity", new Bundle());
     }
 
     @Override

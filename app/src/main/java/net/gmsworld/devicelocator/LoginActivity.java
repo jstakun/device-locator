@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -91,6 +92,8 @@ public class LoginActivity extends AppCompatActivity  {
         reset.setText(Html.fromHtml(getString(R.string.resetLink)));
 
         toaster = new Toaster(this);
+
+        FirebaseAnalytics.getInstance(this).logEvent("login_activity", new Bundle());
     }
 
     private void attemptLogin() {

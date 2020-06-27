@@ -11,6 +11,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.utilities.AbstractCommand;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
@@ -116,6 +118,8 @@ public class CommandListActivity extends AppCompatActivity {
             listview.setAdapter(null);
             listview.setEmptyView(findViewById(R.id.commandEmpty));
         }
+
+        FirebaseAnalytics.getInstance(this).logEvent("command_list_activity", new Bundle());
     }
 
     @Override

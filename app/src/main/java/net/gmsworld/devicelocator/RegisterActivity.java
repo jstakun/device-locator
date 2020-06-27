@@ -13,6 +13,8 @@ import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import net.gmsworld.devicelocator.fragments.EmailNotificationDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.services.SmsSenderService;
@@ -59,6 +61,8 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         initRegisterButton();
 
         initEmailInput();
+
+        FirebaseAnalytics.getInstance(this).logEvent("register_activity", new Bundle());
     }
 
     public void onSwitchSelected(View view) {
@@ -173,6 +177,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
     private void initRegisterButton() {
         Button registerButton = findViewById(R.id.register_button);
+        final FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -182,15 +187,19 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                     if (settings.getBoolean(PRIVACY_POLICY, false)) {
                         if (Permissions.haveLocationPermission(RegisterActivity.this)) {
                             registerEmail(email, true, true);
+                            firebaseAnalytics.logEvent("register_ok", new Bundle());
                         } else {
                             toaster.showActivityToast(R.string.location_policy_toast);
+                            firebaseAnalytics.logEvent("register_location_permission", new Bundle());
                         }
                     } else {
                         toaster.showActivityToast(R.string.privacy_policy_toast);
+                        firebaseAnalytics.logEvent("register_privacy_policy", new Bundle());
                     }
                 } else {
                     toaster.showActivityToast(R.string.email_invalid_error);
                     email.setText("");
+                    firebaseAnalytics.logEvent("register_invalid_email", new Bundle());
                 }
             }
         });

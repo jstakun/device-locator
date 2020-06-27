@@ -22,6 +22,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
@@ -154,6 +156,8 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                 }
             }
         });
+
+        FirebaseAnalytics.getInstance(this).logEvent("pin_activity", new Bundle());
     }
 
     @Override

@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Switch;
 
 import com.androidhiddencamera.HiddenCameraUtils;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
@@ -63,6 +64,8 @@ public class PermissionsActivity extends AppCompatActivity {
             FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.permissions_first_time_use, R.drawable.ic_settings_cell_gray);
             firstTimeUseDialogFragment.show(getFragmentManager(), "PermissionsFirstTimeUseDialog");
         }
+
+        FirebaseAnalytics.getInstance(this).logEvent("permissions_activity", new Bundle());
     }
 
     @Override

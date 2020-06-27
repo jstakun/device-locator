@@ -102,7 +102,6 @@
                             android:layout_height="wrap_content"
                             android:layout_centerHorizontal="true"
                             android:backgroundTint="@color/colorPrimary"
-                            android:padding="8dp"
                             android:text="@string/register_text"
                             android:textColor="@android:color/white" />
 

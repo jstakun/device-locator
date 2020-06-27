@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import net.gmsworld.devicelocator.fragments.RegisterDeviceDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
@@ -97,6 +98,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         toaster = new Toaster(this);
         thisDeviceImei = Messenger.getDeviceId(this, false);
         deviceImei = getIntent().getStringExtra("imei");
+
+        FirebaseAnalytics.getInstance(this).logEvent("maps_activity", new Bundle());
     }
 
     @Override

@@ -24,6 +24,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -154,6 +155,8 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         getRoutePoints(listener);
 
         initShareRouteButton();
+
+        FirebaseAnalytics.getInstance(this).logEvent("route_activity", new Bundle());
     }
 
     @Override
