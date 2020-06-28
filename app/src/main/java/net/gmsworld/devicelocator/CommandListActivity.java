@@ -75,12 +75,14 @@ public class CommandListActivity extends AppCompatActivity {
                     if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
                         sender = sender.substring(Messenger.CID_SEPARATOR.length());
                     }
-                    message = "Command " + StringUtils.capitalize(commandName) + " has been sent to " + sender + "\n" + pt.format(new Date(timestamp));
-                    position = DevicesUtils.getDevicePosition(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
+                    final String deviceName = DevicesUtils.getDeviceName(devices, sender);
+                    message = "Command " + StringUtils.capitalize(commandName) + " has been sent to " + deviceName + "\n" + pt.format(new Date(timestamp));
+                    position = DevicesUtils.getDevicePosition(devices, sender);
                 } else {
                     if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
-                        final String deviceName = DevicesUtils.getDeviceName(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
-                        position = DevicesUtils.getDevicePosition(devices, sender.substring(Messenger.CID_SEPARATOR.length()));
+                        sender = sender.substring(Messenger.CID_SEPARATOR.length());
+                        final String deviceName = DevicesUtils.getDeviceName(devices, sender);
+                        position = DevicesUtils.getDevicePosition(devices, sender);
                         if (StringUtils.startsWith(commandName, "replyto:")) {
                             message = "Reply to command " + StringUtils.capitalize(commandName.substring(8));
                         } else {

@@ -163,7 +163,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         if (Network.isNetworkAvailable(this)) {
             commandsInProgress.add(imei + "_" + command);
             final String deviceName = (StringUtils.isNotEmpty(name) ? name : imei);
-            auditCommand(this, command, deviceName);
+            auditCommand(this, command, imei);
             Log.d(TAG, "Sending command " + command + " to " + imei);
             final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
