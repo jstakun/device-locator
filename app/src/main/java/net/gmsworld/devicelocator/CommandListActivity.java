@@ -69,8 +69,8 @@ public class CommandListActivity extends AppCompatActivity {
                 String sender = tokens[1];
                 final String commandName = tokens[2];
                 final String type = tokens[3];
-                String message = null;
-                int position = -1;
+                String message;
+                int position;
                 if (StringUtils.equals(type, "1")) {
                     if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
                         sender = sender.substring(Messenger.CID_SEPARATOR.length());
@@ -99,10 +99,8 @@ public class CommandListActivity extends AppCompatActivity {
                         position = -1;
                     }
                 }
-                if (message != null) {
-                    values.add(message);
-                    positions.add(position);
-                }
+                values.add(message);
+                positions.add(position);
             }
 
             final CommandArrayAdapter adapter = new CommandArrayAdapter(this, android.R.layout.simple_list_item_1, values, positions);
