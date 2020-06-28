@@ -67,8 +67,12 @@ public class CommandListActivity extends AppCompatActivity {
                 final String[] tokens = StringUtils.split(command, " ");
                 final long timestamp = Long.parseLong(tokens[0]);
                 String sender = tokens[1];
-                final String commandName = tokens[2];
-                final String type = tokens[3];
+                String commandName = null;
+                String type = null;
+                if (tokens.length > 2) {
+                    commandName = tokens[2];
+                    type = tokens[3];
+                }
                 String message;
                 int position;
                 if (StringUtils.equals(type, "1")) {
@@ -79,7 +83,7 @@ public class CommandListActivity extends AppCompatActivity {
                     message = "Command " + StringUtils.capitalize(commandName) + " has been sent to " + deviceName + "\n" + pt.format(new Date(timestamp));
                     position = DevicesUtils.getDevicePosition(devices, sender);
                 } else {
-                    if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
+                    if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR) && StringUtils.isNotEmpty(commandName)) {
                         sender = sender.substring(Messenger.CID_SEPARATOR.length());
                         final String deviceName = DevicesUtils.getDeviceName(devices, sender);
                         position = DevicesUtils.getDevicePosition(devices, sender);
