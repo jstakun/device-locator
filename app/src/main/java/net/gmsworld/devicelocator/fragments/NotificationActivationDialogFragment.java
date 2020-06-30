@@ -150,7 +150,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         if (mode == Mode.Telegram) {
-                            Log.d(TAG, "Sending Telegram registration request again...");
+                            Log.d(TAG, "Sending again Telegram registration request ...");
                             final String telegramId = settings.getString(MainActivity.NOTIFICATION_SOCIAL);
                             if (StringUtils.isNotEmpty(telegramId)) {
                                 Messenger.sendTelegramRegistrationRequest(getActivity(), telegramId, 1);
@@ -160,7 +160,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                                 toaster.showActivityToast("Failed to send Telegram channel or chat registration request!");
                             }
                         } else {
-                            Log.d(TAG, "Sending email registration request again...");
+                            Log.d(TAG, "Sending again email registration request ...");
                             final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
                             if (StringUtils.isNotEmpty(email)) {
                                 Messenger.sendEmailRegistrationRequest(getActivity(), email, true, 1);
@@ -175,13 +175,13 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                 .setNegativeButton(R.string.forget_me, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         if (mode == Mode.Telegram) {
-                            Log.d(TAG, "Cancelling Telegram registration request...");
+                            Log.d(TAG, "Cancelling Telegram registration request ...");
                             settings.remove(MainActivity.NOTIFICATION_SOCIAL, MainActivity.SOCIAL_REGISTRATION_STATUS, TELEGRAM_SECRET);
                             final TextView telegramInput = getActivity().findViewById(R.id.telegramId);
                             telegramInput.setText("");
                             NotificationActivationDialogFragment.this.dismiss();
                         } else {
-                            Log.d(TAG, "Cancelling email registration request...");
+                            Log.d(TAG, "Cancelling email registration request ...");
                             settings.remove(MainActivity.NOTIFICATION_EMAIL, MainActivity.EMAIL_REGISTRATION_STATUS, EMAIL_SECRET);
                             final TextView emailInput = getActivity().findViewById(R.id.email);
                             emailInput.setText("");
