@@ -282,6 +282,7 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().
                                     putString(MainActivity.EMAIL_REGISTRATION_STATUS, "unverified").apply();
+                            //TODO refactor this code to use interface
                             if (context instanceof Activity) {
                                 final TextView emailInput = ((Activity) context).findViewById(R.id.email);
                                 if (emailInput != null) {
@@ -373,6 +374,7 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().
                                     putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "unverified").apply();
+                            //TODO refactor this code to use interface
                             if (context instanceof Activity) {
                                 final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
                                 if (telegramInput != null) {
@@ -381,6 +383,7 @@ public class Messenger {
                             }
                             Toaster.showToast(context, R.string.telegram_unverified_error);
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
+                            //TODO refactor this code to use interface
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
                             if (context instanceof Activity) {
                                final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
@@ -1034,6 +1037,7 @@ public class Messenger {
                     } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                         //show dialog to enter activation code sent to user
                         if (StringUtils.isNotEmpty(secret)) {
+                            //TODO refactor this code to use interface
                             if (context instanceof Activity) {
                                 Activity activity = (Activity)context;
                                 if (!activity.isFinishing()) {
@@ -1054,6 +1058,7 @@ public class Messenger {
                 } else if (responseCode == 403) {
                     onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
                 } else if (responseCode == 400) {
+                    //TODO refactor this code to use interface
                     if (context instanceof Activity) {
                         Activity activity = (Activity)context;
                         if (!activity.isFinishing()) {
@@ -1084,6 +1089,7 @@ public class Messenger {
 
     public static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
+        //TODO refactor this code to use interface
         if (context instanceof Activity) {
             final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
             if (clearTextInput) {
@@ -1173,6 +1179,7 @@ public class Messenger {
 
     private static void onFailedEmailRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
+        //TODO refactor this code to use interface
         if (context instanceof Activity) {
             final TextView emailInput = ((Activity) context).findViewById(R.id.email);
             if (clearTextInput) {
