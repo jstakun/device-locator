@@ -1891,7 +1891,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     @Override
-    public void onError(int messageId) {
+    public void onDeviceLoadError(int messageId) {
         final TextView deviceListEmpty = findViewById(R.id.deviceListEmpty);
         deviceListEmpty.setText(messageId);
     }

@@ -34,7 +34,7 @@ public class DevicesUtils {
 
     public interface DeviceLoadListener {
         void onDeviceListLoaded(ArrayList<Device> userDevices);
-        void onError(int messageId);
+        void onDeviceLoadError(int messageId);
         void onDeviceRemoved();
     }
 
@@ -88,10 +88,10 @@ public class DevicesUtils {
                                             deviceLoadListener.onDeviceListLoaded(userDevices);
                                         }
                                     } else if (deviceLoadListener != null) {
-                                        deviceLoadListener.onError(R.string.devices_list_empty);
+                                        deviceLoadListener.onDeviceLoadError(R.string.devices_list_empty);
                                     }
                                 } else if (deviceLoadListener != null) {
-                                    deviceLoadListener.onError(R.string.devices_list_empty);
+                                    deviceLoadListener.onDeviceLoadError(R.string.devices_list_empty);
                                 }
                                 if (!thisDeviceOnList) {
                                     //this device has been removed from other device
@@ -101,7 +101,7 @@ public class DevicesUtils {
                                     }
                                 }
                             } else if (deviceLoadListener != null) {
-                                deviceLoadListener.onError(R.string.devices_list_loading_failed);
+                                deviceLoadListener.onDeviceLoadError(R.string.devices_list_loading_failed);
                             }
                               //else if (caller instanceof MainActivity) {
                               //  final TextView deviceListEmpty = ((MainActivity)caller).findViewById(R.id.deviceListEmpty);
