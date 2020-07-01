@@ -54,6 +54,14 @@ public class PreferencesUtils {
         }
     }
 
+    public void setStringSet(String key, Set<String> value) {
+        if (value != null && !value.isEmpty()) {
+            sharedPreferences.edit().putStringSet(key, value).apply();
+        } else {
+            sharedPreferences.edit().remove(key).apply();
+        }
+    }
+
     public void setLong(String key, Long value) {
         if (value != null) {
             sharedPreferences.edit().putLong(key, value).apply();

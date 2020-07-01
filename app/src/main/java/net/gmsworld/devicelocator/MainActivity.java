@@ -110,7 +110,7 @@ import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWith
 
 public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener, NewVersionDialogFragment.NewVersionDialogListener,
         SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener,
-        DownloadFullApplicationDialogFragment.DownloadFullApplicationDialogListener, EmailNotificationDialogFragment.EmailNotificationDialogListener {
+        DownloadFullApplicationDialogFragment.DownloadFullApplicationDialogListener, EmailNotificationDialogFragment.EmailNotificationDialogListener, DevicesUtils.DeviceLoadListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -1616,7 +1616,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             ArrayList<Device> userDevices = DevicesUtils.buildDeviceList(settings);
             if (!userDevices.isEmpty()) {
                 Collections.sort(userDevices, new DeviceComparator()); //sort by device creation date
-                populateDeviceList(userDevices);
+                onDeviceListLoaded(userDevices);
             }
             //second load device list and set array adapter
             DevicesUtils.loadDeviceList(this, settings, this);
@@ -1625,7 +1625,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
     }
 
-    public void populateDeviceList(final ArrayList<Device> userDevices) {
+    @Override
+    public void onDeviceListLoaded(ArrayList<Device> userDevices) {
         final ListView deviceList = findViewById(R.id.deviceList);
         final DeviceArrayAdapter adapter = new DeviceArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, userDevices);
         Log.d(TAG, "Found " + userDevices.size() + " devices");
@@ -1887,6 +1888,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         };
         //register receiver for when .apk download is compete
         registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+    }
+
+    @Override
+    public void onError(int messageId) {
+        final TextView deviceListEmpty = findViewById(R.id.deviceListEmpty);
+        deviceListEmpty.setText(messageId);
+    }
+
+    @Override
+    public void onDeviceRemoved() {
+        initUserLoginInput(true, false);
     }
 
     // -----------------------------------------------------------------------------------

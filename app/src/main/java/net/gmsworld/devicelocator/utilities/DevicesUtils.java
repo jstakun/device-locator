@@ -3,9 +3,7 @@ package net.gmsworld.devicelocator.utilities;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
-import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -34,7 +32,13 @@ public class DevicesUtils {
 
     private static final String TAG = DevicesUtils.class.getSimpleName();
 
-    public static void loadDeviceList(final Context context, final PreferencesUtils settings, final Activity callerActivity) {
+    public interface DeviceLoadListener {
+        void onDeviceListLoaded(ArrayList<Device> userDevices);
+        void onError(int messageId);
+        void onDeviceRemoved();
+    }
+
+    public static void loadDeviceList(final Context context, final PreferencesUtils settings, final DeviceLoadListener deviceLoadListener) {
         if (Network.isNetworkAvailable(context)) {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             final Map<String, String> headers = new HashMap<>();
@@ -78,34 +82,31 @@ public class DevicesUtils {
                                         for (Device device : userDevices) {
                                             deviceSet.add(device.toString());
                                         }
-                                        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet(USER_DEVICES, deviceSet).putLong(USER_DEVICES_TIMESTAMP, System.currentTimeMillis()).apply();
-                                        //TODO refactor this code to use interface
-                                        if (callerActivity != null) {
-                                            if (callerActivity instanceof MainActivity) {
-                                                ((MainActivity)callerActivity).populateDeviceList(userDevices);
-                                            } //else if (callerActivity instanceof MapsActivity) {
-                                              //  ((MapsActivity)callerActivity).loadDeviceMarkers(false);
-                                            //}
+                                        settings.setStringSet(USER_DEVICES, deviceSet);
+                                        settings.setLong(USER_DEVICES_TIMESTAMP, System.currentTimeMillis());
+                                        if (deviceLoadListener != null) {
+                                            deviceLoadListener.onDeviceListLoaded(userDevices);
                                         }
-                                    } else if (callerActivity instanceof MainActivity) {
-                                        final TextView deviceListEmpty = ((MainActivity)callerActivity).findViewById(R.id.deviceListEmpty);
-                                        deviceListEmpty.setText(R.string.devices_list_empty);
+                                    } else if (deviceLoadListener != null) {
+                                        deviceLoadListener.onError(R.string.devices_list_empty);
                                     }
-                                } else if (callerActivity instanceof MainActivity) {
-                                    final TextView deviceListEmpty = ((MainActivity)callerActivity).findViewById(R.id.deviceListEmpty);
-                                    deviceListEmpty.setText(R.string.devices_list_empty);
+                                } else if (deviceLoadListener != null) {
+                                    deviceLoadListener.onError(R.string.devices_list_empty);
                                 }
                                 if (!thisDeviceOnList) {
                                     //this device has been removed from other device
-                                    PreferenceManager.getDefaultSharedPreferences(context).edit().remove(MainActivity.USER_LOGIN).remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).apply();
-                                    if (callerActivity instanceof MainActivity) {
-                                        ((MainActivity)callerActivity).initUserLoginInput(true, false);
+                                    settings.remove(MainActivity.USER_LOGIN, DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP);
+                                    if (deviceLoadListener != null) {
+                                        deviceLoadListener.onDeviceRemoved();
                                     }
                                 }
-                            } else if (callerActivity instanceof MainActivity) {
-                                final TextView deviceListEmpty = ((MainActivity)callerActivity).findViewById(R.id.deviceListEmpty);
-                                deviceListEmpty.setText(R.string.devices_list_loading_failed);
+                            } else if (deviceLoadListener != null) {
+                                deviceLoadListener.onError(R.string.devices_list_loading_failed);
                             }
+                              //else if (caller instanceof MainActivity) {
+                              //  final TextView deviceListEmpty = ((MainActivity)caller).findViewById(R.id.deviceListEmpty);
+                              //  deviceListEmpty.setText(R.string.devices_list_loading_failed);
+                            //}
                         }
                     });
                 } else {
@@ -118,7 +119,7 @@ public class DevicesUtils {
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             Messenger.getToken(context, results);
-                            loadDeviceList(context, settings,  callerActivity);
+                            loadDeviceList(context, settings,  deviceLoadListener);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
@@ -137,7 +138,7 @@ public class DevicesUtils {
             public void onGetFinish(String results, int responseCode, String url) {
                 if (responseCode == 200) {
                     Log.d(TAG, "Device " + deviceId + " has been removed!");
-                    PreferenceManager.getDefaultSharedPreferences(context).edit().remove(DevicesUtils.USER_DEVICES).remove(DevicesUtils.USER_DEVICES_TIMESTAMP).remove(CURRENT_DEVICE_ID).apply();
+                    settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, CURRENT_DEVICE_ID);
                 }
             }
         });
@@ -208,12 +209,11 @@ public class DevicesUtils {
             Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    loadDeviceList(context, settings, context);
+                    loadDeviceList(context, settings, null);
                 }
             });
         } else {
             Log.e(TAG, "No network available. Failed to send device location!");
         }
     }
-
 }
