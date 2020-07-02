@@ -27,7 +27,6 @@ public class CommandArrayAdapter extends ArrayAdapter<String> {
         this.context = context;
     }
 
-
     @NonNull
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {

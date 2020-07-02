@@ -3,13 +3,16 @@ package net.gmsworld.devicelocator;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -35,8 +39,6 @@ public class CommandListActivity extends AppCompatActivity {
     final PrettyTime pt = new PrettyTime();
 
     PreferencesUtils settings;
-
-    ArrayList<Device> devices = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +56,11 @@ public class CommandListActivity extends AppCompatActivity {
 
             settings = new PreferencesUtils(this);
 
-            devices = DevicesUtils.buildDeviceList(settings);
+            ArrayList<Device> devices = DevicesUtils.buildDeviceList(settings);
 
             List<Integer> positions = new ArrayList<>();
-
             List<String> values = new ArrayList<>();
+            List<String> types = new ArrayList<>();
 
             for (int i = commands.size() - 1; i >= 0; i--) {
                 String command = commands.get(i);
@@ -105,19 +107,11 @@ public class CommandListActivity extends AppCompatActivity {
                 }
                 values.add(message);
                 positions.add(position);
+                types.add(type);
             }
 
-            final CommandArrayAdapter adapter = new CommandArrayAdapter(this, android.R.layout.simple_list_item_1, values, positions);
+            final CommandArrayAdapter adapter = new CommandArrayAdapter(this, R.layout.command_log_row, values, positions, devices, types);
             listview.setAdapter(adapter);
-
-            listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, final View view, int position, long id) {
-                    if (id >= 0) {
-                        showCommandActivity((int) id);
-                    }
-                }
-            });
         } else {
             listview.setAdapter(null);
             listview.setEmptyView(findViewById(R.id.commandEmpty));
@@ -128,7 +122,6 @@ public class CommandListActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //Log.d(TAG, "onCreateOptionsMenu()");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         menu.findItem(R.id.commandLog).setVisible(false);
@@ -167,20 +160,19 @@ public class CommandListActivity extends AppCompatActivity {
         }
     }
 
-    private void showCommandActivity(int selectedPosition) {
-        Intent intent = new Intent(CommandListActivity.this, CommandActivity.class);
-        intent.putExtra("index", selectedPosition);
-        intent.putParcelableArrayListExtra("devices", devices);
-        CommandListActivity.this.startActivity(intent);
-    }
-
     private static class CommandArrayAdapter extends ArrayAdapter<String> {
 
         final List<Integer> deviceIds;
+        private final Context context;
+        private final ArrayList<Device> devices;
+        private final List<String> types;
 
-        public CommandArrayAdapter(Context context, int textViewResourceId, List<String> objects, List<Integer> ids) {
+        public CommandArrayAdapter(Context context, int textViewResourceId, List<String> objects, List<Integer> ids, ArrayList<Device> devices, List<String> types) {
             super(context, textViewResourceId, objects);
             this.deviceIds = ids;
+            this.context = context;
+            this.devices = devices;
+            this.types = types;
         }
 
         @Override
@@ -191,6 +183,62 @@ public class CommandListActivity extends AppCompatActivity {
         @Override
         public boolean hasStableIds() {
             return true;
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+            return createView(position, convertView, parent);
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
+            return createView(position, convertView, parent);
+        }
+
+        private View createView(final int position, View convertView, ViewGroup parent) {
+            CommandArrayAdapter.ViewHolder viewHolder; // view lookup cache stored in tag
+            if (convertView == null) {
+                // If there's no view to re-use, inflate a brand new view for row
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(R.layout.command_log_row, parent, false);
+                viewHolder = new CommandArrayAdapter.ViewHolder();
+                viewHolder.logText = convertView.findViewById(R.id.log);
+                viewHolder.type = convertView.findViewById(R.id.type);
+                convertView.setTag(viewHolder);
+            } else {
+                viewHolder = (CommandArrayAdapter.ViewHolder) convertView.getTag();
+            }
+
+            viewHolder.logText.setText(getItem(position));
+            viewHolder.logText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showCommandActivity(position);
+                }
+            });
+            viewHolder.type.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showCommandActivity(position);
+                }
+            });
+            if (StringUtils.equals(types.get(position), "1")) {
+                viewHolder.type.setImageResource(R.drawable.cloud_upload);
+            }
+            return convertView;
+        }
+
+        private void showCommandActivity(int selectedPosition) {
+            Intent intent = new Intent(context, CommandActivity.class);
+            intent.putExtra("index", selectedPosition);
+            intent.putParcelableArrayListExtra("devices", devices);
+            context.startActivity(intent);
+        }
+
+        private static class ViewHolder {
+            TextView logText;
+            ImageView type;
         }
     }
 }
