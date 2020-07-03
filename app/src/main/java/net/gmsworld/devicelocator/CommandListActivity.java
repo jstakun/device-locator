@@ -36,9 +36,9 @@ import androidx.appcompat.widget.Toolbar;
 
 public class CommandListActivity extends AppCompatActivity {
 
-    final PrettyTime pt = new PrettyTime();
-
-    PreferencesUtils settings;
+    private final PrettyTime pt = new PrettyTime();
+    private static ArrayList<Device> devices = null;
+    private PreferencesUtils settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class CommandListActivity extends AppCompatActivity {
 
             settings = new PreferencesUtils(this);
 
-            ArrayList<Device> devices = DevicesUtils.buildDeviceList(settings);
+            devices = DevicesUtils.buildDeviceList(settings);
 
             List<Integer> positions = new ArrayList<>();
             List<String> values = new ArrayList<>();
@@ -110,7 +110,7 @@ public class CommandListActivity extends AppCompatActivity {
                 types.add(type);
             }
 
-            final CommandArrayAdapter adapter = new CommandArrayAdapter(this, R.layout.command_log_row, values, positions, devices, types);
+            final CommandArrayAdapter adapter = new CommandArrayAdapter(this, R.layout.command_log_row, values, positions, types);
             listview.setAdapter(adapter);
         } else {
             listview.setAdapter(null);
@@ -164,14 +164,12 @@ public class CommandListActivity extends AppCompatActivity {
 
         final List<Integer> deviceIds;
         private final Context context;
-        private final ArrayList<Device> devices;
         private final List<String> types;
 
-        public CommandArrayAdapter(Context context, int textViewResourceId, List<String> objects, List<Integer> ids, ArrayList<Device> devices, List<String> types) {
+        public CommandArrayAdapter(Context context, int textViewResourceId, List<String> objects, List<Integer> ids, List<String> types) {
             super(context, textViewResourceId, objects);
             this.deviceIds = ids;
             this.context = context;
-            this.devices = devices;
             this.types = types;
         }
 
@@ -214,18 +212,22 @@ public class CommandListActivity extends AppCompatActivity {
             viewHolder.logText.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    showCommandActivity(position);
+                    showCommandActivity(deviceIds.get(position));
                 }
             });
+
             viewHolder.type.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    showCommandActivity(position);
+                    showCommandActivity(deviceIds.get(position));
                 }
             });
             if (StringUtils.equals(types.get(position), "1")) {
                 viewHolder.type.setImageResource(R.drawable.cloud_upload);
+            } else {
+                viewHolder.type.setImageResource(R.drawable.cloud_download);
             }
+
             return convertView;
         }
 

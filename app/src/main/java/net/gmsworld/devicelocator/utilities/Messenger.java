@@ -280,8 +280,7 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().
-                                    putString(MainActivity.EMAIL_REGISTRATION_STATUS, "unverified").apply();
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, "unverified").apply();
                             //TODO refactor this code to use interface
                             if (context instanceof Activity) {
                                 final TextView emailInput = ((Activity) context).findViewById(R.id.email);
@@ -372,8 +371,7 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "sent")) {
                             Log.d(TAG, "Telegram notification sent successfully!");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            PreferenceManager.getDefaultSharedPreferences(context).edit().
-                                    putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "unverified").apply();
+                            PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "unverified").apply();
                             //TODO refactor this code to use interface
                             if (context instanceof Activity) {
                                 final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
