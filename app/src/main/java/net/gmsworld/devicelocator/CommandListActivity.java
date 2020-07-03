@@ -51,6 +51,7 @@ public class CommandListActivity extends AppCompatActivity {
         final List<String> commands = Files.readFileByLinesFromContextDir(AbstractCommand.AUDIT_FILE, this);
 
         final ListView listview = findViewById(R.id.commandList);
+        listview.setEmptyView(findViewById(R.id.commandEmpty));
 
         if (!commands.isEmpty()) {
 
@@ -112,9 +113,10 @@ public class CommandListActivity extends AppCompatActivity {
 
             final CommandArrayAdapter adapter = new CommandArrayAdapter(this, R.layout.command_log_row, values, positions, types);
             listview.setAdapter(adapter);
+            MainActivity.setListViewHeightBasedOnChildren(listview);
+            listview.setVerticalScrollBarEnabled(false);
         } else {
             listview.setAdapter(null);
-            listview.setEmptyView(findViewById(R.id.commandEmpty));
         }
 
         FirebaseAnalytics.getInstance(this).logEvent("command_list_activity", new Bundle());

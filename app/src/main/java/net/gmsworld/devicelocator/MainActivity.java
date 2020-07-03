@@ -1780,7 +1780,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         settings.setInt("useCount", useCount + 1);
     }
 
-    private static void setListViewHeightBasedOnChildren(ListView listView) {
+    public static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null) {
             // pre-condition
