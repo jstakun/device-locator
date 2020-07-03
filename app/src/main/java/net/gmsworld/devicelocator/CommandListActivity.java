@@ -38,7 +38,8 @@ public class CommandListActivity extends AppCompatActivity {
 
     private final PrettyTime pt = new PrettyTime();
     private static ArrayList<Device> devices = null;
-    private PreferencesUtils settings;
+    PreferencesUtils settings;
+    ListView listview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,17 +49,21 @@ public class CommandListActivity extends AppCompatActivity {
         final Toolbar toolbar = findViewById(R.id.smsToolbar);
         setSupportActionBar(toolbar);
 
-        final List<String> commands = Files.readFileByLinesFromContextDir(AbstractCommand.AUDIT_FILE, this);
-
-        final ListView listview = findViewById(R.id.commandList);
+        listview = findViewById(R.id.commandList);
         listview.setEmptyView(findViewById(R.id.commandEmpty));
 
+        settings = new PreferencesUtils(this);
+        devices = DevicesUtils.buildDeviceList(settings);
+
+        FirebaseAnalytics.getInstance(this).logEvent("command_list_activity", new Bundle());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        final List<String> commands = Files.readFileByLinesFromContextDir(AbstractCommand.AUDIT_FILE, this);
+
         if (!commands.isEmpty()) {
-
-            settings = new PreferencesUtils(this);
-
-            devices = DevicesUtils.buildDeviceList(settings);
-
             List<Integer> positions = new ArrayList<>();
             List<String> values = new ArrayList<>();
             List<String> types = new ArrayList<>();
@@ -83,7 +88,7 @@ public class CommandListActivity extends AppCompatActivity {
                         sender = sender.substring(Messenger.CID_SEPARATOR.length());
                     }
                     final String deviceName = DevicesUtils.getDeviceName(devices, sender);
-                    message = "Command " + StringUtils.capitalize(commandName) + " has been sent to " + deviceName + "\n" + pt.format(new Date(timestamp));
+                    message = "Command " + StringUtils.capitalize(commandName) + "\nsent to " + deviceName + "\n" + pt.format(new Date(timestamp));
                     position = DevicesUtils.getDevicePosition(devices, sender);
                 } else {
                     if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR) && StringUtils.isNotEmpty(commandName)) {
@@ -99,10 +104,10 @@ public class CommandListActivity extends AppCompatActivity {
                                 message = "Command " + StringUtils.capitalize(commandName);
                             }
                         }
-                        message += " has been received from " + deviceName + "\n" + pt.format(new Date(timestamp));
+                        message += "\nsent from " + deviceName + "\n" + pt.format(new Date(timestamp));
                     } else {
                         //old format - leave it as it is
-                        message = "Command " + sender + "\n" + "has been received from unknown device\n" + pt.format(new Date(timestamp));
+                        message = "Command " + sender + "\nreceived from unknown device\n" + pt.format(new Date(timestamp));
                         position = -1;
                     }
                 }
@@ -113,13 +118,11 @@ public class CommandListActivity extends AppCompatActivity {
 
             final CommandArrayAdapter adapter = new CommandArrayAdapter(this, R.layout.command_log_row, values, positions, types);
             listview.setAdapter(adapter);
-            MainActivity.setListViewHeightBasedOnChildren(listview);
             listview.setVerticalScrollBarEnabled(false);
+            MainActivity.setListViewHeightBasedOnChildren(listview);
         } else {
             listview.setAdapter(null);
         }
-
-        FirebaseAnalytics.getInstance(this).logEvent("command_list_activity", new Bundle());
     }
 
     @Override
