@@ -1632,6 +1632,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         Log.d(TAG, "Found " + userDevices.size() + " devices");
         deviceList.setAdapter(adapter);
         setListViewHeightBasedOnChildren(deviceList);
+        if (userDevices.size() == 1) {
+            findViewById(R.id.singleDeviceList).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.singleDeviceList).setVisibility(View.GONE);
+        }
     }
 
     public void onDeleteDevice(final String imei, final boolean silent) {

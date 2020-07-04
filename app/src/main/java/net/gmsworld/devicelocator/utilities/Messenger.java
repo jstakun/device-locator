@@ -281,7 +281,7 @@ public class Messenger {
                             Log.d(TAG, "Email message sent successfully");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, "unverified").apply();
-                            //TODO refactor this code to use interface
+                            //TODO refactor this code to use interface 1
                             if (context instanceof Activity) {
                                 final TextView emailInput = ((Activity) context).findViewById(R.id.email);
                                 if (emailInput != null) {
@@ -372,7 +372,7 @@ public class Messenger {
                             Log.d(TAG, "Telegram notification sent successfully!");
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "unverified").apply();
-                            //TODO refactor this code to use interface
+                            //TODO refactor this code to use interface 2
                             if (context instanceof Activity) {
                                 final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
                                 if (telegramInput != null) {
@@ -381,7 +381,7 @@ public class Messenger {
                             }
                             Toaster.showToast(context, R.string.telegram_unverified_error);
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                            //TODO refactor this code to use interface
+                            //TODO refactor this code to use interface 2
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
                             if (context instanceof Activity) {
                                final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
@@ -1035,7 +1035,7 @@ public class Messenger {
                     } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                         //show dialog to enter activation code sent to user
                         if (StringUtils.isNotEmpty(secret)) {
-                            //TODO refactor this code to use interface
+                            //TODO refactor this code to use interface 3
                             if (context instanceof Activity) {
                                 Activity activity = (Activity)context;
                                 if (!activity.isFinishing()) {
@@ -1056,7 +1056,7 @@ public class Messenger {
                 } else if (responseCode == 403) {
                     onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
                 } else if (responseCode == 400) {
-                    //TODO refactor this code to use interface
+                    //TODO refactor this code to use interface 4
                     if (context instanceof Activity) {
                         Activity activity = (Activity)context;
                         if (!activity.isFinishing()) {
@@ -1087,7 +1087,7 @@ public class Messenger {
 
     public static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
-        //TODO refactor this code to use interface
+        //TODO refactor this code to use interface 2
         if (context instanceof Activity) {
             final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
             if (clearTextInput) {
@@ -1129,7 +1129,7 @@ public class Messenger {
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             settings.remove(NotificationActivationDialogFragment.EMAIL_SECRET);
                             Toaster.showToast(context, "Your email address is already verified.");
-                            //TODO refactor this code to use interface
+                            //TODO refactor this code to use interface 5
                             if (context instanceof RegisterActivity) {
                                 RegisterActivity activity = (RegisterActivity) context;
                                 activity.openMainActivity();
@@ -1137,7 +1137,7 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
-                                //TODO refactor this code to use interface
+                                //TODO refactor this code to use interface 6
                                 if (context instanceof Activity) {
                                     Activity activity = (Activity) context;
                                     if (!activity.isFinishing()) {
@@ -1177,7 +1177,7 @@ public class Messenger {
 
     private static void onFailedEmailRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
-        //TODO refactor this code to use interface
+        //TODO refactor this code to use interface 1
         if (context instanceof Activity) {
             final TextView emailInput = ((Activity) context).findViewById(R.id.email);
             if (clearTextInput) {
@@ -1284,7 +1284,7 @@ public class Messenger {
                             if (username != null) {
                                 settings.edit().putString(MainActivity.USER_LOGIN, username).apply();
                                 Log.d(TAG, "User login is set");
-                                //TODO refactor this code to use interface
+                                //TODO refactor this code to use interface 7
                                 if (context instanceof MainActivity) {
                                     ((MainActivity)context).initDeviceList();
                                 }
@@ -1292,7 +1292,7 @@ public class Messenger {
                             if (deviceName != null) {
                                 settings.edit().putString(MainActivity.DEVICE_NAME, deviceName).apply();
                                 Log.d(TAG, "Device name is set");
-                                //TODO refactor this code to use interface
+                                //TODO refactor this code to use interface 7
                                 if (context instanceof MainActivity) {
                                     ((MainActivity)context).initDeviceList();
                                 }

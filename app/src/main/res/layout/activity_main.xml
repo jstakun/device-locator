@@ -512,7 +512,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:paddingTop="8dp">
+                        android:paddingTop="8dp"
+                        >
 
                         <ListView
                             android:id="@+id/deviceList"
@@ -523,7 +524,16 @@
                             android:id="@+id/deviceListEmpty"
                             android:layout_width="fill_parent"
                             android:layout_height="fill_parent"
+                            android:padding="4dp"
                             android:text="@string/devices_list_loading"/>
+
+                        <TextView
+                            android:id="@+id/singleDeviceList"
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            android:visibility="gone"
+                            android:padding="4dp"
+                            android:text="@string/single_device_text"/>
 
                     </LinearLayout>
 
