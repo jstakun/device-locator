@@ -2,9 +2,6 @@ package net.gmsworld.devicelocator;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
@@ -181,9 +178,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus) {
-                    if (settings.getBoolean(PRIVACY_POLICY, false) && Permissions.haveLocationPermission(RegisterActivity.this)) {
-                        registerEmail(emailInput, true, false);
-                    }
+                   registerEmail(emailInput, true, false);
                 }
             }
         });
@@ -192,9 +187,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
-                    if (settings.getBoolean(PRIVACY_POLICY, false) && Permissions.haveLocationPermission(RegisterActivity.this)) {
-                        registerEmail(emailInput, true, false);
-                    }
+                    registerEmail(emailInput, true, false);
                 }
                 return false;
             }
@@ -207,9 +200,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (keyCode) {
                         case KeyEvent.KEYCODE_BACK:
-                            if (settings.getBoolean(PRIVACY_POLICY, false) && Permissions.haveLocationPermission(RegisterActivity.this)) {
-                                registerEmail(emailInput, true, false);
-                            }
+                            registerEmail(emailInput, true, false);
                             break;
                         default:
                             break;
@@ -274,7 +265,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
     public void registerEmail(TextView emailInput, boolean validate, boolean sendRequest) {
         final String newEmailAddress = emailInput.getText().toString();
         if (StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) {
-            if (sendRequest) {
+            if (sendRequest || (settings.getBoolean(PRIVACY_POLICY, false) && Permissions.haveLocationPermission(RegisterActivity.this))) {
                 if (Network.isNetworkAvailable(RegisterActivity.this)) {
                     Log.d(TAG, "Setting new email address: " + newEmailAddress);
                     settings.setString(MainActivity.NOTIFICATION_EMAIL, newEmailAddress);
