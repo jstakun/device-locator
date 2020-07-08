@@ -58,6 +58,7 @@ import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
 import net.gmsworld.devicelocator.fragments.DownloadFullApplicationDialogFragment;
+import net.gmsworld.devicelocator.fragments.EmailActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.EmailNotificationDialogFragment;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
 import net.gmsworld.devicelocator.fragments.LoginDialogFragment;
@@ -295,8 +296,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (settings.getBoolean("isTrackerShown", false)) {
             //show email or telegram registration dialog if still unverified
             if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, toaster);
-                notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                EmailActivationDialogFragment emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
+                emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
             }
             if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
                 NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, toaster);
@@ -378,8 +379,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 showFirstTimeUsageDialog(true, false);
                 //show email or telegram registration dialog if still unverified
                 if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, toaster);
-                    notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                    EmailActivationDialogFragment emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
+                    emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
                 }
                 if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
                     NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, toaster);

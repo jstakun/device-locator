@@ -2,19 +2,26 @@ package net.gmsworld.devicelocator;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import net.gmsworld.devicelocator.fragments.EmailActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.EmailNotificationDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.services.SmsSenderService;
@@ -87,6 +94,12 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
     @Override
     protected void onResume() {
         super.onResume();
+
+        //final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
+        //if (StringUtils.isNotEmpty(email) && !Messenger.isEmailVerified(settings)) {
+        //    Log.d(TAG, "Sending backend request to verify if email address has been registered");
+        //    Messenger.sendEmailRegistrationRequest(this, email, false, 0);
+        //}
 
         Switch privacyPolicyPermission = findViewById(R.id.privacy_policy);
         privacyPolicyPermission.setChecked(settings.getBoolean(PRIVACY_POLICY, false));
@@ -164,9 +177,51 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
             emailInput.setText(email);
         }
 
+        emailInput.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus) {
+                    if (settings.getBoolean(PRIVACY_POLICY, false) && Permissions.haveLocationPermission(RegisterActivity.this)) {
+                        registerEmail(emailInput, true, false);
+                    }
+                }
+            }
+        });
+
+        emailInput.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
+                    if (settings.getBoolean(PRIVACY_POLICY, false) && Permissions.haveLocationPermission(RegisterActivity.this)) {
+                        registerEmail(emailInput, true, false);
+                    }
+                }
+                return false;
+            }
+        });
+
+        emailInput.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                //Log.d(TAG, "Soft keyboard event " + keyCode);
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_BACK:
+                            if (settings.getBoolean(PRIVACY_POLICY, false) && Permissions.haveLocationPermission(RegisterActivity.this)) {
+                                registerEmail(emailInput, true, false);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                return false;
+            }
+        });
+
         if (StringUtils.isNotEmpty(email) && !Messenger.isEmailVerified(settings)) {
-            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, toaster, this);
-            notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+            EmailActivationDialogFragment emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
+            emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
         }
     }
 

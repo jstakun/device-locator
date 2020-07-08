@@ -34,6 +34,7 @@ import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.RegisterActivity;
+import net.gmsworld.devicelocator.fragments.EmailActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.TelegramSetupDialogFragment;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
@@ -1142,13 +1143,8 @@ public class Messenger {
                                     Activity activity = (Activity) context;
                                     if (!activity.isFinishing()) {
                                         try {
-                                            if (activity instanceof RegisterActivity) {
-                                                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, new Toaster(activity), (RegisterActivity)activity);
-                                                notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
-                                            } else {
-                                                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, new Toaster(activity));
-                                                notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
-                                            }
+                                            EmailActivationDialogFragment emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(new Toaster(activity));
+                                            emailActivationDialogFragment.show(activity.getFragmentManager(), EmailActivationDialogFragment.TAG);
                                         } catch (Exception e) {
                                             Log.e(TAG, e.getMessage(), e);
                                         }
