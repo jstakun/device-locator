@@ -49,7 +49,7 @@
         android:resizeableActivity="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".RegisterActivity"/>
         <activity
             android:name=".views.QuotaResetDialogActivity"
             android:theme="@style/Theme.NoDisplay" />

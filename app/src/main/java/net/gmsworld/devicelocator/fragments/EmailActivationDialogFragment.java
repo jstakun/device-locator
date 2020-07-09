@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator.fragments;
 
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Html;
@@ -16,7 +17,6 @@ import net.gmsworld.devicelocator.utilities.Toaster;
 import org.apache.commons.lang3.StringUtils;
 
 import androidx.appcompat.app.AlertDialog;
-import android.app.DialogFragment;
 
 public class EmailActivationDialogFragment extends DialogFragment {
 
@@ -28,6 +28,10 @@ public class EmailActivationDialogFragment extends DialogFragment {
         EmailActivationDialogFragment instance = new EmailActivationDialogFragment();
         instance.toaster = toaster;
         return instance;
+    }
+
+    public void setToaster(Toaster toaster) {
+        this.toaster = toaster;
     }
 
     @Override

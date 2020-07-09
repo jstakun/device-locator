@@ -161,7 +161,8 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         }
 
         if (!accountNames.isEmpty()) {
-            showEmailNotificationDialogFragment(accountNames.toArray(new String[accountNames.size()]));
+            EmailNotificationDialogFragment emailNotificationDialogFragment = EmailNotificationDialogFragment.newInstance(this, accountNames.toArray(new String[accountNames.size()]));
+            emailNotificationDialogFragment.show(getFragmentManager(), EmailNotificationDialogFragment.TAG);
         } else {
             toaster.showActivityToast("No email addresses are registered on this device. Please enter new one!");
         }
@@ -211,14 +212,18 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         });
 
         if (StringUtils.isNotEmpty(email) && !Messenger.isEmailVerified(settings)) {
-            EmailActivationDialogFragment emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
-            emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
+            showEmailActivationDialogFragment();
         }
     }
 
-    private void showEmailNotificationDialogFragment(final String[] userLogins) {
-        EmailNotificationDialogFragment emailNotificationDialogFragment = EmailNotificationDialogFragment.newInstance(this, userLogins);
-        emailNotificationDialogFragment.show(getFragmentManager(), EmailNotificationDialogFragment.TAG);
+    public void showEmailActivationDialogFragment() {
+        EmailActivationDialogFragment emailActivationDialogFragment = (EmailActivationDialogFragment) getFragmentManager().findFragmentByTag(EmailActivationDialogFragment.TAG);
+        if (emailActivationDialogFragment == null) {
+            emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
+            emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
+        } else {
+            emailActivationDialogFragment.setToaster(toaster);
+        }
     }
 
     private void initRegisterButton() {

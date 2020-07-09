@@ -296,8 +296,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (settings.getBoolean("isTrackerShown", false)) {
             //show email or telegram registration dialog if still unverified
             if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-                EmailActivationDialogFragment emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
-                emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
+                showEmailActivationDialogFragment();
             }
             if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
                 NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, toaster);
@@ -379,8 +378,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 showFirstTimeUsageDialog(true, false);
                 //show email or telegram registration dialog if still unverified
                 if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-                    EmailActivationDialogFragment emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
-                    emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
+                    showEmailActivationDialogFragment();
                 }
                 if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
                     NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, toaster);
@@ -1905,6 +1903,16 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     @Override
     public void onDeviceRemoved() {
         initUserLoginInput(true, false);
+    }
+
+    public void showEmailActivationDialogFragment() {
+        EmailActivationDialogFragment emailActivationDialogFragment = (EmailActivationDialogFragment) getFragmentManager().findFragmentByTag(EmailActivationDialogFragment.TAG);
+        if (emailActivationDialogFragment == null) {
+            emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
+            emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
+        } else {
+            emailActivationDialogFragment.setToaster(toaster);
+        }
     }
 
     // -----------------------------------------------------------------------------------

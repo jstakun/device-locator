@@ -34,7 +34,6 @@ import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.RegisterActivity;
-import net.gmsworld.devicelocator.fragments.EmailActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.TelegramSetupDialogFragment;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
@@ -1139,16 +1138,10 @@ public class Messenger {
                             //show dialog to enter activation code sent to user
                             if (StringUtils.isNotEmpty(secret)) {
                                 //TODO refactor this code to use interface 6
-                                if (context instanceof Activity) {
-                                    Activity activity = (Activity) context;
-                                    if (!activity.isFinishing()) {
-                                        try {
-                                            EmailActivationDialogFragment emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(new Toaster(activity));
-                                            emailActivationDialogFragment.show(activity.getFragmentManager(), EmailActivationDialogFragment.TAG);
-                                        } catch (Exception e) {
-                                            Log.e(TAG, e.getMessage(), e);
-                                        }
-                                    }
+                                if (context instanceof RegisterActivity) {
+                                    ((RegisterActivity) context).showEmailActivationDialogFragment();
+                                } else if (context instanceof MainActivity) {
+                                    ((MainActivity) context).showEmailActivationDialogFragment();
                                 }
                             } else {
                                 onFailedEmailRegistration(context, "Failed to send activation email to your inbox. Please register your email address again!", true);
