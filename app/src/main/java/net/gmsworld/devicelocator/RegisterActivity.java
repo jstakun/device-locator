@@ -2,6 +2,7 @@ package net.gmsworld.devicelocator;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
@@ -10,6 +11,7 @@ import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -235,6 +237,10 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 final TextView email = findViewById(R.id.email);
                 final String newEmailAddress = email.getText().toString();
                 if (StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
+                    }
                     if (settings.getBoolean(PRIVACY_POLICY, false)) {
                         if (Permissions.haveLocationPermission(RegisterActivity.this)) {
                             registerEmail(email, true, true);
@@ -270,6 +276,10 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
     public void registerEmail(TextView emailInput, boolean validate, boolean sendRequest) {
         final String newEmailAddress = emailInput.getText().toString();
         if (StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null) {
+                imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
+            }
             if (sendRequest || (settings.getBoolean(PRIVACY_POLICY, false) && Permissions.haveLocationPermission(RegisterActivity.this))) {
                 if (Network.isNetworkAvailable(RegisterActivity.this)) {
                     Log.d(TAG, "Setting new email address: " + newEmailAddress);
