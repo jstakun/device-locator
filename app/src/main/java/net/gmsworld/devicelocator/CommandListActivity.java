@@ -79,7 +79,9 @@ public class CommandListActivity extends AppCompatActivity {
                 String type = null;
                 if (tokens.length > 2) {
                     commandName = tokens[2];
-                    type = tokens[3];
+                    if (tokens.length > 3) {
+                        type = tokens[3];
+                    }
                 }
                 String message;
                 int position;
