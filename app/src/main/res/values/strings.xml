@@ -202,5 +202,6 @@
         <item quantity="other">Device location will be saved in an interval of %d hours.</item>
     </plurals>
     <string name="alarm_settings_suffix">Next %1$s</string>
+    <string name="device_tracker_radius_in_meters">Device tracker radius in meters</string>
 
 </resources>

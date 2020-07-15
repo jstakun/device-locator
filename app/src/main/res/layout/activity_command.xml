@@ -35,6 +35,7 @@
                 android:gravity="center"
                 android:paddingTop="16dp"
                 android:paddingBottom="4dp"
+                android:labelFor="@id/deviceList"
                 android:text="@string/devices" />
 
             <Spinner
@@ -49,6 +50,7 @@
                 android:gravity="center"
                 android:paddingTop="8dp"
                 android:paddingBottom="4dp"
+                android:labelFor="@id/deviceCommand"
                 android:text="@string/command" />
 
             <Spinner
@@ -92,6 +94,7 @@
                 android:layout_height="match_parent"
                 android:paddingTop="4dp"
                 android:gravity="center"
+                android:labelFor="@id/deviceCommandArgs"
                 android:text="@string/command_arguments" />
 
             <EditText
@@ -108,6 +111,7 @@
             <CheckBox
                 android:id="@+id/social_send"
                 android:text="@string/social_link"
+                android:contentDescription="@string/social_link"
                 android:textColor="@color/gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

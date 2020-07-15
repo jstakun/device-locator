@@ -209,7 +209,7 @@
 
                             <SeekBar
                                 android:id="@+id/radiusBar"
-                                android:contentDescription="Device tracker radius in meters"
+                                android:contentDescription="@string/device_tracker_radius_in_meters"
                                 android:layout_width="fill_parent"
                                 android:layout_height="wrap_content"
                                 android:max="1000"
@@ -281,6 +281,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
+                            android:labelFor="@id/phoneNumber"
                             android:text="@string/phone_number" />
 
                         <LinearLayout
@@ -326,6 +327,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
+                            android:labelFor="@id/email"
                             android:text="@string/email_address" />
 
                         <LinearLayout
@@ -370,6 +372,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
+                            android:labelFor="@id/telegramId"
                             android:text="@string/telegram_chat_id" />
 
                         <LinearLayout
@@ -459,6 +462,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
+                            android:labelFor="@id/deviceName"
                             android:text="@string/device_name" />
 
                         <net.gmsworld.devicelocator.views.KeyboardEditText
@@ -483,6 +487,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
+                            android:labelFor="@id/userAccounts"
                             android:text="@string/your_login" />
 
                         <Spinner

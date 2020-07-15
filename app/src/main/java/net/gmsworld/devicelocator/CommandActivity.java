@@ -71,7 +71,14 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
             return;
         }
 
-        device = devices.get(getIntent().getIntExtra("index", 0));
+        int index = getIntent().getIntExtra("index", 0);
+
+        if (index < 0 && index >= devices.size()) {
+            Log.d(TAG, "Invalid index " + index + " for devices " + devices.size());
+            return;
+        }
+
+        device = devices.get(index);
 
         final Spinner commandSpinner = findViewById(R.id.deviceCommand);
         final EditText args = findViewById(R.id.deviceCommandArgs);

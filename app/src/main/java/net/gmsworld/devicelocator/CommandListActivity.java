@@ -239,10 +239,12 @@ public class CommandListActivity extends AppCompatActivity {
         }
 
         private void showCommandActivity(int selectedPosition) {
-            Intent intent = new Intent(context, CommandActivity.class);
-            intent.putExtra("index", selectedPosition);
-            intent.putParcelableArrayListExtra("devices", devices);
-            context.startActivity(intent);
+            if (selectedPosition >= 0) {
+                Intent intent = new Intent(context, CommandActivity.class);
+                intent.putExtra("index", selectedPosition);
+                intent.putParcelableArrayListExtra("devices", devices);
+                context.startActivity(intent);
+            }
         }
 
         private static class ViewHolder {
