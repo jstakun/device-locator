@@ -219,12 +219,14 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
     }
 
     public void showEmailActivationDialogFragment() {
-        EmailActivationDialogFragment emailActivationDialogFragment = (EmailActivationDialogFragment) getFragmentManager().findFragmentByTag(EmailActivationDialogFragment.TAG);
-        if (emailActivationDialogFragment == null) {
-            emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
-            emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
-        } else {
-            emailActivationDialogFragment.setToaster(toaster);
+        if (!isFinishing()) {
+            EmailActivationDialogFragment emailActivationDialogFragment = (EmailActivationDialogFragment) getFragmentManager().findFragmentByTag(EmailActivationDialogFragment.TAG);
+            if (emailActivationDialogFragment == null) {
+                emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
+                emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
+            } else {
+                emailActivationDialogFragment.setToaster(toaster);
+            }
         }
     }
 

@@ -1031,6 +1031,7 @@ public class Messenger {
                     }
                     if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                         settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET, TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT);
+                        //TODO refactor this code to use interface 8
                         Toaster.showToast(context, "Your Telegram chat or channel is already verified.");
                     } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                         //show dialog to enter activation code sent to user
@@ -1128,8 +1129,8 @@ public class Messenger {
                         settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, status);
                         if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                             settings.remove(NotificationActivationDialogFragment.EMAIL_SECRET);
-                            Toaster.showToast(context, "Your email address is already verified.");
                             //TODO refactor this code to use interface 5
+                            Toaster.showToast(context, "Your email address is already verified.");
                             if (context instanceof RegisterActivity) {
                                 RegisterActivity activity = (RegisterActivity) context;
                                 activity.openMainActivity();
@@ -1287,6 +1288,7 @@ public class Messenger {
                                 }
                             }
                         } else {
+                            //TODO refactor this code to use interface 8
                             Toaster.showToast(context, "Device registration failed! Please restart Device Manager and try again.");
                         }
                     }
