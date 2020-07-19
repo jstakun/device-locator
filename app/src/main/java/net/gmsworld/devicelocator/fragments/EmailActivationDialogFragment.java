@@ -57,7 +57,7 @@ public class EmailActivationDialogFragment extends DialogFragment {
                         }
                     }
                 })
-                .setNegativeButton(R.string.forget_me, new DialogInterface.OnClickListener() {
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Log.d(TAG, "Cancelling email registration request ...");
                         settings.remove(MainActivity.NOTIFICATION_EMAIL, MainActivity.EMAIL_REGISTRATION_STATUS, NotificationActivationDialogFragment.EMAIL_SECRET);
