@@ -276,7 +276,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
     @Override
     public void registerEmail(TextView emailInput, boolean validate, boolean sendRequest) {
-        final String newEmailAddress = emailInput.getText().toString();
+        final String newEmailAddress = StringUtils.lowerCase(emailInput.getText().toString());
         if (StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             if (imm != null) {

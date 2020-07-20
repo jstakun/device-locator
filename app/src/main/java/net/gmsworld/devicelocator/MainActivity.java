@@ -1167,7 +1167,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     public synchronized void registerEmail(TextView emailInput, boolean validate, boolean retry) {
-        String newEmailAddress = emailInput.getText().toString();
+        String newEmailAddress = StringUtils.lowerCase(emailInput.getText().toString());
         email = settings.getString(NOTIFICATION_EMAIL);
         if ((!StringUtils.equals(email, newEmailAddress) || retry) && ((StringUtils.isNotEmpty(newEmailAddress) && Patterns.EMAIL_ADDRESS.matcher(newEmailAddress).matches()) || StringUtils.isEmpty(newEmailAddress))) {
             if (Network.isNetworkAvailable(MainActivity.this)) {
