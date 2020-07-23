@@ -3,10 +3,10 @@ package net.gmsworld.devicelocator.fragments;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
-import android.widget.TextView;
 
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
@@ -43,8 +43,22 @@ public class EmailActivationDialogFragment extends DialogFragment {
 
         final PreferencesUtils settings = new PreferencesUtils(getActivity());
 
-        alertDialogBuilder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setPositiveButton("Open My Inbox", new DialogInterface.OnClickListener() {
                     @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        toaster.showActivityToast(R.string.please_wait);
+                        Intent intent = new Intent(Intent.ACTION_MAIN);
+                        intent.addCategory(Intent.CATEGORY_APP_EMAIL);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        try {
+                            startActivity(intent);
+                        } catch (Exception e) {
+                            startActivity(Intent.createChooser(intent, "Open Mail Inbox"));
+                        }
+                        toaster.showActivityToast("Please open newest message from " + getActivity().getString(R.string.app_email)  + " and click on the link to confirm registration");
+                    }
+                })
+                .setNegativeButton("Done", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Log.d(TAG, "Sending again email registration request ...");
                         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
@@ -55,15 +69,12 @@ public class EmailActivationDialogFragment extends DialogFragment {
                         } else {
                             toaster.showActivityToast("Failed to send email registration request!");
                         }
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Log.d(TAG, "Cancelling email registration request ...");
+                        //Forget Me action
+                        /*Log.d(TAG, "Cancelling email registration request ...");
                         settings.remove(MainActivity.NOTIFICATION_EMAIL, MainActivity.EMAIL_REGISTRATION_STATUS, NotificationActivationDialogFragment.EMAIL_SECRET);
                         final TextView emailInput = getActivity().findViewById(R.id.email);
                         emailInput.setText("");
-                        EmailActivationDialogFragment.this.dismiss();
+                        EmailActivationDialogFragment.this.dismiss();*/
                     }
                 });
 

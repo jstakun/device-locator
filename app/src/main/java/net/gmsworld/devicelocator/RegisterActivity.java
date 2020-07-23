@@ -49,9 +49,13 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
     private Toaster toaster;
 
+    private String action = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate()");
+
         setContentView(R.layout.activity_register);
 
         settings = new PreferencesUtils(this);
@@ -68,43 +72,43 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
         initEmailInput();
 
-        FirebaseAnalytics.getInstance(this).logEvent("register_activity", new Bundle());
-    }
+        Intent intent = getIntent();
 
-    public void onSwitchSelected(View view) {
-        boolean checked = ((Switch) view).isChecked();
-
-        switch (view.getId()) {
-            case R.id.privacy_policy:
-                settings.setBoolean(PRIVACY_POLICY, checked);
-                break;
-            case R.id.location_policy:
-                if (checked && !Permissions.haveLocationPermission(this)) {
-                    Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
-                } else if (!checked) {
-                    Permissions.startSettingsIntent(this , "Location");
-                }
-                break;
-            default:
-                break;
+        if (intent != null) {
+            action = intent.getAction();
         }
+
+        FirebaseAnalytics.getInstance(this).logEvent("register_activity", new Bundle());
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        //final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
-        //if (StringUtils.isNotEmpty(email) && !Messenger.isEmailVerified(settings)) {
-        //    Log.d(TAG, "Sending backend request to verify if email address has been registered");
-        //    Messenger.sendEmailRegistrationRequest(this, email, false, 0);
-        //}
+        Log.d(TAG, "onResume()");
 
         Switch privacyPolicyPermission = findViewById(R.id.privacy_policy);
         privacyPolicyPermission.setChecked(settings.getBoolean(PRIVACY_POLICY, false));
 
         Switch accessFineLocationPermission = findViewById(R.id.location_policy);
         accessFineLocationPermission.setChecked(Permissions.haveLocationPermission(this));
+
+        if (StringUtils.equals(action, "VERIFY")) {
+            Log.d(TAG, "Sending email registration confirmation request...");
+            NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, toaster, this);
+            notificationActivationDialogFragment.onEnteredActivationCode(this, settings, settings.getString(NotificationActivationDialogFragment.EMAIL_SECRET));
+        } else {
+            initEmailInput();
+        }
+    }
+
+    @Override
+    protected void onNewIntent (Intent intent) {
+        super.onNewIntent(intent);
+        Log.d(TAG, "onNewIntent()");
+
+        if (intent != null) {
+            action = intent.getAction();
+        }
     }
 
     @Override
@@ -120,6 +124,25 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 Bundle extras = new Bundle();
                 extras.putString("telegramId", getString(R.string.telegram_notification));
                 SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void onSwitchSelected(View view) {
+        boolean checked = ((Switch) view).isChecked();
+
+        switch (view.getId()) {
+            case R.id.privacy_policy:
+                settings.setBoolean(PRIVACY_POLICY, checked);
+                break;
+            case R.id.location_policy:
+                if (checked && !Permissions.haveLocationPermission(this)) {
+                    Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                } else if (!checked) {
+                    Permissions.startSettingsIntent(this , "Location");
+                }
                 break;
             default:
                 break;
@@ -223,6 +246,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
             EmailActivationDialogFragment emailActivationDialogFragment = (EmailActivationDialogFragment) getFragmentManager().findFragmentByTag(EmailActivationDialogFragment.TAG);
             if (emailActivationDialogFragment == null) {
                 emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
+                toaster.cancel();
                 emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
             } else {
                 emailActivationDialogFragment.setToaster(toaster);

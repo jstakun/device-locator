@@ -110,7 +110,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                                     if (code.length() == 4 && StringUtils.equals(code, activationCode)) {
                                         activationCodeInput.setText(code);
                                         toaster.showActivityToast("Code has been pasted from clipboard");
-                                        onEnteredActivationCode(settings, secret);
+                                        onEnteredActivationCode(getActivity(), settings, secret);
                                         break;
                                     }
                                 }
@@ -133,7 +133,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
             public void onTextChanged(CharSequence code, int i, int i1, int i2) {
                 //Log.d(TAG, "Comparing " + code + " with " + activationCode);
                 if (code.length() == 4 && StringUtils.equals(code, activationCode)) {
-                    onEnteredActivationCode(settings, secret);
+                    onEnteredActivationCode(getActivity(), settings, secret);
                 }
             }
 
@@ -193,14 +193,13 @@ public class NotificationActivationDialogFragment extends DialogFragment {
         return builder.create();
     }
 
-    private void onEnteredActivationCode(final PreferencesUtils settings, String secret) {
-        if (Network.isNetworkAvailable(getActivity())) {
+    public void onEnteredActivationCode(final Context context, final PreferencesUtils settings, final String secret) {
+        if (Network.isNetworkAvailable(context)) {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bearer " + tokenStr);
             toaster.showActivityToast(R.string.please_wait);
-            final String verifyUrl = getActivity().getString(R.string.verifyUrl) + "/" + secret;
-            final Context context = getActivity();
+            final String verifyUrl = context.getString(R.string.verifyUrl) + "/" + secret;
             Network.get(context, verifyUrl, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
@@ -226,9 +225,11 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                     }
                 }
             });
-            NotificationActivationDialogFragment.this.dismiss();
+            if (NotificationActivationDialogFragment.this.isVisible()) {
+                NotificationActivationDialogFragment.this.dismiss();
+            }
         } else {
-            toaster.showActivityToast("No network available. Failed to verify!");
+            toaster.showActivityToast("No network available. Failed to send request! Please try again in a few moments");
         }
     }
 }

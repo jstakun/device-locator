@@ -1184,7 +1184,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     Messenger.sendEmailRegistrationRequest(MainActivity.this, email, validate, 1);
                 } else {
                     settings.remove(MainActivity.EMAIL_REGISTRATION_STATUS, NotificationActivationDialogFragment.EMAIL_SECRET);
-                    toaster.showActivityToast("No email notifications will be sent...");
+                    toaster.showActivityToast("No more email notifications will be sent...");
                 }
             } else {
                 toaster.showActivityToast(R.string.no_network_error);
@@ -1261,7 +1261,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     Messenger.sendTelegramRegistrationRequest(MainActivity.this, telegramId, 1);
                 } else {
                     settings.remove(MainActivity.SOCIAL_REGISTRATION_STATUS, NotificationActivationDialogFragment.TELEGRAM_SECRET);
-                    toaster.showActivityToast("No Telegram notifications will be sent...");
+                    toaster.showActivityToast("No more Telegram notifications will be sent...");
                 }
             } else {
                 toaster.showActivityToast(R.string.no_network_error);
