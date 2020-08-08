@@ -159,7 +159,7 @@ public class PermissionsActivity extends AppCompatActivity {
         accessFineLocationPermission.setChecked(Permissions.haveLocationPermission(this));
 
         Switch smsPermission = findViewById(R.id.sms_permission);
-        if (AppUtils.getInstance().isFullVersion()) {
+        if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
             smsPermission.setChecked(Permissions.haveSendSMSPermission(this));
         } else {
             smsPermission.setVisibility(View.GONE);
@@ -177,7 +177,7 @@ public class PermissionsActivity extends AppCompatActivity {
         writeStoragePermission.setChecked(Permissions.haveWriteStoragePermission(this));
 
         Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
-        if (AppUtils.getInstance().isFullVersion()) {
+        if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
             boolean perm = Permissions.haveReadContactsPermission(this);
             readContactsPermission.setChecked(perm);
             if (!perm && settings.contains(DevicesUtils.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {

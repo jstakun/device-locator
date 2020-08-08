@@ -42,7 +42,7 @@
     <string name="telegram_chat_id">Telegram id</string>
     <string name="share_route">Share route</string>
     <string name="device_tracker">Device Tracker</string>
-    <string name="sms_control">SMS Commands</string>
+    <string name="sms_control">Device Commands</string>
     <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
     <string name="verify_security_pin">Authenticate me at application startup using Security PIN</string>
     <string name="sms_manager_first_time_use">&lt;font color="#808080">On this screen you can enable SMS commands, manage your Security PIN, and select Location messages sent in reply to Locate command.&lt;br/>Do you want to enable now SMS commands on your device?&lt;/font></string>

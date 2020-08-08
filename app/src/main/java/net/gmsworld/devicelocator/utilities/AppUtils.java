@@ -100,6 +100,10 @@ public class AppUtils {
         return BuildConfig.APP_TYPE.equalsIgnoreCase("FULL");
     }
 
+    public boolean hasTelephonyFeature(Context c) {
+        return c.getPackageManager().hasSystemFeature("android.hardware.telephony");
+    }
+
     //private ApplicationInfo getApplicationInfo(Context c) throws PackageManager.NameNotFoundException {
     //    PackageManager pm = c.getPackageManager();
     //    ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), 0);

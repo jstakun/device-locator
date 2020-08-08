@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         commandLink.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
-        if (AppUtils.getInstance().isFullVersion()) {
+        if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
             toggleSmsBroadcastReceiver();
         } else {
             findViewById(R.id.sms_notification).setVisibility(View.GONE);
@@ -629,7 +629,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private void updateUI() {
-        if (AppUtils.getInstance().isFullVersion()) {
+        if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
             //check if sms permission is present
             if (running && !Permissions.haveSendSMSPermission(this)) {
                 toggleRunning();
@@ -1413,15 +1413,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
         } else if (!running) {
             //SMS Manager
-            //Full version
-            if (AppUtils.getInstance().isFullVersion()) {
+            if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
+                //Full version with telephony
                 if (!settings.contains(SmsCommandsInitDialogFragment.TAG)) {
                     settings.setBoolean(SmsCommandsInitDialogFragment.TAG, true);
                     SmsCommandsInitDialogFragment smsCommandsInitDialogFragment = SmsCommandsInitDialogFragment.newInstance(this);
                     smsCommandsInitDialogFragment.show(getFragmentManager(), SmsCommandsInitDialogFragment.TAG);
                 }
-            } else {
-                //GP version
+            } else if (AppUtils.getInstance().hasTelephonyFeature(this)) {
+                //GP version with telephony
                 //DownloadFullApplicationDialogFragment downloadFullApplicationDialogFragment = DownloadFullApplicationDialogFragment.newInstance(this);
                 //downloadFullApplicationDialogFragment.show(getFragmentManager(), DownloadFullApplicationDialogFragment.TAG);
                 if (!settings.contains("SmsManagerFirstTimeUseDialog")) {
@@ -1430,7 +1430,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     firstTimeUseDialogFragment.show(getFragmentManager(), "SmsManagerFirstTimeUseDialog");
                 }
             }
-            //
         }
     }
 
@@ -1446,9 +1445,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         title.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (AppUtils.getInstance().isFullVersion()) {
+                if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(MainActivity.this)) {
                     MainActivity.this.toggleRunning();
                     MainActivity.this.clearFocus();
+                } else if (!AppUtils.getInstance().hasTelephonyFeature(MainActivity.this)) {
+                    title.setChecked(false);
+                    toaster.showActivityToast("Telephony service is not available on this device!");
                 } else {
                     title.setChecked(false);
                     DownloadFullApplicationDialogFragment downloadFullApplicationDialogFragment = DownloadFullApplicationDialogFragment.newInstance(MainActivity.this);
