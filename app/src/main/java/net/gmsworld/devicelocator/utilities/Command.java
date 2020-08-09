@@ -848,7 +848,7 @@ public class Command {
 
         @SuppressLint("MissingPermission")
         private boolean initPhoneCall(String sender, Context context) {
-            if (Permissions.haveCallPhonePermission(context)) {
+            if (AppUtils.getInstance().hasTelephonyFeature(context) && Permissions.haveCallPhonePermission(context)) {
                 try {
                     Log.d(TAG, "Calling " + sender + " ...");
                     Uri call = Uri.parse("tel:" + sender);
@@ -863,7 +863,7 @@ public class Command {
                     return false;
                 }
             } else {
-                Log.e(TAG, "Unable to initiate phone call due to missing permission!");
+                Log.e(TAG, "Unable to initiate phone call due to missing permission or lack of telephony service!");
                 return false;
             }
         }

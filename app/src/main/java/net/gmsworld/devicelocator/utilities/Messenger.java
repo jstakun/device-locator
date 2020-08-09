@@ -779,7 +779,7 @@ public class Messenger {
                     text = "You should now stop hearing ringtone from your device " + deviceId + getBatteryLevel(context);
                     break;
                 case Command.CALL_COMMAND:
-                    text = "Failed to initiate phone call from device " + deviceId + "!";
+                    text = "Failed to initiate phone call from device " + deviceId + ". Required permissions are not granted or device has no telephony service!";
                     break;
                 case Command.SHARE_COMMAND:
                     text = "Unable to share location from device " + deviceId + ". Required permissions are not granted!";

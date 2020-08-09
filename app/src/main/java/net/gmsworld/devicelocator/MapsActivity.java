@@ -53,6 +53,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final String TAG = MapsActivity.class.getSimpleName();
 
+    private static final long DEVICE_SEARCH_INTERVAL = 10000L; //10 sec
+
     private GoogleMap mMap;
     private PreferencesUtils settings;
 
@@ -67,7 +69,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private final Handler handler = new Handler();
 
-    private final Runnable r = new Runnable() {
+    private final Runnable findDevices = new Runnable() {
         @Override
         public void run() {
             Log.d(TAG, "Checking for new devices list...");
@@ -75,8 +77,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.d(TAG, "Found!");
                 loadDeviceMarkers(false);
             } else {
-                Log.d(TAG, "Will check again in 5 seconds...");
-                handler.postDelayed(r, 5000L);
+                Log.d(TAG, "Will check again in " + DEVICE_SEARCH_INTERVAL + " milliseconds...");
+                handler.postDelayed(findDevices, DEVICE_SEARCH_INTERVAL);
             }
         }
     };
@@ -127,7 +129,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onPause();
         Log.d(TAG, "onPause()");
         SmartLocation.with(this).location().stop();
-        handler.removeCallbacks(r);
+        handler.removeCallbacks(findDevices);
     }
 
     @Override
@@ -144,9 +146,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //Log.d(TAG, "onCreateOptionsMenu()");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
-
         menu.findItem(R.id.map).setVisible(false);
-
         return true;
     }
 
@@ -273,7 +273,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     currentZoom = mMap.getCameraPosition().zoom;
                 }
             }
-            handler.postDelayed(r, 5000L);
+            handler.postDelayed(findDevices, DEVICE_SEARCH_INTERVAL);
         } else {
             RegisterDeviceDialogFragment.newInstance().show(this.getFragmentManager(), RegisterDeviceDialogFragment.TAG);
         }
@@ -325,19 +325,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 if (devices != null && devices.size() > 1) {
                     toaster.showActivityToast(R.string.please_wait);
+                    long delay = 0L;
                     for (Device device : devices) {
                         if (!StringUtils.equals(device.imei, thisDeviceImei)) {
                             if (settings.contains(CommandActivity.PIN_PREFIX + device.imei)) {
-                                //send locate command to deviceImei
-                                Log.d(TAG, "Sending locate command to the device " + device.name);
-                                String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + device.imei);
-                                Intent newIntent = new Intent(MapsActivity.this, CommandService.class);
-                                newIntent.putExtra("command", "locate");
-                                newIntent.putExtra("imei", device.imei);
-                                newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
-                                newIntent.putExtra("pin", devicePin);
-                                newIntent.putExtra("args", "silent");
-                                startService(newIntent);
+                                //send locate command to device
+                                handler.postDelayed(new LocateCommandSender(device), delay);
+                                delay += 5000L;
                             } else {
                                 toaster.showActivityToast(MapsActivity.this.getString(R.string.pin_not_saved, device.name));
                             }
@@ -346,5 +340,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         });
+    }
+
+    private class LocateCommandSender implements Runnable {
+
+        private Device device;
+
+        public LocateCommandSender(Device device) {
+            this.device = device;
+        }
+
+        @Override
+        public void run() {
+            Log.d(TAG, "Sending locate command to the device " + device.name);
+            String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + device.imei);
+            Intent newIntent = new Intent(MapsActivity.this, CommandService.class);
+            newIntent.putExtra("command", "locate");
+            newIntent.putExtra("imei", device.imei);
+            newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
+            newIntent.putExtra("pin", devicePin);
+            newIntent.putExtra("args", "silent");
+            startService(newIntent);
+        }
     }
 }
