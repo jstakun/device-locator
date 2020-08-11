@@ -214,6 +214,7 @@ public abstract class AbstractCommand {
             int foundCommand = findCommandInMessage(context, keyword, message, pin, sender, isPinRequired);
             if (foundCommand == 1) {
                 if (!validateTokens()) {
+                    Log.e(TAG, "Invalid command parameters in command " + message);
                     foundCommand = 0;
                 }
             }

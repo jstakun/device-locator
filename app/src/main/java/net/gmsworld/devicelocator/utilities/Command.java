@@ -104,7 +104,7 @@ public class Command {
                         sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
                     }
                     if (sms != null) {
-                        String smsMessage = StringUtils.trim(sms.getMessageBody());
+                        final String smsMessage = StringUtils.trim(sms.getMessageBody());
                         if (StringUtils.isNotEmpty(smsMessage)) {
                             //Log.d(TAG, "Checking sms message " + smsMessage);
                             final PreferencesUtils prefs = new PreferencesUtils(context);
@@ -808,7 +808,8 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            return (commandTokens == null || commandTokens.length == 1 || Patterns.PHONE.matcher(commandTokens[commandTokens.length - 1]).matches() || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
+            //return (commandTokens == null || commandTokens.length == 1 || Patterns.PHONE.matcher(commandTokens[commandTokens.length - 1]).matches() || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
+            return (commandTokens.length >= 1 && Patterns.PHONE.matcher(commandTokens[commandTokens.length - 1]).matches());
         }
 
         @Override
@@ -821,15 +822,15 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             final String phoneNumber = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
-            if (StringUtils.isNotEmpty(phoneNumber) && !initPhoneCall(phoneNumber, context)) {
+            if (StringUtils.isEmpty(phoneNumber) || !initPhoneCall(phoneNumber, context)) {
                 sendSocialNotification(context, CALL_COMMAND, sender, null);
             }
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            String phoneNumber = extras.getString("args");
-            if (phoneNumber != null && Patterns.PHONE.matcher(phoneNumber).matches() && SmsReceiver.contactExists(context, phoneNumber)) {
+            final String phoneNumber = extras.getString("args");
+            if (StringUtils.isNotEmpty(phoneNumber) && Patterns.PHONE.matcher(phoneNumber).matches() && SmsReceiver.contactExists(context, phoneNumber)) {
                 if (!initPhoneCall(phoneNumber, context)) {
                     sendAppNotification(context, CALL_COMMAND, sender);
                 }
@@ -848,8 +849,7 @@ public class Command {
 
         @SuppressLint("MissingPermission")
         private boolean initPhoneCall(String sender, Context context) {
-            //if (AppUtils.getInstance().hasTelephonyFeature(context) && Permissions.haveCallPhonePermission(context)) {
-            if (Permissions.haveCallPhonePermission(context)) {
+            if (AppUtils.getInstance().hasTelephonyFeature(context) && Permissions.haveCallPhonePermission(context)) {
                 try {
                     Log.d(TAG, "Calling " + sender + " ...");
                     Uri call = Uri.parse("tel:" + sender);
