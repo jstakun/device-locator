@@ -809,7 +809,7 @@ public class Command {
         @Override
         public boolean validateTokens() {
             //return (commandTokens == null || commandTokens.length == 1 || Patterns.PHONE.matcher(commandTokens[commandTokens.length - 1]).matches() || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
-            return (commandTokens.length >= 1 && Patterns.PHONE.matcher(commandTokens[commandTokens.length - 1]).matches());
+            return (commandTokens != null && commandTokens.length >= 1 && Patterns.PHONE.matcher(commandTokens[commandTokens.length - 1]).matches());
         }
 
         @Override
@@ -823,6 +823,7 @@ public class Command {
         protected void onSocialCommandFound(String sender, Context context) {
             final String phoneNumber = PreferenceManager.getDefaultSharedPreferences(context).getString(MainActivity.NOTIFICATION_PHONE_NUMBER, "");
             if (StringUtils.isEmpty(phoneNumber) || !initPhoneCall(phoneNumber, context)) {
+                Log.e(TAG, "Failed to init phone call to: " + phoneNumber);
                 sendSocialNotification(context, CALL_COMMAND, sender, null);
             }
         }

@@ -52,7 +52,7 @@ public class SmsReceiver extends BroadcastReceiver {
         }
 
         if (proceed) {
-            String command = Command.findCommandInSms(context, bundle);
+            final String command = Command.findCommandInSms(context, bundle);
             if (StringUtils.isNotEmpty(command)) {
                 FirebaseAnalytics.getInstance(context).logEvent("sms_command_received_" + command.toLowerCase(), new Bundle());
             }

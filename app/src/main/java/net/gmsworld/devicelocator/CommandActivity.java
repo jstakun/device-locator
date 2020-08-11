@@ -85,7 +85,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         final EditText pinEdit = findViewById(R.id.devicePin);
         final CheckBox socialSend = findViewById(R.id.social_send);
 
-        //commands list
+        //command args
 
         args.setOnEditorActionListener(new EditText.OnEditorActionListener() {
             @Override
@@ -96,6 +96,8 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 return false;
             }
         });
+
+        //commands list
 
         final CommandArrayAdapter commands = new CommandArrayAdapter(this, R.layout.command_row,  getResources().getStringArray(R.array.device_commands));
         commandSpinner.setAdapter(commands);
