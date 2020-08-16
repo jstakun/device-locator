@@ -43,7 +43,7 @@ public class EmailActivationDialogFragment extends DialogFragment {
 
         final PreferencesUtils settings = new PreferencesUtils(getActivity());
 
-        alertDialogBuilder.setPositiveButton("Open My Inbox", new DialogInterface.OnClickListener() {
+        alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         toaster.showActivityToast(R.string.please_wait);
@@ -55,10 +55,10 @@ public class EmailActivationDialogFragment extends DialogFragment {
                         } catch (Exception e) {
                             startActivity(Intent.createChooser(intent, "Open Mail Inbox"));
                         }
-                        toaster.showActivityToast("Please open newest message from " + getActivity().getString(R.string.app_email)  + " and click on the link to confirm registration");
+                        toaster.showActivityToast("Please open newest message from " + getActivity().getString(R.string.app_email)  + " and click the link to confirm your registration");
                     }
                 })
-                .setNegativeButton("Done", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         Log.d(TAG, "Sending again email registration request ...");
                         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
@@ -69,7 +69,7 @@ public class EmailActivationDialogFragment extends DialogFragment {
                         } else {
                             toaster.showActivityToast("Failed to send email registration request!");
                         }
-                        //Forget Me action
+                        //old Forget Me action
                         /*Log.d(TAG, "Cancelling email registration request ...");
                         settings.remove(MainActivity.NOTIFICATION_EMAIL, MainActivity.EMAIL_REGISTRATION_STATUS, NotificationActivationDialogFragment.EMAIL_SECRET);
                         final TextView emailInput = getActivity().findViewById(R.id.email);
