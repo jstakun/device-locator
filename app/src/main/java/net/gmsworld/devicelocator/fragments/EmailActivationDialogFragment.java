@@ -22,11 +22,16 @@ public class EmailActivationDialogFragment extends DialogFragment {
 
     public static final String TAG = "EmailActivationDialog";
 
+    public enum Mode {Initial, Retry};
+
     private Toaster toaster;
 
-    public static EmailActivationDialogFragment newInstance(Toaster toaster) {
+    private Mode mode;
+
+    public static EmailActivationDialogFragment newInstance(Toaster toaster, Mode mode) {
         EmailActivationDialogFragment instance = new EmailActivationDialogFragment();
         instance.toaster = toaster;
+        instance.mode = mode;
         return instance;
     }
 
@@ -34,10 +39,18 @@ public class EmailActivationDialogFragment extends DialogFragment {
         this.toaster = toaster;
     }
 
+    public void setMode(Mode mode) {
+        this.mode = mode;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-        alertDialogBuilder.setMessage(Html.fromHtml(getString(R.string.email_registration)));
+        if (mode == Mode.Initial) {
+            alertDialogBuilder.setMessage(Html.fromHtml(getString(R.string.email_registration_initial)));
+        } else if (mode == Mode.Retry) {
+            alertDialogBuilder.setMessage(Html.fromHtml(getString(R.string.email_registration_retry)));
+        }
         alertDialogBuilder.setIcon(R.drawable.ic_warning_gray);
         alertDialogBuilder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
 

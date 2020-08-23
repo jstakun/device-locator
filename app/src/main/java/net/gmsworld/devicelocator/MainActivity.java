@@ -896,7 +896,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         final long alarmMillis = settings.getLong(LocationAlarmUtils.ALARM_KEY,0L);
         String alarmText = getResources().getQuantityString(R.plurals.alarm_interval, interval, interval);
         if (alarmMillis > System.currentTimeMillis() && settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)) {
-            alarmText += getString(R.string.alarm_settings_suffix, pt.format(new Date(alarmMillis)));
+            alarmText += " " + getString(R.string.alarm_settings_suffix, pt.format(new Date(alarmMillis)));
         }
         alarmInterval.setText(alarmText);
     }
@@ -1910,10 +1910,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     public void showEmailActivationDialogFragment() {
         EmailActivationDialogFragment emailActivationDialogFragment = (EmailActivationDialogFragment) getFragmentManager().findFragmentByTag(EmailActivationDialogFragment.TAG);
         if (emailActivationDialogFragment == null) {
-            emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
+            emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster, EmailActivationDialogFragment.Mode.Initial);
             emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
         } else {
             emailActivationDialogFragment.setToaster(toaster);
+            emailActivationDialogFragment.setMode(EmailActivationDialogFragment.Mode.Initial);
         }
     }
 

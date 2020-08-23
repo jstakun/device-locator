@@ -338,6 +338,7 @@ public class NotificationUtils {
         return new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_devices_other_white)
                     .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                    .setProgress(0, 0 ,true)
                     .setContentTitle(context.getString(R.string.app_name) + " Notification")
                     .setContentText(text).build();
     }

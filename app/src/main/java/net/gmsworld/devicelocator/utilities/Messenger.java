@@ -1105,6 +1105,7 @@ public class Messenger {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
         headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
+        headers.put("X-GMS-DeviceName", Messenger.getDeviceId(context, true));
 
         try {
             final String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false) + "&validate=" + validate;
@@ -1140,7 +1141,7 @@ public class Messenger {
                             if (StringUtils.isNotEmpty(secret)) {
                                 //TODO refactor this code to use interface 6
                                 if (context instanceof RegisterActivity) {
-                                    ((RegisterActivity) context).showEmailActivationDialogFragment();
+                                    ((RegisterActivity) context).showEmailActivationDialogFragment(false);
                                 } else if (context instanceof MainActivity) {
                                     ((MainActivity) context).showEmailActivationDialogFragment();
                                 }

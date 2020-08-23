@@ -39,10 +39,13 @@ public class LauncherActivity extends Activity {
             //email verification request
             final String secret = appLinkData.getLastPathSegment();
             if (StringUtils.equals(secret, settings.getString(NotificationActivationDialogFragment.EMAIL_SECRET))) {
-                showIntent = new Intent(this, RegisterActivity.class);
-                action = "VERIFY";
+                action = RegisterActivity.ACTION_VERIFY;
                 Log.d(TAG, "Sending VERIFY action to Register Activity");
+            } else {
+                action = RegisterActivity.ACTION_INVALID;
+                Log.d(TAG, "Sending INVALID action to Register Activity");
             }
+            showIntent = new Intent(this, RegisterActivity.class);
         }
 
         if (showIntent == null) {

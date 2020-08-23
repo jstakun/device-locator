@@ -44,6 +44,9 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
     public static final String PRIVACY_POLICY = "privacy_policy";
 
+    protected static final String ACTION_VERIFY = "VERIFY";
+    protected static final String ACTION_INVALID = "INVALID";
+
     private static final String TAG = RegisterActivity.class.getSimpleName();
 
     private PreferencesUtils settings;
@@ -71,7 +74,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
         initRegisterButton();
 
-        initEmailInput();
+        initEmailInput(false);
 
         Intent intent = getIntent();
 
@@ -93,12 +96,17 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         Switch accessFineLocationPermission = findViewById(R.id.location_policy);
         accessFineLocationPermission.setChecked(Permissions.haveLocationPermission(this));
 
-        if (StringUtils.equals(action, "VERIFY")) {
+        if (StringUtils.equals(action, ACTION_VERIFY)) {
             Log.d(TAG, "Sending email registration confirmation request...");
             NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Email, toaster, this);
             notificationActivationDialogFragment.onEnteredActivationCode(this, settings, settings.getString(NotificationActivationDialogFragment.EMAIL_SECRET));
         } else {
-            initEmailInput();
+            if (StringUtils.equals(action, ACTION_INVALID)) {
+                Log.d(TAG, "Invalid link has been clicked...");
+                initEmailInput(true);
+            } else {
+                initEmailInput(false);
+            }
         }
     }
 
@@ -194,7 +202,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         }
     }
 
-    private void initEmailInput() {
+    private void initEmailInput(boolean retry) {
         final TextView emailInput = findViewById(R.id.email);
         final String email = settings.getString(MainActivity.NOTIFICATION_EMAIL);
         if (StringUtils.isNotEmpty(email)) {
@@ -238,15 +246,21 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         });
 
         if (StringUtils.isNotEmpty(email) && !Messenger.isEmailVerified(settings)) {
-            showEmailActivationDialogFragment();
+            showEmailActivationDialogFragment(retry);
         }
     }
 
-    public void showEmailActivationDialogFragment() {
+    public void showEmailActivationDialogFragment(boolean retry) {
         if (!isFinishing()) {
             EmailActivationDialogFragment emailActivationDialogFragment = (EmailActivationDialogFragment) getFragmentManager().findFragmentByTag(EmailActivationDialogFragment.TAG);
+            EmailActivationDialogFragment.Mode mode;
+            if (retry) {
+                mode = EmailActivationDialogFragment.Mode.Retry;
+            } else {
+                mode = EmailActivationDialogFragment.Mode.Initial;
+            }
             if (emailActivationDialogFragment == null) {
-                emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster);
+                emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster, mode);
                 toaster.cancel();
                 //emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -254,6 +268,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 ft.commitAllowingStateLoss();
             } else {
                 emailActivationDialogFragment.setToaster(toaster);
+                emailActivationDialogFragment.setMode(mode);
             }
         }
     }
