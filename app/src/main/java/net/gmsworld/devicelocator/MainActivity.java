@@ -68,6 +68,7 @@ import net.gmsworld.devicelocator.fragments.RemoveDeviceDialogFragment;
 import net.gmsworld.devicelocator.fragments.SmsCommandsEnabledDialogFragment;
 import net.gmsworld.devicelocator.fragments.SmsCommandsInitDialogFragment;
 import net.gmsworld.devicelocator.fragments.SmsNotificationWarningDialogFragment;
+import net.gmsworld.devicelocator.fragments.TelegramSetupDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
@@ -299,8 +300,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 showEmailActivationDialogFragment();
             }
             if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
-                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, toaster);
-                notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
             }
         }
     }
@@ -381,8 +381,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     showEmailActivationDialogFragment();
                 }
                 if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
-                    NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, toaster);
-                    notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+                    openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
                 }
                 return true;
             case R.id.devices:
@@ -1285,6 +1284,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     public void clearTelegramInput(final boolean clearTextInput, final String message) {
+        settings.setString(MainActivity.NOTIFICATION_SOCIAL, "");
         final TextView telegramInput = findViewById(R.id.telegramId);
         if (clearTextInput) {
             telegramInput.setText("");
@@ -1695,6 +1695,36 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
     }
 
+    public void openNotificationActivationDialogFragment(final NotificationActivationDialogFragment.Mode mode) {
+        if (!isFinishing()) {
+            try {
+                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(mode, toaster);
+                notificationActivationDialogFragment.show(getFragmentManager(), NotificationActivationDialogFragment.TAG);
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+        }
+    }
+
+    public void openTelegramSetupDialogFragment() {
+        if (!isFinishing()) {
+            final int failedSetupCount = settings.getInt(TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT, 0);
+            if (failedSetupCount < 3) {
+                try {
+                    settings.setInt(TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT, failedSetupCount+1);
+                    TelegramSetupDialogFragment.newInstance().show(getFragmentManager(), TelegramSetupDialogFragment.TAG);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                    clearTelegramInput(false, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!");
+                }
+            } else {
+                Messenger.getMyTelegramId(this);
+            }
+        } else {
+            clearTelegramInput(false, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!");
+        }
+    }
+
     private void getTelegramChatId(final String telegramSecret) {
         if (Network.isNetworkAvailable(this)) {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
@@ -1734,22 +1764,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                 } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                                     //show dialog to enter activation code sent to user
                                     if (StringUtils.isNotEmpty(secret)) {
-                                        if (!MainActivity.this.isFinishing()) {
-                                            try {
-                                                NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, toaster);
-                                                notificationActivationDialogFragment.show(MainActivity.this.getFragmentManager(), NotificationActivationDialogFragment.TAG);
-                                            } catch (Exception e) {
-                                                Log.e(TAG, e.getMessage(), e);
-                                            }
-                                        }
+                                        openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
                                     } else {
-                                        Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
+                                        clearTelegramInput(true, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!");
                                     }
                                 } else {
-                                    Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
+                                    clearTelegramInput(true, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!");
                                 }
                             } else if (responseCode >= 400) {
-                                Messenger.onFailedTelegramRegistration(MainActivity.this, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);
+                                clearTelegramInput(true, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!");
                             }
                         } else {
                             Log.d(TAG, "User has canceled Telegram registration!");

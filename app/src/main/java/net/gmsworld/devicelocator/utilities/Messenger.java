@@ -1,7 +1,6 @@
 package net.gmsworld.devicelocator.utilities;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -1020,16 +1019,8 @@ public class Messenger {
                         //show dialog to enter activation code sent to user
                         if (StringUtils.isNotEmpty(secret)) {
                             //TODO refactor this code to use interface 3
-                            if (context instanceof Activity) {
-                                Activity activity = (Activity)context;
-                                if (!activity.isFinishing()) {
-                                    try {
-                                        NotificationActivationDialogFragment notificationActivationDialogFragment = NotificationActivationDialogFragment.newInstance(NotificationActivationDialogFragment.Mode.Telegram, new Toaster(activity));
-                                        notificationActivationDialogFragment.show(activity.getFragmentManager(), NotificationActivationDialogFragment.TAG);
-                                    } catch (Exception e) {
-                                        Log.e(TAG, e.getMessage(), e);
-                                    }
-                                }
+                            if (context instanceof MainActivity) {
+                                ((MainActivity)context).openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
                             }
                         } else {
                             onFailedTelegramRegistration(context, "Failed to send activation code to your Telegram chat or channel. Please register again your Telegram chat or channel!", true);
@@ -1041,24 +1032,8 @@ public class Messenger {
                     onFailedTelegramRegistration(context, "Please grant @device_locator_bot permission to write posts to you chat or channel!", true);
                 } else if (responseCode == 400) {
                     //TODO refactor this code to use interface 4
-                    if (context instanceof Activity) {
-                        Activity activity = (Activity)context;
-                        if (!activity.isFinishing()) {
-                            final int failedSetupCount = settings.getInt(TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT, 0);
-                            if (failedSetupCount < 3) {
-                                try {
-                                    settings.setInt(TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT, failedSetupCount+1);
-                                    TelegramSetupDialogFragment.newInstance().show(activity.getFragmentManager(), TelegramSetupDialogFragment.TAG);
-                                } catch (Exception e) {
-                                    Log.e(TAG, e.getMessage(), e);
-                                    onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
-                                }
-                            } else {
-                                Messenger.getMyTelegramId(context);
-                            }
-                        } else {
-                            onFailedTelegramRegistration(context, "Oops! Your Telegram channel id seems to be wrong. Please use button on the left to find your channel id!", false);
-                        }
+                    if (context instanceof MainActivity) {
+                        ((MainActivity)context).openTelegramSetupDialogFragment();
                     }
                 } else if (responseCode != 200 && retryCount > 0) {
                     sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
@@ -1069,8 +1044,7 @@ public class Messenger {
         });
     }
 
-    public static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
+    private static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
         //TODO refactor this code to use interface 2
         if (context instanceof MainActivity) {
             ((MainActivity)context).clearTelegramInput(clearTextInput, message);
