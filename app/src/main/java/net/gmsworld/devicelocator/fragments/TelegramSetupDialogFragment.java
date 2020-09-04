@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Html;
 
+import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.utilities.Messenger;
 
@@ -26,7 +27,9 @@ public class TelegramSetupDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setNegativeButton("Not now", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                Messenger.onFailedTelegramRegistration(getActivity(), null, true);
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity)getActivity()).clearTelegramInput(true, null);
+                }
             }
         });
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
