@@ -1196,6 +1196,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
     }
 
+    public void clearEmailInput(final boolean clearTextInput, final String message) {
+        final TextView emailInput = findViewById(R.id.email);
+        if (clearTextInput) {
+            emailInput.setText("");
+        }
+        emailInput.requestFocus();
+        if (StringUtils.isNotEmpty(message)) {
+            toaster.showActivityToast(message);
+        }
+    }
+
     //telegram input setup -----------------------------------------------------------------
 
     private void initTelegramInput() {
@@ -1270,6 +1281,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         } else if (!StringUtils.equals(telegramId, newTelegramId)) {
             toaster.showActivityToast("Make sure to specify valid Telegram chat id!");
             telegramInput.setText("");
+        }
+    }
+
+    public void clearTelegramInput(final boolean clearTextInput, final String message) {
+        final TextView telegramInput = findViewById(R.id.telegramId);
+        if (clearTextInput) {
+            telegramInput.setText("");
+        }
+        telegramInput.requestFocus();
+        if (StringUtils.isNotEmpty(message)) {
+            toaster.showActivityToast(message);
         }
     }
 
@@ -1677,8 +1699,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (Network.isNetworkAvailable(this)) {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             final Map<String, String> headers = new HashMap<>();
-            headers.put("X-GMS-AppId", "2");
-            headers.put("X-GMS-Scope", "dl");
             if (StringUtils.isNotEmpty(tokenStr)) {
                 final String queryString = "type=getTelegramChatId&telegramSecret=" + telegramSecret;
                 Network.get(this, getString(R.string.telegramUrl) + "?" + queryString, headers, new Network.OnGetFinishListener() {

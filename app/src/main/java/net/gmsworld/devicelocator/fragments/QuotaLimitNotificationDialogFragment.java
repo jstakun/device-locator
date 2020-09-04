@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.text.Html;
 
 import net.gmsworld.devicelocator.R;
-import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Toaster;
 
@@ -69,8 +68,6 @@ public class QuotaLimitNotificationDialogFragment extends DialogFragment {
         final Context context = getContext();
         if (Network.isNetworkAvailable(context)) {
             Map<String, String> headers = new HashMap<>();
-            headers.put("X-GMS-AppId", "2");
-            headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
             headers.put("Authorization", "Bearer " + tokenStr);
             Network.post(context, getString(R.string.deviceManagerUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                     @Override

@@ -104,6 +104,13 @@ public class AppUtils {
         return c.getPackageManager().hasSystemFeature("android.hardware.telephony");
     }
 
+    public Locale getCurrentLocale(Context c) {
+        try {
+            return c.getResources().getConfiguration().locale;
+        } catch (Exception e) { //might cause NPE on some devices
+            return Locale.getDefault();
+        }
+    }
     //private ApplicationInfo getApplicationInfo(Context c) throws PackageManager.NameNotFoundException {
     //    PackageManager pm = c.getPackageManager();
     //    ApplicationInfo ai = pm.getApplicationInfo(c.getPackageName(), 0);

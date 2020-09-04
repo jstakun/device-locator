@@ -38,8 +38,6 @@ public class DeviceLocatorApp extends Application {
                 public void onGetFinish(String results, int responseCode, String url) {
                     if (responseCode == 200) {
                         headers.put("Authorization", "Bearer " + Messenger.getToken(DeviceLocatorApp.this, results));
-                        headers.put("X-GMS-AppId", "2");
-                        headers.put("X-GMS-Scope", "dl");
                         initAcra(headers);
                     } else {
                         Log.d(TAG, "Failed to receive token: " + results);

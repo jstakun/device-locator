@@ -20,7 +20,6 @@ import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -110,8 +109,6 @@ public class Messenger {
                 final String deviceId = getDeviceId(context, false);
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
-                    headers.put("X-GMS-AppId", "2");
-                    headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
                     if (StringUtils.isNotEmpty(deviceId)) {
                         headers.put("X-GMS-DeviceId", deviceId);
                     }
@@ -217,7 +214,6 @@ public class Messenger {
                 String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
-                    headers.put("X-GMS-AppId", "2");
                     String deviceId = getDeviceId(context, false);
                     if (StringUtils.isNotEmpty(deviceId)) {
                         headers.put("X-GMS-DeviceId", deviceId);
@@ -282,11 +278,8 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, "unverified").apply();
                             //TODO refactor this code to use interface 1
-                            if (context instanceof Activity) {
-                                final TextView emailInput = ((Activity) context).findViewById(R.id.email);
-                                if (emailInput != null) {
-                                    emailInput.setText("");
-                                }
+                            if (context instanceof MainActivity) {
+                                ((MainActivity)context).clearEmailInput(true, null);
                             }
                             Toaster.showToast(context, R.string.email_unverified_error);
                         } else {
@@ -373,23 +366,15 @@ public class Messenger {
                         } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "unverified").apply();
                             //TODO refactor this code to use interface 2
-                            if (context instanceof Activity) {
-                                final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-                                if (telegramInput != null) {
-                                    telegramInput.setText("");
-                                }
+                            if (context instanceof MainActivity) {
+                                ((MainActivity)context).clearTelegramInput(true, context.getString(R.string.telegram_unverified_error));
                             }
-                            Toaster.showToast(context, R.string.telegram_unverified_error);
                         } else if (StringUtils.equalsIgnoreCase(status, "failed")) {
-                            //TODO refactor this code to use interface 2
                             PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
-                            if (context instanceof Activity) {
-                               final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-                                if (telegramInput != null) {
-                                    telegramInput.setText("");
-                                }
+                            //TODO refactor this code to use interface 2
+                            if (context instanceof MainActivity) {
+                                ((MainActivity)context).clearTelegramInput(true, context.getString(R.string.telegram_invalid_id));
                             }
-                            Toaster.showToast(context, R.string.telegram_invalid_id);
                         } else {
                             Toaster.showToast(context, R.string.telegram_internal_error);
                         }
@@ -409,7 +394,6 @@ public class Messenger {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
                 headers.put("Authorization", "Bearer " + tokenStr);
-                headers.put("X-GMS-AppId", "2");
                 String deviceId = getDeviceId(context, false);
                 if (StringUtils.isNotEmpty(deviceId)) {
                     headers.put("X-GMS-DeviceId", deviceId);
@@ -1007,7 +991,6 @@ public class Messenger {
     private static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
 
         final String queryString = "type=register_t&chatId=" + telegramId + "&user=" + getDeviceId(context, false);
         Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
@@ -1089,23 +1072,15 @@ public class Messenger {
     public static void onFailedTelegramRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_SOCIAL, "").apply();
         //TODO refactor this code to use interface 2
-        if (context instanceof Activity) {
-            final TextView telegramInput = ((Activity) context).findViewById(R.id.telegramId);
-            if (clearTextInput) {
-                telegramInput.setText("");
-            }
-            telegramInput.requestFocus();
-            if (StringUtils.isNotEmpty(message)) {
-                Toaster.showToast(context, message);
-            }
+        if (context instanceof MainActivity) {
+            ((MainActivity)context).clearTelegramInput(clearTextInput, message);
         }
     }
 
     private static void sendEmailRegistrationRequest(final Context context, final String email, final boolean validate, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
-        headers.put("X-GMS-DeviceName", Messenger.getDeviceId(context, true));
+        headers.put("X-GMS-DeviceName", getDeviceId(context, true));
 
         try {
             final String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false) + "&validate=" + validate;
@@ -1169,13 +1144,8 @@ public class Messenger {
     private static void onFailedEmailRegistration(Context context, String message, boolean clearTextInput) {
         PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
         //TODO refactor this code to use interface 1
-        if (context instanceof Activity) {
-            final TextView emailInput = ((Activity) context).findViewById(R.id.email);
-            if (clearTextInput) {
-                emailInput.setText("");
-            }
-            emailInput.requestFocus();
-            Toaster.showToast(context, message);
+        if (context instanceof MainActivity) {
+            ((MainActivity)context).clearEmailInput(clearTextInput, message);
         }
     }
 

@@ -165,7 +165,6 @@ public class LoginActivity extends AppCompatActivity  {
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     Map<String, String> headers = new HashMap<>();
                     headers.put("Authorization", "Bearer " + tokenStr);
-                    headers.put("X-GMS-AppId", "2");
                     String deviceId = Messenger.getDeviceId(this, false);
                     if (StringUtils.isNotEmpty(deviceId)) {
                         headers.put("X-GMS-DeviceId", deviceId);

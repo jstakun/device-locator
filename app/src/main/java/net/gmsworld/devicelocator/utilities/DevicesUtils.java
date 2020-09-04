@@ -42,8 +42,6 @@ public class DevicesUtils {
         if (Network.isNetworkAvailable(context)) {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             final Map<String, String> headers = new HashMap<>();
-            headers.put("X-GMS-AppId", "2");
-            headers.put("X-GMS-Scope", "dl");
             if (StringUtils.isNotEmpty(tokenStr)) {
                 String userLogin = settings.getString(MainActivity.USER_LOGIN);
                 if (StringUtils.isNotEmpty(userLogin)) {

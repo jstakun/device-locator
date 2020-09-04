@@ -181,8 +181,6 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                         uploadUrl = getString(R.string.securePhotoUploadUrl);
                     }
 
-                    headers.put("X-GMS-AppId", "2");
-                    headers.put("X-GMS-Scope", "dl");
                     headers.put("X-GMS-DeviceName", Messenger.getDeviceId(this, true));
 
                     if (location != null) {

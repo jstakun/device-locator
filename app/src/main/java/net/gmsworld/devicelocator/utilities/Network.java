@@ -355,6 +355,8 @@ public class Network {
             defaultHeaders.put("X-GMS-Scope", "dl");
             if (context != null) {
                 defaultHeaders.put("User-Agent", AppUtils.getInstance().getUserAgent(context));
+                defaultHeaders.put("Accept-Language", AppUtils.getInstance().getCurrentLocale(context).getLanguage());
+                defaultHeaders.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
             }
         }
         return defaultHeaders;

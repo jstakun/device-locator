@@ -320,7 +320,6 @@ public abstract class AbstractLocationManager {
                     }
                     //Log.d(TAG, "Route:\n" + route);
                     headers.put("X-GMS-RouteId", RouteTrackingServiceUtils.getRouteId(context));
-                    headers.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
                     headers.put("X-GMS-DeviceName", Messenger.getDeviceId(context, true));
                     Network.post(context, url, "route=" + content, null, headers, onFinishListener);
                 } catch (Exception e) {
