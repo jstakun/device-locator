@@ -266,9 +266,13 @@ public abstract class AbstractCommand {
         SmsSenderService.initService(context, true, true, true, null, command, sender, "mobile", extras);
     }
 
-    void sendAppNotification(final Context context, final String command, final String app) {
+    void sendAppNotification(final Context context, final String command, final String app, final String language) {
         if (StringUtils.isNotEmpty(app)) {
-            SmsSenderService.initService(context, false, false, false, app, command, null, null, null);
+            Bundle extras = new Bundle();
+            if (StringUtils.isNotEmpty(language)) {
+                extras.putString("language", language);
+            }
+            SmsSenderService.initService(context, false, false, false, app, command, null, null, extras);
         } else {
             Log.d(TAG, "App is empty!");
         }

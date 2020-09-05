@@ -290,7 +290,7 @@ public class Command {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
 
-            sendAppNotification(context, START_COMMAND, sender);
+            sendAppNotification(context, START_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -359,7 +359,7 @@ public class Command {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
 
-            sendAppNotification(context, RESUME_COMMAND, sender);
+            sendAppNotification(context, RESUME_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -454,9 +454,9 @@ public class Command {
             }
             if (settings.getBoolean("motionDetectorRunning", false)) {
                 settings.setBoolean("motionDetectorRunning", false);
-                sendAppNotification(context, STOP_COMMAND, sender);
+                sendAppNotification(context, STOP_COMMAND, sender, extras.getString("language"));
             } else {
-                sendAppNotification(context, STOPPED_TRACKER, sender);
+                sendAppNotification(context, STOPPED_TRACKER, sender, extras.getString("language"));
             }
         }
 
@@ -593,12 +593,12 @@ public class Command {
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (!Permissions.haveLocationPermission(context)) {
                 Log.e(TAG, "Missing Location permission");
-                sendAppNotification(context, SHARE_COMMAND, sender);
+                sendAppNotification(context, SHARE_COMMAND, sender, extras.getString("language"));
             } else {
                 if (commandTokens != null && commandTokens.length > 1) {
                     String intervalStr = commandTokens[commandTokens.length - 1];
                     if (StringUtils.equalsIgnoreCase(intervalStr, "now")) {
-                        sendAppNotification(context, null, sender); //don't set SHARE_COMMAND here!
+                        sendAppNotification(context, null, sender, extras.getString("language")); //don't set SHARE_COMMAND here!
                     } else {
                         int interval = 0;
                         try {
@@ -613,13 +613,13 @@ public class Command {
                             settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, interval);
                             settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, true);
                             LocationAlarmUtils.initWhenDown(context, true);
-                            sendAppNotification(context, ALARM_COMMAND, sender);
+                            sendAppNotification(context, ALARM_COMMAND, sender, extras.getString("language"));
                         } else {
-                            sendAppNotification(context, null, sender); //don't set SHARE_COMMAND here!
+                            sendAppNotification(context, null, sender, extras.getString("language")); //don't set SHARE_COMMAND here!
                         }
                     }
                 } else {
-                    sendAppNotification(context, null, sender); //don't set SHARE_COMMAND here!
+                    sendAppNotification(context, null, sender, extras.getString("language")); //don't set SHARE_COMMAND here!
                 }
             }
         }
@@ -736,9 +736,9 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (setRingerMode(context, AudioManager.RINGER_MODE_SILENT)) {
-                sendAppNotification(context, MUTE_COMMAND, sender);
+                sendAppNotification(context, MUTE_COMMAND, sender, extras.getString("language"));
             } else {
-                sendAppNotification(context, RINGER_MODE_FAILED, sender);
+                sendAppNotification(context, RINGER_MODE_FAILED, sender, extras.getString("language"));
             }
         }
 
@@ -784,9 +784,9 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (setRingerMode(context, AudioManager.RINGER_MODE_NORMAL)) {
-                sendAppNotification(context, UNMUTE_COMMAND, sender);
+                sendAppNotification(context, UNMUTE_COMMAND, sender, extras.getString("language"));
             } else {
-                sendAppNotification(context, RINGER_MODE_FAILED, sender);
+                sendAppNotification(context, RINGER_MODE_FAILED, sender, extras.getString("language"));
             }
         }
 
@@ -833,10 +833,10 @@ public class Command {
             final String phoneNumber = extras.getString("args");
             if (StringUtils.isNotEmpty(phoneNumber) && Patterns.PHONE.matcher(phoneNumber).matches() && SmsReceiver.contactExists(context, phoneNumber)) {
                 if (!initPhoneCall(phoneNumber, context)) {
-                    sendAppNotification(context, CALL_COMMAND, sender);
+                    sendAppNotification(context, CALL_COMMAND, sender, extras.getString("language"));
                 }
             } else {
-                sendAppNotification(context, CALL_COMMAND, sender);
+                sendAppNotification(context, CALL_COMMAND, sender, extras.getString("language"));
             }
         }
 
@@ -933,7 +933,7 @@ public class Command {
             PreferencesUtils settings = new PreferencesUtils(context);
             settings.setInt("radius", radius);
             RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, sender);
-            sendAppNotification(context, RADIUS_COMMAND, sender);
+            sendAppNotification(context, RADIUS_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -972,7 +972,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", true).apply();
-            sendAppNotification(context, AUDIO_COMMAND, sender);
+            sendAppNotification(context, AUDIO_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -1003,7 +1003,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("useAudio", false).apply();
-            sendAppNotification(context, AUDIO_OFF_COMMAND, sender);
+            sendAppNotification(context, AUDIO_OFF_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -1036,7 +1036,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 1).apply();
-            sendAppNotification(context, GPS_HIGH_COMMAND, sender);
+            sendAppNotification(context, GPS_HIGH_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -1069,7 +1069,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferenceManager.getDefaultSharedPreferences(context).edit().putInt(RouteTrackingService.GPS_ACCURACY, 0).apply();
-            sendAppNotification(context, GPS_BALANCED_COMMAND, sender);
+            sendAppNotification(context, GPS_BALANCED_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -1116,7 +1116,7 @@ public class Command {
                 cameraIntent.putExtra("app", sender);
                 context.startService(cameraIntent);
             }
-            sendAppNotification(context, TAKE_PHOTO_COMMAND, sender);
+            sendAppNotification(context, TAKE_PHOTO_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -1331,7 +1331,7 @@ public class Command {
 
                 RouteTrackingServiceUtils.resetRouteTrackingService(context, null, false, radius, sender);
 
-                sendAppNotification(context, NOTIFY_COMMAND, sender);
+                sendAppNotification(context, NOTIFY_COMMAND, sender, extras.getString("language"));
             }
         }
     }
@@ -1354,7 +1354,7 @@ public class Command {
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            sendAppNotification(context, PING_COMMAND, sender);
+            sendAppNotification(context, PING_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -1386,7 +1386,7 @@ public class Command {
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            sendAppNotification(context, HELLO_COMMAND, sender);
+            sendAppNotification(context, HELLO_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -1427,7 +1427,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             sendLog();
-            sendAppNotification(context, ABOUT_COMMAND, sender);
+            sendAppNotification(context, ABOUT_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -1469,9 +1469,9 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (lockScreenNow(context)) {
-                sendAppNotification(context, LOCK_SCREEN_COMMAND, sender);
+                sendAppNotification(context, LOCK_SCREEN_COMMAND, sender, extras.getString("language"));
             } else {
-                sendAppNotification(context, LOCK_SCREEN_FAILED, sender);
+                sendAppNotification(context, LOCK_SCREEN_FAILED, sender, extras.getString("language"));
             }
         }
 
@@ -1583,7 +1583,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (playBeep(context)) {
-                sendAppNotification(context, RING_COMMAND, sender);
+                sendAppNotification(context, RING_COMMAND, sender, extras.getString("language"));
             }
         }
 
@@ -1629,7 +1629,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (stopBeep(context)) {
-                sendAppNotification(context, RING_OFF_COMMAND, sender);
+                sendAppNotification(context, RING_OFF_COMMAND, sender, extras.getString("language"));
             }
         }
 
@@ -1816,7 +1816,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             applyConfigChange(context);
-            sendAppNotification(context, CONFIG_COMMAND, sender);
+            sendAppNotification(context, CONFIG_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
@@ -1924,14 +1924,14 @@ public class Command {
             final ComponentName compName = new ComponentName(context, DeviceAdminEventReceiver.class);
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("allowReset", false) && deviceManger != null && deviceManger.isAdminActive(compName)) {
                 try {
-                    sendAppNotification(context, RESET_COMMAND, sender);
+                    sendAppNotification(context, RESET_COMMAND, sender, extras.getString("language"));
                     deviceManger.wipeData(0);
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
-                    sendAppNotification(context, RESET_FAILED, sender);
+                    sendAppNotification(context, RESET_FAILED, sender, extras.getString("language"));
                 }
             } else {
-                sendAppNotification(context, RESET_FAILED, sender);
+                sendAppNotification(context, RESET_FAILED, sender, extras.getString("language"));
             }
         }
 

@@ -85,18 +85,20 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                                     }
                                     DevicesUtils.loadDeviceList(this, new PreferencesUtils(this), null);
                                 }
-                            } else if (token.startsWith("routeId:")) {
-                                extras.putString("routeId", token.split(":")[1]);
                             } else if (token.startsWith("deviceName:")) {
                                 extras.putString(MainActivity.DEVICE_NAME, token.split(":")[1]);
                             } else if (token.startsWith("deviceId:")) {
                                 extras.putString("imei", token.split(":")[1]);
+                            } else if (token.startsWith("routeId:")) {
+                                extras.putString("routeId", token.split(":")[1]);
                             } else if (token.startsWith("command:")) {
                                 extras.putString("command", token.split(":")[1]);
                             } else if (token.startsWith("telegram:")) {
                                 extras.putString("telegram", token.split(":")[1]);
                             } else if (token.startsWith("messenger:")) {
                                 extras.putString("messenger", token.split(":")[1]);
+                            } else if (token.startsWith("language:")) {
+                                extras.putString("language", token.split(":")[1]);
                             }
                         }
                     } catch (Exception e) {

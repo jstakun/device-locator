@@ -600,7 +600,7 @@ public class Messenger {
     }
 
     public static void sendCommandMessage(final Context context, final Bundle extras) {
-        String text = null, title = null, phoneNumber = null, telegramId = null, email = null, command = null, app = null;
+        String text = null, title = null, phoneNumber = null, telegramId = null, email = null, command = null, app = null, language = null;
         String deviceId = getDeviceId(context, true);
         List<String> notifications = new ArrayList<>();
         PreferencesUtils settings = new PreferencesUtils(context);
@@ -611,9 +611,11 @@ public class Messenger {
             email = extras.getString("email");
             command = extras.getString("command");
             app = extras.getString("app");
+            language = extras.getString("language", "en");
         }
 
-        //Log.d(TAG, "sendCommandMessage params: " + phoneNumber + " " + telegramId + " " + email + " " + app + " " + command);
+        //TODO send message based on language value
+        Log.d(TAG, "Following language has been selected for command message: " + language);
 
         if (command != null) {
             switch (command) {
