@@ -19,6 +19,7 @@ import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
 import android.util.Base64;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -1013,7 +1014,13 @@ public class Messenger {
                     }
                     if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
                         settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET, TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT);
-                        //TODO refactor this code to use interface 8
+                        //TODO refactor this code to use interface 9
+                        if (context instanceof MainActivity) {
+                            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                            if (imm != null) {
+                                imm.hideSoftInputFromWindow(((MainActivity)context).findViewById(android.R.id.content).getWindowToken(), 0);
+                            }
+                        }
                         Toaster.showToast(context, "Your Telegram chat or channel is already verified.");
                     } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
                         //show dialog to enter activation code sent to user
