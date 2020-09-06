@@ -46,6 +46,7 @@ import org.ocpsoft.prettytime.PrettyTime;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -63,7 +64,11 @@ public class Messenger {
 
     private static final String TAG = Messenger.class.getSimpleName();
 
-    private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
+    private static final DecimalFormat latAndLongFormat = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
+
+    static {
+        latAndLongFormat.applyPattern("#.######");
+    }
 
     public static final String MAPS_URL_PREFIX = "https://maps.google.com/maps?q=";
     public static final String LAT_HEADER = "X-GMS-Lat";

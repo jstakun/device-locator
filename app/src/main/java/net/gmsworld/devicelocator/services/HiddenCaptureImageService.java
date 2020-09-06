@@ -38,7 +38,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
@@ -58,7 +60,11 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
     public static final String STATUS = "hiddenCamera";
 
     private static final String TAG = HiddenCaptureImageService.class.getSimpleName();
-    private static final DecimalFormat latAndLongFormat = new DecimalFormat("#.######");
+    private static final DecimalFormat latAndLongFormat = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
+
+    static {
+        latAndLongFormat.applyPattern("#.######");
+    }
 
     private boolean isTest = false;
     private String sender = null, app = null;
