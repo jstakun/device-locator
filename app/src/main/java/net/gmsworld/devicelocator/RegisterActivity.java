@@ -2,6 +2,7 @@ package net.gmsworld.devicelocator;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
@@ -262,10 +263,15 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
             if (emailActivationDialogFragment == null) {
                 emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster, mode);
                 toaster.cancel();
-                //emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.add(emailActivationDialogFragment, EmailActivationDialogFragment.TAG);
-                ft.commitAllowingStateLoss();
+                FragmentManager fm = getFragmentManager();
+                if (fm != null) {
+                    //emailActivationDialogFragment.show(fm, EmailActivationDialogFragment.TAG);
+                    FragmentTransaction ft = fm.beginTransaction();
+                    ft.add(emailActivationDialogFragment, EmailActivationDialogFragment.TAG);
+                    ft.commitAllowingStateLoss();
+                } else {
+                    Log.e(TAG, "FragmentManager is null!");
+                }
             } else {
                 emailActivationDialogFragment.setToaster(toaster);
                 emailActivationDialogFragment.setMode(mode);

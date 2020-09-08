@@ -59,7 +59,7 @@ public class AppUtils {
                 versionCode = getPackageInfo(c).versionCode;
             }
 
-            userAgentMessage = c.getString(R.string.app_name) + "/" + versionName + "-" + versionCode + " (+" + c.getString(R.string.serverUrl) + ")";
+            userAgentMessage = c.getString(R.string.app_name) + "/" + versionName + "-" + versionCode + "." + BuildConfig.APP_TYPE + " (+" + c.getString(R.string.serverUrl) + ")";
         }
         return userAgentMessage;
     }
