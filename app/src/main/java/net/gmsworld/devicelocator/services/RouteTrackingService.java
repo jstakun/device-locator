@@ -143,14 +143,18 @@ public class RouteTrackingService extends Service {
         super.onDestroy();
         Log.i(TAG, "onDestroy()");
         stopTracking();
-        Intent broadcastIntent = new Intent("net.gmsworld.devicelocator.Services.RouteTrackingServiceRestartReceiver");
+        Intent broadcastIntent = new Intent("net.gmsworld.devicelocator.Services.ServiceRestartReceiver");
         sendBroadcast(broadcastIntent);
     }
 
     private synchronized void startTracking(int gpsAccuracy, boolean resetRoute) {
         Log.d(TAG, "startTracking() in mode " + mode.name());
 
-        PreferenceManager.getDefaultSharedPreferences(this).edit().remove(RouteTrackingServiceUtils.ROUTE_TITLE).apply();
+        PreferenceManager.getDefaultSharedPreferences(this).
+                edit().
+                remove(RouteTrackingServiceUtils.ROUTE_TITLE).
+                putString("motionDetectorMode", mode.name()).
+                apply();
 
         if (this.mWakeLock != null)
         {
@@ -305,7 +309,7 @@ public class RouteTrackingService extends Service {
 
                                 //EXPERIMENTAL FEATURE audio transmitter
                                 //you should plug antenna to your device audio transmitter
-                                boolean useAudio = PreferenceManager.getDefaultSharedPreferences(service).getBoolean("useAudio", false);
+                                boolean useAudio = settings.getBoolean("useAudio", false);
                                 if (useAudio) {
                                     final String signal = ((int) (location.getLatitude() * 1e6)) + "," + ((int) (location.getLongitude() * 1e6));
                                     Log.d(TAG, "Sending audio signal: " + signal);

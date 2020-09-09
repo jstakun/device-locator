@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static net.gmsworld.devicelocator.utilities.AbstractLocationManager.ROUTE_FILE;
-
 /**
  * Created by jstakun on 5/31/17.
  */
@@ -67,7 +65,7 @@ public class Files {
     }
 
     public static int getRoutePoints(Context context) {
-        return getQueueSize(ROUTE_FILE, context);
+        return getQueueSize(AbstractLocationManager.ROUTE_FILE, context);
     }
 
     public static int getAuditComands(Context context) {

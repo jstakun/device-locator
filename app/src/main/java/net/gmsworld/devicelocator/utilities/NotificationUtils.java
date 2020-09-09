@@ -330,17 +330,26 @@ public class NotificationUtils {
         return nb.build();
     }
 
-    public static Notification buildWorkerNotification(Context context, String text) {
+    public static Notification buildWorkerNotification(Context context, String title, String text, boolean showProgress) {
         initChannels(context, DEFAULT_CHANNEL_ID);
         if (text == null) {
             text = context.getString(R.string.please_wait);
         }
-        return new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_devices_other_white)
-                    .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
-                    .setProgress(0, 0 ,true)
-                    .setContentTitle(context.getString(R.string.app_name) + " Notification")
-                    .setContentText(text).build();
+        if (title == null) {
+            title = context.getString(R.string.app_name) + " Notification";
+        }
+
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_devices_other_white)
+                        .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                        .setContentTitle(title)
+                        .setContentText(text);
+
+        if (showProgress) {
+            nb.setProgress(0, 0 ,true);
+        }
+
+        return nb.build();
     }
 
     public static void cancel(Context context, String notificationId) {
