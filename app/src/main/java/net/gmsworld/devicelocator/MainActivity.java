@@ -16,7 +16,6 @@ import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -222,11 +221,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             Messenger.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
         }
 
-        //TODO testing
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(new Intent(this, ScreenStatusService.class));
-        } else {
-            startService(new Intent(this, ScreenStatusService.class));
+        //
+        if (settings.getBoolean(ScreenStatusService.RUNNING, false)) {
+            ScreenStatusService.initService(this);
         }
         //
 

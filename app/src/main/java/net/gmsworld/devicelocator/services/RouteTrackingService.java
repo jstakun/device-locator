@@ -51,7 +51,7 @@ public class RouteTrackingService extends Service {
     private static final int NOTIFICATION_ID = 1001;
     private static final String TAG = RouteTrackingService.class.getSimpleName();
 
-    public enum Mode {Normal, Silent, Perimeter};
+    public enum Mode {Normal, Silent, Perimeter, Screen};
 
     private PowerManager.WakeLock mWakeLock;
     private final Handler incomingHandler = new IncomingHandler(this);

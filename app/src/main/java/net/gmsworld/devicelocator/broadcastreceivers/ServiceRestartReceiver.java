@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -22,7 +21,7 @@ public class ServiceRestartReceiver extends BroadcastReceiver {
     private static final String TAG = ServiceRestartReceiver.class.getSimpleName();
 
     private int radius = RouteTrackingService.DEFAULT_RADIUS;
-    private boolean motionDetectorRunning = false;
+    private boolean motionDetectorRunning = false, screenMonitorRunning = false;
     private RouteTrackingService.Mode mode;
 
     @Override
@@ -38,17 +37,18 @@ public class ServiceRestartReceiver extends BroadcastReceiver {
         } else {
             Log.d(TAG, "No need to restart RouteTrackingService.");
         }
-        //TODO restart screen status service if needed
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(new Intent(context, ScreenStatusService.class));
+
+        if (screenMonitorRunning) {
+            ScreenStatusService.initService(context);
         } else {
-            context.startService(new Intent(context, ScreenStatusService.class));
+            Log.d(TAG, "No need to restart ScreenStatusService.");
         }
     }
 
     private void restoreSavedData(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
         this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
+        this.screenMonitorRunning = settings.getBoolean(ScreenStatusService.RUNNING, false);
         this.radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
         String modeName = settings.getString("motionDetectorRunning", "Normal");
         mode = RouteTrackingService.Mode.valueOf(modeName);

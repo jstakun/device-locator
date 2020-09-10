@@ -3,7 +3,7 @@ package net.gmsworld.devicelocator.broadcastreceivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.services.ScreenStatusService;
@@ -21,11 +21,8 @@ public class BootReceiver extends BroadcastReceiver {
             Log.d(TAG, "Received Boot Broadcast");
             LocationAlarmUtils.initWhenDown(context, false);
 
-            //TODO testing
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(new Intent(context, ScreenStatusService.class));
-            } else {
-                context.startService(new Intent(context, ScreenStatusService.class));
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
+                ScreenStatusService.initService(context);
             }
         } else if (StringUtils.equals(intent.getAction(), "android.intent.action.ACTION_SHUTDOWN")) {
             Log.d(TAG, "Received Shutdown Broadcast");

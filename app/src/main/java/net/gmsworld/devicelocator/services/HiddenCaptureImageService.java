@@ -59,6 +59,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
 
     public static final String STATUS = "hiddenCamera";
 
+    private static final int NOTIFICATION_ID = 1111;
     private static final String TAG = HiddenCaptureImageService.class.getSimpleName();
     private static final DecimalFormat latAndLongFormat = (DecimalFormat) NumberFormat.getNumberInstance(Locale.US);
 
@@ -100,7 +101,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
         app = intent.getStringExtra("app");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForeground(NotificationUtils.WORKER_NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, null, "Camera image capture in progress...", true));
+            startForeground(NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, null, "Camera image capture in progress...", true));
         }
 
         if (Permissions.haveCameraPermission(this)) {

@@ -26,6 +26,7 @@ import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
+import net.gmsworld.devicelocator.services.ScreenStatusService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.acra.ACRA;
@@ -235,7 +236,7 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "s", "silent") || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
+            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "s", "silent", "screen") || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
         }
 
         @Override
@@ -243,68 +244,49 @@ public class Command {
             return STOP_COMMAND;
         }
 
-        @Override
-        protected void onSmsCommandFound(String sender, Context context) {
+        private void startTracker(final Context context) {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
 
             RouteTrackingService.Mode mode = RouteTrackingService.Mode.Normal;
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("silent") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
                 mode = RouteTrackingService.Mode.Silent;
+            } else if (commandTokens.length > 1 && commandTokens[commandTokens.length - 1].equalsIgnoreCase("screen")) {
+                mode = RouteTrackingService.Mode.Screen;
             }
 
-            if (Permissions.haveLocationPermission(context)) {
+            //TODO testing
+            if (mode == RouteTrackingService.Mode.Screen) {
+                ScreenStatusService.initService(context);
+            } else if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, true, mode);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
+        }
 
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            startTracker(context);
             sendSmsNotification(context, sender, START_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-
-            if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, true, RouteTrackingService.Mode.Normal);
-                settings.edit().putBoolean("motionDetectorRunning", true).apply();
-            } else {
-                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
-            }
-
+            startTracker(context);
             sendSocialNotification(context, START_COMMAND, sender, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-
-            if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, sender, true, RouteTrackingService.Mode.Normal);
-                settings.edit().putBoolean("motionDetectorRunning", true).apply();
-            } else {
-                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
-            }
-
+            startTracker(context);
             sendAppNotification(context, START_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-
-            if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, true, RouteTrackingService.Mode.Normal);
-                settings.edit().putBoolean("motionDetectorRunning", true).apply();
-            } else {
-                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
-            }
-
+            startTracker(context);
             sendAdmNotification(context, START_COMMAND, sender, null);
         }
     }
@@ -315,8 +297,7 @@ public class Command {
             super(RESUME_COMMAND, "rs", Finder.EQUALS);
         }
 
-        @Override
-        protected void onSmsCommandFound(String sender, Context context) {
+        private void resumeTracker(Context context) {
             PreferencesUtils settings = new PreferencesUtils(context);
             final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
 
@@ -326,7 +307,11 @@ public class Command {
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
+        }
 
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            resumeTracker(context);
             Bundle extras = new Bundle();
             extras.putString("phoneNumber", sender);
             SmsSenderService.initService(context, true, true, true, null, RESUME_COMMAND, null, null, extras);
@@ -334,46 +319,19 @@ public class Command {
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            PreferencesUtils settings = new PreferencesUtils(context);
-            final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-
-            if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, false, RouteTrackingService.Mode.Normal);
-                settings.setBoolean("motionDetectorRunning", true);
-            } else {
-                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
-            }
-
+            resumeTracker(context);
             sendSocialNotification(context, RESUME_COMMAND, sender, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            PreferencesUtils settings = new PreferencesUtils(context);
-            final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-
-            if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, sender, false, RouteTrackingService.Mode.Normal);
-                settings.setBoolean("motionDetectorRunning", true);
-            } else {
-                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
-            }
-
+            resumeTracker(context);
             sendAppNotification(context, RESUME_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            PreferencesUtils settings = new PreferencesUtils(context);
-            final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-
-            if (Permissions.haveLocationPermission(context)) {
-                RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, false, RouteTrackingService.Mode.Normal);
-                settings.setBoolean("motionDetectorRunning", true);
-            } else {
-                Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
-            }
-
+            resumeTracker(context);
             sendAdmNotification(context, RESUME_COMMAND, sender, null);
         }
     }
@@ -400,20 +358,27 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "s", "share") || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
+            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "s", "share", "screen") || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
         }
 
-        @Override
-        protected void onSmsCommandFound(String sender, Context context) {
-            PreferencesUtils settings = new PreferencesUtils(context);
-            if (GmsSmartLocationManager.getInstance().isEnabled()) {
+        private void stopTracker(Context context) {
+            //TODO testing
+            if (commandTokens.length > 1 && commandTokens[commandTokens.length - 1].equalsIgnoreCase("screen")) {
+                ScreenStatusService.stopService(context);
+            } else if (GmsSmartLocationManager.getInstance().isEnabled()) {
                 if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
-                    String title = RouteTrackingServiceUtils.getRouteId(context);
+                    final String title = RouteTrackingServiceUtils.getRouteId(context);
                     RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, null);
                 } else {
                     RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null);
                 }
             }
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            PreferencesUtils settings = new PreferencesUtils(context);
+            stopTracker(context);
             if (settings.getBoolean("motionDetectorRunning", false)) {
                 settings.setBoolean("motionDetectorRunning", false);
                 sendSmsNotification(context, sender, STOP_COMMAND);
@@ -425,14 +390,7 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             PreferencesUtils settings = new PreferencesUtils(context);
-            if (GmsSmartLocationManager.getInstance().isEnabled()) {
-                if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
-                    final String title = RouteTrackingServiceUtils.getRouteId(context);
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, null);
-                } else {
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null);
-                }
-            }
+            stopTracker(context);
             if (settings.getBoolean("motionDetectorRunning", false)) {
                 settings.setBoolean("motionDetectorRunning", false);
                 sendSocialNotification(context, STOP_COMMAND, sender, null);
@@ -444,14 +402,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferencesUtils settings = new PreferencesUtils(context);
-            if (GmsSmartLocationManager.getInstance().isEnabled()) {
-                if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
-                    final String title = RouteTrackingServiceUtils.getRouteId(context);
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, sender);
-                } else {
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, sender);
-                }
-            }
+            stopTracker(context);
             if (settings.getBoolean("motionDetectorRunning", false)) {
                 settings.setBoolean("motionDetectorRunning", false);
                 sendAppNotification(context, STOP_COMMAND, sender, extras.getString("language"));
@@ -463,14 +414,7 @@ public class Command {
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
             PreferencesUtils settings = new PreferencesUtils(context);
-            if (GmsSmartLocationManager.getInstance().isEnabled()) {
-                if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
-                    String title = RouteTrackingServiceUtils.getRouteId(context);
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, null);
-                } else {
-                    RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, false, null, null);
-                }
-            }
+            stopTracker(context);
             if (settings.getBoolean("motionDetectorRunning", false)) {
                 settings.setBoolean("motionDetectorRunning", false);
                 sendAdmNotification(context, STOP_COMMAND, sender, null);

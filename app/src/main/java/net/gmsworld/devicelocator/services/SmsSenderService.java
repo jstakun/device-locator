@@ -33,6 +33,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     private final static String TAG = SmsSenderService.class.getSimpleName();
 
     private final static int LOCATION_REQUEST_MAX_WAIT_TIME = 120; //seconds
+    private static final int NOTIFICATION_ID = 2222;
 
     public static final String SEND_ACKNOWLEDGE_MESSAGE = "settings_detected_sms";
     public static final String SEND_LOCATION_MESSAGE = "settings_gps_sms";
@@ -95,7 +96,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 } else {
                     text = "Sending device command " + command + " in progress...";
                 }
-                startForeground(NotificationUtils.WORKER_NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, null, text, true));
+                startForeground(NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, null, text, true));
             }
 
             if (StringUtils.isEmpty(command)) {

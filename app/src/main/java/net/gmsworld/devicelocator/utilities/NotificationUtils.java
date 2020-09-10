@@ -43,7 +43,6 @@ public class NotificationUtils {
 
     private static final String DEFAULT_CHANNEL_ID = "Device-Locator";
     private static final String TAG = NotificationUtils.class.getSimpleName();
-    public static final int WORKER_NOTIFICATION_ID = 1234;
     private static final Map<String, Integer> notificationIds = new HashMap<>();
 
     public static Notification buildTrackerNotification(Context context, int notificationId) {
