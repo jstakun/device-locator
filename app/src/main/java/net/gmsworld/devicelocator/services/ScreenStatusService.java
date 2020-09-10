@@ -11,6 +11,7 @@ import android.util.Log;
 
 import net.gmsworld.devicelocator.broadcastreceivers.ScreenStatusBroadcastReceiver;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 public class ScreenStatusService extends Service {
 
@@ -23,6 +24,7 @@ public class ScreenStatusService extends Service {
     public static final int COMMAND_STOP = 0;
 
 
+    private PreferencesUtils settings;
     private static ScreenStatusBroadcastReceiver mScreenReceiver;
 
     @Override
@@ -33,6 +35,7 @@ public class ScreenStatusService extends Service {
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate()");
+        settings = new PreferencesUtils(this);
     }
 
     @Override
@@ -46,6 +49,7 @@ public class ScreenStatusService extends Service {
                 switch (command) {
                     case COMMAND_START:
                         registerScreenStatusReceiver();
+                        settings.setBoolean(RUNNING, true);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             startForeground(NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, null, "Screen activity monitor is running...", false));
                         }
@@ -71,6 +75,7 @@ public class ScreenStatusService extends Service {
     public void onDestroy() {
         Log.d(TAG, "onDestroy()");
         unregisterScreenStatusReceiver();
+        settings.setBoolean(RUNNING, false);
         Intent broadcastIntent = new Intent("net.gmsworld.devicelocator.Services.ServiceRestartReceiver");
         sendBroadcast(broadcastIntent);
     }
@@ -89,6 +94,7 @@ public class ScreenStatusService extends Service {
         try {
             if (mScreenReceiver != null) {
                 unregisterReceiver(mScreenReceiver);
+                mScreenReceiver = null;
             }
         } catch (IllegalArgumentException e) {
         }
