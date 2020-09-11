@@ -247,6 +247,10 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         });
 
         if (StringUtils.isNotEmpty(email) && !Messenger.isEmailVerified(settings)) {
+            if (settings.getBoolean(EmailActivationDialogFragment.TAG, false)) {
+                settings.remove(EmailActivationDialogFragment.TAG);
+                Messenger.sendEmailRegistrationRequest(this, email, false, 1);
+            }
             showEmailActivationDialogFragment(retry);
         }
     }

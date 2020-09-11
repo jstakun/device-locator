@@ -68,6 +68,7 @@ public class EmailActivationDialogFragment extends DialogFragment {
                         } catch (Exception e) {
                             startActivity(Intent.createChooser(intent, "Open Mail Inbox"));
                         }
+                        settings.setBoolean(TAG, true);
                         toaster.showActivityToast("Please open newest message from " + getActivity().getString(R.string.app_email)  + " and click the link to confirm your registration");
                     }
                 })
@@ -82,12 +83,6 @@ public class EmailActivationDialogFragment extends DialogFragment {
                         } else {
                             toaster.showActivityToast("Failed to send email registration request!");
                         }
-                        //old Forget Me action
-                        /*Log.d(TAG, "Cancelling email registration request ...");
-                        settings.remove(MainActivity.NOTIFICATION_EMAIL, MainActivity.EMAIL_REGISTRATION_STATUS, NotificationActivationDialogFragment.EMAIL_SECRET);
-                        final TextView emailInput = getActivity().findViewById(R.id.email);
-                        emailInput.setText("");
-                        EmailActivationDialogFragment.this.dismiss();*/
                     }
                 });
 
