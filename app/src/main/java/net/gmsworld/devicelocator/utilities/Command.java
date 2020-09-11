@@ -48,6 +48,12 @@ import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWith
 
 public class Command {
 
+    //Creating new command:
+    //1. Create here class extending AbstractCommand
+    //2. Add command message to Messenger.sendCommandMessage
+    //3. Add command name to device_commands array in res/values/arrays.xml (if command is public)
+    //4. Register command in backend com.jstakun.lm.server.utils.persistence.DevicePersistenceUtils
+
     private static final String TAG = Command.class.getSimpleName();
 
     //public
