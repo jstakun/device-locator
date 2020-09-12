@@ -1925,25 +1925,33 @@ public class Command {
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            ScreenStatusService.initService(context);
+            if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
+                ScreenStatusService.initService(context);
+            }
             sendSmsNotification(context, sender, SCREEN_ON_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            ScreenStatusService.initService(context);
+            if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
+                ScreenStatusService.initService(context);
+            }
             sendSocialNotification(context, SCREEN_ON_COMMAND, sender, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            ScreenStatusService.initService(context);
+            if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
+                ScreenStatusService.initService(context);
+            }
             sendAppNotification(context, SCREEN_ON_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            ScreenStatusService.initService(context);
+            if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
+                ScreenStatusService.initService(context);
+            }
             sendAdmNotification(context, SCREEN_ON_COMMAND, sender, null);
         }
     }
@@ -1951,7 +1959,7 @@ public class Command {
     private static final class ScreenOffCommand extends AbstractCommand {
 
         public ScreenOffCommand() {
-            super(SCREEN_OFF_COMMAND, "so", Finder.STARTS);
+            super(SCREEN_OFF_COMMAND, "so", Finder.EQUALS);
         }
 
         @Override
@@ -1960,48 +1968,43 @@ public class Command {
         }
 
         @Override
-        public String getDefaultArgs() {
-            return "s";
-        }
-
-        @Override
         public String getOppositeCommand() {
             return SCREEN_ON_COMMAND;
         }
 
-        @Override
-        public boolean validateTokens() {
-            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "s", "share") || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
-        }
-
         private void stopService(Context context) {
-            if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
-                //TODO share screen activity log
-            }
             ScreenStatusService.stopService(context);
         }
 
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
-            stopService(context);
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
+                stopService(context);
+            }
             sendSmsNotification(context, sender, SCREEN_OFF_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
-            stopService(context);
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
+                stopService(context);
+            }
             sendSocialNotification(context, SCREEN_OFF_COMMAND, sender, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
-            stopService(context);
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
+                stopService(context);
+            }
             sendAppNotification(context, SCREEN_OFF_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
-            stopService(context);
+            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
+                stopService(context);
+            }
             sendAdmNotification(context, SCREEN_OFF_COMMAND, sender, null);
         }
     }

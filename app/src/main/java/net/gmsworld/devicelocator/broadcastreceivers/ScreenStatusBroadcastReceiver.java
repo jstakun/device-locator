@@ -13,7 +13,7 @@ public class ScreenStatusBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = ScreenStatusBroadcastReceiver.class.getSimpleName();
 
-    private static final String SCREEN_FILE = "screenFile.bin";
+    public static final String SCREEN_FILE = "screenFile.bin";
 
     @Override
     public void onReceive(Context context, Intent intent) {

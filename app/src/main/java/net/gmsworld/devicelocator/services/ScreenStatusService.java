@@ -10,8 +10,16 @@ import android.os.IBinder;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.broadcastreceivers.ScreenStatusBroadcastReceiver;
+import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.ocpsoft.prettytime.PrettyTime;
+
+import java.util.Date;
+import java.util.List;
 
 public class ScreenStatusService extends Service {
 
@@ -88,6 +96,7 @@ public class ScreenStatusService extends Service {
             filter.addAction(Intent.ACTION_SCREEN_ON);
             registerReceiver(mScreenReceiver, filter);
             Log.d(TAG, "Registered broadcast receiver");
+            Files.deleteFileFromContextDir(ScreenStatusBroadcastReceiver.SCREEN_FILE, this, false);
         }
     }
 
@@ -137,6 +146,35 @@ public class ScreenStatusService extends Service {
         }
         if (name != null) {
             Log.d(TAG, "Service " + name.getClassName() + " stopped...");
+        }
+    }
+
+    public static String readScreenActivityLog(Context context) {
+        final List<String> logs = Files.readFileByLinesFromContextDir(ScreenStatusBroadcastReceiver.SCREEN_FILE, context);
+        long total = 0, endTime = 0, startTime = 0, oldestTime = 0;
+        for (String log : logs) {
+            //0 or 1,milliseconds
+            final String[] tokens = StringUtils.split(log, ",");
+            if (tokens.length >= 2) {
+                //Log.d(TAG, tokens[0] + " - " + tokens[1]);
+                if (StringUtils.equals(tokens[0], "0")) {
+                    endTime = Long.parseLong(tokens[1]);
+                } else if (StringUtils.equals(tokens[0], "1")) {
+                    startTime = Long.parseLong(tokens[1]);
+                }
+                if (endTime > startTime && endTime > 0 && startTime > 0) {
+                    total += endTime - startTime;
+                }
+                if (oldestTime == 0 && startTime > 0) {
+                    oldestTime = startTime;
+                }
+            }
+        }
+        if (total > 0 && oldestTime > 0) {
+            final String duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins' ss 'sec'", true) + " since " + new PrettyTime().format(new Date(oldestTime));
+            return duration;
+        } else {
+            return null;
         }
     }
 }

@@ -38,6 +38,7 @@ import net.gmsworld.devicelocator.fragments.TelegramSetupDialogFragment;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
+import net.gmsworld.devicelocator.services.ScreenStatusService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
@@ -836,6 +837,10 @@ public class Messenger {
                     break;
                 case Command.SCREEN_OFF_COMMAND:
                     text = "Screen activity monitor on device " + deviceId + " has been stopped.";
+                    final String duration = ScreenStatusService.readScreenActivityLog(context);
+                    if (StringUtils.isNotEmpty(duration)) {
+                        text += " Screen was active for approximately " + duration + ".";
+                    }
                     text += getBatteryLevel(context);
                     break;
                 default:
