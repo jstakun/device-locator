@@ -247,12 +247,12 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         });
 
         if (StringUtils.isNotEmpty(email) && !Messenger.isEmailVerified(settings)) {
+            showEmailActivationDialogFragment(retry);
             if (settings.getBoolean(EmailActivationDialogFragment.TAG, false)) {
                 settings.remove(EmailActivationDialogFragment.TAG);
-                toaster.showActivityToast("Email verification in progress...");
+                toaster.showActivityToast(R.string.please_wait);
                 Messenger.sendEmailRegistrationRequest(this, email, false, 1);
             }
-            showEmailActivationDialogFragment(retry);
         }
     }
 
@@ -344,7 +344,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 if (Network.isNetworkAvailable(RegisterActivity.this)) {
                     Log.d(TAG, "Setting new email address: " + newEmailAddress);
                     settings.setString(MainActivity.NOTIFICATION_EMAIL, newEmailAddress);
-                    toaster.showActivityToast("Email verification in progress...");
+                    toaster.showActivityToast(R.string.please_wait);
                     Messenger.sendEmailRegistrationRequest(RegisterActivity.this, newEmailAddress, validate, 1);
                 } else {
                     toaster.showActivityToast(R.string.no_network_error);
@@ -356,4 +356,18 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
             emailInput.setText("");
         }
     }
+
+    public void clearEmailInput(final boolean clearTextInput, final String message) {
+        final TextView emailInput = findViewById(R.id.email);
+        if (clearTextInput) {
+            emailInput.setText("");
+        }
+        emailInput.requestFocus();
+        if (StringUtils.isNotEmpty(message)) {
+            toaster.showActivityToast(message);
+        }
+    }
+
+
+
 }

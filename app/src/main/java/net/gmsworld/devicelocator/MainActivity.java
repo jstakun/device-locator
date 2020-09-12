@@ -304,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (settings.getBoolean("isTrackerShown", false)) {
             //show email or telegram registration dialog if still unverified
             if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-                showEmailActivationDialogFragment();
+                showEmailActivationDialogFragment(false);
             }
             if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
                 openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
@@ -385,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 showFirstTimeUsageDialog(true, false);
                 //show email or telegram registration dialog if still unverified
                 if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-                    showEmailActivationDialogFragment();
+                    showEmailActivationDialogFragment(false);
                 }
                 if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
                     openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
@@ -1957,14 +1957,20 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initUserLoginInput(true, false);
     }
 
-    public void showEmailActivationDialogFragment() {
+    public void showEmailActivationDialogFragment(boolean retry) {
         EmailActivationDialogFragment emailActivationDialogFragment = (EmailActivationDialogFragment) getFragmentManager().findFragmentByTag(EmailActivationDialogFragment.TAG);
+        EmailActivationDialogFragment.Mode mode;
+        if (retry) {
+            mode = EmailActivationDialogFragment.Mode.Retry;
+        } else {
+            mode = EmailActivationDialogFragment.Mode.Initial;
+        }
         if (emailActivationDialogFragment == null) {
-            emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster, EmailActivationDialogFragment.Mode.Initial);
+            emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster, mode);
             emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
         } else {
             emailActivationDialogFragment.setToaster(toaster);
-            emailActivationDialogFragment.setMode(EmailActivationDialogFragment.Mode.Initial);
+            emailActivationDialogFragment.setMode(mode);
         }
     }
 

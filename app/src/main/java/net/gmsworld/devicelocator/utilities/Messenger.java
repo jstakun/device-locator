@@ -1048,13 +1048,13 @@ public class Messenger {
                                 if (context instanceof RegisterActivity) {
                                     ((RegisterActivity) context).showEmailActivationDialogFragment(false);
                                 } else if (context instanceof MainActivity) {
-                                    ((MainActivity) context).showEmailActivationDialogFragment();
+                                    ((MainActivity) context).showEmailActivationDialogFragment(false);
                                 }
                             } else {
                                 onFailedEmailRegistration(context, "Failed to send activation email to your inbox. Please register your email address again!", true);
                             }
                         } else {
-                            onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", true);
+                            onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", false);
                         }
                     } else if (responseCode == 400) {
                         onFailedEmailRegistration(context, "Your email address seems to be incorrect. Please check it once again!", false);
@@ -1076,6 +1076,8 @@ public class Messenger {
         //TODO refactor this code to use interface 1
         if (context instanceof MainActivity) {
             ((MainActivity)context).clearEmailInput(clearTextInput, message);
+        } else if (context instanceof RegisterActivity) {
+            ((RegisterActivity)context).clearEmailInput(clearTextInput, message);
         }
     }
 
