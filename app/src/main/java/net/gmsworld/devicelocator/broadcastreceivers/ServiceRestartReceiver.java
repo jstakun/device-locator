@@ -47,10 +47,10 @@ public class ServiceRestartReceiver extends BroadcastReceiver {
 
     private void restoreSavedData(Context context) {
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-        this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
+        this.motionDetectorRunning = settings.getBoolean(RouteTrackingService.RUNNING, false);
         this.screenMonitorRunning = settings.getBoolean(ScreenStatusService.RUNNING, false);
         this.radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
-        String modeName = settings.getString("motionDetectorRunning", "Normal");
+        String modeName = settings.getString(RouteTrackingService.MODE, "Normal");
         mode = RouteTrackingService.Mode.valueOf(modeName);
     }
 }

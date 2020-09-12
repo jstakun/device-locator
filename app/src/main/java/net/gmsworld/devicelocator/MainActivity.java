@@ -1807,7 +1807,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private void saveData() {
         settings.setBoolean("running", this.running);
-        settings.setBoolean("motionDetectorRunning", this.motionDetectorRunning);
+        settings.setBoolean(RouteTrackingService.RUNNING, this.motionDetectorRunning);
         settings.setInt("radius", this.radius);
         settings.setString(NOTIFICATION_PHONE_NUMBER, phoneNumber);
         settings.setString(NOTIFICATION_EMAIL, email);
@@ -1823,7 +1823,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             settings.setEncryptedString(PinActivity.DEVICE_PIN, pin);
         }
 
-        this.motionDetectorRunning = settings.getBoolean("motionDetectorRunning", false);
+        this.motionDetectorRunning = settings.getBoolean(RouteTrackingService.RUNNING, false);
         this.radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
         if (this.radius > MAX_RADIUS) {
             this.radius = MAX_RADIUS;

@@ -47,6 +47,8 @@ public class RouteTrackingService extends Service {
     public static final int DEFAULT_RADIUS = 100; //meters
     public static final int DEFAULT_PERIMETER = 500; //meters
     public static final String GPS_ACCURACY = "gpsAccuracy"; //1>= high 0<= balanced
+    public static final String MODE ="motionDetectorMode";
+    public static final String RUNNING = "motionDetectorRunning";
 
     private static final int NOTIFICATION_ID = 1001;
     private static final String TAG = RouteTrackingService.class.getSimpleName();
@@ -153,7 +155,7 @@ public class RouteTrackingService extends Service {
         PreferenceManager.getDefaultSharedPreferences(this).
                 edit().
                 remove(RouteTrackingServiceUtils.ROUTE_TITLE).
-                putString("motionDetectorMode", mode.name()).
+                putString(MODE, mode.name()).
                 apply();
 
         if (this.mWakeLock != null)

@@ -263,7 +263,7 @@ public class Command {
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, true, mode);
-                settings.edit().putBoolean("motionDetectorRunning", true).apply();
+                settings.edit().putBoolean(RouteTrackingService.RUNNING, true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -306,7 +306,7 @@ public class Command {
 
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, false, RouteTrackingService.Mode.Normal);
-                settings.setBoolean("motionDetectorRunning", true);
+                settings.setBoolean(RouteTrackingService.RUNNING, true);
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
             }
@@ -379,8 +379,8 @@ public class Command {
         protected void onSmsCommandFound(String sender, Context context) {
             PreferencesUtils settings = new PreferencesUtils(context);
             stopTracker(context);
-            if (settings.getBoolean("motionDetectorRunning", false)) {
-                settings.setBoolean("motionDetectorRunning", false);
+            if (settings.getBoolean(RouteTrackingService.RUNNING, false)) {
+                settings.setBoolean(RouteTrackingService.RUNNING, false);
                 sendSmsNotification(context, sender, STOP_COMMAND);
             } else {
                 sendSmsNotification(context, sender, STOPPED_TRACKER);
@@ -391,8 +391,8 @@ public class Command {
         protected void onSocialCommandFound(String sender, Context context) {
             PreferencesUtils settings = new PreferencesUtils(context);
             stopTracker(context);
-            if (settings.getBoolean("motionDetectorRunning", false)) {
-                settings.setBoolean("motionDetectorRunning", false);
+            if (settings.getBoolean(RouteTrackingService.RUNNING, false)) {
+                settings.setBoolean(RouteTrackingService.RUNNING, false);
                 sendSocialNotification(context, STOP_COMMAND, sender, null);
             } else {
                 sendSocialNotification(context, STOPPED_TRACKER, sender, null);
@@ -403,8 +403,8 @@ public class Command {
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             PreferencesUtils settings = new PreferencesUtils(context);
             stopTracker(context);
-            if (settings.getBoolean("motionDetectorRunning", false)) {
-                settings.setBoolean("motionDetectorRunning", false);
+            if (settings.getBoolean(RouteTrackingService.RUNNING, false)) {
+                settings.setBoolean(RouteTrackingService.RUNNING, false);
                 sendAppNotification(context, STOP_COMMAND, sender, extras.getString("language"));
             } else {
                 sendAppNotification(context, STOPPED_TRACKER, sender, extras.getString("language"));
@@ -415,8 +415,8 @@ public class Command {
         protected void onAdmCommandFound(String sender, Context context) {
             PreferencesUtils settings = new PreferencesUtils(context);
             stopTracker(context);
-            if (settings.getBoolean("motionDetectorRunning", false)) {
-                settings.setBoolean("motionDetectorRunning", false);
+            if (settings.getBoolean(RouteTrackingService.RUNNING, false)) {
+                settings.setBoolean(RouteTrackingService.RUNNING, false);
                 sendAdmNotification(context, STOP_COMMAND, sender, null);
             } else {
                 sendAdmNotification(context, STOPPED_TRACKER, sender, null);
@@ -1698,7 +1698,7 @@ public class Command {
                 PreferencesUtils settings = new PreferencesUtils(context);
                 final int radius = settings.getInt("radius", RouteTrackingService.DEFAULT_RADIUS);
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, sender, true, RouteTrackingService.Mode.Perimeter);
-                settings.setBoolean("motionDetectorRunning", true);
+                settings.setBoolean(RouteTrackingService.RUNNING, true);
                 int perimeter = Integer.parseInt(commandTokens[1]);
                 if (radius < MainActivity.MIN_RADIUS) {
                     perimeter = MainActivity.MIN_RADIUS;

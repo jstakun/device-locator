@@ -627,7 +627,7 @@ public class Messenger {
             switch (command) {
                 case Command.RESUME_COMMAND:
                     title = context.getString(R.string.app_name) + " resumed location tracking on device " + deviceId;
-                    if (GmsSmartLocationManager.isLocationEnabled(context) && settings.getBoolean("motionDetectorRunning", false)) {
+                    if (GmsSmartLocationManager.isLocationEnabled(context) && settings.getBoolean(RouteTrackingService.RUNNING, false)) {
                         text = "Device location tracking has been resumed. ";
                         if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
                             notifications.add(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER));
@@ -654,7 +654,7 @@ public class Messenger {
                     break;
                 case Command.START_COMMAND:
                     title = context.getString(R.string.app_name) + " started location tracking on device " + deviceId;
-                    if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean("motionDetectorRunning", false)) {
+                    if (GmsSmartLocationManager.isLocationEnabled(context) && PreferenceManager.getDefaultSharedPreferences(context).getBoolean(RouteTrackingService.RUNNING, false)) {
                         text = "Device location tracking on device " + deviceId + " is running. " +
                                 "Track route live " + RouteTrackingServiceUtils.getRouteUrl(context) + "/now";
                         if (StringUtils.isNotEmpty(settings.getString(MainActivity.NOTIFICATION_PHONE_NUMBER))) {
