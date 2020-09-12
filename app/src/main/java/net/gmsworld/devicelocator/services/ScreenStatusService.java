@@ -87,6 +87,7 @@ public class ScreenStatusService extends Service {
             filter.addAction(Intent.ACTION_SCREEN_OFF);
             filter.addAction(Intent.ACTION_SCREEN_ON);
             registerReceiver(mScreenReceiver, filter);
+            Log.d(TAG, "Registered broadcast receiver");
         }
     }
 
@@ -94,6 +95,7 @@ public class ScreenStatusService extends Service {
         try {
             if (mScreenReceiver != null) {
                 unregisterReceiver(mScreenReceiver);
+                Log.d(TAG, "Unregistered broadcast receiver");
                 mScreenReceiver = null;
             }
         } catch (IllegalArgumentException e) {

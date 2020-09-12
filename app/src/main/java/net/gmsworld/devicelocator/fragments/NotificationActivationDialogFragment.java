@@ -205,7 +205,9 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     if (responseCode == 200) {
-                        NotificationActivationDialogFragment.this.dismiss();
+                        if (NotificationActivationDialogFragment.this.isVisible()) {
+                            NotificationActivationDialogFragment.this.dismiss();
+                        }
                         if (mode == Mode.Telegram) {
                             toaster.showActivityToast("Your Telegram chat or channel has been verified.");
                             settings.setString(MainActivity.SOCIAL_REGISTRATION_STATUS, "verified");

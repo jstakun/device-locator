@@ -197,8 +197,7 @@
         <receiver
             android:name=".broadcastreceivers.ServiceRestartReceiver"
             android:enabled="true"
-            android:exported="false"
-            android:label="RestartRouteTrackingServiceWhenStopped">
+            android:exported="false">
             <intent-filter android:priority="999">
                 <action android:name="net.gmsworld.devicelocator.Services.ServiceRestartReceiver" />
             </intent-filter>
