@@ -1008,6 +1008,77 @@ public class Messenger {
         }
     }
 
+    private static void sendEmailRegistrationRequest(final Context context, final String email, final boolean validate, final String tokenStr, final int retryCount) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer " + tokenStr);
+        headers.put("X-GMS-DeviceName", getDeviceId(context, true));
+
+        try {
+            final String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false) + "&validate=" + validate;
+            Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
+                @Override
+                public void onGetFinish(String results, int responseCode, String url) {
+                    final PreferencesUtils settings = new PreferencesUtils(context);
+                    if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
+                        JsonElement reply = new JsonParser().parse(results);
+                        String status = null, secret = null;
+                        if (reply != null) {
+                            JsonElement st = reply.getAsJsonObject().get("status");
+                            if (st != null) {
+                                status = st.getAsString();
+                            }
+                            JsonElement se = reply.getAsJsonObject().get("secret");
+                            if (se != null) {
+                                secret = se.getAsString();
+                                settings.setString(NotificationActivationDialogFragment.EMAIL_SECRET, secret);
+                            }
+                        }
+                        settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, status);
+                        if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
+                            settings.remove(NotificationActivationDialogFragment.EMAIL_SECRET);
+                            //TODO refactor this code to use interface 5
+                            if (context instanceof RegisterActivity) {
+                                RegisterActivity activity = (RegisterActivity) context;
+                                activity.openMainActivity("Your email address is already verified.");
+                            }
+                        } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
+                            //show dialog to enter activation code sent to user
+                            if (StringUtils.isNotEmpty(secret)) {
+                                //TODO refactor this code to use interface 6
+                                if (context instanceof RegisterActivity) {
+                                    ((RegisterActivity) context).showEmailActivationDialogFragment(false);
+                                } else if (context instanceof MainActivity) {
+                                    ((MainActivity) context).showEmailActivationDialogFragment();
+                                }
+                            } else {
+                                onFailedEmailRegistration(context, "Failed to send activation email to your inbox. Please register your email address again!", true);
+                            }
+                        } else {
+                            onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", true);
+                        }
+                    } else if (responseCode == 400) {
+                        onFailedEmailRegistration(context, "Your email address seems to be incorrect. Please check it once again!", false);
+                    } else if (responseCode > 400 && retryCount > 0) {
+                        Log.d(TAG, "Repeating email registration request due to " + responseCode + " reply");
+                        sendEmailRegistrationRequest(context, email, validate, tokenStr, retryCount - 1);
+                    } else {
+                        onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", true);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Log.d(TAG, e.getMessage(), e);
+        }
+    }
+
+    private static void onFailedEmailRegistration(Context context, String message, boolean clearTextInput) {
+        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
+        //TODO refactor this code to use interface 1
+        if (context instanceof MainActivity) {
+            ((MainActivity)context).clearEmailInput(clearTextInput, message);
+        }
+    }
+
     private static void sendTelegramRegistrationRequest(final Context context, final String telegramId, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
@@ -1075,78 +1146,6 @@ public class Messenger {
         //TODO refactor this code to use interface 2
         if (context instanceof MainActivity) {
             ((MainActivity)context).clearTelegramInput(clearTextInput, message);
-        }
-    }
-
-    private static void sendEmailRegistrationRequest(final Context context, final String email, final boolean validate, final String tokenStr, final int retryCount) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-DeviceName", getDeviceId(context, true));
-
-        try {
-            final String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false) + "&validate=" + validate;
-            Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
-                @Override
-                public void onGetFinish(String results, int responseCode, String url) {
-                    final PreferencesUtils settings = new PreferencesUtils(context);
-                    if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                        JsonElement reply = new JsonParser().parse(results);
-                        String status = null, secret = null;
-                        if (reply != null) {
-                            JsonElement st = reply.getAsJsonObject().get("status");
-                            if (st != null) {
-                                status = st.getAsString();
-                            }
-                            JsonElement se = reply.getAsJsonObject().get("secret");
-                            if (se != null) {
-                                secret = se.getAsString();
-                                settings.setString(NotificationActivationDialogFragment.EMAIL_SECRET, secret);
-                            }
-                        }
-                        settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, status);
-                        if (StringUtils.equalsIgnoreCase(status, "registered") || StringUtils.equalsIgnoreCase(status, "verified")) {
-                            settings.remove(NotificationActivationDialogFragment.EMAIL_SECRET);
-                            //TODO refactor this code to use interface 5
-                            Toaster.showToast(context, "Your email address is already verified.");
-                            if (context instanceof RegisterActivity) {
-                                RegisterActivity activity = (RegisterActivity) context;
-                                activity.openMainActivity();
-                            }
-                        } else if (StringUtils.equalsIgnoreCase(status, "unverified")) {
-                            //show dialog to enter activation code sent to user
-                            if (StringUtils.isNotEmpty(secret)) {
-                                //TODO refactor this code to use interface 6
-                                if (context instanceof RegisterActivity) {
-                                    ((RegisterActivity) context).showEmailActivationDialogFragment(false);
-                                } else if (context instanceof MainActivity) {
-                                    ((MainActivity) context).showEmailActivationDialogFragment();
-                                }
-                            } else {
-                                onFailedEmailRegistration(context, "Failed to send activation email to your inbox. Please register your email address again!", true);
-                            }
-                        } else {
-                            onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", true);
-                        }
-                    } else if (responseCode == 400) {
-                        onFailedEmailRegistration(context, "Your email address seems to be incorrect. Please check it once again!", false);
-                    } else if (responseCode > 400 && retryCount > 0) {
-                        Log.d(TAG, "Repeating email registration request due to " + responseCode + " reply");
-                        sendEmailRegistrationRequest(context, email, validate, tokenStr, retryCount - 1);
-                    } else {
-                        onFailedEmailRegistration(context, "Oops! Something went wrong. Please register your email address again!", true);
-                    }
-                }
-            });
-        } catch (Exception e) {
-            Log.d(TAG, e.getMessage(), e);
-        }
-    }
-
-    private static void onFailedEmailRegistration(Context context, String message, boolean clearTextInput) {
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putString(MainActivity.NOTIFICATION_EMAIL, "").apply();
-        //TODO refactor this code to use interface 1
-        if (context instanceof MainActivity) {
-            ((MainActivity)context).clearEmailInput(clearTextInput, message);
         }
     }
 

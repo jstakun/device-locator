@@ -249,6 +249,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         if (StringUtils.isNotEmpty(email) && !Messenger.isEmailVerified(settings)) {
             if (settings.getBoolean(EmailActivationDialogFragment.TAG, false)) {
                 settings.remove(EmailActivationDialogFragment.TAG);
+                toaster.showActivityToast("Email verification in progress...");
                 Messenger.sendEmailRegistrationRequest(this, email, false, 1);
             }
             showEmailActivationDialogFragment(retry);
@@ -317,9 +318,13 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         });
     }
 
-    public void openMainActivity() {
+    public void openMainActivity(String message) {
         Log.d(TAG, "openMainActivity()");
-        toaster.cancel();
+        if (StringUtils.isNotEmpty(message)) {
+            toaster.showActivityToast(message);
+        } else {
+            toaster.cancel();
+        }
         settings.setString(MainActivity.USER_LOGIN, settings.getString(MainActivity.NOTIFICATION_EMAIL));
         Intent intent = new Intent(this, MainActivity.class);
         intent.setAction(MainActivity.ACTION_DEVICE_MANAGER);

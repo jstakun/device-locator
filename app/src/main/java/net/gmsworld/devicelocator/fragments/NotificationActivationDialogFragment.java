@@ -47,7 +47,7 @@ public class NotificationActivationDialogFragment extends DialogFragment {
     private Mode mode = Mode.Email;
 
     public interface NotificationActivationDialogListener {
-        void openMainActivity();
+        void openMainActivity(String message);
     }
 
     public static NotificationActivationDialogFragment newInstance(Mode mode, Toaster toaster) {
@@ -208,17 +208,18 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                         if (NotificationActivationDialogFragment.this.isVisible()) {
                             NotificationActivationDialogFragment.this.dismiss();
                         }
+                        String message;
                         if (mode == Mode.Telegram) {
-                            toaster.showActivityToast("Your Telegram chat or channel has been verified.");
+                            message = "Your Telegram chat or channel has been verified.";
                             settings.setString(MainActivity.SOCIAL_REGISTRATION_STATUS, "verified");
                             settings.remove(TELEGRAM_SECRET, TelegramSetupDialogFragment.TELEGRAM_FAILED_SETUP_COUNT);
                         } else {
-                            toaster.showActivityToast("Your email address has been verified.");
+                            message = "Your email address has been verified.";
                             settings.setString(MainActivity.EMAIL_REGISTRATION_STATUS, "verified");
                             settings.remove(EMAIL_SECRET);
                         }
                         if (initListener != null) {
-                            initListener.openMainActivity();
+                            initListener.openMainActivity(message);
                         }
                     } else {
                         if (mode == Mode.Telegram) {
