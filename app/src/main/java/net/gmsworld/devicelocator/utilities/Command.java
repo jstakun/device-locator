@@ -26,6 +26,7 @@ import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
+import net.gmsworld.devicelocator.services.ScreenStatusService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.acra.ACRA;
@@ -48,10 +49,10 @@ import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWith
 public class Command {
 
     //Creating new command:
-    //1. Create here class extending AbstractCommand
+    //1. Create here your Command class extending AbstractCommand
     //2. Add command message to Messenger.sendCommandMessage
     //3. Add command name to device_commands array in res/values/arrays.xml (if command is public)
-    //4. Register command in backend com.jstakun.lm.server.utils.persistence.DevicePersistenceUtils
+    //4. Register command in the backend at com.jstakun.lm.server.utils.persistence.DevicePersistenceUtils
 
     private static final String TAG = Command.class.getSimpleName();
 
@@ -78,6 +79,8 @@ public class Command {
     public final static String CONFIG_COMMAND = "configdl"; //cf change app configuration
     public final static String PERIMETER_COMMAND = "perimeterdl"; //pm perimeter cloud message
     public final static String RESET_COMMAND = "resetdl"; //rt reset device to factory settings
+    public final static String SCREEN_ON_COMMAND = "screendl"; //sc start screen monitor
+    public final static String SCREEN_OFF_COMMAND = "screenoffdl"; //so stop screen monitor
 
     //private
     public final static String PIN_COMMAND = "pindl"; //send pin to notifiers (only when notifiers are set)
@@ -256,14 +259,8 @@ public class Command {
             RouteTrackingService.Mode mode = RouteTrackingService.Mode.Normal;
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("silent") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
                 mode = RouteTrackingService.Mode.Silent;
-            } //else if (commandTokens.length > 1 && commandTokens[commandTokens.length - 1].equalsIgnoreCase("screen")) {
-            //    mode = RouteTrackingService.Mode.Screen;
-            //}
+            }
 
-            //TODO testing
-            //if (mode == RouteTrackingService.Mode.Screen) {
-            //    ScreenStatusService.initService(context);
-            //} else
             if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, true, mode);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
@@ -368,10 +365,6 @@ public class Command {
         }
 
         private void stopTracker(Context context) {
-            //TODO testing
-            //if (commandTokens.length > 1 && commandTokens[commandTokens.length - 1].equalsIgnoreCase("screen")) {
-            //    ScreenStatusService.stopService(context);
-            //} else
             if (GmsSmartLocationManager.getInstance().isEnabled()) {
                 if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
                     final String title = RouteTrackingServiceUtils.getRouteId(context);
@@ -1559,15 +1552,15 @@ public class Command {
         }
 
         @Override
+        public String getLabel() {
+            return "Stop ringing";
+        }
+
+        @Override
         protected void onSmsCommandFound(String sender, Context context) {
             if (stopBeep(context)) {
                 sendSmsNotification(context, sender, RING_OFF_COMMAND);
             }
-        }
-
-        @Override
-        public String getLabel() {
-            return "Stop ringing";
         }
 
         @Override
@@ -1911,6 +1904,105 @@ public class Command {
         @Override
         public boolean canResend() {
             return true;
+        }
+    }
+
+    private static final class ScreenOnCommand extends AbstractCommand {
+
+        public ScreenOnCommand() {
+            super(SCREEN_ON_COMMAND, "sc", Finder.EQUALS);
+        }
+
+        @Override
+        public String getOppositeCommand() {
+            return SCREEN_OFF_COMMAND;
+        }
+
+        @Override
+        public String getLabel() {
+            return "Start";
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            ScreenStatusService.initService(context);
+            sendSmsNotification(context, sender, SCREEN_ON_COMMAND);
+        }
+
+        @Override
+        protected void onSocialCommandFound(String sender, Context context) {
+            ScreenStatusService.initService(context);
+            sendSocialNotification(context, SCREEN_ON_COMMAND, sender, null);
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
+            ScreenStatusService.initService(context);
+            sendAppNotification(context, SCREEN_ON_COMMAND, sender, extras.getString("language"));
+        }
+
+        @Override
+        protected void onAdmCommandFound(String sender, Context context) {
+            ScreenStatusService.initService(context);
+            sendAdmNotification(context, SCREEN_ON_COMMAND, sender, null);
+        }
+    }
+
+    private static final class ScreenOffCommand extends AbstractCommand {
+
+        public ScreenOffCommand() {
+            super(SCREEN_OFF_COMMAND, "so", Finder.STARTS);
+        }
+
+        @Override
+        public String getLabel() {
+            return "Stop";
+        }
+
+        @Override
+        public String getDefaultArgs() {
+            return "s";
+        }
+
+        @Override
+        public String getOppositeCommand() {
+            return SCREEN_ON_COMMAND;
+        }
+
+        @Override
+        public boolean validateTokens() {
+            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "s", "share") || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
+        }
+
+        private void stopService(Context context) {
+            if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
+                //TODO share screen activity log
+            }
+            ScreenStatusService.stopService(context);
+        }
+
+        @Override
+        protected void onSmsCommandFound(String sender, Context context) {
+            stopService(context);
+            sendSmsNotification(context, sender, SCREEN_OFF_COMMAND);
+        }
+
+        @Override
+        protected void onSocialCommandFound(String sender, Context context) {
+            stopService(context);
+            sendSocialNotification(context, SCREEN_OFF_COMMAND, sender, null);
+        }
+
+        @Override
+        protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
+            stopService(context);
+            sendAppNotification(context, SCREEN_OFF_COMMAND, sender, extras.getString("language"));
+        }
+
+        @Override
+        protected void onAdmCommandFound(String sender, Context context) {
+            stopService(context);
+            sendAdmNotification(context, SCREEN_OFF_COMMAND, sender, null);
         }
     }
 }

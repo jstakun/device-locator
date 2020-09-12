@@ -830,6 +830,14 @@ public class Messenger {
                         text += getBatteryLevel(context);
                     }
                     break;
+                case Command.SCREEN_ON_COMMAND:
+                    text = "Screen activity monitor on device " + deviceId + " has been started.";
+                    text += getBatteryLevel(context);
+                    break;
+                case Command.SCREEN_OFF_COMMAND:
+                    text = "Screen activity monitor on device " + deviceId + " has been stopped.";
+                    text += getBatteryLevel(context);
+                    break;
                 default:
                     Log.e(TAG, "Messenger received wrong command: " + command);
                     break;

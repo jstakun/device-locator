@@ -20,6 +20,8 @@
         <item>Config</item>
         <item>Radius</item>
         <item>Notify</item>
+        <item>Screen</item>
+        <item>ScreenOff</item>
         <item>About</item>
     </string-array>
 </resources>

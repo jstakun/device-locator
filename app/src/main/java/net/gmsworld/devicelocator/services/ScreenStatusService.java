@@ -48,10 +48,12 @@ public class ScreenStatusService extends Service {
                 Log.d(TAG, "ScreenStatusService onStartCommand(): " + command);
                 switch (command) {
                     case COMMAND_START:
-                        registerScreenStatusReceiver();
-                        settings.setBoolean(RUNNING, true);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            startForeground(NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, null, "Screen activity monitor is running...", false));
+                        if (mScreenReceiver == null) {
+                            registerScreenStatusReceiver();
+                            settings.setBoolean(RUNNING, true);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                startForeground(NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, null, "Screen activity monitor is running...", false));
+                            }
                         }
                         break;
                     case COMMAND_STOP:
@@ -74,8 +76,6 @@ public class ScreenStatusService extends Service {
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()");
-        unregisterScreenStatusReceiver();
-        settings.setBoolean(RUNNING, false);
         Intent broadcastIntent = new Intent("net.gmsworld.devicelocator.Services.ServiceRestartReceiver");
         sendBroadcast(broadcastIntent);
     }
@@ -103,6 +103,8 @@ public class ScreenStatusService extends Service {
     }
 
     private void stop() {
+        unregisterScreenStatusReceiver();
+        settings.setBoolean(RUNNING, false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             stopForeground(true);
         } else {
@@ -134,7 +136,7 @@ public class ScreenStatusService extends Service {
             name = context.startService(intent);
         }
         if (name != null) {
-            Log.d(TAG, "Service " + name.getClassName() + " stop...");
+            Log.d(TAG, "Service " + name.getClassName() + " stopped...");
         }
     }
 }
