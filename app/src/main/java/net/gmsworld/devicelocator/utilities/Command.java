@@ -26,7 +26,6 @@ import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
-import net.gmsworld.devicelocator.services.ScreenStatusService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.acra.ACRA;
@@ -242,7 +241,7 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "s", "silent", "screen") || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
+            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "s", "silent") || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
         }
 
         @Override
@@ -257,14 +256,15 @@ public class Command {
             RouteTrackingService.Mode mode = RouteTrackingService.Mode.Normal;
             if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("silent") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
                 mode = RouteTrackingService.Mode.Silent;
-            } else if (commandTokens.length > 1 && commandTokens[commandTokens.length - 1].equalsIgnoreCase("screen")) {
-                mode = RouteTrackingService.Mode.Screen;
-            }
+            } //else if (commandTokens.length > 1 && commandTokens[commandTokens.length - 1].equalsIgnoreCase("screen")) {
+            //    mode = RouteTrackingService.Mode.Screen;
+            //}
 
             //TODO testing
-            if (mode == RouteTrackingService.Mode.Screen) {
-                ScreenStatusService.initService(context);
-            } else if (Permissions.haveLocationPermission(context)) {
+            //if (mode == RouteTrackingService.Mode.Screen) {
+            //    ScreenStatusService.initService(context);
+            //} else
+            if (Permissions.haveLocationPermission(context)) {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, true, mode);
                 settings.edit().putBoolean("motionDetectorRunning", true).apply();
             } else {
@@ -364,14 +364,15 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "s", "share", "screen") || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
+            return (commandTokens == null || commandTokens.length == 1 || StringUtils.equalsAnyIgnoreCase(commandTokens[commandTokens.length - 1], "s", "share") || StringUtils.isNumeric(commandTokens[commandTokens.length - 1]));
         }
 
         private void stopTracker(Context context) {
             //TODO testing
-            if (commandTokens.length > 1 && commandTokens[commandTokens.length - 1].equalsIgnoreCase("screen")) {
-                ScreenStatusService.stopService(context);
-            } else if (GmsSmartLocationManager.getInstance().isEnabled()) {
+            //if (commandTokens.length > 1 && commandTokens[commandTokens.length - 1].equalsIgnoreCase("screen")) {
+            //    ScreenStatusService.stopService(context);
+            //} else
+            if (GmsSmartLocationManager.getInstance().isEnabled()) {
                 if (commandTokens.length > 1 && (commandTokens[commandTokens.length - 1].equalsIgnoreCase("share") || commandTokens[commandTokens.length - 1].equalsIgnoreCase("s"))) {
                     final String title = RouteTrackingServiceUtils.getRouteId(context);
                     RouteTrackingServiceUtils.stopRouteTrackingService(context, null, false, true, title, null);
