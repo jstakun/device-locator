@@ -1,9 +1,15 @@
 package net.gmsworld.devicelocator.utilities;
 
 import android.content.Context;
+import android.os.Environment;
 import android.util.Log;
 
 import com.squareup.tape2.QueueFile;
+
+import net.gmsworld.devicelocator.R;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -140,6 +146,21 @@ public class Files {
                     Log.d(TAG, e.getMessage(), e);
                 }
             }
+        }
+    }
+
+    public static void galleryAddPic(File imageFile, Context context) {
+        if (Permissions.haveWriteStoragePermission(context)) {
+            try {
+                final String path = StringUtils.remove(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(), "Pictures") + context.getString(R.string.app_name);
+                Log.d(TAG, "Saving image to path: " + path);
+                File storageDir = new File(path, imageFile.getName());
+                FileUtils.copyFile(imageFile, storageDir);
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage(), e);
+            }
+        } else {
+            Log.w(TAG, "Camera image won't be saved on device due to missing write storage permission!");
         }
     }
 }

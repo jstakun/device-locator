@@ -53,7 +53,7 @@ public class ScreenStatusService extends Service {
         if (intent != null) {
             if (intent.hasExtra(COMMAND)) {
                 final int command = intent.getIntExtra(COMMAND, -1);
-                Log.d(TAG, "ScreenStatusService onStartCommand(): " + command);
+                Log.d(TAG, "onStartCommand(): " + command);
                 switch (command) {
                     case COMMAND_START:
                         if (mScreenReceiver == null) {
