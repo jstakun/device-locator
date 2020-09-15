@@ -93,9 +93,11 @@ public class Command {
     public final static String RESET_FAILED = "resetfail";
     public final static String RINGER_MODE_FAILED = "ringerfail";
     public final static String STOPPED_TRACKER = "stopped";
+    public final static String ALARM_COMMAND = "alarm";
+    public final static String SCREEN_STOPPED = "screenStopped";
+    public final static String SCREEN_RUNNING = "screenRunning";
     protected final static String INVALID_PIN = "invalidPin";
     protected final static String INVALID_COMMAND = "invalidCommand";
-    public final static String ALARM_COMMAND = "alarm";
 
     private static List<AbstractCommand> commands = null;
 
@@ -1927,32 +1929,40 @@ public class Command {
         protected void onSmsCommandFound(String sender, Context context) {
             if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
                 ScreenStatusService.initService(context);
+                sendSmsNotification(context, sender, SCREEN_ON_COMMAND);
+            } else {
+                sendSmsNotification(context, sender, SCREEN_RUNNING);
             }
-            sendSmsNotification(context, sender, SCREEN_ON_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
                 ScreenStatusService.initService(context);
+                sendSocialNotification(context, SCREEN_ON_COMMAND, sender, null);
+            } else {
+                sendSocialNotification(context, SCREEN_RUNNING, sender, null);
             }
-            sendSocialNotification(context, SCREEN_ON_COMMAND, sender, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
                 ScreenStatusService.initService(context);
+                sendAppNotification(context, SCREEN_ON_COMMAND, sender, extras.getString("language"));
+            } else {
+                sendAppNotification(context, SCREEN_RUNNING, sender, extras.getString("language"));
             }
-            sendAppNotification(context, SCREEN_ON_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
             if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
                 ScreenStatusService.initService(context);
+                sendAdmNotification(context, SCREEN_ON_COMMAND, sender, null);
+            } else {
+                sendAdmNotification(context, SCREEN_RUNNING, sender, null);
             }
-            sendAdmNotification(context, SCREEN_ON_COMMAND, sender, null);
         }
     }
 
@@ -1980,32 +1990,40 @@ public class Command {
         protected void onSmsCommandFound(String sender, Context context) {
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
                 stopService(context);
+                sendSmsNotification(context, sender, SCREEN_OFF_COMMAND);
+            } else {
+                sendSmsNotification(context, sender, SCREEN_STOPPED);
             }
-            sendSmsNotification(context, sender, SCREEN_OFF_COMMAND);
         }
 
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
                 stopService(context);
+                sendSocialNotification(context, SCREEN_OFF_COMMAND, sender, null);
+            } else {
+                sendSocialNotification(context, SCREEN_STOPPED, sender, null);
             }
-            sendSocialNotification(context, SCREEN_OFF_COMMAND, sender, null);
         }
 
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
                 stopService(context);
+                sendAppNotification(context, SCREEN_OFF_COMMAND, sender, extras.getString("language"));
+            } else {
+                sendAppNotification(context, SCREEN_STOPPED, sender, extras.getString("language"));
             }
-            sendAppNotification(context, SCREEN_OFF_COMMAND, sender, extras.getString("language"));
         }
 
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
                 stopService(context);
+                sendAdmNotification(context, SCREEN_OFF_COMMAND, sender, null);
+            } else {
+                sendAdmNotification(context, SCREEN_STOPPED, sender, null);
             }
-            sendAdmNotification(context, SCREEN_OFF_COMMAND, sender, null);
         }
     }
 }

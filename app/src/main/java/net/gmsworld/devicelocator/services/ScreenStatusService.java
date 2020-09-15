@@ -16,9 +16,7 @@ import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.ocpsoft.prettytime.PrettyTime;
 
-import java.util.Date;
 import java.util.List;
 
 public class ScreenStatusService extends Service {
@@ -171,7 +169,13 @@ public class ScreenStatusService extends Service {
             }
         }
         if (total > 0 && oldestTime > 0) {
-            final String duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins' ss 'sec'", true) + " since " + new PrettyTime().format(new Date(oldestTime));
+            String duration;
+            if (total > 60000) { //1 min
+                //final String duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins' ss 'sec'", true) + " since " + new PrettyTime().format(new Date(oldestTime));
+                duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins'", true) + " during " + DurationFormatUtils.formatDuration((startTime - oldestTime), "HH 'hrs' mm 'mins'", true);
+            } else {
+                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", true) + " during " + DurationFormatUtils.formatDuration((startTime - oldestTime), "HH 'hrs' mm 'mins'", true);
+            }
             return duration;
         } else {
             return null;

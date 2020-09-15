@@ -843,6 +843,22 @@ public class Messenger {
                     }
                     text += getBatteryLevel(context);
                     break;
+                case Command.SCREEN_STOPPED:
+                    text = "Screen activity monitor on device " + deviceId + " is stopped.";
+                    final String duration1 = ScreenStatusService.readScreenActivityLog(context);
+                    if (StringUtils.isNotEmpty(duration1)) {
+                        text += " Screen was active for approximately " + duration1 + ".";
+                    }
+                    text += getBatteryLevel(context);
+                    break;
+                case Command.SCREEN_RUNNING:
+                    text = "Screen activity monitor on device " + deviceId + " is running.";
+                    final String duration2 = ScreenStatusService.readScreenActivityLog(context);
+                    if (StringUtils.isNotEmpty(duration2)) {
+                        text += " Screen has been active so far for approximately " + duration2 + ".";
+                    }
+                    text += getBatteryLevel(context);
+                    break;
                 default:
                     Log.e(TAG, "Messenger received wrong command: " + command);
                     break;

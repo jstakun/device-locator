@@ -26,7 +26,7 @@ public class ScreenshotActivity extends AppCompatActivity {
             public void run() {
                 takeScreenshot();
             }
-        }, 2000L);
+        }, 1000L);
     }
 
     private void takeScreenshot() {
@@ -42,16 +42,15 @@ public class ScreenshotActivity extends AppCompatActivity {
 
             view.setDrawingCacheEnabled(true);
             Bitmap bitmap = view.getDrawingCache(true);
-            view.setDrawingCacheEnabled(false);
 
             File imageFile = new File(mPath);
-
             FileOutputStream outputStream = new FileOutputStream(imageFile);
             int quality = 100;
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
             outputStream.flush();
             outputStream.close();
 
+            view.setDrawingCacheEnabled(false);
         } catch (Throwable e) {
             // Several error may come out with file handling or DOM
             Log.e(TAG, e.getMessage(), e);
