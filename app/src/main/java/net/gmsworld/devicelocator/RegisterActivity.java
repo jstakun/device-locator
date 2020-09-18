@@ -188,7 +188,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         Account[] allAccounts = AccountManager.get(this).getAccounts();
         for (Account a : allAccounts) {
             //Log.d(TAG, "Found account " + a.name);
-            if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches()) {
+            if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.endsWithIgnoreCase(a.name, "icloud.com")) {
                 if (!accountNames.contains(a.name)) {
                     accountNames.add(a.name);
                 }
@@ -367,7 +367,4 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
             toaster.showActivityToast(message);
         }
     }
-
-
-
 }

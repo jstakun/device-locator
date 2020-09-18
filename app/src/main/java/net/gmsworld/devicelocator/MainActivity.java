@@ -945,7 +945,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             Account[] allAccounts = AccountManager.get(this).getAccounts();
             for (Account a : allAccounts) {
                 //Log.d(TAG, "Found account " + a.name);
-                if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.equalsIgnoreCase(a.name, email)) {
+                if (!StringUtils.equalsIgnoreCase(a.name, email) && Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.endsWithIgnoreCase(a.name, "icloud.com")) {
                     if (!accountNames.contains(a.name)) {
                         accountNames.add(a.name);
                     }
@@ -1619,7 +1619,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         Account[] allAccounts = AccountManager.get(this).getAccounts();
         for (Account a : allAccounts) {
             //Log.d(TAG, "Found account " + a.name);
-            if (Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.equalsIgnoreCase(a.name, email)) {
+            if (!StringUtils.equalsIgnoreCase(a.name, email) && Patterns.EMAIL_ADDRESS.matcher(a.name).matches() && !StringUtils.endsWithIgnoreCase(a.name, "icloud.com")) {
                 if (!accountNames.contains(a.name)) {
                     accountNames.add(a.name);
                 }
