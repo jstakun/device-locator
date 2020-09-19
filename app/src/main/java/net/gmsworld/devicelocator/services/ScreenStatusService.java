@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.broadcastreceivers.ScreenStatusBroadcastReceiver;
@@ -60,6 +61,11 @@ public class ScreenStatusService extends Service {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 startForeground(NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, null, "Screen activity monitor is running...", false));
                             }
+                            if (isScreenOn()) {
+                                ScreenStatusBroadcastReceiver.persistScreenStatus(this, Intent.ACTION_SCREEN_ON);
+                            } else {
+                                ScreenStatusBroadcastReceiver.persistScreenStatus(this, Intent.ACTION_SCREEN_OFF);
+                            }
                         }
                         break;
                     case COMMAND_STOP:
@@ -111,12 +117,22 @@ public class ScreenStatusService extends Service {
 
     private void stop() {
         unregisterScreenStatusReceiver();
+        if (isScreenOn()) {
+            ScreenStatusBroadcastReceiver.persistScreenStatus(this, Intent.ACTION_SCREEN_ON);
+        } else {
+            ScreenStatusBroadcastReceiver.persistScreenStatus(this, Intent.ACTION_SCREEN_OFF);
+        }
         settings.setBoolean(RUNNING, false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             stopForeground(true);
         } else {
             stopSelf();
         }
+    }
+
+    private boolean isScreenOn() {
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        return powerManager.isScreenOn();
     }
 
     public static void initService(final Context context) {
@@ -149,7 +165,7 @@ public class ScreenStatusService extends Service {
 
     public static String readScreenActivityLog(Context context) {
         final List<String> logs = Files.readFileByLinesFromContextDir(ScreenStatusBroadcastReceiver.SCREEN_FILE, context);
-        long total = 0, endTime = 0, startTime = 0, oldestTime = 0;
+        long total = 0, endTime = 0, startTime = 0, oldestTime = 0, newestTime = 0;
         for (String log : logs) {
             //0 or 1,milliseconds
             final String[] tokens = StringUtils.split(log, ",");
@@ -157,24 +173,30 @@ public class ScreenStatusService extends Service {
                 //Log.d(TAG, tokens[0] + " - " + tokens[1]);
                 if (StringUtils.equals(tokens[0], "0")) {
                     endTime = Long.parseLong(tokens[1]);
+                    newestTime = endTime;
                 } else if (StringUtils.equals(tokens[0], "1")) {
                     startTime = Long.parseLong(tokens[1]);
-                }
-                if (endTime > startTime && endTime > 0 && startTime > 0) {
-                    total += endTime - startTime;
+                    newestTime = startTime;
                 }
                 if (oldestTime == 0 && startTime > 0) {
                     oldestTime = startTime;
+                } else if (oldestTime == 0 && endTime > 0) {
+                    oldestTime = endTime;
+                }
+                if (endTime > startTime && endTime > 0 && startTime > 0) {
+                    total += endTime - startTime;
                 }
             }
         }
         if (total > 0 && oldestTime > 0) {
             String duration;
+            long timespan = newestTime - oldestTime;
             if (total > 60000) { //1 min
-                //final String duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins' ss 'sec'", true) + " since " + new PrettyTime().format(new Date(oldestTime));
-                duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins'", true) + " during " + DurationFormatUtils.formatDuration((startTime - oldestTime), "HH 'hrs' mm 'mins'", true);
+                duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins'", true) + " during " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", true);
+            } else if (timespan > 60000) { //1 min
+                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", true) + " during " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", true);
             } else {
-                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", true) + " during " + DurationFormatUtils.formatDuration((startTime - oldestTime), "HH 'hrs' mm 'mins'", true);
+                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", true) + " during " + DurationFormatUtils.formatDuration(timespan, "ss 'sec'", true);
             }
             return duration;
         } else {

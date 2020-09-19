@@ -17,12 +17,16 @@ public class ScreenStatusBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        persistScreenStatus(context, intent.getAction());
+    }
+
+    public static void persistScreenStatus(Context context, String action) {
         File screenFile = Files.getFilesDir(context, SCREEN_FILE, false);
         String line = "" + System.currentTimeMillis();
-        if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+        if (action.equals(Intent.ACTION_SCREEN_OFF)) {
             line = "0," + line;
             Log.d(TAG, "Screen Off Broadcast Received");
-        } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
+        } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
             line = "1," + line;
             Log.d(TAG, "Screen On Broadcast Received");
         }
