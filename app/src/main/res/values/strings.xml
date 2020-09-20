@@ -64,7 +64,8 @@
     <string name="admin_grant_explanation">Please grant this permissions to enable failed login notification service and lock screen command in Device Locator.</string>
     <string name="admin_grant_description">Device Locator can notify you on failed login, reset your device to factory defaults and lock screen</string>
     <string name="test">Test</string>
-    <string name="notification_tracker">"Device Locator is tracking your device location. Click to open Device Locator"</string>
+    <string name="notification_tracker">Device Locator is tracking your device location. Click to open Device Locator</string>
+    <string name="notification_monitor">Device Locator is monitoring your screen activity. Click to open Device Locator</string>
     <string name="activation_email_title">Email activation</string>
     <string name="activation_telegram_title">Telegram activation</string>
     <string name="activation_email_desc">In order to activate email notifications please enter 4 digit activation code we\'ve sent to your email address:</string>

@@ -10,6 +10,7 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.broadcastreceivers.ScreenStatusBroadcastReceiver;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
@@ -59,7 +60,7 @@ public class ScreenStatusService extends Service {
                             registerScreenStatusReceiver();
                             settings.setBoolean(RUNNING, true);
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                startForeground(NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, null, "Screen activity monitor is running...", false));
+                                startForeground(NOTIFICATION_ID, NotificationUtils.buildMonitorNotification(this, NOTIFICATION_ID, getString(R.string.notification_monitor)));
                             }
                             if (isScreenOn()) {
                                 ScreenStatusBroadcastReceiver.persistScreenStatus(this, Intent.ACTION_SCREEN_ON);
@@ -165,7 +166,7 @@ public class ScreenStatusService extends Service {
 
     public static String readScreenActivityLog(Context context) {
         final List<String> logs = Files.readFileByLinesFromContextDir(ScreenStatusBroadcastReceiver.SCREEN_FILE, context);
-        long total = 0, endTime = 0, startTime = 0, oldestTime = 0, newestTime = 0;
+        long total = 0, endTime = 0, startTime = 0, oldestTime = 0;
         for (String log : logs) {
             //0 or 1,milliseconds
             final String[] tokens = StringUtils.split(log, ",");
@@ -173,10 +174,8 @@ public class ScreenStatusService extends Service {
                 //Log.d(TAG, tokens[0] + " - " + tokens[1]);
                 if (StringUtils.equals(tokens[0], "0")) {
                     endTime = Long.parseLong(tokens[1]);
-                    newestTime = endTime;
                 } else if (StringUtils.equals(tokens[0], "1")) {
                     startTime = Long.parseLong(tokens[1]);
-                    newestTime = startTime;
                 }
                 if (oldestTime == 0 && startTime > 0) {
                     oldestTime = startTime;
@@ -190,7 +189,7 @@ public class ScreenStatusService extends Service {
         }
         if (total > 0 && oldestTime > 0) {
             String duration;
-            long timespan = newestTime - oldestTime;
+            final long timespan = System.currentTimeMillis() - oldestTime;
             if (total > 60000) { //1 min
                 duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins'", true) + " during " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", true);
             } else if (timespan > 60000) { //1 min

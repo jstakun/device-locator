@@ -18,6 +18,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.MainActivity;
+import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.morse.MorseSoundGenerator;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
 import net.gmsworld.devicelocator.utilities.Command;
@@ -172,7 +173,7 @@ public class RouteTrackingService extends Service {
                 this.mWakeLock.acquire();
             }
 
-            startForeground(NOTIFICATION_ID, NotificationUtils.buildTrackerNotification(this, NOTIFICATION_ID));
+            startForeground(NOTIFICATION_ID, NotificationUtils.buildTrackerNotification(this, NOTIFICATION_ID, getString(R.string.notification_tracker)));
 
             //use smart location lib
             GmsSmartLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, gpsAccuracy, resetRoute);

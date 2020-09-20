@@ -107,7 +107,7 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         commandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                final String command = commandSpinner.getSelectedItem().toString();
+                final String command = StringUtils.deleteWhitespace(commandSpinner.getSelectedItem().toString());
                 AbstractCommand c = Command.getCommandByName(command);
                 if (c != null && c.hasParameters()) {
                     String defaultArgs = c.getDefaultArgs();
@@ -267,7 +267,8 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
         }
     }
 
-    private void sendCommand(String pin, String command, String commandArgs, boolean sendSocial) {
+    private void sendCommand(String pin, String commandStr, String commandArgs, boolean sendSocial) {
+        final String command = StringUtils.deleteWhitespace(commandStr);
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);

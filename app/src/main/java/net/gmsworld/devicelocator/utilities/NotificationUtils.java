@@ -45,12 +45,10 @@ public class NotificationUtils {
     private static final String TAG = NotificationUtils.class.getSimpleName();
     private static final Map<String, Integer> notificationIds = new HashMap<>();
 
-    public static Notification buildTrackerNotification(Context context, int notificationId) {
+    public static Notification buildTrackerNotification(final Context context, final int notificationId, final String message) {
         Intent trackerIntent = new Intent(context, LauncherActivity.class);
         trackerIntent.setAction(MainActivity.ACTION_DEVICE_TRACKER);
         PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, trackerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        final String message = context.getString(R.string.notification_tracker);
 
         initChannels(context, Messenger.getDefaultDeviceName());
 
@@ -65,7 +63,27 @@ public class NotificationUtils {
                 .setCategory(NotificationCompat.CATEGORY_STATUS)
                 .setOngoing(true)
                 .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent)
-                //.setPublicVersion(publicNotification) //API 21
+                .build();
+    }
+
+    public static Notification buildMonitorNotification(final Context context, final int notificationId, final String message) {
+        Intent trackerIntent = new Intent(context, LauncherActivity.class);
+        trackerIntent.setAction(MainActivity.ACTION_DEVICE_MANAGER);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, trackerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        initChannels(context, Messenger.getDefaultDeviceName());
+
+        return new NotificationCompat.Builder(context, Messenger.getDefaultDeviceName())
+                .setContentTitle(context.getString(R.string.app_name) + " Notification")
+                .setContentText(message)
+                .setSmallIcon(R.drawable.ic_devices_other_white)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                .setContentIntent(contentIntent)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setCategory(NotificationCompat.CATEGORY_STATUS)
+                .setOngoing(true)
+                .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent)
                 .build();
     }
 
