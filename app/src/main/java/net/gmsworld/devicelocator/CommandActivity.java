@@ -321,8 +321,8 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
                 lastCommand = c.getOppositeCommand().substring(0, c.getOppositeCommand().length()-2);
             }
             for (int i = 0;i < commandSpinner.getAdapter().getCount();i++) {
-                //Log.d(TAG, "Comparing " + commandSpinner.getItemAtPosition(i) + " with " + lastCommand);
-                if (StringUtils.equalsIgnoreCase((String)commandSpinner.getItemAtPosition(i), lastCommand)) {
+                final String item = (String)commandSpinner.getItemAtPosition(i);
+                if (StringUtils.equalsIgnoreCase(StringUtils.deleteWhitespace(item), lastCommand)) {
                    commandSpinner.setSelection(i);
                    break;
                 }

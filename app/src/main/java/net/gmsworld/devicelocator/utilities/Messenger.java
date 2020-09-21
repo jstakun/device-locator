@@ -852,7 +852,7 @@ public class Messenger {
                     text += getBatteryLevel(context);
                     break;
                 case Command.SCREEN_RUNNING:
-                    text = "Screen activity monitor on device " + deviceId + " is running.";
+                    text = "Screen activity monitor on device " + deviceId + " is already running.";
                     final String duration2 = ScreenStatusService.readScreenActivityLog(context);
                     if (StringUtils.isNotEmpty(duration2)) {
                         text += " Screen has been active so far for approximately " + duration2 + ".";

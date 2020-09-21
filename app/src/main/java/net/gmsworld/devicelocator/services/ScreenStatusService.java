@@ -191,11 +191,11 @@ public class ScreenStatusService extends Service {
             String duration;
             final long timespan = System.currentTimeMillis() - oldestTime;
             if (total > 60000) { //1 min
-                duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins'", true) + " during " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", true);
+                duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins'", true) + " during last " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", true);
             } else if (timespan > 60000) { //1 min
-                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", true) + " during " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", true);
+                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", true) + " during last " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", true);
             } else {
-                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", true) + " during " + DurationFormatUtils.formatDuration(timespan, "ss 'sec'", true);
+                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", true) + " during last " + DurationFormatUtils.formatDuration(timespan, "ss 'sec'", true);
             }
             return duration;
         } else {
