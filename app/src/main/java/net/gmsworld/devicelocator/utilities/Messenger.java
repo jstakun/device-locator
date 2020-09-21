@@ -1398,9 +1398,10 @@ public class Messenger {
         String manufacturer = StringUtils.capitalize(Build.MANUFACTURER);
         String model = StringUtils.capitalize(Build.MODEL);
         if (model.startsWith(manufacturer)) {
-            return model;
+            return StringUtils.replaceAll(model, " ", "-");
+        } else {
+            return StringUtils.replaceAll(manufacturer + "-" + model, " ", "-");
         }
-        return StringUtils.replaceAll(manufacturer + " " + model, " ", "-");
     }
 
     public static void getMyTelegramId(Context context) {

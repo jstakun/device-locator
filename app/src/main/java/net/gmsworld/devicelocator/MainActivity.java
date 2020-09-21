@@ -1086,7 +1086,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         String newDeviceName = deviceNameInput.getText().toString();
         String deviceName = settings.getString(DEVICE_NAME);
         if (!StringUtils.equals(deviceName, newDeviceName)) {
-            String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-').replace(',', '-');
+            final String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-').replace(',', '-');
             if (Messenger.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName, false)) {
                 if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
                     EditText deviceNameEdit = findViewById(R.id.deviceName);
