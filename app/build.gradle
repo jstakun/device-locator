@@ -27,7 +27,13 @@ android {
     }
     lintOptions {
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
+
+def acraVersion = '5.7.0'
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
@@ -47,7 +53,9 @@ dependencies {
     implementation 'io.nlopez.smartlocation:library:3.3.3'
     implementation 'org.apache.commons:commons-lang3:3.7'
     implementation 'com.madgag.spongycastle:core:1.58.0.0'
-    implementation 'ch.acra:acra:4.11'
+    implementation "ch.acra:acra-core:$acraVersion"
+    implementation "ch.acra:acra-http:$acraVersion"
+    implementation "ch.acra:acra-toast:$acraVersion"
     implementation 'commons-io:commons-io:2.6'
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.1.Final'
     testImplementation 'junit:junit:4.12'

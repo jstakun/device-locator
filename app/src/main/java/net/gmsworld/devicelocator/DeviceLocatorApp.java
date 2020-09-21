@@ -8,9 +8,11 @@ import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 
 import org.acra.ACRA;
-import org.acra.ReportingInteractionMode;
-import org.acra.config.ACRAConfiguration;
-import org.acra.config.ConfigurationBuilder;
+import org.acra.config.CoreConfigurationBuilder;
+import org.acra.config.HttpSenderConfigurationBuilder;
+import org.acra.config.ToastConfigurationBuilder;
+import org.acra.data.StringFormat;
+import org.acra.sender.HttpSender;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -51,16 +53,22 @@ public class DeviceLocatorApp extends Application {
 
     private void initAcra(Map<String, String> headers) {
         try {
-            ACRAConfiguration config = new ConfigurationBuilder(this)
-                    .setFormUri(getString(R.string.crashReportUrl))
-                    .setReportingInteractionMode(ReportingInteractionMode.TOAST)
-                    .setHttpHeaders(headers)
-                    .setResToastText(R.string.crash_error)
-                    .setSocketTimeout(30000)
+            CoreConfigurationBuilder builder = new CoreConfigurationBuilder(this)
+                    .setBuildConfigClass(BuildConfig.class)
+                    .setReportFormat(StringFormat.KEY_VALUE_LIST)
                     .setLogcatArguments( "-t", "500", "-v", "time", "net.gmsworld.devicelocator:D", "*.S")
-                    .build();
-            ACRA.init(this, config);
-        } catch (Exception e) {
+                    .setEnabled(true);
+            builder.getPluginConfigurationBuilder(HttpSenderConfigurationBuilder.class)
+                    .setUri(getString(R.string.crashReportUrl))
+                    .setHttpMethod(HttpSender.Method.POST)
+                    .setHttpHeaders(headers)
+                    .setSocketTimeout(30000)
+                    .setEnabled(true);
+            builder.getPluginConfigurationBuilder(ToastConfigurationBuilder.class)
+                    .setResText(R.string.crash_error)
+                    .setEnabled(true);
+            ACRA.init(this, builder);
+        } catch (Throwable e) {
             Log.e(TAG, e.getMessage(), e);
         }
     }
