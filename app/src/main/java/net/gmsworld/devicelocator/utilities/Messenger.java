@@ -738,7 +738,7 @@ public class Messenger {
                         text = "Front camera photo will be taken on the device " + deviceId + ". You should receive link soon.";
                     } else if (StringUtils.isEmpty(imageUrl) && !hiddenCamera) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            text = "On device " + deviceId + " access to front camera in the background is not permitted! No photo will be taken.";
+                            text = "On device " + deviceId + " access to front camera from the background is not permitted! No photo will be taken.";
                         } else {
                             text = "Front camera is disabled on the device " + deviceId + "! No photo will be taken.";
                         }
