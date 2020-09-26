@@ -397,7 +397,7 @@ public class PermissionsActivity extends AppCompatActivity {
             }
         } else {
             Log.d(TAG, "Camera is currently on");
-            Permissions.startSettingsIntent(PermissionsActivity.this, "Camera");
+            Permissions.startSettingsIntent(this, "Camera");
         }
     }
 

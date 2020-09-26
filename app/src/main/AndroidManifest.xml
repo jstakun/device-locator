@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="net.gmsworld.devicelocator">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -156,16 +156,19 @@
 
         <service
             android:name=".services.SmsSenderService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="location" />
         <service
             android:name=".services.CommandService"
             android:exported="false" />
         <service
             android:name=".services.RouteTrackingService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="location" />
         <service
             android:name=".services.HiddenCaptureImageService"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="location|camera" />
         <service
             android:name=".services.DlFirebaseMessagingService"
             android:enabled="true"

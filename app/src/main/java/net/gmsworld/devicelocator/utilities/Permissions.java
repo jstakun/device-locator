@@ -51,11 +51,15 @@ public class Permissions {
     }
 
     public static void requestLocationPermission(Activity activity, int requestCode) {
-        try {
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, requestCode);
-        } catch (Throwable e) {
-            Toaster.showToast(activity, R.string.internal_error);
-            Log.e(TAG, e.getMessage(), e);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            startSettingsIntent(activity, "Location");
+        } else {
+            try {
+                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, requestCode);
+            } catch (Throwable e) {
+                Toaster.showToast(activity, R.string.internal_error);
+                Log.e(TAG, e.getMessage(), e);
+            }
         }
     }
 
