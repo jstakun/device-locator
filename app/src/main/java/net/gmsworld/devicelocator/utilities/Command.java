@@ -1928,7 +1928,7 @@ public class Command {
         @Override
         protected void onSmsCommandFound(String sender, Context context) {
             if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
-                ScreenStatusService.initService(context);
+                ScreenStatusService.initService(context, true);
                 sendSmsNotification(context, sender, SCREEN_ON_COMMAND);
             } else {
                 sendSmsNotification(context, sender, SCREEN_RUNNING);
@@ -1938,7 +1938,7 @@ public class Command {
         @Override
         protected void onSocialCommandFound(String sender, Context context) {
             if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
-                ScreenStatusService.initService(context);
+                ScreenStatusService.initService(context, true);
                 sendSocialNotification(context, SCREEN_ON_COMMAND, sender, null);
             } else {
                 sendSocialNotification(context, SCREEN_RUNNING, sender, null);
@@ -1948,7 +1948,7 @@ public class Command {
         @Override
         protected void onAppCommandFound(String sender, Context context, Location location, Bundle extras) {
             if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
-                ScreenStatusService.initService(context);
+                ScreenStatusService.initService(context, true);
                 sendAppNotification(context, SCREEN_ON_COMMAND, sender, extras.getString("language"));
             } else {
                 sendAppNotification(context, SCREEN_RUNNING, sender, extras.getString("language"));
@@ -1958,7 +1958,7 @@ public class Command {
         @Override
         protected void onAdmCommandFound(String sender, Context context) {
             if (!PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
-                ScreenStatusService.initService(context);
+                ScreenStatusService.initService(context, true);
                 sendAdmNotification(context, SCREEN_ON_COMMAND, sender, null);
             } else {
                 sendAdmNotification(context, SCREEN_RUNNING, sender, null);

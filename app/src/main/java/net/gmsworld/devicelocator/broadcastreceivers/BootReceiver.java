@@ -22,7 +22,7 @@ public class BootReceiver extends BroadcastReceiver {
             LocationAlarmUtils.initWhenDown(context, false);
 
             if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(ScreenStatusService.RUNNING, false)) {
-                ScreenStatusService.initService(context);
+                ScreenStatusService.initService(context, false);
             }
         } else if (StringUtils.equals(intent.getAction(), "android.intent.action.ACTION_SHUTDOWN")) {
             Log.d(TAG, "Received Shutdown Broadcast");

@@ -39,7 +39,7 @@ public class ServiceRestartReceiver extends BroadcastReceiver {
         }
 
         if (screenMonitorRunning) {
-            ScreenStatusService.initService(context);
+            ScreenStatusService.initService(context, false);
         } else {
             Log.d(TAG, "No need to restart ScreenStatusService.");
         }

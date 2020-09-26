@@ -223,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         //
         if (settings.getBoolean(ScreenStatusService.RUNNING, false)) {
-            ScreenStatusService.initService(this);
+            ScreenStatusService.initService(this, false);
         }
         //
 

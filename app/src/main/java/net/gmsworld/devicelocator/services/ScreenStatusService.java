@@ -57,7 +57,7 @@ public class ScreenStatusService extends Service {
                 switch (command) {
                     case COMMAND_START:
                         if (mScreenReceiver == null) {
-                            registerScreenStatusReceiver();
+                            registerScreenStatusReceiver(intent.getBooleanExtra("reset", true));
                             settings.setBoolean(RUNNING, true);
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 startForeground(NOTIFICATION_ID, NotificationUtils.buildMonitorNotification(this, NOTIFICATION_ID, getString(R.string.notification_monitor)));
@@ -93,7 +93,7 @@ public class ScreenStatusService extends Service {
         sendBroadcast(broadcastIntent);
     }
 
-    private void registerScreenStatusReceiver() {
+    private void registerScreenStatusReceiver(boolean reset) {
         if (mScreenReceiver == null) {
             mScreenReceiver = new ScreenStatusBroadcastReceiver();
             IntentFilter filter = new IntentFilter();
@@ -101,7 +101,9 @@ public class ScreenStatusService extends Service {
             filter.addAction(Intent.ACTION_SCREEN_ON);
             registerReceiver(mScreenReceiver, filter);
             Log.d(TAG, "Registered broadcast receiver");
-            Files.deleteFileFromContextDir(ScreenStatusBroadcastReceiver.SCREEN_FILE, this, false);
+            if (reset) {
+                Files.deleteFileFromContextDir(ScreenStatusBroadcastReceiver.SCREEN_FILE, this, false);
+            }
         }
     }
 
@@ -136,10 +138,11 @@ public class ScreenStatusService extends Service {
         return powerManager.isScreenOn();
     }
 
-    public static void initService(final Context context) {
+    public static void initService(final Context context, boolean reset) {
         ComponentName name;
         Intent intent = new Intent(context, ScreenStatusService.class);
         intent.putExtra(COMMAND, COMMAND_START);
+        intent.putExtra("reset", reset);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             name = context.startForegroundService(intent);
         } else {
