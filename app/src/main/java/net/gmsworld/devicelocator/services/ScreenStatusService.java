@@ -115,6 +115,7 @@ public class ScreenStatusService extends Service {
                 mScreenReceiver = null;
             }
         } catch (IllegalArgumentException e) {
+            Log.e(TAG, e.getMessage(), e);
         }
     }
 
@@ -193,12 +194,18 @@ public class ScreenStatusService extends Service {
         if (total > 0 && oldestTime > 0) {
             String duration;
             final long timespan = System.currentTimeMillis() - oldestTime;
-            if (total > 60000) { //1 min
-                duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins'", true) + " during last " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", true);
+            if (timespan > 24 * 60 * 60000) {
+                if (total > 60000) { //1 min
+                    duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins'", false) + " during last " + DurationFormatUtils.formatDuration(timespan, "dd 'days' HH 'hrs' mm 'mins'", false);
+                } else {
+                    duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", false) + " during last " + DurationFormatUtils.formatDuration(timespan, "dd 'days' HH 'hrs' mm 'mins'", false);
+                }
+            } else if (total > 60000) { //1 min
+                duration = DurationFormatUtils.formatDuration(total, "HH 'hrs' mm 'mins'", false) + " during last " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", false);
             } else if (timespan > 60000) { //1 min
-                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", true) + " during last " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", true);
+                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", false) + " during last " + DurationFormatUtils.formatDuration(timespan, "HH 'hrs' mm 'mins'", false);
             } else {
-                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", true) + " during last " + DurationFormatUtils.formatDuration(timespan, "ss 'sec'", true);
+                duration = DurationFormatUtils.formatDuration(total, "ss 'sec'", false) + " during last " + DurationFormatUtils.formatDuration(timespan, "ss 'sec'", false);
             }
             return duration;
         } else {
