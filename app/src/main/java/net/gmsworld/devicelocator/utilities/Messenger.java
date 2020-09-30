@@ -76,6 +76,8 @@ public class Messenger {
     public static final String LNG_HEADER = "X-GMS-Lng";
     public static final String ACC_HEADER = "X-GMS-Acc";
     public static final String SPD_HEADER = "X-GMS-Speed";
+    public static final String DEVICE_ID_HEADER = "X-GMS-DeviceId";
+    public static final String DEVICE_NAME_HEADER = "X-GMS-DeviceName";
 
     public static final String TELEGRAM_PACKAGE = "org.telegram.messenger";
     //private static final String FACEBOOK_MESSENGER_PACKAGE = "com.facebook.orca";
@@ -116,9 +118,9 @@ public class Messenger {
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     if (StringUtils.isNotEmpty(deviceId)) {
-                        headers.put("X-GMS-DeviceId", deviceId);
+                        headers.put(DEVICE_ID_HEADER, deviceId);
                     }
-                    headers.put("X-GMS-DeviceName", getDeviceId(context, true));
+                    headers.put(DEVICE_NAME_HEADER, getDeviceId(context, true));
                     if (location != null) {
                         headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
                         headers.put(LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
@@ -222,7 +224,7 @@ public class Messenger {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     String deviceId = getDeviceId(context, false);
                     if (StringUtils.isNotEmpty(deviceId)) {
-                        headers.put("X-GMS-DeviceId", deviceId);
+                        headers.put(DEVICE_ID_HEADER, deviceId);
                     }
                     if (location != null) {
                         headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
@@ -308,7 +310,7 @@ public class Messenger {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     String deviceId = getDeviceId(context, false);
                     if (StringUtils.isNotEmpty(deviceId)) {
-                        headers.put("X-GMS-DeviceId", deviceId);
+                        headers.put(DEVICE_ID_HEADER, deviceId);
                     }
                     if (location != null) {
                         headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
@@ -402,7 +404,7 @@ public class Messenger {
                 headers.put("Authorization", "Bearer " + tokenStr);
                 String deviceId = getDeviceId(context, false);
                 if (StringUtils.isNotEmpty(deviceId)) {
-                    headers.put("X-GMS-DeviceId", deviceId);
+                    headers.put(DEVICE_ID_HEADER, deviceId);
                 }
                 if (location != null) {
                     headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
@@ -1031,7 +1033,11 @@ public class Messenger {
     private static void sendEmailRegistrationRequest(final Context context, final String email, final boolean validate, final String tokenStr, final int retryCount) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer " + tokenStr);
-        headers.put("X-GMS-DeviceName", getDeviceId(context, true));
+        headers.put(DEVICE_NAME_HEADER, getDeviceId(context, true));
+        final String deviceId = getDeviceId(context, false);
+        if (StringUtils.isNotEmpty(deviceId)) {
+            headers.put(DEVICE_ID_HEADER, deviceId);
+        }
 
         try {
             final String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false) + "&validate=" + validate;

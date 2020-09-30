@@ -3,7 +3,6 @@ package net.gmsworld.devicelocator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.location.Location;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.InputType;
@@ -40,11 +39,8 @@ import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ViewCompat;
-import io.nlopez.smartlocation.OnLocationUpdatedListener;
-import io.nlopez.smartlocation.SmartLocation;
-import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
-public class CommandActivity extends AppCompatActivity implements OnLocationUpdatedListener, SendCommandDialogFragment.SendCommandDialogListener {
+public class CommandActivity extends AppCompatActivity implements SendCommandDialogFragment.SendCommandDialogListener {
 
     private static final String TAG = CommandActivity.class.getSimpleName();
 
@@ -218,27 +214,10 @@ public class CommandActivity extends AppCompatActivity implements OnLocationUpda
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).oneFix().start(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).stop();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
         //reset pin verification time
         settings.setLong("pinVerificationMillis", System.currentTimeMillis());
-    }
-
-    @Override
-    public void onLocationUpdated(Location location) {
-        Log.d(TAG, "Location found with accuracy " + location.getAccuracy() + " m");
     }
 
     private boolean isValidCommand(String pin, String command, String commandArgs) {
