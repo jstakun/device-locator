@@ -56,6 +56,8 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
     private String action = null;
 
+    private boolean locationSent = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,6 +136,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 Bundle extras = new Bundle();
                 extras.putString("telegramId", getString(R.string.telegram_notification));
                 SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
+                locationSent = true;
                 break;
             default:
                 break;
@@ -341,6 +344,12 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
             }
             if (sendRequest || (settings.getBoolean(PRIVACY_POLICY, false) && Permissions.haveLocationPermission(RegisterActivity.this))) {
+                if (!locationSent) {
+                    Bundle extras = new Bundle();
+                    extras.putString("telegramId", getString(R.string.telegram_notification));
+                    SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
+                    locationSent = true;
+                }
                 if (Network.isNetworkAvailable(RegisterActivity.this)) {
                     Log.d(TAG, "Setting new email address: " + newEmailAddress);
                     settings.setString(MainActivity.NOTIFICATION_EMAIL, newEmailAddress);
