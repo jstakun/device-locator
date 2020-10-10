@@ -7,7 +7,7 @@ android {
         applicationId "net.gmsworld.devicelocator"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 77
+        versionCode 78
         versionName "0.4"
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
         buildConfigField "String", "APP_TYPE", "\"FULL\"" //"\"GP\""   "\"FULL\""
@@ -37,17 +37,17 @@ def acraVersion = '5.7.0'
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.google.firebase:firebase-core:17.5.0'
-    implementation 'com.google.firebase:firebase-messaging:20.2.4'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    implementation 'com.google.firebase:firebase-core:17.5.1'
+    implementation 'com.google.firebase:firebase-messaging:20.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
     implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.core:core:1.3.1'
+    implementation 'androidx.core:core:1.3.2'
     implementation 'com.google.android.material:material:1.2.1'
     implementation 'com.google.android.gms:play-services-places:17.0.0'
-    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.1.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'io.nlopez.smartlocation:library:3.3.3'

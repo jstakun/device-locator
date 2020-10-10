@@ -301,17 +301,18 @@ public class Messenger {
         }
     }
 
-    private static void sendTelegram(final Context context, final Location location, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
+    private static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount, final Map<String, String> headers, final Location location) {
         if (isValidTelegramId(telegramId)) {
             if (Network.isNetworkAvailable(context)) {
-                final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
+                final PreferencesUtils settings = new PreferencesUtils(context);
+                final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     String deviceId = getDeviceId(context, false);
                     if (StringUtils.isNotEmpty(deviceId)) {
                         headers.put(DEVICE_ID_HEADER, deviceId);
                     }
+                    headers.put(DEVICE_NAME_HEADER, getDeviceId(context, true));
                     if (location != null) {
                         headers.put(LAT_HEADER, latAndLongFormat.format(location.getLatitude()));
                         headers.put(LNG_HEADER, latAndLongFormat.format(location.getLongitude()));
@@ -323,7 +324,11 @@ public class Messenger {
                         }
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
-                    sendTelegram(context, telegramId, message, 1, headers);
+                    String username = settings.getString(MainActivity.USER_LOGIN);
+                    if (StringUtils.isEmpty(username)) {
+                        username = deviceId;
+                    }
+                    sendTelegram(context, telegramId, message, username, 1, headers);
                 } else {
                     String queryString = "scope=dl&user=" + getDeviceId(context, false);
                     Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
@@ -331,12 +336,12 @@ public class Messenger {
                         public void onGetFinish(String results, int responseCode, String url) {
                             if (responseCode == 200) {
                                 if (StringUtils.isNotEmpty(getToken(context, results))) {
-                                    sendTelegram(context, location, telegramId, message, 1, headers);
+                                    sendTelegram(context, telegramId, message, 1, headers, location);
                                 } else {
                                     Log.e(TAG, "Failed to parse token!");
                                 }
                             } else if (responseCode == 500 && retryCount > 0) {
-                                sendTelegram(context, location, telegramId, message, retryCount - 1, headers);
+                                sendTelegram(context, telegramId, message, retryCount - 1, headers, location);
                             } else {
                                 Log.d(TAG, "Failed to receive token: " + results);
                             }
@@ -351,15 +356,18 @@ public class Messenger {
         }
     }
 
-    private static void sendTelegram(final Context context, final String telegramId, final String message, final int retryCount, final Map<String, String> headers) {
+    private static void sendTelegram(final Context context, final String telegramId, final String message, final String username, final int retryCount, final Map<String, String> headers) {
         try {
-            final String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message + "&username=" + getDeviceId(context, false);
+            String queryString = "type=t_dl&chatId=" + telegramId + "&message=" + message;
+            if (StringUtils.isNotEmpty(username)) {
+                queryString += "&username=" + username;
+            }
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
                     if (responseCode == 500 && retryCount > 0) {
-                        sendTelegram(context, telegramId, message, retryCount - 1, headers);
+                        sendTelegram(context, telegramId, message, username, retryCount - 1, headers);
                     } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
                         String status = null;
@@ -482,7 +490,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         }
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
+            sendTelegram(context, telegramId, text, 1, new HashMap<String, String>(), location);
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - current location";
@@ -503,7 +511,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         }
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, location, telegramId, text, 1, new HashMap<String, String>());
+            sendTelegram(context, telegramId, text, 1, new HashMap<String, String>(), location);
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - location map link";
@@ -531,7 +539,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         }
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
+            sendTelegram(context, telegramId, text, 1, new HashMap<String, String>(), null);
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - location request";
@@ -577,7 +585,7 @@ public class Messenger {
         //First send notification to telegram and if not configured to email
         //REMEMBER this could send a lot of email messages and your account could be overloaded
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, location, telegramId, message, 1, headers);
+            sendTelegram(context, telegramId, message, 1, headers, location);
         } else if (StringUtils.isNotEmpty(email)) {
             final String title = context.getString(R.string.message, deviceId) + " - location change";
             final String mailMessage = message + "\n\n" + "We recommend to use Telegram Messenger for route tracking notifications!";
@@ -880,7 +888,7 @@ public class Messenger {
                 Log.e(TAG, e.getMessage(), e);
             }
             if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
+                sendTelegram(context, telegramId, text, 1, new HashMap<String, String>(), null);
             }
             if (StringUtils.isNotEmpty(email)) {
                 if (StringUtils.isEmpty(title)) {
@@ -902,7 +910,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, message);
         }
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, null, telegramId, message, 1, new HashMap<String, String>());
+            sendTelegram(context, telegramId, message, 1, new HashMap<String, String>(), null);
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - current location";
@@ -922,7 +930,7 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         }
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, null, telegramId, text, 1, new HashMap<String, String>());
+            sendTelegram(context, telegramId, text, 1, new HashMap<String, String>(), null);
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - failed login";

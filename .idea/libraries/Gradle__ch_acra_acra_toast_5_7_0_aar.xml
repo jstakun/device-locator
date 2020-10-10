@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: ch.acra:acra-toast:5.7.0@aar">
     <CLASSES>
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/cf0d8caade54569f00a12ace38927e34/jetified-acra-toast-5.7.0/AndroidManifest.xml" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/cf0d8caade54569f00a12ace38927e34/jetified-acra-toast-5.7.0/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/cf0d8caade54569f00a12ace38927e34/jetified-acra-toast-5.7.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5f8890eca53b3edf9fc708b0b020335d/jetified-acra-toast-5.7.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5f8890eca53b3edf9fc708b0b020335d/jetified-acra-toast-5.7.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5f8890eca53b3edf9fc708b0b020335d/jetified-acra-toast-5.7.0/res" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ch.acra/acra-toast/5.7.0/759fd210da37f8db8ebe0218fe23ec47395656d0/acra-toast-5.7.0-javadoc.jar!/" />
