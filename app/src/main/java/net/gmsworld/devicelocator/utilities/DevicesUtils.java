@@ -51,10 +51,13 @@ public class DevicesUtils {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
                             if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                                JsonElement reply = new JsonParser().parse(results);
-                                JsonArray devices = reply.getAsJsonObject().get("devices").getAsJsonArray();
+                                JsonObject reply = new JsonParser().parse(results).getAsJsonObject();
+                                JsonArray devices = null;
+                                if (reply.has("devices")) {
+                                    devices = reply.get("devices").getAsJsonArray();
+                                }
                                 boolean thisDeviceOnList = false;
-                                if (devices.size() > 0) {
+                                if (devices != null && devices.size() > 0) {
                                     ArrayList<Device> userDevices = new ArrayList<>();
                                     final String imei = Messenger.getDeviceId(context, false);
                                     for (JsonElement d : devices) {
