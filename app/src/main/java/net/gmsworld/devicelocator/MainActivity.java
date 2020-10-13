@@ -1958,20 +1958,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     public void showEmailActivationDialogFragment(boolean retry) {
-        EmailActivationDialogFragment emailActivationDialogFragment = (EmailActivationDialogFragment) getFragmentManager().findFragmentByTag(EmailActivationDialogFragment.TAG);
-        EmailActivationDialogFragment.Mode mode;
-        if (retry) {
-            mode = EmailActivationDialogFragment.Mode.Retry;
-        } else {
-            mode = EmailActivationDialogFragment.Mode.Initial;
-        }
-        if (emailActivationDialogFragment == null) {
-            emailActivationDialogFragment = EmailActivationDialogFragment.newInstance(toaster, mode);
-            emailActivationDialogFragment.show(getFragmentManager(), EmailActivationDialogFragment.TAG);
-        } else {
-            emailActivationDialogFragment.setToaster(toaster);
-            emailActivationDialogFragment.setMode(mode);
-        }
+        EmailActivationDialogFragment.showEmailActivationDialogFragment(retry, this, toaster);
     }
 
     // -----------------------------------------------------------------------------------

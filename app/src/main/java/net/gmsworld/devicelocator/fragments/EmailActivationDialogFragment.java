@@ -1,7 +1,10 @@
 package net.gmsworld.devicelocator.fragments;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,13 +30,6 @@ public class EmailActivationDialogFragment extends DialogFragment {
     private Toaster toaster;
 
     private Mode mode;
-
-    public static EmailActivationDialogFragment newInstance(Toaster toaster, Mode mode) {
-        EmailActivationDialogFragment instance = new EmailActivationDialogFragment();
-        instance.toaster = toaster;
-        instance.mode = mode;
-        return instance;
-    }
 
     public void setToaster(Toaster toaster) {
         this.toaster = toaster;
@@ -87,5 +83,35 @@ public class EmailActivationDialogFragment extends DialogFragment {
                 });
 
         return alertDialogBuilder.create();
+    }
+
+    public static void showEmailActivationDialogFragment(boolean retry, Activity activity, Toaster toaster) {
+        if (!activity.isFinishing()) {
+            EmailActivationDialogFragment emailActivationDialogFragment = (EmailActivationDialogFragment) activity.getFragmentManager().findFragmentByTag(EmailActivationDialogFragment.TAG);
+            EmailActivationDialogFragment.Mode mode;
+            if (retry) {
+                mode = EmailActivationDialogFragment.Mode.Retry;
+            } else {
+                mode = EmailActivationDialogFragment.Mode.Initial;
+            }
+            if (emailActivationDialogFragment == null) {
+                emailActivationDialogFragment = new EmailActivationDialogFragment();
+                emailActivationDialogFragment.setMode(mode);
+                emailActivationDialogFragment.setToaster(toaster);
+                toaster.cancel();
+                FragmentManager fm = activity.getFragmentManager();
+                if (fm != null) {
+                    //emailActivationDialogFragment.show(fm, EmailActivationDialogFragment.TAG);
+                    FragmentTransaction ft = fm.beginTransaction();
+                    ft.add(emailActivationDialogFragment, EmailActivationDialogFragment.TAG);
+                    ft.commitAllowingStateLoss();
+                } else {
+                    Log.e(TAG, "FragmentManager is null!");
+                }
+            } else {
+                emailActivationDialogFragment.setToaster(toaster);
+                emailActivationDialogFragment.setMode(mode);
+            }
+        }
     }
 }
