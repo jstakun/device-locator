@@ -84,6 +84,8 @@ public class Messenger {
 
     public static final String CID_SEPARATOR = "+=+";
 
+    public static final String LOCATION_SENT_MILLIS = "locationSentMillis";
+
     private static void sendSMS(final Context context, final String phoneNumber, final String message) {
         String status = null;
         if (Permissions.haveSendSMSPermission(context)) {
@@ -130,6 +132,7 @@ public class Messenger {
                         if (location.hasSpeed()) {
                             headers.put(SPD_HEADER, Float.toString(location.getSpeed()));
                         }
+                        settings.setLong(LOCATION_SENT_MILLIS, System.currentTimeMillis());
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     if (StringUtils.equalsAnyIgnoreCase(replyToCommand, Command.START_COMMAND, Command.STOP_COMMAND, Command.RESUME_COMMAND, Command.PERIMETER_COMMAND, Command.ROUTE_COMMAND)) {
@@ -218,8 +221,8 @@ public class Messenger {
     private static void sendEmail(final Context context, final Location location, final String email, final String message, final String title, final int retryCount, final Map<String, String> headers) {
         if (StringUtils.isNotEmpty(email) && (StringUtils.isNotEmpty(message))) {
             if (Network.isNetworkAvailable(context)) {
-                final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
+                final PreferencesUtils settings = new PreferencesUtils(context);
+                String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
                 if (StringUtils.isNotEmpty(tokenStr)) {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     String deviceId = getDeviceId(context, false);
@@ -235,6 +238,7 @@ public class Messenger {
                         if (location.hasSpeed()) {
                             headers.put(SPD_HEADER, Float.toString(location.getSpeed()));
                         }
+                        settings.setLong(LOCATION_SENT_MILLIS, System.currentTimeMillis());
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     sendEmail(context, email, message, title, 1, headers);
@@ -322,6 +326,7 @@ public class Messenger {
                         if (location.hasSpeed()) {
                             headers.put(SPD_HEADER, Float.toString(location.getSpeed()));
                         }
+                        settings.setLong(LOCATION_SENT_MILLIS, System.currentTimeMillis());
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     String username = settings.getString(MainActivity.USER_LOGIN);
@@ -406,8 +411,8 @@ public class Messenger {
 
     private static void sendRoutePoint(final Context context, final Location location, final int retryCount, final Map<String, String> headers) {
         if (Network.isNetworkAvailable(context)) {
-            final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN, "");
+            final PreferencesUtils settings = new PreferencesUtils(context);
+            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             if (StringUtils.isNotEmpty(tokenStr)) {
                 headers.put("Authorization", "Bearer " + tokenStr);
                 String deviceId = getDeviceId(context, false);
@@ -423,6 +428,7 @@ public class Messenger {
                     if (location.hasSpeed()) {
                         headers.put(SPD_HEADER, Float.toString(location.getSpeed()));
                     }
+                    settings.setLong(LOCATION_SENT_MILLIS, System.currentTimeMillis());
                 }
                 headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                 sendRoutePoint(context, 1, headers);

@@ -7,7 +7,9 @@ import android.os.Bundle;
 import android.util.Log;
 
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
+import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -63,6 +65,15 @@ public class LauncherActivity extends Activity {
         }
 
         startActivity(showIntent);
+
+        //Sending device location after 12 hours of inactivity
+        if (Permissions.haveLocationPermission(this) && System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60 * 12)) {
+            Log.d(TAG, "Sending device location after long time inactivity");
+            Bundle extras = new Bundle();
+            extras.putString("telegramId", getString(R.string.telegram_notification));
+            SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
+        }
+
         finish();
     }
 

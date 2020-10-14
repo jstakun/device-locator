@@ -78,7 +78,7 @@
     <string name="email_unverified_error">Device Locator is unable to sent notification because your email address is unverified. Please check your inbox for registration message from device-locator@gms-world.net</string>
     <string name="email_internal_error">Oops! Failed to sent email notification. Something went wrong on our side!</string>
     <string name="telegram_unverified_error">Device Locator is unable to sent notification because your chat or channel is unverified! Please register again your Telegram chat or channel.</string>
-    <string name="telegram_invalid_id">Oops! Your Telegram chat or channel id seems to be wrong you have blocked our Bot. Please register again your Telegram chat or channel!</string>
+    <string name="telegram_invalid_id">Oops! Your Telegram chat or channel id seems to be wrong or you have blocked our Bot. Please register again your Telegram chat or channel!</string>
     <string name="telegram_internal_error">Oops! Failed to sent Telegram notification. Something went wrong on our side!</string>
     <string name="internal_error">Oops! Something went wrong on our side. Please try again!</string>
     <string name="device_removed">Device has been removed!</string>

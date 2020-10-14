@@ -197,6 +197,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
                         if (location.hasSpeed()) {
                             headers.put(Messenger.SPD_HEADER, Float.toString(location.getSpeed()));
                         }
+                        settings.setLong(Messenger.LOCATION_SENT_MILLIS, System.currentTimeMillis());
                     }
 
                     Network.uploadScreenshot(this, uploadUrl, out.toByteArray(), "screenshot_device_locator" + suffix, headers, new Network.OnGetFinishListener() {
