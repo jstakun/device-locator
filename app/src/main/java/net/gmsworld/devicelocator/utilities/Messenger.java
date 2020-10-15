@@ -844,7 +844,7 @@ public class Messenger {
                     command = Command.RESET_COMMAND;
                     break;
                 case Command.ALARM_COMMAND:
-                    int interval = settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12);
+                    int interval = settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, LocationAlarmUtils.ALARM_INTERVAL_VALUE);
                     text = context.getResources().getQuantityString(R.plurals.alarm_interval, interval, interval);
                     if (settings.getLong(LocationAlarmUtils.ALARM_KEY,0L) > 0) {
                         text += "\n" + context.getString(R.string.alarm_settings_suffix, new PrettyTime().format(new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY))));

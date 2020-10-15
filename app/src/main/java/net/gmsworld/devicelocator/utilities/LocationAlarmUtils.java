@@ -17,11 +17,12 @@ public class LocationAlarmUtils {
     public static final String ALARM_KEY = "LocationAlarmTriggerMillis";
     public static final String ALARM_INTERVAL = "LocationAlarmIntervalHours";
     public static final String ALARM_SETTINGS = "settings_alarm";
+    public static final int ALARM_INTERVAL_VALUE = 1;
 
     public static void initWhenDown(Context context, boolean forceReset) {
         PreferencesUtils settings = new PreferencesUtils(context);
         if (settings.getBoolean(ALARM_SETTINGS, false)) {
-            final long alarmInterval = settings.getInt(ALARM_INTERVAL, 12) * AlarmManager.INTERVAL_HOUR;
+            final long alarmInterval = settings.getInt(ALARM_INTERVAL, ALARM_INTERVAL_VALUE) * AlarmManager.INTERVAL_HOUR;
 
             AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);

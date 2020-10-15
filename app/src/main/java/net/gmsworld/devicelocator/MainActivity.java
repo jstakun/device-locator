@@ -864,7 +864,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private void initAlarmInput() {
         SeekBar alarmBar = findViewById(R.id.alarmBar);
-        alarmBar.setProgress(settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12));
+        alarmBar.setProgress(settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, LocationAlarmUtils.ALARM_INTERVAL_VALUE));
         updateAlarmText();
         alarmBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int progressChangedValue = 12;
@@ -898,7 +898,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private void updateAlarmText() {
         final TextView alarmInterval = findViewById(R.id.alarm_interval);
-        final int interval = settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, 12);
+        final int interval = settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, LocationAlarmUtils.ALARM_INTERVAL_VALUE);
         final long alarmMillis = settings.getLong(LocationAlarmUtils.ALARM_KEY,0L);
         String alarmText = getResources().getQuantityString(R.plurals.alarm_interval, interval, interval);
         if (alarmMillis > System.currentTimeMillis() && settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)) {

@@ -8,6 +8,7 @@ import android.util.Log;
 
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.services.SmsSenderService;
+import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -74,6 +75,11 @@ public class LauncherActivity extends Activity {
             SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
         } else {
             Log.d(TAG, "Device location has been sent less than 1 hour ago");
+        }
+
+        //enable location sharing by default
+        if (!settings.contains(LocationAlarmUtils.ALARM_SETTINGS)) {
+            settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, true);
         }
 
         finish();
