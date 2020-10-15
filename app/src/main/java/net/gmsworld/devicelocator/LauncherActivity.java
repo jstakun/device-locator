@@ -66,12 +66,14 @@ public class LauncherActivity extends Activity {
 
         startActivity(showIntent);
 
-        //Sending device location after 12 hours of inactivity
-        if (Permissions.haveLocationPermission(this) && System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60 * 12)) {
+        //Sending device location after 1 hour of inactivity
+        if (Permissions.haveLocationPermission(this) && System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60)) {
             Log.d(TAG, "Sending device location after long time inactivity");
             Bundle extras = new Bundle();
             extras.putString("telegramId", getString(R.string.telegram_notification));
             SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
+        } else {
+            Log.d(TAG, "Device location has been sent less than 1 hour ago");
         }
 
         finish();

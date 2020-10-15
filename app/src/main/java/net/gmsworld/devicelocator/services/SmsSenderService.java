@@ -115,7 +115,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
 
         if (StringUtils.equals(source, DeviceAdminEventReceiver.SOURCE)) {
             Messenger.sendLoginFailedMessage(this, phoneNumber, telegramId, email, app);
-        } else if (settings.getBoolean(SEND_ACKNOWLEDGE_MESSAGE, true)) {
+        } else if (!StringUtils.equals(telegramId, getString(R.string.telegram_notification)) && settings.getBoolean(SEND_ACKNOWLEDGE_MESSAGE, true)) {
             Messenger.sendAcknowledgeMessage(this, phoneNumber, telegramId, email, app);
         }
 
@@ -196,14 +196,14 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             if (bestLocation == null) {
                 Messenger.sendLocationErrorMessage(this, phoneNumber, telegramId, email, app);
             } else {
-                if (settings.getBoolean(SEND_LOCATION_MESSAGE, false) && isRunning) {
+                if (!StringUtils.equals(telegramId, getString(R.string.telegram_notification)) && settings.getBoolean(SEND_LOCATION_MESSAGE, false) && isRunning) {
                     Log.d(TAG, "Sending Location details message...");
                     Messenger.sendLocationMessage(this, bestLocation, isLocationFused(bestLocation), phoneNumber, telegramId, email, app);
                 } else {
                     Log.d(TAG, "Location details message won't be send");
                 }
 
-                if (settings.getBoolean(SEND_MAP_LINK_MESSAGE, true) && isRunning) {
+                if ((StringUtils.equals(telegramId, getString(R.string.telegram_notification)) || settings.getBoolean(SEND_MAP_LINK_MESSAGE, true)) && isRunning) {
                     Log.d(TAG, "Sending Google Maps link message...");
                     Messenger.sendGoogleMapsMessage(this, bestLocation, phoneNumber, telegramId, email, app);
                 } else {
