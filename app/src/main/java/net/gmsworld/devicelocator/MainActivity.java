@@ -1938,7 +1938,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         }
                     }
                     toaster.showActivityToast(getString(R.string.app_name) + " Full version has been downloaded. Please uninstall Google Play version and install Full version.");
-                    unregisterReceiver(onDownloadComplete);
+                    try {
+                        unregisterReceiver(onDownloadComplete);
+                    } catch (Exception e) {
+                        Log.e(TAG, e.getMessage(), e);
+                    }
                 }
             }
         };

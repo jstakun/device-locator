@@ -77,8 +77,12 @@ public abstract class HiddenCameraService extends Service implements CameraCallb
         } else {
 
             //Add the camera preview surface to the root of the activity view.
-            if (mCameraPreview == null) mCameraPreview = addPreView();
-            mCameraPreview.startCameraInternal(cameraConfig);
+            if (mCameraPreview == null) {
+                mCameraPreview = addPreView();
+            }
+            if (mCameraPreview != null) {
+                mCameraPreview.startCameraInternal(cameraConfig);
+            }
         }
     }
 
