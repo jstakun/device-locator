@@ -191,8 +191,6 @@
 
     <string name="title_activity_ringing">Ringing Activity</string>
 
-    <string name="route_share_text">Follow device %1$s at %2$s</string>
-
     <string name="command_log">Command Log</string>
     <string name="commandEmpty">No commands has been sent to this device yet!</string>
 

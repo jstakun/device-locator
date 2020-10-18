@@ -266,9 +266,10 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 }
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.route_share_text, deviceName, routeUrl));
-                sendIntent.putExtra(Intent.EXTRA_TITLE, getString(R.string.message, deviceName) + " - route map link");
-                sendIntent.setType("text/plain");
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + deviceImei + " location here: " + routeUrl);
+                sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Follow device <a href=\"" + getString(R.string.deviceUrl) + "/" + deviceImei + "\">" + deviceImei + "</a> location <a href=\"" + routeUrl + "\">here</a>...");
+                sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.message, deviceImei) + " - route map link");
+                sendIntent.setType("text/html");
                 startActivity(sendIntent);
             }
         });
@@ -280,7 +281,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             final LatLngBounds.Builder routePointsBounds = new LatLngBounds.Builder();
 
             if (routePoints.size() > 1) {
-                Marker m = mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).icon(BitmapDescriptorFactory.fromResource(R.drawable.red_ball)).anchor(0.5f, 0.5f));
+                Marker m = mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).icon(BitmapDescriptorFactory.fromResource(R.drawable.route_start)).anchor(0.5f, 0.5f));
                 m.setTag("first");
                 for (int i = 0; i < routePoints.size() - 1; i++) {
                     mMap.addPolyline(new PolylineOptions().add(routePoints.get(i), routePoints.get(i + 1)).width(12).color(Color.RED));

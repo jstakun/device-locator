@@ -1986,10 +1986,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                             activity.toaster.showActivityToast("Route has been uploaded to server and route map url has been saved to clipboard.");
                         }
                         String[] discs = StringUtils.split(showRouteUrl, "/");
+                        final String imei = discs[discs.length - 2];
                         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity) == ConnectionResult.SUCCESS) {
                             Log.d(TAG, "Route tokens /: " + showRouteUrl);
                             Intent gmsIntent = new Intent(activity, RouteActivity.class);
-                            gmsIntent.putExtra("imei", discs[discs.length - 2]);
+                            gmsIntent.putExtra("imei", imei);
                             gmsIntent.putExtra("routeId", discs[discs.length - 1]);
                             gmsIntent.putExtra("now", "false");
                             activity.startActivity(gmsIntent);
@@ -2004,9 +2005,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
                         Intent sendIntent = new Intent();
                         sendIntent.setAction(Intent.ACTION_SEND);
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, activity.getString(R.string.route_share_text, discs[discs.length - 2], showRouteUrl));
-                        sendIntent.putExtra(Intent.EXTRA_TITLE, activity.getString(R.string.message, discs[discs.length - 2]) + " - route map link");
-                        sendIntent.setType("text/plain");
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + imei + " location here: " + showRouteUrl);
+                        sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Follow device <a href=\"" + activity.getString(R.string.deviceUrl) + "/" + imei + "\">" + imei + "</a> location <a href=\"" + showRouteUrl + "\">here</a>...");
+                        sendIntent.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.message, imei) + " - route map link");
+                        sendIntent.setType("text/html");
                         activity.startActivity(sendIntent);
                     } else if (responseCode == 400) {
                         activity.toaster.showActivityToast("Route upload failed due to invalid route file!");
