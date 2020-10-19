@@ -10,6 +10,7 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
+import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
 public class LocationAlarmReceiver extends BroadcastReceiver {
 
@@ -20,8 +21,12 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
         Log.d(TAG, "Received broadcast...");
 
         if (Permissions.haveLocationPermission(context)) {
+            PreferencesUtils settings = new PreferencesUtils(context);
             Bundle extras = new Bundle();
             extras.putString("adminTelegramId", context.getString(R.string.telegram_notification));
+            if (settings.getBoolean(LocationAlarmUtils.ALARM_SILENT, false)) {
+                extras.putString("email", null);
+            }
             SmsSenderService.initService(context, true, true, true, null, null, null, null, extras);
         } else {
             Log.d(TAG, "Location permission is missing. No location update will be sent.");

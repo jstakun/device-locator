@@ -80,6 +80,7 @@ public class LauncherActivity extends Activity {
         //enable location sharing by default
         if (!settings.contains(LocationAlarmUtils.ALARM_SETTINGS)) {
             settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, true);
+            settings.setBoolean(LocationAlarmUtils.ALARM_SILENT, true);
         }
 
         finish();

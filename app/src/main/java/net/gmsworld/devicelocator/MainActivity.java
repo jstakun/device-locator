@@ -614,6 +614,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private void setAlarmChecked(boolean checked) {
         settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, checked);
+        settings.remove(LocationAlarmUtils.ALARM_SILENT);
         if (checked) {
             LocationAlarmUtils.initWhenDown(this, true);
         } else {
@@ -867,7 +868,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         alarmBar.setProgress(settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, LocationAlarmUtils.ALARM_INTERVAL_VALUE));
         updateAlarmText();
         alarmBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            int progressChangedValue = 12;
+            int progressChangedValue = LocationAlarmUtils.ALARM_INTERVAL_VALUE;
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 progressChangedValue = progress;

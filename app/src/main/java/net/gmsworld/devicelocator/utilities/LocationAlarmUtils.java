@@ -17,6 +17,7 @@ public class LocationAlarmUtils {
     public static final String ALARM_KEY = "LocationAlarmTriggerMillis";
     public static final String ALARM_INTERVAL = "LocationAlarmIntervalHours";
     public static final String ALARM_SETTINGS = "settings_alarm";
+    public static final String ALARM_SILENT = "LocationAlarmUtilsSilent";
     public static final int ALARM_INTERVAL_VALUE = 1;
 
     public static void initWhenDown(Context context, boolean forceReset) {
