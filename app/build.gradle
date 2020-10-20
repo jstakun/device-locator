@@ -58,7 +58,7 @@ dependencies {
     implementation "ch.acra:acra-toast:$acraVersion"
     implementation 'commons-io:commons-io:2.6'
     implementation 'org.ocpsoft.prettytime:prettytime:4.0.1.Final'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
