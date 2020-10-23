@@ -36,6 +36,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -45,6 +46,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -220,6 +222,28 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
             Messenger.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
         }
+
+        ScrollView deviceSettings = findViewById(R.id.deviceSettings);
+        deviceSettings.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+            int prev = 0;
+            @Override
+            public void onScrollChanged() {
+                if (settings.getBoolean("isDeviceManagerShown", false)) {
+                    if (deviceSettings.getScrollY() == 0 && prev > 0) {
+                        //Log.d(TAG, "UP...................");
+                        DevicesUtils.loadDeviceList(MainActivity.this, settings, MainActivity.this);
+                    } else {
+                        View view = (View) deviceSettings.getChildAt(deviceSettings.getChildCount() - 1);
+                        final int diff = (view.getBottom() - (deviceSettings.getHeight() + deviceSettings.getScrollY()));
+                        if (diff == 0 && prev < deviceSettings.getScrollY()) {
+                            //Log.d(TAG, "DOWN...................");
+                            DevicesUtils.loadDeviceList(MainActivity.this, settings, MainActivity.this);
+                        }
+                    }
+                    prev = deviceSettings.getScrollY();
+                }
+            }
+        });
 
         //
         if (settings.getBoolean(ScreenStatusService.RUNNING, false)) {

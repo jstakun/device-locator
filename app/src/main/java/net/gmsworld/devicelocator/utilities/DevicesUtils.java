@@ -30,6 +30,8 @@ public class DevicesUtils {
     public static final String USER_DEVICES_TIMESTAMP = "userDevicesTimestamp";
     public static final String CURRENT_DEVICE_ID = "currentDeviceId";
 
+    private static boolean isSyncingDevices = false;
+
     private static final String TAG = DevicesUtils.class.getSimpleName();
 
     public interface DeviceLoadListener {
@@ -44,12 +46,14 @@ public class DevicesUtils {
             final Map<String, String> headers = new HashMap<>();
             if (StringUtils.isNotEmpty(tokenStr)) {
                 String userLogin = settings.getString(MainActivity.USER_LOGIN);
-                if (StringUtils.isNotEmpty(userLogin)) {
+                if (StringUtils.isNotEmpty(userLogin) && !isSyncingDevices) {
+                    isSyncingDevices = true;
                     headers.put("Authorization", "Bearer " + tokenStr);
-                    String content = "username=" + userLogin + "&action=list";
+                    final String content = "username=" + userLogin + "&action=list";
                     Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
+                            isSyncingDevices = false;
                             if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                                 JsonObject reply = new JsonParser().parse(results).getAsJsonObject();
                                 JsonArray devices = null;
@@ -110,8 +114,10 @@ public class DevicesUtils {
                             //}
                         }
                     });
-                } else {
+                } else if (StringUtils.isEmpty(userLogin)) {
                     Log.e(TAG, "User login is unset. No device list will be loaded");
+                } else {
+                    Log.d(TAG, "Device sync in progress");
                 }
             } else {
                 String queryString = "scope=dl&user=" + Messenger.getDeviceId(context, false);

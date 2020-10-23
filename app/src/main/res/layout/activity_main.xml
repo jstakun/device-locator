@@ -432,14 +432,14 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:id="@+id/deviceSettings"
+            android:visibility="gone"
             >
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:id="@+id/deviceSettings"
-                android:visibility="gone">
+                android:orientation="vertical">
 
                 <net.gmsworld.devicelocator.views.LDCard
                     android:layout_width="match_parent"
