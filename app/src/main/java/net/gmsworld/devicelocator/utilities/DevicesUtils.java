@@ -66,20 +66,22 @@ public class DevicesUtils {
                                     final String imei = Messenger.getDeviceId(context, false);
                                     for (JsonElement d : devices) {
                                         JsonObject deviceObject = d.getAsJsonObject();
-                                        if (StringUtils.isNotEmpty(deviceObject.get("token").getAsString())) {
+                                        if (deviceObject.has("creationDate") && deviceObject.has("imei")) {
                                             Device device = new Device();
+                                            device.imei = deviceObject.get("imei").getAsString();
+                                            device.creationDate = deviceObject.get("creationDate").getAsString();
                                             if (deviceObject.has("name")) {
                                                 device.name = deviceObject.get("name").getAsString();
                                             }
-                                            device.imei = deviceObject.get("imei").getAsString();
-                                            device.creationDate = deviceObject.get("creationDate").getAsString();
                                             if (deviceObject.has("geo")) {
                                                 device.geo = deviceObject.get("geo").getAsString();
                                             }
                                             if (StringUtils.equals(device.imei, imei)) {
                                                 thisDeviceOnList = true;
                                             }
-                                            userDevices.add(device);
+                                            if (deviceObject.has("token") || StringUtils.equals(device.imei, imei)) {
+                                                userDevices.add(device);
+                                            }
                                         }
                                     }
                                     if (thisDeviceOnList) {
