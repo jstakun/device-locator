@@ -67,19 +67,24 @@ public class DevicesUtils {
                                     for (JsonElement d : devices) {
                                         JsonObject deviceObject = d.getAsJsonObject();
                                         if (deviceObject.has("creationDate") && deviceObject.has("imei")) {
-                                            Device device = new Device();
-                                            device.imei = deviceObject.get("imei").getAsString();
-                                            device.creationDate = deviceObject.get("creationDate").getAsString();
-                                            if (deviceObject.has("name")) {
-                                                device.name = deviceObject.get("name").getAsString();
+                                            final String deviceImei = deviceObject.get("imei").getAsString();
+                                            String token = null;
+                                            if (deviceObject.has("token")) {
+                                                token = deviceObject.get("token").getAsString();
                                             }
-                                            if (deviceObject.has("geo")) {
-                                                device.geo = deviceObject.get("geo").getAsString();
-                                            }
-                                            if (StringUtils.equals(device.imei, imei)) {
-                                                thisDeviceOnList = true;
-                                            }
-                                            if (deviceObject.has("token") || StringUtils.equals(device.imei, imei)) {
+                                            if (StringUtils.isNotEmpty(token) || StringUtils.equals(deviceImei, imei)) {
+                                                Device device = new Device();
+                                                device.imei = deviceImei;
+                                                device.creationDate = deviceObject.get("creationDate").getAsString();
+                                                if (deviceObject.has("name")) {
+                                                    device.name = deviceObject.get("name").getAsString();
+                                                }
+                                                if (deviceObject.has("geo")) {
+                                                    device.geo = deviceObject.get("geo").getAsString();
+                                                }
+                                                if (StringUtils.equals(device.imei, imei)) {
+                                                    thisDeviceOnList = true;
+                                                }
                                                 userDevices.add(device);
                                             }
                                         }
