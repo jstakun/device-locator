@@ -23,6 +23,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.gson.JsonElement;
@@ -623,7 +624,7 @@ public class Messenger {
 
     public static void sendCommandMessage(final Context context, final Bundle extras) {
         String text = null, title = null, phoneNumber = null, telegramId = null, email = null, command = null, app = null, language = null;
-        String deviceId = getDeviceId(context, true);
+        final String deviceId = getDeviceId(context, true);
         List<String> notifications = new ArrayList<>();
         PreferencesUtils settings = new PreferencesUtils(context);
 
@@ -904,8 +905,44 @@ public class Messenger {
                 sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(app)) {
-                sendCloudMessage(context, null, app, text, command, 1, 2000, new HashMap<String, String>());
+                if (StringUtils.startsWith(app, getDeviceId(context, false))) {
+                    //send message to local device
+                    sendLocalMessage(context, app, text, command);
+                } else {
+                    sendCloudMessage(context, null, app, text, command, 1, 2000, new HashMap<String, String>());
+                }
             }
+        }
+    }
+
+    private static void sendLocalMessage(Context context, final String replyTo, final String message, final String replyToCommand) {
+        String[] replyToTokens = StringUtils.split(replyTo, CID_SEPARATOR);
+        if (replyToTokens != null && replyToTokens.length >= 1) {
+            Map<String, String> messageData = new HashMap<String, String>();
+            messageData.put("imei", replyToTokens[0].trim());
+            messageData.put("pin", replyToTokens[1].trim());
+            messageData.put("command", Command.MESSAGE_COMMAND + "app");
+            messageData.put("args", message);
+            List<String> tokens = new ArrayList<>();
+            final String deviceId = getDeviceId(context, false);
+            if (StringUtils.isNotEmpty(deviceId)) {
+                tokens.add("deviceId:" + deviceId);
+            }
+            final String deviceName = getDeviceId(context, true);
+            if (StringUtils.isNotEmpty(deviceName)) {
+                tokens.add("deviceName:" + deviceName);
+            }
+            if (StringUtils.isNotEmpty(replyToCommand)) {
+                tokens.add("command:" + StringUtils.remove(replyToCommand, "dl"));
+            }
+            tokens.add("language:" + AppUtils.getInstance().getCurrentLocale(context).getLanguage());
+            messageData.put("flex", StringUtils.join(tokens, ","));
+            final String foundCommand = DlFirebaseMessagingService.processMessage(context, messageData);
+            if (StringUtils.isNotEmpty(foundCommand)) {
+                FirebaseAnalytics.getInstance(context).logEvent("cloud_command_received_" + foundCommand.toLowerCase(), new Bundle());
+            }
+        } else {
+            Log.e(TAG, "Invalid replyTo: " + replyTo);
         }
     }
 

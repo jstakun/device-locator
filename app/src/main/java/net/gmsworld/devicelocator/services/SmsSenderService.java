@@ -87,7 +87,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 return;
             }
 
-            String command = extras.getString("command");
+            final String command = extras.getString("command");
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 String text;

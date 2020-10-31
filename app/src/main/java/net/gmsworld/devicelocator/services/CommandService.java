@@ -7,11 +7,14 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
 import net.gmsworld.devicelocator.CommandActivity;
 import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
+import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
@@ -45,6 +48,8 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     private Toaster toaster;
 
+    private FirebaseAnalytics firebaseAnalytics;
+
     public CommandService() {
         super(TAG);
         toaster = new Toaster(this);
@@ -54,6 +59,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate()");
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).oneFix().start(this);
     }
 
@@ -103,7 +109,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             final String command = cmd;
             final String imei = extras.getString("imei");
             final String args = extras.getString("args");
-            final String name = extras.getString(MainActivity.DEVICE_NAME);
+            final String deviceName = extras.getString(MainActivity.DEVICE_NAME);
             final String cancelCommand = extras.getString("cancelCommand");
             final String routeId = extras.getString("routeId");
 
@@ -128,12 +134,13 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
             prefs.setEncryptedString(CommandActivity.PIN_PREFIX + imei, pin);
 
-            final String deviceId = Messenger.getDeviceId(this, false);
+            final String thisDeviceId = Messenger.getDeviceId(this, false);
+            final String correlationId = thisDeviceId + Messenger.CID_SEPARATOR + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
 
             String content = "imei=" + imei;
             content += "&command=" + command + "dlapp";
             content += "&pin=" + pin;
-            content += "&correlationId=" + deviceId + Messenger.CID_SEPARATOR + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
+            content += "&correlationId=" + correlationId;
             if (StringUtils.isNotEmpty(args)) {
                 try {
                     content += "&args=" + URLEncoder.encode(args, "UTF-8");
@@ -151,9 +158,37 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 } else if (StringUtils.isNotEmpty("routeId")) {
                     NotificationUtils.cancel(this, routeId);
                 }
-                sendCommand(content, command, imei, name, prefs, deviceId);
+                if (StringUtils.equals(imei, thisDeviceId)) {
+                    //if imei is this device send command locally
+                    auditCommand(this, command, imei);
+                    Map<String, String> messageData = new HashMap<String, String>();
+                    messageData.put("pin", pin);
+                    messageData.put("command", command + "dlapp");
+                    if (StringUtils.isNotEmpty(args)) {
+                        messageData.put("args", args);
+                    }
+                    messageData.put("correlationId", correlationId);
+                    //create flex
+                    List<String> tokens = new ArrayList<>();
+                    if (StringUtils.isNotEmpty(thisDeviceId)) {
+                        tokens.add("deviceId:" + thisDeviceId);
+                    }
+                    if (StringUtils.isNotEmpty(deviceName)) {
+                        tokens.add("deviceName:" + deviceName);
+                    }
+                    tokens.add("language:" + AppUtils.getInstance().getCurrentLocale(this).getLanguage());
+                    messageData.put("flex", StringUtils.join(tokens, ","));
+                    final String foundCommand = DlFirebaseMessagingService.processMessage(this, messageData);
+                    if (StringUtils.isNotEmpty(foundCommand)) {
+                        toaster.showServiceToast(R.string.command_sent_to_device, command, (StringUtils.isNotEmpty(deviceName) ? deviceName : imei));
+                        firebaseAnalytics.logEvent("cloud_command_received_" + foundCommand.toLowerCase(), new Bundle());
+                    }
+                } else {
+                    //else send command to remote device
+                    sendCommand(content, command, imei, deviceName, prefs, thisDeviceId);
+                }
             } else {
-                toaster.showServiceToast(R.string.command_sent_to_device, command, (StringUtils.isNotEmpty(name) ? name : imei));
+                toaster.showServiceToast(R.string.command_sent_to_device, command, (StringUtils.isNotEmpty(deviceName) ? deviceName : imei));
             }
         }
     }
@@ -179,9 +214,6 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                             toaster.showServiceToast(R.string.command_failed_device_offline,deviceName);
                         } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
                             //show dialog with action=reset_quota appended to queryString
-                            //JsonElement reply = new JsonParser().parse(results);
-                            //final int count = reply.getAsJsonObject().get("count").getAsInt();
-                            //showToast("Failed to send command " + StringUtils.capitalize(command) + " to the device " + deviceName + " after " + count + " attempts!");
                             Intent newIntent = new Intent(CommandService.this, QuotaResetDialogActivity.class);
                             newIntent.putExtra("command", command);
                             newIntent.putExtra("queryString", queryString);

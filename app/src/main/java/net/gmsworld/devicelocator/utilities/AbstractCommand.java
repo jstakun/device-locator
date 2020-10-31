@@ -273,6 +273,7 @@ public abstract class AbstractCommand {
                 extras.putString("language", language);
             }
             SmsSenderService.initService(context, false, false, false, app, command, null, null, extras);
+            //}
         } else {
             Log.d(TAG, "App is empty!");
         }
