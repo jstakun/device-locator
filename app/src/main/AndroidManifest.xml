@@ -87,7 +87,23 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/device_map"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.gms-world.net"
+                    android:pathPrefix="/showDevice/"
+                    android:scheme="http" />
+                <data
+                    android:host="www.gms-world.net"
+                    android:pathPrefix="/showDevice/"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".RingingActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"

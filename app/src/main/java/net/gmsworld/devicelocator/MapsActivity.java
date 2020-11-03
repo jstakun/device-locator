@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -99,7 +100,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         settings = new PreferencesUtils(this);
         toaster = new Toaster(this);
         thisDeviceImei = Messenger.getDeviceId(this, false);
-        deviceImei = getIntent().getStringExtra("imei");
+
+        Intent intent = getIntent();
+        String action = intent.getAction();
+
+        if (StringUtils.equals(action,Intent.ACTION_VIEW)) {
+            Uri data = intent.getData();
+            String[] tokens = StringUtils.split(data.getPath(), "/");
+            if (tokens.length >= 2) {
+                deviceImei = tokens[1];
+            }
+        } else {
+            deviceImei = intent.getStringExtra("imei");
+        }
 
         FirebaseAnalytics.getInstance(this).logEvent("maps_activity", new Bundle());
     }
@@ -210,6 +223,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void loadDeviceMarkers(boolean centerToBounds) {
         mMap.clear();
         devices = DevicesUtils.buildDeviceList(settings);
+        boolean foundDeviceImei = false;
         if (!devices.isEmpty()) {
             LatLng center = null;
             final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
@@ -243,6 +257,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     MarkerOptions mo;
                     if (d.imei.equals(deviceImei)) {
                         center = deviceMarker;
+                        foundDeviceImei = true;
                         mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok)).anchor(0.5f, 0.5f);
                     } else if (d.imei.equals(thisDeviceImei)) {
                         mo = new MarkerOptions().zIndex(0.5f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk)).anchor(0.5f, 0.5f);
@@ -273,6 +288,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     currentZoom = mMap.getCameraPosition().zoom;
                 }
             }
+
+            if (!foundDeviceImei && deviceImei != null) {
+                toaster.showActivityToast(R.string.device_not_found);
+            }
+
             handler.postDelayed(findDevices, DEVICE_SEARCH_INTERVAL);
         } else {
             RegisterDeviceDialogFragment.newInstance().show(this.getFragmentManager(), RegisterDeviceDialogFragment.TAG);
