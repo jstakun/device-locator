@@ -198,7 +198,14 @@ public class NotificationActivationDialogFragment extends DialogFragment {
             String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bearer " + tokenStr);
-            headers.put("X-GMS-DeviceName", Messenger.getDeviceId(context, true));
+            final String deviceName = Messenger.getDeviceId(context, true);
+            if (StringUtils.isNotEmpty(deviceName)) {
+                headers.put(Messenger.DEVICE_NAME_HEADER, deviceName);
+            }
+            final String deviceId = Messenger.getDeviceId(context, false);
+            if (StringUtils.isNotEmpty(deviceId)) {
+                headers.put(Messenger.DEVICE_ID_HEADER, deviceId);
+            }
             toaster.showActivityToast(R.string.please_wait);
             final String verifyUrl = context.getString(R.string.verifyUrl) + "/" + secret;
             Network.get(context, verifyUrl, headers, new Network.OnGetFinishListener() {
