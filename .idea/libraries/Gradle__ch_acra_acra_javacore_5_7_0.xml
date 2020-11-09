@@ -1,5 +1,5 @@
 <component name="libraryTable">
-  <library name="Gradle: ch.acra:acra-javacore:5.7.0@jar">
+  <library name="Gradle: ch.acra:acra-javacore:5.7.0">
     <CLASSES>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ch.acra/acra-javacore/5.7.0/541beb58414209a050e068fcfdef8543506a4262/acra-javacore-5.7.0.jar!/" />
     </CLASSES>

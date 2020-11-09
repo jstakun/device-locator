@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="device-locator/app" />
-      <module fileurl="file://$PROJECT_DIR$/device-locator.iml" filepath="$PROJECT_DIR$/device-locator.iml" group="device-locator" />
+      <module fileurl="file://$PROJECT_DIR$/device-locator.iml" filepath="$PROJECT_DIR$/device-locator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/device-locator.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/device-locator.app.iml" />
     </modules>
   </component>
 </project>
