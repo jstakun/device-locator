@@ -113,6 +113,12 @@ import androidx.core.view.ViewCompat;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
+//import com.google.android.play.core.review.ReviewInfo;
+//import com.google.android.play.core.review.ReviewManager;
+//import com.google.android.play.core.review.ReviewManagerFactory;
+//import com.google.android.play.core.review.testing.FakeReviewManager;
+//import com.google.android.play.core.tasks.Task;
+
 public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener, NewVersionDialogFragment.NewVersionDialogListener,
         SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener,
         DownloadFullApplicationDialogFragment.DownloadFullApplicationDialogListener, EmailNotificationDialogFragment.EmailNotificationDialogListener, DevicesUtils.DeviceLoadListener {
@@ -150,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private FirebaseAnalytics firebaseAnalytics;
     private final PrettyTime pt = new PrettyTime();
     private BroadcastReceiver onDownloadComplete = null;
+    //private ReviewInfo reviewInfo;
 
     private Toaster toaster;
 
@@ -178,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
 
         //
-
+        //initAppReview();
         initRunningButton();
         initShareRouteButton();
         initRadiusInput();
@@ -387,61 +394,65 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.sms:
-                Log.d(TAG, "Show sms settings");
-                settings.setBoolean("isTrackerShown", false);
-                settings.setBoolean("isDeviceManagerShown", false);
-                findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
-                findViewById(R.id.trackerSettings).setVisibility(View.GONE);
-                findViewById(R.id.ll_sms_focus).requestFocus();
-                supportInvalidateOptionsMenu();
-                showFirstTimeUsageDialog(false, false);
-                return true;
-            case R.id.tracker:
-                Log.d(TAG, "Show tracker settings");
-                settings.setBoolean("isTrackerShown", true);
-                settings.setBoolean("isDeviceManagerShown", false);
-                findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
-                findViewById(R.id.smsSettings).setVisibility(View.GONE);
-                findViewById(R.id.ll_tracker_focus).requestFocus();
-                supportInvalidateOptionsMenu();
-                showFirstTimeUsageDialog(true, false);
-                //show email or telegram registration dialog if still unverified
-                if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
-                    showEmailActivationDialogFragment(false);
-                }
-                if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
-                    openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
-                }
-                return true;
-            case R.id.devices:
-                Log.d(TAG, "Show Device Manager settings");
-                settings.setBoolean("isTrackerShown", false);
-                settings.setBoolean("isDeviceManagerShown", true);
-                findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
-                findViewById(R.id.smsSettings).setVisibility(View.GONE);
-                findViewById(R.id.trackerSettings).setVisibility(View.GONE);
-                findViewById(R.id.ll_device_focus).requestFocus();
-                supportInvalidateOptionsMenu();
-                initUserLoginInput(true, false);
-                showFirstTimeUsageDialog(false, true);
-                return true;
-            case R.id.permissions:
-                startActivity(new Intent(this, PermissionsActivity.class));
-                return true;
-            case R.id.map:
-                startActivity(new Intent(this, MapsActivity.class));
-                return true;
-            case R.id.commandLog:
-                startActivity(new Intent(this, CommandListActivity.class));
-                return true;
-            //case R.id.privacyPolicy:
-            //    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.privacyPolicyUrl))));
-            //    return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        //final int useCount = settings.getInt("useCount", 0);
+        //final int appReview = settings.getInt("appReview", 0);
+        //if (reviewInfo != null) {
+        //    showAppReview();
+        //    return true;
+        //} else {
+            switch (item.getItemId()) {
+                case R.id.sms:
+                    Log.d(TAG, "Show sms settings");
+                    settings.setBoolean("isTrackerShown", false);
+                    settings.setBoolean("isDeviceManagerShown", false);
+                    findViewById(R.id.smsSettings).setVisibility(View.VISIBLE);
+                    findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+                    findViewById(R.id.ll_sms_focus).requestFocus();
+                    supportInvalidateOptionsMenu();
+                    showFirstTimeUsageDialog(false, false);
+                    return true;
+                case R.id.tracker:
+                    Log.d(TAG, "Show tracker settings");
+                    settings.setBoolean("isTrackerShown", true);
+                    settings.setBoolean("isDeviceManagerShown", false);
+                    findViewById(R.id.trackerSettings).setVisibility(View.VISIBLE);
+                    findViewById(R.id.smsSettings).setVisibility(View.GONE);
+                    findViewById(R.id.ll_tracker_focus).requestFocus();
+                    supportInvalidateOptionsMenu();
+                    showFirstTimeUsageDialog(true, false);
+                    //show email or telegram registration dialog if still unverified
+                    if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
+                        showEmailActivationDialogFragment(false);
+                    }
+                    if (StringUtils.equalsIgnoreCase(settings.getString(SOCIAL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(telegramId)) {
+                        openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
+                    }
+                    return true;
+                case R.id.devices:
+                    Log.d(TAG, "Show Device Manager settings");
+                    settings.setBoolean("isTrackerShown", false);
+                    settings.setBoolean("isDeviceManagerShown", true);
+                    findViewById(R.id.deviceSettings).setVisibility(View.VISIBLE);
+                    findViewById(R.id.smsSettings).setVisibility(View.GONE);
+                    findViewById(R.id.trackerSettings).setVisibility(View.GONE);
+                    findViewById(R.id.ll_device_focus).requestFocus();
+                    supportInvalidateOptionsMenu();
+                    initUserLoginInput(true, false);
+                    showFirstTimeUsageDialog(false, true);
+                    return true;
+                case R.id.permissions:
+                    startActivity(new Intent(this, PermissionsActivity.class));
+                    return true;
+                case R.id.map:
+                    startActivity(new Intent(this, MapsActivity.class));
+                    return true;
+                case R.id.commandLog:
+                    startActivity(new Intent(this, CommandListActivity.class));
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
+        //}
     }
 
     @Override
@@ -1856,8 +1867,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         this.phoneNumber = settings.getString(NOTIFICATION_PHONE_NUMBER);
         this.email = settings.getString(NOTIFICATION_EMAIL);
         this.telegramId = settings.getString(NOTIFICATION_SOCIAL);
-        //testing use count
-        int useCount = settings.getInt("useCount", 0);
+
+        final int useCount = settings.getInt("useCount", 0);
         settings.setInt("useCount", useCount + 1);
     }
 
@@ -1990,6 +2001,45 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         EmailActivationDialogFragment.showEmailActivationDialogFragment(retry, this, toaster);
     }
 
+    //In App review ----
+
+    /*private void initAppReview() {
+        final int useCount = settings.getInt("useCount", 0);
+        final int appReview = settings.getInt("appReview", 0);
+        if (useCount - appReview >= 10) {
+            ReviewManager manager = ReviewManagerFactory.create(this);//new FakeReviewManager(this);//
+            Task<ReviewInfo> request = manager.requestReviewFlow();
+            request.addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    reviewInfo = task.getResult();
+                    Log.d(TAG, "Received app review info object");
+                } else {
+                    Log.e(TAG, "Failed to get app review info object");
+                }
+            });
+        } else {
+            Log.d(TAG, "Use count: " + useCount + " App review: " + appReview);
+        }
+    }
+
+    private void showAppReview() {
+        if (reviewInfo != null) {
+            final int useCount = settings.getInt("useCount", 0);
+            ReviewManager manager = ReviewManagerFactory.create(this);
+            Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
+            flow.addOnCompleteListener(flowTask -> {
+                settings.setInt("appReview", useCount);
+                reviewInfo  = null;
+            });
+            flow.addOnFailureListener(flowTask -> {
+                Log.e(TAG, flowTask.getMessage());
+                reviewInfo = null;
+            });
+        } else {
+            Log.d(TAG,"Review info object is null");
+        }
+    }*/
+
     // -----------------------------------------------------------------------------------
 
     private static class UIHandler extends Handler {
@@ -2118,7 +2168,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
             viewHolder.deviceRemove.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    showRemoveDeviceDialogFragment(devices.get(position));
+                    Device selectedDevice = devices.get(position);
+                    if (StringUtils.equals(selectedDevice.imei, Messenger.getDeviceId(getContext(), false))) {
+                        Toaster.showToast(getContext(), "You can't remove this device from the list!");
+                    } else {
+                        showRemoveDeviceDialogFragment(selectedDevice);
+                    }
                 }
             });
 
