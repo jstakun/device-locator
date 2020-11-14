@@ -104,7 +104,9 @@
                 android:gravity="start"
                 android:paddingTop="16dp"
                 android:paddingBottom="8dp"
-                />
+                android:onClick="onUrlClick"
+                android:linksClickable="false"
+                android:clickable="true"/>
 
         </LinearLayout>
       </net.gmsworld.devicelocator.views.LDCard>

@@ -5,6 +5,7 @@ import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,7 +24,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-import net.gmsworld.devicelocator.utilities.LinkMovementMethodFixed;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -86,7 +86,7 @@ public class LoginActivity extends AppCompatActivity  {
 
         TextView register = findViewById(R.id.register);
         register.setText(Html.fromHtml(getString(R.string.registerLink)));
-        register.setMovementMethod(LinkMovementMethodFixed.getInstance());
+        //register.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
         TextView reset = findViewById(R.id.reset);
         reset.setText(Html.fromHtml(getString(R.string.resetLink)));
@@ -251,6 +251,16 @@ public class LoginActivity extends AppCompatActivity  {
                 public void onAnimationEnd(Animator animation) {
                     mProgressView.setVisibility(show ? View.VISIBLE : View.GONE); }
             });
+    }
+
+    public void onUrlClick(final View view) {
+        TextView textView = (TextView)view;
+        if (textView.getId() == R.id.register) {
+            Intent gmsIntent = new Intent(this, WebViewActivity.class);
+            gmsIntent.putExtra("url", getString(R.string.registerLink));
+            gmsIntent.putExtra("title", getString(R.string.app_name) + " Registration");
+            startActivity(gmsIntent);
+        }
     }
 
     private static class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
