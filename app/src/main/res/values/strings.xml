@@ -88,7 +88,7 @@
     <string name="device_not_found">Device not found!</string>
 
     <!-- Pin Activity -->
-    <string name="pin_link">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="http://www.gms-world.net/">here&lt;/a>&lt;/font></string>
+    <string name="pin_link">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="#">here&lt;/a>&lt;/font></string>
     <string name="pin_enter_valid">Please enter valid PIN!</string>
     <string name="pin_enter">Please enter PIN</string>
     <string name="pin_sent_ok">Security PIN has been sent to notifiers</string>
@@ -169,7 +169,7 @@
     <string name="reset_permission">Allow Reset device to factory defaults command</string>
 
     <!-- Register Activity -->
-    <string name="privacy_policy_text">Read our &lt;a href="http://www.gms-world.net/privacy.jsp">Privacy Policy&lt;/a></string>
+    <string name="privacy_policy_text">Read our &lt;a href="https://www.gms-world.net/privacy.jsp">Privacy Policy&lt;/a></string>
     <string name="register_email_text">In order to receive location notifications from this device please enter your email address:</string>
     <string name="privacy_policy_toast">Please accept our Privacy Policy</string>
     <string name="configure_email_notification_text">Configure email notification</string>

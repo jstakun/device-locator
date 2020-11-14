@@ -70,7 +70,10 @@
                         android:layout_height="wrap_content"
                         android:gravity="left"
                         android:paddingTop="16dp"
-                        android:paddingBottom="8dp" />
+                        android:paddingBottom="8dp"
+                        android:onClick="onUrlClick"
+                        android:linksClickable="false"
+                        android:clickable="true"/>
 
                     <Switch
                         android:id="@+id/privacy_policy"

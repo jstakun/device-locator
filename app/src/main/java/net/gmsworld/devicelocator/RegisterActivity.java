@@ -24,7 +24,6 @@ import net.gmsworld.devicelocator.fragments.EmailActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.EmailNotificationDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.services.SmsSenderService;
-import net.gmsworld.devicelocator.utilities.LinkMovementMethodFixed;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
@@ -69,7 +68,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
         TextView privacyPolicyLink = findViewById(R.id.privacy_policy_text);
         privacyPolicyLink.setText(Html.fromHtml(getString(R.string.privacy_policy_text)));
-        privacyPolicyLink.setMovementMethod(LinkMovementMethodFixed.getInstance());
+        //privacyPolicyLink.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
         initEmailButton();
 
@@ -354,5 +353,15 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         extras.putString("telegramId", getString(R.string.telegram_notification));
         SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
         locationSent = true;
+    }
+
+    public void onUrlClick(final View view) {
+        TextView textView = (TextView)view;
+        if (textView.getId() == R.id.privacy_policy_text) {
+            Intent gmsIntent = new Intent(this, WebViewActivity.class);
+            gmsIntent.putExtra("url", getString(R.string.privacyPolicyUrl));
+            gmsIntent.putExtra("title", getString(R.string.app_name) + " Privacy Policy");
+            startActivity(gmsIntent);
+        }
     }
 }

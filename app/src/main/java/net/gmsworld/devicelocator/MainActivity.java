@@ -201,7 +201,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initDeviceNameInput();
         initUserLoginInput(false, true);
 
-        //TODO testing
         TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
         //commandLink.setMovementMethod(LinkMovementMethodFixed.getInstance());
@@ -1924,12 +1923,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     public void onUrlClick(final View view) {
-        //TODO testing
         TextView textView = (TextView)view;
         if (textView.getId() == R.id.docs_link) {
             Intent gmsIntent = new Intent(this, WebViewActivity.class);
             gmsIntent.putExtra("url", getString(R.string.showCommandsUrl));
-            gmsIntent.putExtra("title", getString(R.string.app_name) + " commands");
+            gmsIntent.putExtra("title", getString(R.string.app_name) + " Commands");
             startActivity(gmsIntent);
         } else if (textView.getId() == R.id.device_id_text) {
             Intent gmsIntent = new Intent(this, MapsActivity.class);

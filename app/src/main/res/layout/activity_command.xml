@@ -67,7 +67,10 @@
                 android:layout_height="wrap_content"
                 android:gravity="left"
                 android:paddingTop="8dp"
-                android:paddingBottom="8dp"/>
+                android:paddingBottom="8dp"
+                android:onClick="onUrlClick"
+                android:linksClickable="false"
+                android:clickable="true"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"

@@ -25,7 +25,6 @@ import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractCommand;
 import net.gmsworld.devicelocator.utilities.Command;
-import net.gmsworld.devicelocator.utilities.LinkMovementMethodFixed;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -205,7 +204,7 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
 
         TextView commandLink = findViewById(R.id.docs_link);
         commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
-        commandLink.setMovementMethod(LinkMovementMethodFixed.getInstance());
+        //commandLink.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
         findViewById(R.id.commandView).requestFocus();
 
@@ -306,6 +305,16 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
                    break;
                 }
             }
+        }
+    }
+
+    public void onUrlClick(final View view) {
+        TextView textView = (TextView)view;
+        if (textView.getId() == R.id.docs_link) {
+            Intent gmsIntent = new Intent(this, WebViewActivity.class);
+            gmsIntent.putExtra("url", getString(R.string.showCommandsUrl));
+            gmsIntent.putExtra("title", getString(R.string.app_name) + " Commands");
+            startActivity(gmsIntent);
         }
     }
 }

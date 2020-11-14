@@ -4,16 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
@@ -28,6 +29,7 @@ public class WebViewActivity extends AppCompatActivity {
     private String url = null, title = null;
     private static final String WEBVIEW_STATE_PRESENT = "webview_state_present";
     private static final String TAG = WebViewActivity.class.getSimpleName();
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,15 +41,13 @@ public class WebViewActivity extends AppCompatActivity {
             title = extras.getString("title");
         }
 
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        requestWindowFeature(Window.FEATURE_PROGRESS);
-
         setContentView(R.layout.activity_web_view);
 
         final Toolbar toolbar = findViewById(R.id.smsToolbar);
         setSupportActionBar(toolbar);
 
         webView = findViewById(R.id.webview);
+        progressBar = findViewById(R.id.loading_progress);
 
         WebSettings settings = webView.getSettings();
 
@@ -69,12 +69,12 @@ public class WebViewActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(WebView view, int progress) {
                 Log.d(TAG, "Loading progress " + progress + "...");
-                //Make the bar disappear after URL is loaded, and changes string to Loading...
                 WebViewActivity.this.setTitle(R.string.please_wait);
-                setProgressBarIndeterminateVisibility(true);
-                setProgressBarVisibility(true);
-                WebViewActivity.this.setProgress(progress * 100); //Make the bar disappear after URL is loaded
-
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    progressBar.setProgress(progress, true);
+                } else {
+                    progressBar.setProgress(progress);
+                }
                 // Return the app name after finish loading
                 if (progress == 100) {
                     if (title != null) {
@@ -82,8 +82,6 @@ public class WebViewActivity extends AppCompatActivity {
                     } else {
                         WebViewActivity.this.setTitle(R.string.app_name);
                     }
-                    setProgressBarIndeterminateVisibility(false);
-                    setProgressBarVisibility(false);
                 }
             }
         });
