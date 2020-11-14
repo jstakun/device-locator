@@ -103,10 +103,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="start"
                 android:paddingTop="16dp"
-                android:paddingBottom="8dp"
-                android:onClick="onUrlClick"
-                android:linksClickable="false"
-                android:clickable="true"/>
+                android:paddingBottom="8dp" />
 
         </LinearLayout>
       </net.gmsworld.devicelocator.views.LDCard>
