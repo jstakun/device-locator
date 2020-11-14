@@ -3,6 +3,7 @@
     <string name="routeProviderUrl">https://www.gms-world.net/routeProvider</string>
     <string name="secureRouteProviderUrl">https://www.gms-world.net/s/routeProvider</string>
     <string name="showRouteUrl">https://www.gms-world.net/dlr</string>
+    <string name="showCommandsUrl">https://www.gms-world.net/dl</string>
     <string name="crashReportUrl">https://www.gms-world.net/s/crashReport</string>
     <string name="notificationUrl">https://www.gms-world.net/s/notifications</string>
     <string name="tokenUrl">https://www.gms-world.net/token</string>
