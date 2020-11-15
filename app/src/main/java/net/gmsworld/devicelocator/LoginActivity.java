@@ -5,7 +5,6 @@ import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -252,16 +251,6 @@ public class LoginActivity extends AppCompatActivity  {
                 public void onAnimationEnd(Animator animation) {
                     mProgressView.setVisibility(show ? View.VISIBLE : View.GONE); }
             });
-    }
-
-    public void onUrlClick(final View view) {
-        TextView textView = (TextView)view;
-        if (textView.getId() == R.id.register) {
-            Intent gmsIntent = new Intent(this, WebViewActivity.class);
-            gmsIntent.putExtra("url", getString(R.string.registerLink));
-            gmsIntent.putExtra("title", getString(R.string.app_name) + " Registration");
-            startActivity(gmsIntent);
-        }
     }
 
     private static class UserLoginTask extends AsyncTask<Void, Void, Boolean> {

@@ -8,6 +8,7 @@ import android.text.Html;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.ViewCompat;
 
 public class CommandActivity extends AppCompatActivity implements SendCommandDialogFragment.SendCommandDialogListener {
@@ -54,6 +56,11 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_command);
+
+        final Toolbar toolbar = findViewById(R.id.smsToolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         settings = new PreferencesUtils(this);
 
@@ -217,6 +224,18 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
         super.onDestroy();
         //reset pin verification time
         settings.setLong("pinVerificationMillis", System.currentTimeMillis());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
+            setResult(RESULT_CANCELED);
+            finish();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     private boolean isValidCommand(String pin, String command, String commandArgs) {

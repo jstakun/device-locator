@@ -105,7 +105,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                 String input = charSequence.toString();
                 if (StringUtils.equals(input, pin)) {
                     onAuthenticated();
-                } else if (input.length() >= pin.length() && input.length() >= lastLength) {
+                } else if (input.length() >= pin.length() && input.length() > lastLength) {
                     onFailed(FingerprintHelper.AuthType.Pin);
                 }
                 lastLength = input.length();
@@ -231,7 +231,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         if (pinFailedCount == 3) {
             pinFailedCount = -1;
             //send failed login notification
-            Log.d(TAG, "Invalid pin has been entered to unlock the app. SENDING NOTIFICATION!");
+            Log.d(TAG, "Invalid Security PIN has been entered to unlock the app. SENDING NOTIFICATION!");
             SmsSenderService.initService(PinActivity.this, true, true, true, null, null, null, DeviceAdminEventReceiver.SOURCE, null);
             toaster.showActivityToast(R.string.pin_invalid_entered);
             if (settings.getBoolean(HiddenCaptureImageService.STATUS, false) && HiddenCaptureImageService.isNotBusy()) {

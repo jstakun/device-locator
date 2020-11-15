@@ -45,6 +45,8 @@ public class WebViewActivity extends AppCompatActivity {
 
         final Toolbar toolbar = findViewById(R.id.smsToolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         webView = findViewById(R.id.webview);
         progressBar = findViewById(R.id.loading_progress);

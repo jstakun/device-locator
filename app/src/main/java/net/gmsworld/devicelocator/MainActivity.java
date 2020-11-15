@@ -2162,7 +2162,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             } else {
                 viewHolder.deviceLocation.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
-                        showDeviceLocation(devices.get(position));
+                        Device device = devices.get(position);
+                        if (settings.contains(CommandActivity.PIN_PREFIX + device.imei) || StringUtils.equals(device.imei, Messenger.getDeviceId(MainActivity.this, false))) {
+                            showDeviceLocation(device);
+                        } else {
+                            settings.setString(device.imei + CommandService.LAST_COMMAND_SUFFIX, Command.SHARE_COMMAND);
+                            showCommandActivity(position);
+                        }
                     }
                 });
             }
