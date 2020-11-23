@@ -266,9 +266,9 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 }
                 Intent sendIntent = new Intent();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + deviceImei + " location here: " + routeUrl);
-                sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Follow device <a href=\"" + getString(R.string.deviceUrl) + "/" + deviceImei + "\">" + deviceImei + "</a> location <a href=\"" + routeUrl + "\">here</a>...");
-                sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.message, deviceImei) + " - route map link");
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + deviceName + " location here: " + routeUrl);
+                sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Follow device <a href=\"" + getString(R.string.deviceUrl) + "/" + deviceImei + "\">" + deviceName + "</a> location <a href=\"" + routeUrl + "\">here</a>...");
+                sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.message, deviceName) + " - route map link");
                 sendIntent.setType("text/html");
                 startActivity(sendIntent);
             }

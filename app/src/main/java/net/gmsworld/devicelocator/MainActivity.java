@@ -2079,12 +2079,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         }
                         String[] discs = StringUtils.split(showRouteUrl, "/");
                         final String imei = discs[discs.length - 2];
+                        final String deviceName = Messenger.getDeviceId(activity, true);
                         if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity) == ConnectionResult.SUCCESS) {
                             Log.d(TAG, "Route tokens /: " + showRouteUrl);
                             Intent gmsIntent = new Intent(activity, RouteActivity.class);
                             gmsIntent.putExtra("imei", imei);
                             gmsIntent.putExtra("routeId", discs[discs.length - 1]);
                             gmsIntent.putExtra("now", "false");
+                            gmsIntent.putExtra("deviceName", deviceName);
                             activity.startActivity(gmsIntent);
                         } else {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(showRouteUrl));
@@ -2097,9 +2099,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
                         Intent sendIntent = new Intent();
                         sendIntent.setAction(Intent.ACTION_SEND);
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + imei + " location here: " + showRouteUrl);
-                        sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Follow device <a href=\"" + activity.getString(R.string.deviceUrl) + "/" + imei + "\">" + imei + "</a> location <a href=\"" + showRouteUrl + "\">here</a>...");
-                        sendIntent.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.message, imei) + " - route map link");
+                        sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + deviceName + " location here: " + showRouteUrl);
+                        sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Follow device <a href=\"" + activity.getString(R.string.deviceUrl) + "/" + imei + "\">" + deviceName + "</a> location <a href=\"" + showRouteUrl + "\">here</a>...");
+                        sendIntent.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.message, deviceName) + " - route map link");
                         sendIntent.setType("text/html");
                         activity.startActivity(sendIntent);
                     } else if (responseCode == 400) {
