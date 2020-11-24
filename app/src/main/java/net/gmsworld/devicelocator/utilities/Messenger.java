@@ -1091,7 +1091,7 @@ public class Messenger {
         }
 
         try {
-            final String queryString = "type=register_m&email=" + email + "&user=" + getDeviceId(context, false) + "&validate=" + validate;
+            final String queryString = "type=register_m&email=" + email + "&user=" + deviceId + "&validate=" + validate;
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {

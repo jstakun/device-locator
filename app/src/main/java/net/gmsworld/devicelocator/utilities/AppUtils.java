@@ -67,12 +67,7 @@ public class AppUtils {
     private String getBuildDate(Context c) {
         String s = "recently";
         try{
-            Locale l;
-            try {
-                l = c.getResources().getConfiguration().locale;
-            } catch (Exception e) { //might cause NPE on some devices
-                l = java.util.Locale.getDefault();
-            }
+            Locale l = getCurrentLocale(c);
             DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, l);
             s = formatter.format(BuildConfig.TIMESTAMP);
         } catch(Exception e) {
