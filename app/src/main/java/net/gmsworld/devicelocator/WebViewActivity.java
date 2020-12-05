@@ -18,6 +18,8 @@ import android.widget.ProgressBar;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import net.gmsworld.devicelocator.utilities.Toaster;
+
 import org.apache.commons.lang3.StringUtils;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -154,9 +156,14 @@ public class WebViewActivity extends AppCompatActivity {
             if (url.startsWith("http://") || url.startsWith("https://")) {
                 view.loadUrl(url);
             } else {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Toaster.showToast(WebViewActivity.this, "Failed to open " + url);
+                    Log.e(TAG, e.getMessage(), e);
+                }
             }
             return true;
         }
