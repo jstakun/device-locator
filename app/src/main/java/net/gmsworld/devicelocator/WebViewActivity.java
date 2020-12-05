@@ -65,6 +65,7 @@ public class WebViewActivity extends AppCompatActivity {
         try {
             HelperInternal.setCacheSettings(getApplicationContext(), settings);
         } catch (VerifyError e) {
+            Log.e(TAG, e.getMessage(), e);
         }
 
         webView.setWebViewClient(new MyWebViewClient());
