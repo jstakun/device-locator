@@ -30,8 +30,7 @@ public class DeviceLocatorApp extends Application {
         final String tokenStr = PreferenceManager.getDefaultSharedPreferences(this).getString(GMS_TOKEN, "");
         if (StringUtils.isNotEmpty(tokenStr)) {
             headers.put("Authorization", "Bearer " + tokenStr);
-            headers.put("X-GMS-AppId", "2");
-            headers.put("X-GMS-Scope", "dl");
+            headers.putAll(Network.getDefaultHeaders(this));
             initAcra(headers);
         } else if (Network.isNetworkAvailable(this)) {
             String queryString = "scope=dl&user=" + Messenger.getDeviceId(this, false);
@@ -40,8 +39,7 @@ public class DeviceLocatorApp extends Application {
                 public void onGetFinish(String results, int responseCode, String url) {
                     if (responseCode == 200) {
                         headers.put("Authorization", "Bearer " + Messenger.getToken(DeviceLocatorApp.this, results));
-                        headers.put("X-GMS-AppId", "2");
-                        headers.put("X-GMS-Scope", "dl");
+                        headers.putAll(Network.getDefaultHeaders(DeviceLocatorApp.this));
                         initAcra(headers);
                     } else {
                         Log.d(TAG, "Failed to receive token: " + results);

@@ -348,7 +348,7 @@ public class Network {
         }
     }
 
-    private static Map<String, String> getDefaultHeaders(Context context) {
+    public static Map<String, String> getDefaultHeaders(Context context) {
         if (defaultHeaders == null) {
             defaultHeaders = new HashMap<>();
             defaultHeaders.put("X-GMS-AppId", "2");

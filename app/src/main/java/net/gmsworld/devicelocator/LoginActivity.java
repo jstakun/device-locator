@@ -167,7 +167,7 @@ public class LoginActivity extends AppCompatActivity  {
                     headers.put("Authorization", "Bearer " + tokenStr);
                     String deviceId = Messenger.getDeviceId(this, false);
                     if (StringUtils.isNotEmpty(deviceId)) {
-                        headers.put("X-GMS-DeviceId", deviceId);
+                        headers.put(Messenger.DEVICE_ID_HEADER, deviceId);
                     }
                     headers.put("X-GMS-UseCount", Integer.toString(settings.getInt("useCount", 1)));
                     final String queryString = "type=reset&login=" + email;
