@@ -26,12 +26,14 @@ public class Files {
     private static final String TAG = Files.class.getSimpleName();
 
     public static File getFilesDir(Context context, String filename, boolean isExternal) {
-        String absolutePath;
-        if (isExternal) {
-            absolutePath = context.getExternalFilesDir(null).getAbsolutePath();
-            absolutePath = absolutePath.substring(0, absolutePath.length() - 6); //remove /files from the end
-        } else {
-            absolutePath = context.getFilesDir().getAbsolutePath();
+        String absolutePath = null;
+        if (context != null) {
+            if (isExternal) {
+                absolutePath = context.getExternalFilesDir(null).getAbsolutePath();
+                absolutePath = absolutePath.substring(0, absolutePath.length() - 6); //remove /files from the end
+            } else {
+                absolutePath = context.getFilesDir().getAbsolutePath();
+            }
         }
         return new File(absolutePath, filename);
     }

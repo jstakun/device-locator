@@ -200,7 +200,7 @@ public class Command {
     }
 
 
-    private static List<AbstractCommand> getCommands() {
+    protected static List<AbstractCommand> getCommands() {
         if (commands == null) {
             Log.d(TAG, "Initializing commands...");
             commands = new ArrayList<>();

@@ -35,7 +35,7 @@ public abstract class AbstractCommand {
 
     private final Finder finder;
 
-    String[] commandTokens;
+    String[] commandTokens = null;
 
     AbstractCommand(String smsCommand, String smsShortCommand, Finder finder) {
         this.smsCommand = smsCommand;
@@ -90,7 +90,6 @@ public abstract class AbstractCommand {
     public final void setCommandTokens(String[] commandTokens) {
         this.commandTokens = commandTokens;
     }
-
 
     protected final boolean findSmsCommand(Context context, final String smsMessage, final String sender, final String pin, final boolean isPinRequired, final boolean hasSocialNotifiers) {
         int status = 0;
@@ -263,9 +262,13 @@ public abstract class AbstractCommand {
     }
 
     static void sendSocialNotification(final Context context, final String command, final String sender, final String invalidCommand) {
-        Bundle extras = new Bundle();
-        extras.putString("invalidCommand", invalidCommand);
-        SmsSenderService.initService(context, true, true, true, null, command, sender, "mobile", extras);
+        if (context != null) {
+            Bundle extras = new Bundle();
+            extras.putString("invalidCommand", invalidCommand);
+            SmsSenderService.initService(context, true, true, true, null, command, sender, "mobile", extras);
+        } else {
+            Log.e(TAG, "Context can't be empty");
+        }
     }
 
     void sendAppNotification(final Context context, final String command, final String app, final String language) {
@@ -282,9 +285,13 @@ public abstract class AbstractCommand {
     }
 
     void sendSmsNotification(final Context context, final String sender, final String command) {
-        Bundle extras = new Bundle();
-        extras.putString("phoneNumber", sender);
-        SmsSenderService.initService(context, true, false, false, null, command, null, null, extras);
+        if (context != null) {
+            Bundle extras = new Bundle();
+            extras.putString("phoneNumber", sender);
+            SmsSenderService.initService(context, true, false, false, null, command, null, null, extras);
+        } else {
+            Log.e(TAG, "Context can't be empty");
+        }
     }
 
     void sendAdmNotification(final Context context, final String command, final String sender, final String invalidCommand) {
