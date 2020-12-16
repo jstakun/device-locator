@@ -818,24 +818,26 @@ public class Messenger {
                     command = Command.MUTE_COMMAND;
                     break;
                 case Command.INVALID_PIN:
+                    final String deviceName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), deviceId);
                     String sender = extras.getString("sender", "unknown");
                     if (StringUtils.contains(sender, "=")) {
                         sender = StringUtils.split(sender, "=")[0].trim();
                     }
+                    final String senderName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), sender);
                     final String source = extras.getString("source");
                     final String invalidCommand = extras.getString("invalidCommand");
-                    text = "Command " + invalidCommand + " with invalid pin has been sent to device " + deviceId + " from " + source + " " + sender + ".";
+                    text = "Command " + invalidCommand + " with invalid Security PIN has been sent to the device " + deviceName + " from " + source + " " + senderName + ".";
                     break;
                 case Command.INVALID_COMMAND:
-                    final String deviceName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), deviceId);
+                    final String deviceNamee = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), deviceId);
                     String senderr = extras.getString("sender", "unknown");
                     if (senderr.contains("=")) {
                         senderr = senderr.split("=")[0].trim();
                     }
-                    final String senderName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), senderr);
+                    final String senderNamee = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), senderr);
                     final String sourcee = extras.getString("source");
                     final String invalidCommandd = extras.getString("invalidCommand");
-                    text = "Invalid command " + invalidCommandd + " has been sent to device " + deviceName + " from " + sourcee + " " + senderName + ".";
+                    text = "Invalid command " + invalidCommandd + " has been sent to the device " + deviceNamee + " from " + sourcee + " " + senderNamee + ".";
                     break;
                 case Command.RESET_COMMAND:
                     text = "Reset to factory defaults on device " + deviceId + " has been started.";
@@ -1255,7 +1257,11 @@ public class Messenger {
 
     public static boolean sendRegistrationToServer(final Context context, final String username, final String deviceName, final boolean silent) {
         if (Network.isNetworkAvailable(context)) {
-            final String firebaseToken = PreferenceManager.getDefaultSharedPreferences(context).getString(DlFirebaseMessagingService.FIREBASE_TOKEN, "");
+            String firebaseToken = PreferenceManager.getDefaultSharedPreferences(context).getString(DlFirebaseMessagingService.FIREBASE_TOKEN, "");
+            if (StringUtils.isEmpty(firebaseToken)) {
+                firebaseToken = PreferenceManager.getDefaultSharedPreferences(context).getString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, "");
+            }
+
             if (StringUtils.isEmpty(firebaseToken)) {
                 Task<InstanceIdResult> result = FirebaseInstanceId.getInstance().getInstanceId();
 
@@ -1266,7 +1272,7 @@ public class Messenger {
                             // Task completed successfully
                             InstanceIdResult result = task.getResult();
                             if (result != null) {
-                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, result.getToken()).apply();
+                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, result.getToken()).remove(DlFirebaseMessagingService.FIREBASE_TOKEN).apply();
                                 sendRegistrationToServer(context, result.getToken(), username, deviceName);
                             }
                         } else {

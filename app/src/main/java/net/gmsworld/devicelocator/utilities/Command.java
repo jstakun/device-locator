@@ -146,7 +146,7 @@ public class Command {
             final String pin = prefs.getEncryptedString(PinActivity.DEVICE_PIN);
             final boolean isPinRequired = prefs.getBoolean("settings_sms_without_pin", true);
             final boolean hasSocialNotifiers = StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_SOCIAL)) || StringUtils.isNotEmpty(prefs.getString(MainActivity.NOTIFICATION_EMAIL));
-            int foundCommand;
+            int foundCommand = 0;
             for (AbstractCommand c : getCommands()) {
                 foundCommand = c.findAppCommand(context, StringUtils.trim(message), replyTo, location, extras, pin, isPinRequired);
                 if (foundCommand == 1) {
@@ -167,13 +167,15 @@ public class Command {
                 }
             }
             //invalid command
-            final String commandName = message.split("dl")[0];
-            Log.d(TAG, "Invalid command " + commandName + " found in message!");
-            if (StringUtils.isNotEmpty(replyTo)) {
-                final String msg = "Invalid command " + commandName + " sent to device " + Messenger.getDeviceId(context, true);
-                Messenger.sendCloudMessage(context, null, replyTo, msg, commandName, 1, 2000, new HashMap<String, String>());
+            if (foundCommand == 0) {
+                final String commandName = message.split("dl")[0];
+                Log.e(TAG, "Invalid command " + commandName + " found in message!");
+                if (StringUtils.isNotEmpty(replyTo)) {
+                    final String msg = "Invalid command " + commandName + " has been sent to the device " + Messenger.getDeviceId(context, true);
+                    Messenger.sendCloudMessage(context, null, replyTo, msg, commandName, 1, 2000, new HashMap<String, String>());
+                }
+                AbstractCommand.sendSocialNotification(context, INVALID_COMMAND, replyTo, commandName);
             }
-            AbstractCommand.sendSocialNotification(context, INVALID_COMMAND, replyTo, commandName);
         }
         return null;
     }

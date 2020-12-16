@@ -3,7 +3,6 @@ package net.gmsworld.devicelocator.services;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -69,8 +68,10 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
     public void onNewToken(String token) {
         // Get updated InstanceID token.
         Log.d(TAG, "New Firebase token: " + token);
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putString(NEW_FIREBASE_TOKEN, token).remove(FIREBASE_TOKEN).apply();
-        final String pin = new PreferencesUtils(this).getEncryptedString(PinActivity.DEVICE_PIN);
+        PreferencesUtils settings = new PreferencesUtils(this);
+        settings.setString(NEW_FIREBASE_TOKEN, token);
+        settings.remove(FIREBASE_TOKEN);
+        final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
         if (StringUtils.isNotEmpty(pin)) {
             Messenger.sendRegistrationToServer(this, token, null, null);
         }
