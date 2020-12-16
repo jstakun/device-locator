@@ -225,34 +225,36 @@ public abstract class AbstractCommand {
     }
 
     private int findCommandInMessage(Context context, String command, String message, String pin, String sender, boolean isPinRequired) {
-        //<command><pin> <args> or <command> <pin> <args>
+        //message = <command><pin> <args> or <command> <pin> <args>
         Log.d(TAG, "Matching " + message + " with " + command + " and " + pin);
         int foundCommand = 0;
         if (finder == Finder.EQUALS || finder == Finder.STARTS) {
             commandTokens = message.split(" ");
             if (commandTokens.length >= 1) {
                 if (StringUtils.equalsIgnoreCase(commandTokens[0], command + pin)) {
+                    //<command><pin>
                     foundCommand = 1;
                 }
                 if (foundCommand == 0 && commandTokens.length >= 2) {
                     if (StringUtils.equalsIgnoreCase(commandTokens[0], command) && (!isPinRequired || StringUtils.equals(commandTokens[1], pin))) {
+                        //<command> <pin>
                         foundCommand = 1;
                     }
                 }
-                if (foundCommand == 0 && commandTokens.length >= 2 && StringUtils.equalsIgnoreCase(commandTokens[0], command) && StringUtils.isNumeric(commandTokens[1]) && !StringUtils.equals(commandTokens[1], pin) && !StringUtils.equalsIgnoreCase(commandTokens[0], command + "t")) {
+                if (foundCommand == 0 && commandTokens.length >= 2 &&
+                    StringUtils.equalsIgnoreCase(commandTokens[0], command) && !StringUtils.equalsIgnoreCase(commandTokens[0], command + "t") &&
+                    StringUtils.isNumeric(commandTokens[1]) && !StringUtils.equals(commandTokens[1], pin)) {
                     sendSocialNotification(context, Command.INVALID_PIN, sender, commandTokens[0] + " " + commandTokens[1]);
                     Log.e(TAG, "1: Command " + commandTokens[0] + " with invalid Security PIN " + commandTokens[1] + " received!");
                     foundCommand = -1;
-                } else {
-                    if (foundCommand == 0 && commandTokens[0].length() > pin.length()) {
-                        final String commandStr = StringUtils.substring(commandTokens[0], 0, commandTokens[0].length() - pin.length());
-                        final String pinStr = StringUtils.substring(commandTokens[0], commandTokens[0].length() - pin.length());
-                        Log.d(TAG, "Comparing " + commandStr + " " + pinStr + " with " + command);
-                        if (StringUtils.equalsIgnoreCase(commandStr, command) && StringUtils.isNumeric(pinStr)) {
-                            sendSocialNotification(context, Command.INVALID_PIN, sender, commandTokens[0]);
-                            Log.e(TAG, "2: Command " + commandTokens[0] + " with invalid Security PIN received!");
-                            foundCommand = -1;
-                        }
+                } else if (foundCommand == 0 && commandTokens[0].length() > pin.length()) {
+                    final String commandStr = StringUtils.substring(commandTokens[0], 0, commandTokens[0].length() - pin.length());
+                    final String pinStr = StringUtils.substring(commandTokens[0], commandTokens[0].length() - pin.length());
+                    Log.d(TAG, "Comparing " + commandStr + " " + pinStr + " with " + command);
+                    if (StringUtils.startsWithIgnoreCase(commandStr, command) && StringUtils.isNumeric(pinStr) && !StringUtils.equals(pinStr, pin)) {
+                        sendSocialNotification(context, Command.INVALID_PIN, sender, commandTokens[0]);
+                        Log.e(TAG, "2: Command " + commandTokens[0] + " with invalid Security PIN received!");
+                        foundCommand = -1;
                     }
                 }
             }
