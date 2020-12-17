@@ -1234,14 +1234,14 @@ public class Messenger {
         if (StringUtils.isNotEmpty(firebaseToken) && !StringUtils.equalsIgnoreCase(firebaseToken, "BLACKLISTED")) {
             final String tokenStr = PreferenceManager.getDefaultSharedPreferences(context).getString(DeviceLocatorApp.GMS_TOKEN, "");
             if (StringUtils.isNotEmpty(tokenStr)) {
-                sendRegistrationToServer(context, firebaseToken, username, deviceName, tokenStr);
+                sendRegistrationToServerBackend(context, firebaseToken, username, deviceName, tokenStr);
             } else {
                 String queryString = "scope=dl&user=" + Messenger.getDeviceId(context, false);
                 Network.get(context, context.getString(R.string.tokenUrl) + "?" + queryString, null, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
-                            sendRegistrationToServer(context, firebaseToken, username, deviceName, Messenger.getToken(context, results));
+                            sendRegistrationToServerBackend(context, firebaseToken, username, deviceName, Messenger.getToken(context, results));
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
@@ -1295,7 +1295,7 @@ public class Messenger {
         }
     }
 
-    private static void sendRegistrationToServer(final Context context, final String firebaseToken, final String username, final String deviceName, final String gmsTokenStr) {
+    private static void sendRegistrationToServerBackend(final Context context, final String firebaseToken, final String username, final String deviceName, final String gmsTokenStr) {
         try {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (!StringUtils.equalsIgnoreCase(firebaseToken, "BLACKLISTED")) {

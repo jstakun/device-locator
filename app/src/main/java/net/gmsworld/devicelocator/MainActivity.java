@@ -217,10 +217,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             isTrackingServiceBound = false;
         }
 
-        //register firebase token if has changed and not set to server
+        //register firebase token if is not yet set or has changed and not send to server
         final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
         final String newFirebaseToken = settings.getString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN);
-        if (StringUtils.isEmpty(firebaseToken) && StringUtils.isNotEmpty(newFirebaseToken)) {
+        if (StringUtils.isEmpty(firebaseToken) || StringUtils.isNotEmpty(newFirebaseToken)) {
             String deviceName = settings.getString(DEVICE_NAME);
             if (StringUtils.isEmpty(deviceName)) {
                 deviceName = Messenger.getDefaultDeviceName();
