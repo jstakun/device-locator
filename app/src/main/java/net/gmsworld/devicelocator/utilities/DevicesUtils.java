@@ -117,10 +117,6 @@ public class DevicesUtils {
                             } else if (deviceLoadListener != null) {
                                 deviceLoadListener.onDeviceLoadError(R.string.devices_list_loading_failed);
                             }
-                              //else if (caller instanceof MainActivity) {
-                              //  final TextView deviceListEmpty = ((MainActivity)caller).findViewById(R.id.deviceListEmpty);
-                              //  deviceListEmpty.setText(R.string.devices_list_loading_failed);
-                            //}
                         }
                     });
                 } else if (StringUtils.isEmpty(userLogin)) {
