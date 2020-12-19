@@ -83,7 +83,7 @@ public class Device implements Parcelable{
 
     //formatter is not thread safe!
     public synchronized Date getDate() {
-        if (date == null) {
+        if (date == null && creationDate != null) {
             try {
                 date = formatter.parse(creationDate);
             } catch (ParseException e) {

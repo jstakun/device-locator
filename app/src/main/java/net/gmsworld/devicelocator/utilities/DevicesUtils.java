@@ -66,7 +66,7 @@ public class DevicesUtils {
                                     final String imei = Messenger.getDeviceId(context, false);
                                     for (JsonElement d : devices) {
                                         JsonObject deviceObject = d.getAsJsonObject();
-                                        if (deviceObject.has("creationDate") && deviceObject.has("imei")) {
+                                        if (deviceObject.has("imei")) {
                                             final String deviceImei = deviceObject.get("imei").getAsString();
                                             String token = null;
                                             if (deviceObject.has("token")) {
@@ -75,7 +75,9 @@ public class DevicesUtils {
                                             if (StringUtils.isNotEmpty(token) || StringUtils.equals(deviceImei, imei)) {
                                                 Device device = new Device();
                                                 device.imei = deviceImei;
-                                                device.creationDate = deviceObject.get("creationDate").getAsString();
+                                                if (deviceObject.has("creationDate")) {
+                                                    device.creationDate = deviceObject.get("creationDate").getAsString();
+                                                }
                                                 if (deviceObject.has("name")) {
                                                     device.name = deviceObject.get("name").getAsString();
                                                 }
