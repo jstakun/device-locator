@@ -277,13 +277,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 final int height = getResources().getDisplayMetrics().heightPixels;
                 final int padding = (int) (width * 0.2);
                 if (centerToBounds) {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                    try {
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                    } catch (Exception e) {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                    }
                 }
                 if (center != null) {
                     if (currentZoom > 0) {
-                        mMap.animateCamera(CameraUpdateFactory.newLatLng(center));
+                        try {
+                            mMap.animateCamera(CameraUpdateFactory.newLatLng(center));
+                        } catch (Exception e) {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLng(center));
+                        }
                     } else {
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 14f));
+                        try {
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 14f));
+                        } catch (Exception e) {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 14f));
+                        }
                     }
                     currentZoom = mMap.getCameraPosition().zoom;
                 }

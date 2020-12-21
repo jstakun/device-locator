@@ -309,15 +309,27 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             m.setTag("last");
 
             if (zoom) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
+                try {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
+                } catch (Exception e) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
+                }
             } else if (routePoints.size() > 1) {
                 LatLngBounds bounds = routePointsBounds.build();
                 final int width = getResources().getDisplayMetrics().widthPixels;
                 final int height = getResources().getDisplayMetrics().heightPixels;
                 final int padding = (int) (width * 0.2);
-                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                try {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                } catch (Exception e) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                }
             } else if (routePoints.size() == 1) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
+                try {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
+                } catch (Exception e) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(routePoints.get(routePoints.size() - 1), 14f));
+                }
             }
         }
     }
@@ -336,7 +348,11 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
     @Override
     public void onLocationUpdated(Location location) {
         if (mMap != null && routePoints.isEmpty()) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14f));
+            try {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14f));
+            } catch (Exception e) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 14f));
+            }
         }
 
         if (bestLocation == null) {
