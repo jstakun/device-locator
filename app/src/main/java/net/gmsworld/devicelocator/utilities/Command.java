@@ -96,6 +96,7 @@ public class Command {
     public final static String ALARM_COMMAND = "alarm";
     public final static String SCREEN_STOPPED = "screenStopped";
     public final static String SCREEN_RUNNING = "screenRunning";
+    public final static String SHARE_OFF_COMMAND = "locateOffdl";
     protected final static String INVALID_PIN = "invalidPin";
     protected final static String INVALID_COMMAND = "invalidCommand";
 
@@ -484,6 +485,7 @@ public class Command {
                         }
                         if (interval == 0) {
                             LocationAlarmUtils.cancel(context);
+                            sendSmsNotification(context, sender, SHARE_OFF_COMMAND);
                         } else {
                             if (interval <= 24 && interval > 0) {
                                 PreferencesUtils settings = new PreferencesUtils(context);
@@ -521,6 +523,7 @@ public class Command {
                         }
                         if (interval == 0) {
                             LocationAlarmUtils.cancel(context);
+                            sendSocialNotification(context, SHARE_OFF_COMMAND, sender, null);
                         } else if (interval <= 24 && interval > 0) {
                             PreferencesUtils settings = new PreferencesUtils(context);
                             settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, interval);
@@ -556,6 +559,7 @@ public class Command {
                         }
                         if (interval == 0) {
                             LocationAlarmUtils.cancel(context);
+                            sendAppNotification(context, SHARE_OFF_COMMAND, sender, extras.getString("language"));
                         } else if (interval <= 24 && interval > 0) {
                             PreferencesUtils settings = new PreferencesUtils(context);
                             settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, interval);
@@ -591,6 +595,7 @@ public class Command {
                         }
                         if (interval == 0) {
                             LocationAlarmUtils.cancel(context);
+                            sendAdmNotification(context, SHARE_OFF_COMMAND, sender, null);
                         } else if (interval <= 24 && interval > 0) {
                             PreferencesUtils settings = new PreferencesUtils(context);
                             settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, interval);

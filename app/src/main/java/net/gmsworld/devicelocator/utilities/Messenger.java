@@ -882,6 +882,10 @@ public class Messenger {
                     }
                     text += getBatteryLevel(context);
                     break;
+                case Command.SHARE_OFF_COMMAND:
+                    text = "Periodical device location sharing has been disabled.";
+                    text += getBatteryLevel(context);
+                    break;
                 default:
                     Log.e(TAG, "Messenger received wrong command: " + command);
                     break;
