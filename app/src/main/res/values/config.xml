@@ -21,6 +21,6 @@
     <string name="downloadUrl">https://github.com/jstakun/device-locator/raw/master/app/app-release.apk</string>
     <string name="telegramStartUrl">https://telegram.me/device_locator_bot?start=%1$s</string>
     <string name="telegramWebUrl">https://web.telegram.org/#/im?p=@device_locator_bot</string>
-    <string name="otpUrl">https://www.gms-world.net/otp</string>
+    <string name="otpUrl">https://www.gms-world.net/s/otp</string>
     <string name="telegram_notification">\@device_locator_notifications</string>
 </resources>

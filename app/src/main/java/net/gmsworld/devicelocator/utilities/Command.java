@@ -18,6 +18,7 @@ import android.telephony.SmsMessage;
 import android.util.Log;
 import android.util.Patterns;
 
+import net.gmsworld.devicelocator.DeviceLocatorApp;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.R;
@@ -38,6 +39,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
@@ -184,11 +186,16 @@ public class Command {
     private static void findAdmCommandInMessage(final Context context, final String message, final String sender, final Location location, final Bundle extras, final String otp) {
         final String deviceId = Messenger.getDeviceId(context, false);
         final String content = "key=" + deviceId + "&value=" + otp;
-        Network.post(context, context.getString(R.string.otpUrl), content, null, null, new Network.OnGetFinishListener() {
+        final String tokenStr = PreferenceManager.getDefaultSharedPreferences(context).getString(DeviceLocatorApp.GMS_TOKEN, "");
+        final Map<String, String> headers = new HashMap<>();
+        if (StringUtils.isNotEmpty(tokenStr)) {
+            headers.put("Authorization", "Bearer " + tokenStr);
+        }
+        Network.post(context, context.getString(R.string.otpUrl), content, null, headers, new Network.OnGetFinishListener() {
             @Override
             public void onGetFinish(String results, int responseCode, String url) {
                 if (responseCode == 200) {
-                    Log.d(TAG, "Otp has been verified successfully!");
+                    Log.d(TAG, "OTP has been verified successfully!");
                     int foundCommand = 0;
                     for (AbstractCommand c : getCommands()) {
                         foundCommand = c.findAdmCommand(context, StringUtils.trim(message), sender, extras, otp);
@@ -201,7 +208,7 @@ public class Command {
                         //invalid command
                         Bundle extras = new Bundle();
                         extras.putString("telegramId", context.getString(R.string.app_telegram));
-                        extras.putString("email", context.getString(R.string.app_email));
+                        //extras.putString("email", context.getString(R.string.app_email));
                         extras.putString("invalidCommand", message.split(" ")[0]);
                         SmsSenderService.initService(context, false, true, true, null, INVALID_COMMAND, sender, "mobile", extras);
                     }
@@ -209,7 +216,7 @@ public class Command {
                     //invalid token
                     Bundle extras = new Bundle();
                     extras.putString("telegramId", context.getString(R.string.app_telegram));
-                    extras.putString("email", context.getString(R.string.app_email));
+                    //extras.putString("email", context.getString(R.string.app_email));
                     extras.putString("invalidCommand", message.split(" ")[0]);
                     SmsSenderService.initService(context, false, true, true, null, INVALID_PIN, sender, "mobile", extras);
                 }
