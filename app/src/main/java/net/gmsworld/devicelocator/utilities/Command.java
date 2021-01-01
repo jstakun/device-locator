@@ -441,6 +441,11 @@ public class Command {
         }
 
         @Override
+        public boolean canResend() {
+            return true;
+        }
+
+        @Override
         public boolean validateTokens() {
             int interval = -1;
             if (commandTokens != null && commandTokens.length > 1) {
@@ -459,11 +464,6 @@ public class Command {
                 interval = 0;
             }
             return interval >= 0 && interval <= 24;
-        }
-
-        @Override
-        public boolean canResend() {
-            return true;
         }
 
         @Override
@@ -1838,6 +1838,16 @@ public class Command {
         }
 
         @Override
+        public int getConfirmation() {
+            return R.string.reset_confirmation;
+        }
+
+        @Override
+        public boolean canResend() {
+            return true;
+        }
+
+        @Override
         protected void onSmsCommandFound(String sender, Context context) {
             DevicePolicyManager deviceManger = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
             final ComponentName compName = new ComponentName(context, DeviceAdminEventReceiver.class);
@@ -1903,16 +1913,6 @@ public class Command {
             } else {
                 sendAdmNotification(context, RESET_FAILED, sender, null);
             }
-        }
-
-        @Override
-        public int getConfirmation() {
-            return R.string.reset_confirmation;
-        }
-
-        @Override
-        public boolean canResend() {
-            return true;
         }
     }
 
