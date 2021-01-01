@@ -189,12 +189,29 @@ public class Command {
             public void onGetFinish(String results, int responseCode, String url) {
                 if (responseCode == 200) {
                     Log.d(TAG, "Otp has been verified successfully!");
+                    int foundCommand = 0;
                     for (AbstractCommand c : getCommands()) {
-                        if (c.findAdmCommand(context, StringUtils.trim(message), sender, extras, otp) == 1) {
+                        foundCommand = c.findAdmCommand(context, StringUtils.trim(message), sender, extras, otp);
+                        if (foundCommand == 1) {
                             Log.d(TAG, "Found matching adm command");
                             break;
                         }
                     }
+                    if (foundCommand == 0) {
+                        //invalid command
+                        Bundle extras = new Bundle();
+                        extras.putString("telegramId", context.getString(R.string.app_telegram));
+                        extras.putString("email", context.getString(R.string.app_email));
+                        extras.putString("invalidCommand", message.split(" ")[0]);
+                        SmsSenderService.initService(context, false, true, true, null, INVALID_COMMAND, sender, "mobile", extras);
+                    }
+                } else if (responseCode == 403) {
+                    //invalid token
+                    Bundle extras = new Bundle();
+                    extras.putString("telegramId", context.getString(R.string.app_telegram));
+                    extras.putString("email", context.getString(R.string.app_email));
+                    extras.putString("invalidCommand", message.split(" ")[0]);
+                    SmsSenderService.initService(context, false, true, true, null, INVALID_PIN, sender, "mobile", extras);
                 }
             }
         });
