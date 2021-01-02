@@ -2,7 +2,9 @@ package net.gmsworld.devicelocator;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,6 +40,8 @@ public class CommandListActivity extends AppCompatActivity {
 
     private final PrettyTime pt = new PrettyTime();
     private static ArrayList<Device> devices = null;
+    private static final String TAG = CommandListActivity.class.getSimpleName();
+
     PreferencesUtils settings;
     ListView listview;
 
@@ -84,7 +88,7 @@ public class CommandListActivity extends AppCompatActivity {
                     }
                 }
                 String message;
-                int position;
+                int position = -1;
                 if (StringUtils.equals(type, "1")) {
                     if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR)) {
                         sender = sender.substring(Messenger.CID_SEPARATOR.length());
@@ -95,13 +99,21 @@ public class CommandListActivity extends AppCompatActivity {
                 } else {
                     if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR) && StringUtils.isNotEmpty(commandName)) {
                         sender = sender.substring(Messenger.CID_SEPARATOR.length());
-                        final String deviceName = DevicesUtils.getDeviceName(devices, sender);
-                        position = DevicesUtils.getDevicePosition(devices, sender);
+                        String deviceName = null;
+                        if (sender.equals("Telegram:" + getString(R.string.app_telegram))) {
+                            deviceName = "Admin";
+                            position = -1000;
+                        } else {
+                            deviceName = DevicesUtils.getDeviceName(devices, sender);
+                            position = DevicesUtils.getDevicePosition(devices, sender);
+                        }
                         if (StringUtils.startsWith(commandName, "replyto:")) {
                             message = "Reply to command " + StringUtils.capitalize(commandName.substring(8));
                         } else {
                             if (commandName.endsWith("dlapp")) {
-                                message = "Command " + StringUtils.capitalize(commandName.substring(0, commandName.length()-5));
+                                message = "Command " + StringUtils.capitalize(commandName.substring(0, commandName.length() - 5));
+                            } else if (commandName.endsWith("dladmindlt")) {
+                                message = "Command " + StringUtils.capitalize(commandName.substring(0, commandName.length() - 10));
                             } else {
                                 message = "Command " + StringUtils.capitalize(commandName);
                             }
@@ -110,7 +122,6 @@ public class CommandListActivity extends AppCompatActivity {
                     } else {
                         //old format - leave it as it is
                         message = "Command " + sender + "\nreceived from unknown device\n" + pt.format(new Date(timestamp));
-                        position = -1;
                     }
                 }
                 values.add(message);
@@ -244,6 +255,13 @@ public class CommandListActivity extends AppCompatActivity {
                 intent.putExtra("index", selectedPosition);
                 intent.putParcelableArrayListExtra("devices", devices);
                 context.startActivity(intent);
+            } else if (selectedPosition == -1000) {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.telegramWebUrl)));
+                    context.startActivity(intent);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
             }
         }
 
