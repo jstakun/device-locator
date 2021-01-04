@@ -448,6 +448,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 case R.id.commandLog:
                     startActivity(new Intent(this, CommandListActivity.class));
                     return true;
+                case R.id.donateUs:
+                    Messenger.viewDonateUrl(this);
+                    return true;
                 default:
                     return super.onOptionsItemSelected(item);
             }

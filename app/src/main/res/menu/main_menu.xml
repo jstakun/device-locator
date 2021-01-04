@@ -30,9 +30,9 @@
         android:title="@string/command_log"
         android:icon="@drawable/baseline_enhanced_encryption_white"
         app:showAsAction="ifRoom|withText"/>
-    <!--item
-        android:id="@+id/privacyPolicy"
-        android:title="@string/privacy_policy"
-        android:icon="@drawable/ic_format_list_bulleted_white"
-        app:showAsAction="ifRoom|withText"/-->
+    <item
+        android:id="@+id/donateUs"
+        android:title="@string/donate_us"
+        android:icon="@drawable/baseline_money_white_24dp"
+        app:showAsAction="ifRoom|withText"/>
 </menu>

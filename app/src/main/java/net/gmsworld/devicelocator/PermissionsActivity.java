@@ -270,6 +270,9 @@ public class PermissionsActivity extends AppCompatActivity {
                 startActivity(new Intent(this, CommandListActivity.class));
                 finish();
                 return true;
+            case R.id.donateUs:
+                Messenger.viewDonateUrl(this);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

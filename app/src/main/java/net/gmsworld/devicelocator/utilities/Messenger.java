@@ -1577,4 +1577,14 @@ public class Messenger {
                 return status;
         }
     }
+
+    public static void viewDonateUrl(Context context) {
+        try {
+            Toaster.showToast(context, "Opening donation page...");
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.donateUrl)));
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Toaster.showToast(context, "Please visit " + context.getString(R.string.donateUrl) + " and donate this application. Thank you :)");
+        }
+    }
 }

@@ -23,4 +23,5 @@
     <string name="telegramWebUrl">https://web.telegram.org/#/im?p=@device_locator_bot</string>
     <string name="otpUrl">https://www.gms-world.net/s/otp</string>
     <string name="telegram_notification">\@device_locator_notifications</string>
+    <string name="donateUrl">https://paypal.me/devicelocator</string>
 </resources>
