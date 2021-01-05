@@ -209,9 +209,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 } else {
                     Log.d(TAG, "Google Maps link message won't be send");
                 }
-                //send location message for sms only
-                if (telegramId == null && email == null && app == null) {
-                    Messenger.sendCloudMessage(this, bestLocation, Messenger.getDeviceId(this, false), null, null, 2, 2000, new HashMap<String, String>());
+                //send remote location message only for sms or local device
+                final String thisDeviceId = Messenger.getDeviceId(this, false);
+                if (telegramId == null && email == null && (app == null || StringUtils.startsWith(app, thisDeviceId))) {
+                    Messenger.sendCloudMessage(this, bestLocation, thisDeviceId, null, null, 2, 2000, new HashMap<String, String>());
                 }
             }
             isRunning = false;
