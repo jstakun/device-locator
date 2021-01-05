@@ -46,7 +46,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     private final static String TAG = CommandService.class.getSimpleName();
     private static final List<String> commandsInProgress = new ArrayList<>();
 
-    private Toaster toaster;
+    private final Toaster toaster;
 
     private FirebaseAnalytics firebaseAnalytics;
 
@@ -158,6 +158,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 } else if (StringUtils.isNotEmpty("routeId")) {
                     NotificationUtils.cancel(this, routeId);
                 }
+                //Log.d(TAG, "Comparing " + imei + " with " + thisDeviceId);
                 if (StringUtils.equals(imei, thisDeviceId)) {
                     //if imei is this device send command locally
                     auditCommand(this, command, imei);

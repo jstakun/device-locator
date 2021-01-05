@@ -505,7 +505,12 @@ public class Messenger {
             sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
-            sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
+            if (StringUtils.startsWith(app, getDeviceId(context, false))) {
+                //send message to local device
+                sendLocalMessage(context, app, text, Command.SHARE_COMMAND);
+            } else {
+                sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
+            }
         }
     }
 
@@ -526,7 +531,12 @@ public class Messenger {
             sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
-            sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 5, 2000, new HashMap<String, String>());
+            if (StringUtils.startsWith(app, getDeviceId(context, false))) {
+                //send message to local device
+                sendLocalMessage(context, app, text, Command.SHARE_COMMAND);
+            } else {
+                sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 5, 2000, new HashMap<String, String>());
+            }
         }
     }
 
@@ -554,7 +564,12 @@ public class Messenger {
             sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
-            sendCloudMessage(context, null, app, text, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
+            if (StringUtils.startsWith(app, getDeviceId(context, false))) {
+                //send message to local device
+                sendLocalMessage(context, app, text, Command.SHARE_COMMAND);
+            } else {
+                sendCloudMessage(context, null, app, text, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
+            }
         }
     }
 
@@ -911,6 +926,7 @@ public class Messenger {
                 sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
             }
             if (StringUtils.isNotEmpty(app)) {
+                Log.d(TAG, "Sending cloud message to device " + app);
                 if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                     //send message to local device
                     sendLocalMessage(context, app, text, command);
@@ -967,7 +983,12 @@ public class Messenger {
             sendEmail(context, null, email, message, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
-            sendCloudMessage(context, null, app, message, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
+            if (StringUtils.startsWith(app, getDeviceId(context, false))) {
+                //send message to local device
+                sendLocalMessage(context, app, message, Command.SHARE_COMMAND);
+            } else {
+                sendCloudMessage(context, null, app, message, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
+            }
         }
     }
 
@@ -987,7 +1008,12 @@ public class Messenger {
             sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
         }
         if (StringUtils.isNotEmpty(app)) {
-            sendCloudMessage(context, null, app, text, null,1, 2000, new HashMap<String, String>());
+            if (StringUtils.startsWith(app, getDeviceId(context, false))) {
+                //send message to local device
+                sendLocalMessage(context, app, text, null);
+            } else {
+                sendCloudMessage(context, null, app, text, null, 1, 2000, new HashMap<String, String>());
+            }
         }
     }
 
