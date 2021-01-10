@@ -1709,12 +1709,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     public void onDeleteDevice(final String imei, final boolean silent) {
         if (Network.isNetworkAvailable(this)) {
-            String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
-            String content = "imei=" + imei + "&action=delete";
-
+            final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
+            final String content = "imei=" + imei + "&action=delete";
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bearer " + tokenStr);
-
             Network.post(this, getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
