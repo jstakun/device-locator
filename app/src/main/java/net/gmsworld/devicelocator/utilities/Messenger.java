@@ -151,7 +151,7 @@ public class Messenger {
                                 } else {
                                     Log.e(TAG, "Failed to parse token!");
                                 }
-                            } else if (responseCode == 500 && retryCount > 0) {
+                            } else if (responseCode >= 500 && retryCount > 0) {
                                 new Handler().postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
@@ -254,7 +254,7 @@ public class Messenger {
                                 } else {
                                     Log.e(TAG, "Failed to parse token!");
                                 }
-                            } else if (responseCode == 500 && retryCount > 0) {
+                            } else if (responseCode >= 500 && retryCount > 0) {
                                 sendEmail(context, location, email, message, title, retryCount - 1, headers);
                             } else {
                                 Log.d(TAG, "Failed to receive token: " + results);
@@ -275,7 +275,7 @@ public class Messenger {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                    if (responseCode == 500 && retryCount > 0) {
+                    if (responseCode >= 500 && retryCount > 0) {
                         sendEmail(context, email, message, title, retryCount - 1, headers);
                     } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
@@ -346,7 +346,7 @@ public class Messenger {
                                 } else {
                                     Log.e(TAG, "Failed to parse token!");
                                 }
-                            } else if (responseCode == 500 && retryCount > 0) {
+                            } else if (responseCode >= 500 && retryCount > 0) {
                                 sendTelegram(context, telegramId, message, retryCount - 1, headers, location);
                             } else {
                                 Log.d(TAG, "Failed to receive token: " + results);
@@ -372,7 +372,7 @@ public class Messenger {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     Log.d(TAG, "Received following response code: " + responseCode + " from url " + url);
-                    if (responseCode == 500 && retryCount > 0) {
+                    if (responseCode >= 500 && retryCount > 0) {
                         sendTelegram(context, telegramId, message, username, retryCount - 1, headers);
                     } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
                         JsonElement reply = new JsonParser().parse(results);
@@ -444,7 +444,7 @@ public class Messenger {
                             } else {
                                 Log.e(TAG, "Failed to parse token!");
                             }
-                        } else if (responseCode == 500 && retryCount > 0) {
+                        } else if (responseCode >= 500 && retryCount > 0) {
                             sendRoutePoint(context, location, retryCount - 1, headers);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
@@ -463,7 +463,7 @@ public class Messenger {
             Network.post(context, context.getString(R.string.notificationUrl), queryString, null, headers, new Network.OnGetFinishListener() {
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
-                    if (responseCode == 500 && retryCount > 0) {
+                    if (responseCode >= 500 && retryCount > 0) {
                         sendRoutePoint(context, retryCount - 1, headers);
                     }
                 }
@@ -1076,7 +1076,7 @@ public class Messenger {
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             sendEmailRegistrationRequest(context, email, validate, getToken(context, results), retryCount);
-                        } else if (responseCode == 500 && retryCount > 0) {
+                        } else if (responseCode >= 500 && retryCount > 0) {
                             sendEmailRegistrationRequest(context, email, validate, retryCount - 1);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
@@ -1101,7 +1101,7 @@ public class Messenger {
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             sendTelegramRegistrationRequest(context, telegramId, getToken(context, results), 1);
-                        } else if (responseCode == 500 && retryCount > 0) {
+                        } else if (responseCode >= 500 && retryCount > 0) {
                             sendTelegramRegistrationRequest(context, telegramId, retryCount - 1);
                         } else {
                             settings.edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "unverified").commit();
@@ -1244,7 +1244,7 @@ public class Messenger {
                     if (context instanceof MainActivity) {
                         ((MainActivity)context).openTelegramSetupDialogFragment();
                     }
-                } else if (responseCode != 200 && retryCount > 0) {
+                } else if (responseCode > 400 && retryCount > 0) {
                     sendTelegramRegistrationRequest(context, telegramId, tokenStr, retryCount - 1);
                 } else {
                     onFailedTelegramRegistration(context, "Oops! Something went wrong on our side. Please register again your Telegram chat or channel!", true);

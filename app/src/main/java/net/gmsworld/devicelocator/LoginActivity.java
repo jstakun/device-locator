@@ -209,7 +209,7 @@ public class LoginActivity extends AppCompatActivity  {
                                 }
                             } else {
                                 toaster.showActivityToast(R.string.internal_error);
-                                Log.d(TAG, "Failed to receive token: " + results);
+                                Log.d(TAG, "Failed to receive token: " + responseCode + " " + results);
                             }
                         }
                     });
