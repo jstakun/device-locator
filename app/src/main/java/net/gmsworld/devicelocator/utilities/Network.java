@@ -130,6 +130,36 @@ public class Network {
         }
     }
 
+    public static Map<String, String> getDefaultHeaders(Context context) {
+        if (defaultHeaders == null) {
+            defaultHeaders = new HashMap<>();
+            defaultHeaders.put("X-GMS-AppId", "2");
+            defaultHeaders.put("X-GMS-Scope", "dl");
+            if (context != null) {
+                defaultHeaders.put("User-Agent", AppUtils.getInstance().getUserAgent(context));
+                defaultHeaders.put("Accept-Language", AppUtils.getInstance().getCurrentLocale(context).getLanguage());
+                defaultHeaders.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
+            }
+        }
+        return defaultHeaders;
+    }
+
+    private static String encodeQueryStringUTF8(final String queryString) throws Exception {
+        String[] pairs = queryString.split("&");
+        StringBuilder encQueryString = new StringBuilder();
+        for (String pair : pairs) {
+            if (pair.contains("=")) {
+                int idx = pair.indexOf("=");
+                if (encQueryString.length() > 0) {
+                    encQueryString.append("&");
+                }
+                encQueryString.append(pair.substring(0, idx)).append("=").append(URLEncoder.encode(pair.substring(idx + 1), "UTF-8"));
+            }
+
+        }
+        return encQueryString.toString();
+    }
+
     static class PostTask extends AsyncTask<Void, Integer, Integer> {
 
         private final OnGetFinishListener onGetFinishListener;
@@ -346,36 +376,6 @@ public class Network {
                 handleHttpStatus(response, responseCode, urlString, context.get());
             }
         }
-    }
-
-    public static Map<String, String> getDefaultHeaders(Context context) {
-        if (defaultHeaders == null) {
-            defaultHeaders = new HashMap<>();
-            defaultHeaders.put("X-GMS-AppId", "2");
-            defaultHeaders.put("X-GMS-Scope", "dl");
-            if (context != null) {
-                defaultHeaders.put("User-Agent", AppUtils.getInstance().getUserAgent(context));
-                defaultHeaders.put("Accept-Language", AppUtils.getInstance().getCurrentLocale(context).getLanguage());
-                defaultHeaders.put("X-GMS-AppVersionId", Integer.toString(AppUtils.getInstance().getVersionCode(context)));
-            }
-        }
-        return defaultHeaders;
-    }
-
-    private static String encodeQueryStringUTF8(final String queryString) throws Exception {
-        String[] pairs = queryString.split("&");
-        StringBuilder encQueryString = new StringBuilder();
-        for (String pair : pairs) {
-            if (pair.contains("=")) {
-                int idx = pair.indexOf("=");
-                if (encQueryString.length() > 0) {
-                    encQueryString.append("&");
-                }
-                encQueryString.append(pair.substring(0, idx)).append("=").append(URLEncoder.encode(pair.substring(idx + 1), "UTF-8"));
-            }
-
-        }
-        return encQueryString.toString();
     }
 
     static class GetTask extends AsyncTask<Void, Integer, Integer> {

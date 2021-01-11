@@ -220,7 +220,9 @@ public class DevicesUtils {
                 Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
-                        loadDeviceList(context, settings, null);
+                        if (responseCode == 200) {
+                            loadDeviceList(context, settings, null);
+                        }
                     }
                 });
             }
