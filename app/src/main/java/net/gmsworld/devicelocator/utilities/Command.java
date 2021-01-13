@@ -25,6 +25,7 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.RingingActivity;
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
+import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.ScreenStatusService;
@@ -36,7 +37,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +106,8 @@ public class Command {
     protected final static String INVALID_COMMAND = "invalidCommand";
 
     private static List<AbstractCommand> commands = null;
+
+    public final static String UPDATE_UI_ACTION = "updateUiAction";
 
     public static String findCommandInSms(Context context, Bundle extras) {
         if (extras != null && extras.containsKey("pdus")) {
@@ -1685,6 +1690,19 @@ public class Command {
                 }
                 if (message != null) {
                     NotificationUtils.showMessageNotification(context, message, location, extras);
+                }
+                if (location != null && extras.containsKey("imei")) { //update devices list
+                    Device device = new Device();
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+                    device.imei = extras.getString("imei");
+                    device.creationDate = formatter.format(new Date());
+                    device.geo = location.getLatitude() + " " + location.getLongitude() + " " + System.currentTimeMillis();
+                    DevicesUtils.updateDevice(device, context);
+                    //send broadcast
+                    Intent broadcastIntent = new Intent();
+                    Log.d(TAG, "Sending UI Update Broadcast");
+                    broadcastIntent.setAction(UPDATE_UI_ACTION);
+                    context.sendBroadcast(broadcastIntent);
                 }
             }
         }

@@ -159,6 +159,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private Toaster toaster;
 
+    private IntentFilter mIntentFilter;
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
+                Log.d(TAG, "Received UI Update Broadcast");
+                initDeviceList();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -174,6 +186,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         final Toolbar toolbar = findViewById(R.id.smsToolbar);
         setSupportActionBar(toolbar);
+
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(Command.UPDATE_UI_ACTION);
 
         //show card: sms, tracker, devices
 
@@ -281,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         super.onResume();
         Log.d(TAG, "onResume()");
 
+        registerReceiver(mReceiver, mIntentFilter);
         initLocationSMSCheckbox();
         updateUI();
         initDeviceList();
@@ -340,6 +356,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
             }
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause()");
+        unregisterReceiver(mReceiver);
     }
 
     @Override

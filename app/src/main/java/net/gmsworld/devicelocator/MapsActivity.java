@@ -1,7 +1,10 @@
 package net.gmsworld.devicelocator;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -30,6 +33,7 @@ import net.gmsworld.devicelocator.fragments.RegisterDeviceDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
+import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Messenger;
@@ -60,13 +64,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private PreferencesUtils settings;
 
     private ArrayList<Device> devices;
-    private String deviceImei = null;
-    private String thisDeviceImei = null;
+    private String deviceImei = null, thisDeviceImei = null;
     private long devicesTimestamp = -1;
     private float currentZoom = -1f;
     private final PrettyTime pt = new PrettyTime();
     private Location bestLocation;
     private Toaster toaster;
+
+    private IntentFilter mIntentFilter;
 
     private final Handler handler = new Handler();
 
@@ -80,6 +85,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             } else {
                 Log.d(TAG, "Will check again in " + DEVICE_SEARCH_INTERVAL + " milliseconds...");
                 handler.postDelayed(findDevices, DEVICE_SEARCH_INTERVAL);
+            }
+        }
+    };
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
+                Log.d(TAG, "Received UI Update Broadcast");
+                if (mMap != null) {
+                    loadDeviceMarkers(false);
+                }
             }
         }
     };
@@ -101,6 +118,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         toaster = new Toaster(this);
         thisDeviceImei = Messenger.getDeviceId(this, false);
 
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(Command.UPDATE_UI_ACTION);
+
         Intent intent = getIntent();
         String action = intent.getAction();
 
@@ -121,6 +141,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume()");
+        registerReceiver(mReceiver, mIntentFilter);
         if (mMap != null) {
             loadDeviceMarkers(true);
         }
@@ -143,6 +164,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "onPause()");
         SmartLocation.with(this).location().stop();
         handler.removeCallbacks(findDevices);
+        unregisterReceiver(mReceiver);
     }
 
     @Override

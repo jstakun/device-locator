@@ -92,12 +92,7 @@ public class DevicesUtils {
                                         }
                                     }
                                     if (thisDeviceOnList) {
-                                        Set<String> deviceSet = new HashSet<>();
-                                        for (Device device : userDevices) {
-                                            deviceSet.add(device.toString());
-                                        }
-                                        settings.setStringSet(USER_DEVICES, deviceSet);
-                                        settings.setLong(USER_DEVICES_TIMESTAMP, System.currentTimeMillis());
+                                        setUserDevices(settings, userDevices);
                                         if (deviceLoadListener != null) {
                                             deviceLoadListener.onDeviceListLoaded(userDevices);
                                         }
@@ -188,6 +183,31 @@ public class DevicesUtils {
             }
         }
         return userDevices;
+    }
+
+    public static void updateDevice(Device device, Context context) {
+        PreferencesUtils settings = new PreferencesUtils(context);
+        ArrayList<Device> devices = buildDeviceList(settings);
+        if (StringUtils.isEmpty(device.name)) {
+            device.name = getDeviceName(devices, device.imei);
+        }
+        for (int i=0;i<devices.size();i++) {
+            if (devices.get(i).imei.equals(device.imei)) {
+                devices.remove(i);
+                break;
+            }
+        }
+        devices.add(device);
+        setUserDevices(settings, devices);
+    }
+
+    private static void setUserDevices(PreferencesUtils settings, List<Device> userDevices) {
+        Set<String> deviceSet = new HashSet<>();
+        for (Device device : userDevices) {
+            deviceSet.add(device.toString());
+        }
+        settings.setStringSet(USER_DEVICES, deviceSet);
+        settings.setLong(USER_DEVICES_TIMESTAMP, System.currentTimeMillis());
     }
 
     public static String getDeviceName(List<Device> devices, String deviceId) {

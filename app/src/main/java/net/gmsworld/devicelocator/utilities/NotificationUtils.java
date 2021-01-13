@@ -117,8 +117,9 @@ public class NotificationUtils {
 
     private static Notification buildMessageNotification(Context context, int notificationId, String message, Location deviceLocation, Bundle extras) {
         PendingIntent mapIntent = null, routeIntent = null, webIntent = null;
-        String deviceName = extras.getString(MainActivity.DEVICE_NAME);
-        String routeId = extras.getString("routeId");
+        final String deviceName = extras.getString(MainActivity.DEVICE_NAME);
+        final String routeId = extras.getString("routeId");
+        final String imei = extras.getString("imei", null);
         String title = context.getString(R.string.app_name) + " Notification";
 
         try {
@@ -129,9 +130,9 @@ public class NotificationUtils {
 
         if (deviceLocation != null) {
             //message has location
-            if (extras.containsKey("imei") && GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
+            if (imei != null && GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
                 Intent gmsIntent = new Intent(context, MapsActivity.class);
-                gmsIntent.putExtra("imei", extras.get("imei").toString());
+                gmsIntent.putExtra("imei", imei);
                 //gmsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 mapIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             } else {
@@ -156,9 +157,9 @@ public class NotificationUtils {
                     message += "\n" + DistanceFormatter.format(distance) + " away from you";
                 }
             }
-            if (extras.containsKey("imei")) {
-                Float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLatitude", Float.NaN);
-                Float lng = PreferenceManager.getDefaultSharedPreferences(context).getFloat(extras.getString("imei") + "_previousLongitude", Float.NaN);
+            if (imei != null) {
+                Float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(imei + "_previousLatitude", Float.NaN);
+                Float lng = PreferenceManager.getDefaultSharedPreferences(context).getFloat(imei + "_previousLongitude", Float.NaN);
                 if (!lat.isNaN() && !lng.isNaN()) {
                     Location l = new Location("");
                     l.setLatitude((double) lat);
@@ -171,8 +172,8 @@ public class NotificationUtils {
                     }
                 }
                 PreferenceManager.getDefaultSharedPreferences(context).edit().
-                        putFloat(extras.getString("imei") + "_previousLatitude", (float)deviceLocation.getLatitude()).
-                        putFloat(extras.getString("imei") + "_previousLongitude", (float)deviceLocation.getLongitude()).apply();
+                        putFloat(imei + "_previousLatitude", (float)deviceLocation.getLatitude()).
+                        putFloat(imei + "_previousLongitude", (float)deviceLocation.getLongitude()).apply();
             }
             if (deviceLocation.hasSpeed() && deviceLocation.getSpeed() > 10f) {
                 message += "\n" + "Speed: " + Messenger.getSpeed(context, deviceLocation.getSpeed());
@@ -294,7 +295,7 @@ public class NotificationUtils {
         //remove
         //Log.d(TAG, " ---------------------- ----------------------- Extras: " +  extras);
 
-        if (extras.containsKey("imei") && extras.containsKey("command")) {
+        if (imei != null && extras.containsKey("command")) {
             final String commandName = extras.getString("command");
             AbstractCommand command = Command.getCommandByName(commandName);
             if (command != null && command.canResend()) {
@@ -304,7 +305,7 @@ public class NotificationUtils {
                     newIntent.putExtra("args", args);
                 }
                 newIntent.putExtra("command", commandName);
-                newIntent.putExtra("imei", extras.getString("imei"));
+                newIntent.putExtra("imei", imei);
                 if (extras.containsKey("pin")) {
                     newIntent.putExtra("pin", extras.getString("pin"));
                 }
@@ -327,7 +328,7 @@ public class NotificationUtils {
                     } else {
                         newIntent.putExtra("cancelCommand", StringUtils.isNotEmpty(cancelCommand) ? cancelCommand : commandName);
                     }
-                    newIntent.putExtra("imei", extras.getString("imei"));
+                    newIntent.putExtra("imei", imei);
                     if (extras.containsKey("pin")) {
                         newIntent.putExtra("pin", extras.getString("pin"));
                     }
