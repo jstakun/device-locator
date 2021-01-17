@@ -40,8 +40,7 @@ public class LocationPermissionDialogFragment extends DialogFragment {
         TextView message = view.findViewById(R.id.message);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             final String msg = getString(R.string.location_service_permission, getString(R.string.app_name))
-                             + " " + getString(R.string.permission_settings, "Location")
-                             + " Finally please select \"Allow all the time\" option." ;
+                             + " ";
             message.setText(Html.fromHtml(msg));
         } else {
             message.setText(Html.fromHtml(getString(R.string.location_service_permission)));

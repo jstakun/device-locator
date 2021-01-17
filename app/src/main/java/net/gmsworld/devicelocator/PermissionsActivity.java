@@ -50,6 +50,8 @@ public class PermissionsActivity extends AppCompatActivity {
     private PreferencesUtils settings;
     private Toaster toaster;
 
+    private int locationPermissionRetryCount = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,10 +111,17 @@ public class PermissionsActivity extends AppCompatActivity {
                  Log.d(TAG, "Contacts permission callback");
                  break;
             case Permissions.PERMISSIONS_LOCATION:
-                 //send device location to admin channel
-                 Bundle extras = new Bundle();
-                 extras.putString("telegramId", getString(R.string.telegram_notification));
-                 SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
+                if (Permissions.haveBackgroundLocationPermission(this)) {
+                    //send device location to admin channel
+                    Bundle extras = new Bundle();
+                    extras.putString("telegramId", getString(R.string.telegram_notification));
+                    SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
+                } else if (locationPermissionRetryCount < 5) {
+                    locationPermissionRetryCount++;
+                    Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                } else {
+                    Permissions.startSettingsIntent(this, "Location");
+                }
                  break;
              default:
                  break;

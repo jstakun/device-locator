@@ -52,7 +52,14 @@ public class Permissions {
 
     public static void requestLocationPermission(Activity activity, int requestCode) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            startSettingsIntent(activity, "Location");
+            //startSettingsIntent(activity, "Location");
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "Requesting Access Background Location");
+                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, requestCode);
+            } else {
+                Log.d(TAG, "Requesting Access Fine Location");
+                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
+            }
         } else {
             try {
                 ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, requestCode);
@@ -183,6 +190,10 @@ public class Permissions {
 
     public static boolean haveSendSMSPermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static boolean haveBackgroundLocationPermission(Context context) {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     public static boolean haveLocationPermission(Context context) {

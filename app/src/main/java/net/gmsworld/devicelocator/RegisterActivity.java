@@ -56,6 +56,8 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
     private boolean locationSent = false;
 
+    private int locationPermissionRetryCount = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,8 +132,15 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 }
                 break;
             case Permissions.PERMISSIONS_LOCATION:
-                final TextView emailInput = findViewById(R.id.email);
-                sendLocation(emailInput.getText().toString());
+                if (Permissions.haveBackgroundLocationPermission(this)) {
+                    final TextView emailInput = findViewById(R.id.email);
+                    sendLocation(emailInput.getText().toString());
+                } else if (locationPermissionRetryCount < 5) {
+                    locationPermissionRetryCount++;
+                    Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                } else {
+                    Permissions.startSettingsIntent(this, "Location");
+                }
                 break;
             default:
                 break;
