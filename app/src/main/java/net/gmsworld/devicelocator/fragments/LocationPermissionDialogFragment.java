@@ -39,9 +39,7 @@ public class LocationPermissionDialogFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fullscreen_dialog, container, false);
         TextView message = view.findViewById(R.id.message);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            final String msg = getString(R.string.location_service_permission, getString(R.string.app_name))
-                             + " ";
-            message.setText(Html.fromHtml(msg));
+            message.setText(Html.fromHtml(getString(R.string.location_service_permission)));
         } else {
             message.setText(Html.fromHtml(getString(R.string.location_service_permission)));
         }
