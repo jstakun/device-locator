@@ -26,7 +26,7 @@
             android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
+            android:text="Use your location"
             android:textSize="22sp" />
 
         <TextView
@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:text="TextView" />
 
         <RelativeLayout
@@ -56,7 +56,7 @@
                 android:id="@+id/buttonOK"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="OK"
+                android:text="Turn on"
                 android:layout_marginRight="32dp"
                 android:backgroundTint="@color/colorPrimary"
                 android:textColor="@android:color/white"
