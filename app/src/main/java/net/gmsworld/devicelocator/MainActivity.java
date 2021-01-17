@@ -63,6 +63,7 @@ import net.gmsworld.devicelocator.fragments.DownloadFullApplicationDialogFragmen
 import net.gmsworld.devicelocator.fragments.EmailActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.EmailNotificationDialogFragment;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
+import net.gmsworld.devicelocator.fragments.LocationPermissionDialogFragment;
 import net.gmsworld.devicelocator.fragments.LoginDialogFragment;
 import net.gmsworld.devicelocator.fragments.NewVersionDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
@@ -661,7 +662,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 break;
             case R.id.settings_alarm:
                 if (checked && !Permissions.haveLocationPermission(MainActivity.this)) {
-                    Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL);
+                    //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL);
+                    LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL).show(getFragmentManager(), TAG);
                     return;
                 } else {
                     setAlarmChecked(checked);
@@ -776,7 +778,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
         } else {
             if (!this.motionDetectorRunning && !Permissions.haveLocationPermission(MainActivity.this)) {
-                Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL);
+                //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL);
+                LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL).show(getFragmentManager(), TAG);
                 return;
             }
         }
@@ -1087,7 +1090,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (!silent) {
                     toaster.showActivityToast(R.string.devices_list_loading);
                     if (!Permissions.haveLocationPermission(this)) {
-                        Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                        //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                        LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_LOCATION).show(getFragmentManager(), TAG);
                     }
                 }
             }
@@ -1157,7 +1161,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (!silent) {
                     toaster.showActivityToast(R.string.devices_list_loading);
                     if (!Permissions.haveLocationPermission(this)) {
-                        Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                        //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                        LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_LOCATION).show(getFragmentManager(), TAG);
                     }
                 }
             } else {

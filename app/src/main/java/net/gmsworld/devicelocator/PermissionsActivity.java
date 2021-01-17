@@ -18,6 +18,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import net.gmsworld.devicelocator.broadcastreceivers.DeviceAdminEventReceiver;
 import net.gmsworld.devicelocator.fragments.FirstTimeUseDialogFragment;
+import net.gmsworld.devicelocator.fragments.LocationPermissionDialogFragment;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.AppUtils;
@@ -305,7 +306,9 @@ public class PermissionsActivity extends AppCompatActivity {
                 break;
             case R.id.access_fine_location_permission:
                 if (checked && !Permissions.haveLocationPermission(this)) {
-                    Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                    //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                    ((Switch) view).setChecked(false);
+                    LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_LOCATION).show(getFragmentManager(), TAG);
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this , "Location");
                 }

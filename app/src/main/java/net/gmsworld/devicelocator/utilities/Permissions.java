@@ -120,7 +120,7 @@ public class Permissions {
 
     public static void startSettingsIntent(Activity context, String permission) {
         try {
-            Toaster.showToast(context, "Click on Permissions and select " + permission);
+            Toaster.showToast(context, context.getString(R.string.permission_settings, permission));
             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + context.getPackageName()));
             context.startActivity(intent);
         } catch (Exception e) {

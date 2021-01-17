@@ -123,7 +123,7 @@
     <string name="no_device">No device selected!</string>
     <string name="command_sent_to_device">Command %1$s has been sent to the device %2$s!</string>
     <string name="command_failed_to_device">Failed to send command %1$s to the device %2$s!</string>
-    <string name="command_failed_device_gone">Failed to send command %2$s to the device %2$s! Is %3$s installed on this device?"</string>
+    <string name="command_failed_device_gone">Failed to send command %1$s to the device %2$s! Is %3$s installed on this device?"</string>
     <string name="command_failed_device_offline">It seems device %1$s has been offline recently. Retry if no reply soon!</string>
     <string name="please_auth">Please authenticate before sending command</string>
 
@@ -167,6 +167,8 @@
     <string name="Manifest_permission_READ_PHONE_STATE">Allow to read device IMEI number for device identification</string>
     <string name="Manifest_permission_WRITE_EXTERNAL_STORAGE">Allow saving camera pictures in device photo gallery</string>
     <string name="reset_permission">Allow Reset device to factory defaults command</string>
+    <string name="permission_settings">Next please click on Permissions list item and select %1$s permission from the list.</string>
+    <string name="location_service_permission">&lt;font color="#808080">In order to allow %1$s to locate your Device at any time please grant us permission to access your Device location in the background.&lt;br/>Please click OK button to proceed.&lt;/font></string>
 
     <!-- Register Activity -->
     <string name="privacy_policy_text">Read our &lt;a href="https://www.gms-world.net/privacy.jsp">Privacy Policy&lt;/a></string>

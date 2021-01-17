@@ -22,6 +22,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import net.gmsworld.devicelocator.fragments.EmailActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.EmailNotificationDialogFragment;
+import net.gmsworld.devicelocator.fragments.LocationPermissionDialogFragment;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.Messenger;
@@ -146,7 +147,9 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 break;
             case R.id.location_policy:
                 if (checked && !Permissions.haveLocationPermission(this)) {
-                    Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                    //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
+                    ((Switch) view).setChecked(false);
+                    LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_LOCATION).show(getFragmentManager(), TAG);
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this , "Location");
                 }
