@@ -19,7 +19,8 @@
             android:id="@+id/icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="32dp"
             app:srcCompat="@drawable/ic_launcher_96" />
 
         <TextView
@@ -27,7 +28,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Use your location"
-            android:textSize="22sp" />
+            android:textSize="22sp"
+            android:padding="4dp"/>
 
         <TextView
             android:id="@+id/message"
@@ -40,9 +42,9 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="16dp">
+            android:layout_marginTop="16dp">
 
-            <Button
+            <!--Button
                 android:id="@+id/buttonCancel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -60,9 +62,19 @@
                 android:layout_marginRight="32dp"
                 android:backgroundTint="@color/colorPrimary"
                 android:textColor="@android:color/white"
-                android:layout_alignParentRight="true"/>
+                android:layout_alignParentRight="true"/-->
+
+            <Button
+                android:id="@+id/buttonOK"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Turn on"
+                android:backgroundTint="@color/colorPrimary"
+                android:textColor="@android:color/white"
+                android:layout_centerInParent="true"/>
 
         </RelativeLayout>
+
 
     </LinearLayout>
 

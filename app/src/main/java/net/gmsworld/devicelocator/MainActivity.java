@@ -663,6 +663,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             case R.id.settings_alarm:
                 if (checked && !Permissions.haveLocationPermission(MainActivity.this)) {
                     //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL);
+                    ((Switch) view).setChecked(false);
                     LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL).show(getFragmentManager(), TAG);
                     return;
                 } else {

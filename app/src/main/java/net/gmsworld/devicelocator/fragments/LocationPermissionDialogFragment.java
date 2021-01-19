@@ -43,13 +43,13 @@ public class LocationPermissionDialogFragment extends DialogFragment {
         } else {
             message.setText(Html.fromHtml(getString(R.string.location_service_permission)));
         }
-        Button cancel = view.findViewById(R.id.buttonCancel);
+        /*Button cancel = view.findViewById(R.id.buttonCancel);
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dismiss();
             }
-        });
+        });*/
 
         Button ok = view.findViewById(R.id.buttonOK);
         ok.setOnClickListener(new View.OnClickListener() {

@@ -810,7 +810,7 @@ public class Messenger {
                     text = "Failed to initiate phone call from device " + deviceId + ". Required permissions are not granted or device has no telephony service!";
                     break;
                 case Command.SHARE_COMMAND:
-                    text = "Unable to share location from device " + deviceId + ". Required permissions are not granted!";
+                    text = "Unable to share location from device " + deviceId + ". Required location permission is not granted in this Device!";
                     break;
                 case Command.ABOUT_COMMAND:
                     text = AppUtils.getInstance().getAboutMessage(context) + getBatteryLevel(context);
