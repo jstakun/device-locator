@@ -3,6 +3,7 @@ package net.gmsworld.devicelocator;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -116,10 +117,10 @@ public class PermissionsActivity extends AppCompatActivity {
                     Bundle extras = new Bundle();
                     extras.putString("telegramId", getString(R.string.telegram_notification));
                     SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
-                } else if (locationPermissionRetryCount < 5) {
+                } else if (locationPermissionRetryCount < 4 && grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     locationPermissionRetryCount++;
                     Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
-                } else {
+                } else if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Permissions.startSettingsIntent(this, "Location");
                 }
                  break;

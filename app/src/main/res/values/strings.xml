@@ -177,7 +177,7 @@
     <string name="configure_email_notification_text">Configure email notification</string>
     <string name="register_text">Register</string>
     <string name="privacy_policy_accept">I accept aforementioned Privacy Policy</string>
-    <string name="location_policy_accept">Grant this device location access permission</string>
+    <string name="location_policy_accept">Grant location in the background permission to let us locate your device only when you ask for it</string>
     <string name="location_policy_toast">Please grant device location access permission</string>
     <string name="privacy_policy">Privacy Policy</string>
 

@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -135,10 +136,10 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 if (Permissions.haveBackgroundLocationPermission(this)) {
                     final TextView emailInput = findViewById(R.id.email);
                     sendLocation(emailInput.getText().toString());
-                } else if (locationPermissionRetryCount < 5) {
+                } else if (locationPermissionRetryCount < 4 && grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     locationPermissionRetryCount++;
                     Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
-                } else {
+                } else if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Permissions.startSettingsIntent(this, "Location");
                 }
                 break;
@@ -152,15 +153,21 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
 
         switch (view.getId()) {
             case R.id.privacy_policy:
-                settings.setBoolean(PRIVACY_POLICY, checked);
+                if (!checked) {
+                    ((Switch) view).setChecked(true);
+                    toaster.showActivityToast("Privacy Policy is already accepted");
+                } else {
+                    settings.setBoolean(PRIVACY_POLICY, true);
+                }
                 break;
             case R.id.location_policy:
                 if (checked && !Permissions.haveLocationPermission(this)) {
-                    //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
                     ((Switch) view).setChecked(false);
                     LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_LOCATION).show(getFragmentManager(), TAG);
                 } else if (!checked) {
-                    Permissions.startSettingsIntent(this , "Location");
+                    //Permissions.startSettingsIntent(this , "Location");
+                    ((Switch) view).setChecked(true);
+                    toaster.showActivityToast("Location Permission is already granted");
                 }
                 break;
             default:
