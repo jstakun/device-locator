@@ -1081,6 +1081,7 @@ public class Messenger {
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
                             settings.edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, "unverified").commit();
+                            Toaster.showToast(context, R.string.internal_error);
                         }
                     }
                 });

@@ -65,6 +65,7 @@ public class LocationAlarmUtils {
             alarmMgr.cancel(intent);
         }
         PreferencesUtils settings = new PreferencesUtils(context);
-        settings.remove(ALARM_KEY, ALARM_INTERVAL);
+        settings.setBoolean(ALARM_SETTINGS, false);
+        settings.remove(ALARM_KEY, ALARM_INTERVAL, ALARM_SILENT);
     }
 }
