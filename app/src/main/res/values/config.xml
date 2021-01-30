@@ -15,7 +15,7 @@
     <string name="serverUrl">https://www.gms-world.net/</string>
     <string name="authnUrl">https://www.gms-world.net/s/authenticate</string>
     <string name="verifyUrl">https://www.gms-world.net/verify</string>
-    <string name="privacyPolicyUrl">https://www.gms-world.net/privacy.jsp</string>
+    <string name="privacyPolicyUrl">https://www.gms-world.net/dl-privacy</string>
     <string name="app_email">device-locator@gms-world.net</string>
     <string name="app_telegram">-1001218249610</string>
     <string name="downloadUrl">https://github.com/jstakun/device-locator/raw/master/app/app-release.apk</string>

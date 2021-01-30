@@ -472,6 +472,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 case R.id.commandLog:
                     startActivity(new Intent(this, CommandListActivity.class));
                     return true;
+                case R.id.privacyPolicy:
+                    Intent gmsIntent = new Intent(this, WebViewActivity.class);
+                    gmsIntent.putExtra("url", getString(R.string.privacyPolicyUrl));
+                    gmsIntent.putExtra("title", getString(R.string.app_name) + " " + getString(R.string.privacy_policy));
+                    startActivity(gmsIntent);
+                    return true;
                 case R.id.donateUs:
                     Messenger.viewDonateUrl(this);
                     return true;

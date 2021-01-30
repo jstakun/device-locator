@@ -379,7 +379,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
         if (textView.getId() == R.id.privacy_policy_text) {
             Intent gmsIntent = new Intent(this, WebViewActivity.class);
             gmsIntent.putExtra("url", getString(R.string.privacyPolicyUrl));
-            gmsIntent.putExtra("title", getString(R.string.app_name) + " Privacy Policy");
+            gmsIntent.putExtra("title", getString(R.string.app_name) + " " + getString(R.string.privacy_policy));
             startActivity(gmsIntent);
         }
     }

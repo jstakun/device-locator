@@ -281,6 +281,12 @@ public class PermissionsActivity extends AppCompatActivity {
                 startActivity(new Intent(this, CommandListActivity.class));
                 finish();
                 return true;
+            case R.id.privacyPolicy:
+                Intent gmsIntent = new Intent(this, WebViewActivity.class);
+                gmsIntent.putExtra("url", getString(R.string.privacyPolicyUrl));
+                gmsIntent.putExtra("title", getString(R.string.app_name) + " " + getString(R.string.privacy_policy));
+                startActivity(gmsIntent);
+                return true;
             case R.id.donateUs:
                 Messenger.viewDonateUrl(this);
                 return true;
