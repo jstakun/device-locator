@@ -412,6 +412,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         //Log.d(TAG, "onCreateOptionsMenu()");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
+        if (!AppUtils.getInstance().isFullVersion()) {
+            menu.findItem(R.id.donateUs).setVisible(false);
+        }
         return true;
     }
 

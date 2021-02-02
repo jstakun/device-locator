@@ -20,6 +20,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.utilities.AbstractCommand;
+import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.Messenger;
@@ -143,6 +144,9 @@ public class CommandListActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
         menu.findItem(R.id.commandLog).setVisible(false);
+        if (!AppUtils.getInstance().isFullVersion()) {
+            menu.findItem(R.id.donateUs).setVisible(false);
+        }
         return true;
     }
 

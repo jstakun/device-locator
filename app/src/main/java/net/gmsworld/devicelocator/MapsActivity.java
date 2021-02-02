@@ -33,6 +33,7 @@ import net.gmsworld.devicelocator.fragments.RegisterDeviceDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.utilities.AbstractLocationManager;
+import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
@@ -181,6 +182,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //Log.d(TAG, "onCreateOptionsMenu()");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main_menu, menu);
+        if (!AppUtils.getInstance().isFullVersion()) {
+            menu.findItem(R.id.donateUs).setVisible(false);
+        }
         menu.findItem(R.id.map).setVisible(false);
         return true;
     }

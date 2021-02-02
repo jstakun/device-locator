@@ -251,6 +251,10 @@ public class PermissionsActivity extends AppCompatActivity {
             menu.findItem(R.id.commandLog).setVisible(false);
         }
 
+        if (!AppUtils.getInstance().isFullVersion()) {
+            menu.findItem(R.id.donateUs).setVisible(false);
+        }
+
         return true;
     }
 
