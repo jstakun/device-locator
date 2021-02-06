@@ -128,11 +128,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (StringUtils.equals(action,Intent.ACTION_VIEW)) {
             Uri data = intent.getData();
             String[] tokens = StringUtils.split(data.getPath(), "/");
-            if (tokens.length >= 2) {
+            if (tokens.length >= 2 && StringUtils.equals(tokens[0], "showDevice")) {
                 deviceImei = tokens[1];
             }
-        } else {
+        } else if (intent.hasExtra("imei")) {
             deviceImei = intent.getStringExtra("imei");
+        } else {
+            deviceImei = thisDeviceImei;
         }
 
         FirebaseAnalytics.getInstance(this).logEvent("maps_activity", new Bundle());
