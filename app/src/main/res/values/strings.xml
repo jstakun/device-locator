@@ -84,7 +84,7 @@
     <string name="device_removed">Device has been removed!</string>
     <string name="device_remove_failed">Failed to remove device!</string>
     <string name="notifiers_error">No notifiers set. Notification can\'t be delivered!</string>
-    <string name="single_device_text">In order to send commands to other devices please install Device Locator on these devices and register with the same login as above.</string>
+    <string name="single_device_text">In order to locate your other devices please install Device Locator on these devices and register them with the same login as above.</string>
     <string name="device_not_found">Device not found!</string>
 
     <!-- Pin Activity -->
