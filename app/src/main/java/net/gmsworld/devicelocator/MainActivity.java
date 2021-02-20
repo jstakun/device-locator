@@ -214,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         initTokenInput();
         initPingButton();
         initEmailButton();
+        initShareButton();
         initDeviceNameInput();
         initUserLoginInput(false, true);
 
@@ -302,8 +303,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         updateUI();
         initDeviceList();
 
-        TextView deviceId = findViewById(R.id.device_id_text);
-        deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
+        //TextView deviceId = findViewById(R.id.device_id_text);
+        //deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
         //deviceId.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
         if (AppUtils.getInstance().isFullVersion()) {
@@ -1709,6 +1710,25 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
     }
 
+    private void initShareButton() {
+        final ImageButton shareButton = this.findViewById(R.id.share_button);
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent sendIntent = new Intent();
+                final String deviceName = Messenger.getDeviceId(MainActivity.this, true);
+                final String imei = Messenger.getDeviceId(MainActivity.this, false);
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, "Find device " + deviceName + " location here: " + getString(R.string.deviceUrl) + "/" + imei);
+                sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Find device " + deviceName + " location <a href=\"" + getString(R.string.deviceUrl) + "/" + imei + "\">here</a>");
+                sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.message, deviceName) + " - device location");
+                sendIntent.setType("text/html");
+                startActivity(sendIntent);
+            }
+        });
+    }
+
     public void initDeviceList() {
         final ListView deviceList = findViewById(R.id.deviceList);
         final TextView deviceListEmpty = findViewById(R.id.deviceListEmpty);
@@ -1968,11 +1988,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             gmsIntent.putExtra("url", getString(R.string.showCommandsUrl));
             gmsIntent.putExtra("title", getString(R.string.app_name) + " Commands");
             startActivity(gmsIntent);
-        } else if (textView.getId() == R.id.device_id_text) {
+        } /*else if (textView.getId() == R.id.device_id_text) {
             Intent gmsIntent = new Intent(this, MapsActivity.class);
             gmsIntent.putExtra("imei", Messenger.getDeviceId(this, false));
             startActivity(gmsIntent);
-        }
+        }*/
     }
 
     public void downloadApk() {

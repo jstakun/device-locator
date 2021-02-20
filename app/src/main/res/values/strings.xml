@@ -216,4 +216,5 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="donate_us">Donate Us</string>
+    <string name="share_this_device_location">Share this device location</string>
 </resources>
