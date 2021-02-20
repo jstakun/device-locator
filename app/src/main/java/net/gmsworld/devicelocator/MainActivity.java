@@ -303,8 +303,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         updateUI();
         initDeviceList();
 
-        //TextView deviceId = findViewById(R.id.device_id_text);
-        //deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
+        TextView deviceId = findViewById(R.id.device_id_text);
+        deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
         //deviceId.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
         if (AppUtils.getInstance().isFullVersion()) {
@@ -1988,11 +1988,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             gmsIntent.putExtra("url", getString(R.string.showCommandsUrl));
             gmsIntent.putExtra("title", getString(R.string.app_name) + " Commands");
             startActivity(gmsIntent);
-        } /*else if (textView.getId() == R.id.device_id_text) {
+        } else if (textView.getId() == R.id.device_id_text) {
             Intent gmsIntent = new Intent(this, MapsActivity.class);
             gmsIntent.putExtra("imei", Messenger.getDeviceId(this, false));
             startActivity(gmsIntent);
-        }*/
+        }
     }
 
     public void downloadApk() {
