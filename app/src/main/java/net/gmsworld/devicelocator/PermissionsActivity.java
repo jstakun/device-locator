@@ -63,6 +63,12 @@ public class PermissionsActivity extends AppCompatActivity {
         final Toolbar toolbar = findViewById(R.id.smsToolbar);
         setSupportActionBar(toolbar);
 
+        if (getIntent() != null) {
+            if (StringUtils.equals(getIntent().getAction(), "Location")) {
+                toaster.showActivityToast("Please allow route tracking service and Location command");
+            }
+        }
+
         if (!settings.contains("PermissionsFirstTimeUseDialog")) {
             settings.setBoolean("PermissionsFirstTimeUseDialog", true);
             FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.permissions_first_time_use, R.drawable.ic_settings_cell_gray);

@@ -21,6 +21,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import net.gmsworld.devicelocator.LauncherActivity;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.MapsActivity;
+import net.gmsworld.devicelocator.PermissionsActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.RouteActivity;
 import net.gmsworld.devicelocator.services.CommandService;
@@ -111,6 +112,17 @@ public class NotificationUtils {
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
             Log.d(TAG, "Creating notification " + id);
+            notificationManager.notify(notificationId, notification);
+        }
+    }
+
+    public static void showLocationPermissionNotification(Context context) {
+        int notificationId = (int) System.currentTimeMillis();
+
+        Notification notification = NotificationUtils.buildLocationPermissionNotification(context, notificationId);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            Log.d(TAG, "Creating notification " + notificationId);
             notificationManager.notify(notificationId, notification);
         }
     }
@@ -348,7 +360,7 @@ public class NotificationUtils {
         return nb.build();
     }
 
-    public static Notification buildWorkerNotification(Context context, String title, String text, boolean showProgress) {
+    public static Notification buildWorkerNotification(Context context, int notificationId, String title, String text, boolean showProgress) {
         initChannels(context, DEFAULT_CHANNEL_ID);
         if (text == null) {
             text = context.getString(R.string.please_wait);
@@ -357,15 +369,40 @@ public class NotificationUtils {
             title = context.getString(R.string.app_name) + " Notification";
         }
 
+        Intent trackerIntent = new Intent(context, LauncherActivity.class);
+        trackerIntent.setAction(MainActivity.ACTION_DEVICE_TRACKER);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, trackerIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_devices_other_white)
                         .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                         .setContentTitle(title)
-                        .setContentText(text);
+                        .setContentText(text)
+                        .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent);
 
         if (showProgress) {
             nb.setProgress(0, 0 ,true);
         }
+
+        return nb.build();
+    }
+
+    private static Notification buildLocationPermissionNotification(Context context, int notificationId) {
+        initChannels(context, DEFAULT_CHANNEL_ID);
+
+        String text = context.getString(R.string.app_name) + " is unable to locate your device. Please click on the link below and grant Location permission.";
+        String title = context.getString(R.string.app_name) + " Notification";
+
+        Intent permissionIntent = new Intent(context, PermissionsActivity.class);
+        permissionIntent.setAction("Location");
+        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, permissionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_devices_other_white)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setContentTitle(title)
+                .setContentText(text)
+                .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent);
 
         return nb.build();
     }

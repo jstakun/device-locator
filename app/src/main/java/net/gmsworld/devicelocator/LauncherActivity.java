@@ -10,6 +10,7 @@ import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
 import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
@@ -73,6 +74,8 @@ public class LauncherActivity extends Activity {
             Bundle extras = new Bundle();
             extras.putString("telegramId", getString(R.string.telegram_notification));
             SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
+        } else if (!Permissions.haveLocationPermission(this)) {
+            NotificationUtils.showLocationPermissionNotification(this);
         } else {
             Log.d(TAG, "Device location has been sent less than 1 hour ago");
         }

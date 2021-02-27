@@ -300,6 +300,7 @@ public class Command {
                 settings.edit().putBoolean(RouteTrackingService.RUNNING, true).apply();
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
+                NotificationUtils.showLocationPermissionNotification(context);
             }
         }
 
@@ -343,6 +344,7 @@ public class Command {
                 settings.setBoolean(RouteTrackingService.RUNNING, true);
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
+                NotificationUtils.showLocationPermissionNotification(context);
             }
         }
 
@@ -500,6 +502,7 @@ public class Command {
             if (!Permissions.haveSendSMSAndLocationPermission(context)) {
                 Log.e(TAG, "Missing SMS and/or Location permission");
                 sendSmsNotification(context, sender, SHARE_COMMAND);
+                NotificationUtils.showLocationPermissionNotification(context);
             } else {
                 if (commandTokens != null && commandTokens.length > 1) {
                     String intervalStr = commandTokens[commandTokens.length - 1];
@@ -538,6 +541,7 @@ public class Command {
             if (!Permissions.haveLocationPermission(context)) {
                 Log.e(TAG, "Missing Location permission");
                 sendSocialNotification(context, SHARE_COMMAND, sender, null);
+                NotificationUtils.showLocationPermissionNotification(context);
             } else {
                 if (commandTokens != null && commandTokens.length > 1) {
                     String intervalStr = commandTokens[commandTokens.length - 1];
@@ -574,6 +578,7 @@ public class Command {
             if (!Permissions.haveLocationPermission(context)) {
                 Log.e(TAG, "Missing Location permission");
                 sendAppNotification(context, SHARE_COMMAND, sender, extras.getString("language"));
+                NotificationUtils.showLocationPermissionNotification(context);
             } else {
                 if (commandTokens != null && commandTokens.length > 1) {
                     String intervalStr = commandTokens[commandTokens.length - 1];
@@ -610,6 +615,7 @@ public class Command {
             if (!Permissions.haveLocationPermission(context)) {
                 Log.e(TAG, "Missing Location permission");
                 sendAdmNotification(context, SHARE_COMMAND, sender, null);
+                NotificationUtils.showLocationPermissionNotification(context);
             } else {
                 if (commandTokens != null && commandTokens.length > 1) {
                     String intervalStr = commandTokens[commandTokens.length - 1];

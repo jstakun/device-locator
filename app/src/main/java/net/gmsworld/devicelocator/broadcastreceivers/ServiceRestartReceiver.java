@@ -9,6 +9,7 @@ import android.util.Log;
 
 import net.gmsworld.devicelocator.services.RouteTrackingService;
 import net.gmsworld.devicelocator.services.ScreenStatusService;
+import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.RouteTrackingServiceUtils;
 
@@ -33,6 +34,7 @@ public class ServiceRestartReceiver extends BroadcastReceiver {
                 RouteTrackingServiceUtils.startRouteTrackingService(context, null, radius, null, false, mode);
             } else {
                 Log.e(TAG, "Unable to start route tracking service due to lack of Location permission");
+                NotificationUtils.showLocationPermissionNotification(context);
             }
         } else {
             Log.d(TAG, "No need to restart RouteTrackingService.");

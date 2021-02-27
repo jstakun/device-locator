@@ -9,6 +9,7 @@ import android.util.Log;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
+import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
@@ -30,6 +31,7 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
             SmsSenderService.initService(context, true, true, true, null, null, null, null, extras);
         } else {
             Log.d(TAG, "Location permission is missing. No location update will be sent.");
+            NotificationUtils.showLocationPermissionNotification(context);
         }
 
         LocationAlarmUtils.initWhenDown(context, true);

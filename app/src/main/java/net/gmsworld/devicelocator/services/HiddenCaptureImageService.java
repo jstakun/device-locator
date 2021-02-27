@@ -99,7 +99,7 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
         app = intent.getStringExtra("app");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForeground(NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, null, "Camera image capture in progress...", true));
+            startForeground(NOTIFICATION_ID, NotificationUtils.buildWorkerNotification(this, NOTIFICATION_ID, null, "Camera image capture in progress...", true));
         }
 
         if (Permissions.haveCameraPermission(this)) {

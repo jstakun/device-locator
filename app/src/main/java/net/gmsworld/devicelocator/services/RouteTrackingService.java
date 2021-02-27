@@ -179,6 +179,7 @@ public class RouteTrackingService extends Service {
             GmsSmartLocationManager.getInstance().enable(IncomingHandler.class.getName(), incomingHandler, this, radius, gpsAccuracy, resetRoute);
         } else {
             Log.e(TAG, "Unable to start route tracking service due to lack of Location permission!");
+            NotificationUtils.showLocationPermissionNotification(this);
         }
     }
 
