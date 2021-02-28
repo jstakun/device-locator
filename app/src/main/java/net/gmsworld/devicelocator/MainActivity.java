@@ -381,7 +381,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         registerDeviceName((TextView) findViewById(R.id.deviceName), true);
 
         //reset pin verification time
-        settings.setLong(PinActivity.VERIFICATION_TIMESTAMP, System.currentTimeMillis());
+        if (settings.contains(PinActivity.VERIFICATION_TIMESTAMP)) {
+            settings.setLong(PinActivity.VERIFICATION_TIMESTAMP, System.currentTimeMillis());
+        }
 
         if (onDownloadComplete != null) {
             try {

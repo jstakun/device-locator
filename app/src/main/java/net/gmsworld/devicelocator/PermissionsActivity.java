@@ -219,7 +219,8 @@ public class PermissionsActivity extends AppCompatActivity {
         Switch useFingerprintPermission = findViewById(R.id.use_fingerprint_permission);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
-            if (fingerprintManager != null && fingerprintManager.isHardwareDetected()) {
+            final boolean isHardwareDetected = fingerprintManager != null && fingerprintManager.isHardwareDetected();
+            if (isHardwareDetected) {
                 useFingerprintPermission.setChecked(Permissions.haveFingerprintPermission(this) && settings.getBoolean(FingerprintHelper.BIOMETRIC_AUTH, true));
             } else {
                 useFingerprintPermission.setVisibility(View.GONE);
@@ -360,12 +361,14 @@ public class PermissionsActivity extends AppCompatActivity {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     settings.setBoolean(FingerprintHelper.BIOMETRIC_AUTH, checked);
                     FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
-                    if (fingerprintManager != null && fingerprintManager.isHardwareDetected() && checked && !Permissions.haveFingerprintPermission(this)) {
+                    final boolean isHardwareDetected = fingerprintManager != null && fingerprintManager.isHardwareDetected();
+                    if (isHardwareDetected && checked && !Permissions.haveFingerprintPermission(this)) {
                         Permissions.requestCallPhonePermission(this, 0);
-                    } else if (!checked && fingerprintManager != null && fingerprintManager.isHardwareDetected() && Permissions.haveFingerprintPermission(this)) {
+                    } else if (!checked && isHardwareDetected && Permissions.haveFingerprintPermission(this)) {
                         //Permissions.startSettingsIntent(this, "Biometric");
                         settings.remove(PinActivity.VERIFICATION_TIMESTAMP);
-                    } else if (fingerprintManager == null || !fingerprintManager.isHardwareDetected()) {
+                        settings.setBoolean(PinActivity.VERIFY_PIN, true);
+                    } else if (!isHardwareDetected) {
                         toaster.showActivityToast("Your device has no fingerprint reader!");
                     }
                 }

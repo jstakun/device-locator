@@ -251,6 +251,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         final String pin =  prefs.getEncryptedString(PinActivity.DEVICE_PIN);
         final long pinVerificationMillis =  prefs.getLong(VERIFICATION_TIMESTAMP);
         final boolean settingsVerifyPin =  prefs.getBoolean(VERIFY_PIN, false);
+        Log.d(TAG, pin + " " + pinVerificationMillis + " " + settingsVerifyPin);
         return (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS);
     }
 
