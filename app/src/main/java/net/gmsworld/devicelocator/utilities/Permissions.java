@@ -231,7 +231,11 @@ public class Permissions {
     }
 
     public static boolean haveFingerprintPermission(Context context) {
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return ContextCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED;
+        } else {
+            return true;
+        }
     }
 
     public static boolean haveWriteStoragePermission(Context context) {

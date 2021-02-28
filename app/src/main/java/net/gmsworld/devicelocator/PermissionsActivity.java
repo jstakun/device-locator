@@ -363,7 +363,8 @@ public class PermissionsActivity extends AppCompatActivity {
                     if (fingerprintManager != null && fingerprintManager.isHardwareDetected() && checked && !Permissions.haveFingerprintPermission(this)) {
                         Permissions.requestCallPhonePermission(this, 0);
                     } else if (!checked && fingerprintManager != null && fingerprintManager.isHardwareDetected() && Permissions.haveFingerprintPermission(this)) {
-                        Permissions.startSettingsIntent(this, "Biometric");
+                        //Permissions.startSettingsIntent(this, "Biometric");
+                        settings.remove(PinActivity.VERIFICATION_TIMESTAMP);
                     } else if (fingerprintManager == null || !fingerprintManager.isHardwareDetected()) {
                         toaster.showActivityToast("Your device has no fingerprint reader!");
                     }

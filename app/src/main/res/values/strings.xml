@@ -56,7 +56,7 @@
     <string name="permissions_first_time_use">&lt;font color="#808080">On this screen you can grant permissions required to execute commands on this device.&lt;/font></string>
     <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and click Permissions button to grant permissions required to execute commands."&lt;/font></string>
     <string name="telegram_init_prompt">&lt;font color="#808080">Telegram id you provided seems to be wrong. Please click <b>OK</b> to find your Telegram id.&lt;/font></string>
-    <string name="new_version_prompt">&lt;font color="#808080">New Device Locator version is available. Do you want to download it now?&lt;/font></string>
+    <string name="new_version_prompt">&lt;font color="#808080">New %1$s version is available. Do you want to download it now?&lt;/font></string>
     <string name="pin_length_error">Security PIN must have at least 4 digits! Reverting to previous value…</string>
     <string name="enter_security_pin">Enter Security PIN</string>
     <string name="accept_sms_without_pin">Only accept commands containing valid Security PIN</string>

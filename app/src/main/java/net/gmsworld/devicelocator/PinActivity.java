@@ -45,8 +45,11 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
     private static final String TAG = PinActivity.class.getSimpleName();
 
     public static final int PIN_MIN_LENGTH = 4;
-    private static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
     public static final String DEVICE_PIN = "token";
+    public static final String VERIFICATION_TIMESTAMP = "pinVerificationMillis";
+    public static final String FAILED_COUNT = "pinFailedCount";
+    public static final String VERIFY_PIN = "settings_verify_pin";
+    private static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
 
     private Toaster toaster;
 
@@ -205,8 +208,8 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             }
             startActivity(intent);
         }
-        settings.remove("pinFailedCount");
-        settings.setLong("pinVerificationMillis", System.currentTimeMillis());
+        settings.remove(FAILED_COUNT);
+        settings.setLong(VERIFICATION_TIMESTAMP, System.currentTimeMillis());
         finish();
     }
 
@@ -217,7 +220,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
 
     @Override
     public void onFailed(FingerprintHelper.AuthType authType) {
-        int pinFailedCount = settings.getInt("pinFailedCount");
+        int pinFailedCount = settings.getInt(FAILED_COUNT);
         Log.d(TAG, "Invalid credentials type: " + authType.name());
         if (authType == FingerprintHelper.AuthType.Fingerprint) {
             failedFingerprint++;
@@ -241,13 +244,13 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                 Log.d(TAG, "Camera is disabled. No photo will be taken");
             }
         }
-        settings.setInt("pinFailedCount", pinFailedCount + 1);
+        settings.setInt(FAILED_COUNT, pinFailedCount + 1);
     }
 
     public static boolean isAuthRequired(PreferencesUtils prefs) {
         final String pin =  prefs.getEncryptedString(PinActivity.DEVICE_PIN);
-        final long pinVerificationMillis =  prefs.getLong("pinVerificationMillis");
-        final boolean settingsVerifyPin =  prefs.getBoolean("settings_verify_pin", false);
+        final long pinVerificationMillis =  prefs.getLong(VERIFICATION_TIMESTAMP);
+        final boolean settingsVerifyPin =  prefs.getBoolean(VERIFY_PIN, false);
         return (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS);
     }
 

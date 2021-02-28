@@ -40,7 +40,7 @@ public class NewVersionDialogFragment extends DialogFragment {
                 }
             }
         });
-        builder.setMessage(Html.fromHtml(getString(R.string.new_version_prompt)));
+        builder.setMessage(Html.fromHtml(getString(R.string.new_version_prompt, getString(R.string.app_name))));
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
         builder.setIcon(R.drawable.ic_warning_gray);
         return builder.create();

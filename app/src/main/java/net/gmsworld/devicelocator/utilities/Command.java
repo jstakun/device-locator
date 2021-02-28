@@ -1478,7 +1478,7 @@ public class Command {
             if (deviceManger != null && deviceManger.isAdminActive(compName)) {
                 try {
                     deviceManger.lockNow();
-                    PreferenceManager.getDefaultSharedPreferences(context).edit().remove("pinFailedCount").remove("pinVerificationMillis").apply();
+                    PreferenceManager.getDefaultSharedPreferences(context).edit().remove(PinActivity.FAILED_COUNT).remove(PinActivity.VERIFICATION_TIMESTAMP).apply();
                     return true;
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);

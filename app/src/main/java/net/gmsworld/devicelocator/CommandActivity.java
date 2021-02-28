@@ -223,7 +223,7 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
     protected void onDestroy() {
         super.onDestroy();
         //reset pin verification time
-        settings.setLong("pinVerificationMillis", System.currentTimeMillis());
+        settings.setLong(PinActivity.VERIFICATION_TIMESTAMP, System.currentTimeMillis());
     }
 
     @Override

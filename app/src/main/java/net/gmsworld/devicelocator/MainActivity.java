@@ -381,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         registerDeviceName((TextView) findViewById(R.id.deviceName), true);
 
         //reset pin verification time
-        settings.setLong("pinVerificationMillis", System.currentTimeMillis());
+        settings.setLong(PinActivity.VERIFICATION_TIMESTAMP, System.currentTimeMillis());
 
         if (onDownloadComplete != null) {
             try {
@@ -645,7 +645,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         ((Switch) findViewById(R.id.settings_detected_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_ACKNOWLEDGE_MESSAGE, true));
         ((Switch) findViewById(R.id.settings_gps_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_LOCATION_MESSAGE, false));
         ((Switch) findViewById(R.id.settings_google_sms)).setChecked(settings.getBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, true));
-        ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean("settings_verify_pin", false));
+        ((Switch) findViewById(R.id.settings_verify_pin)).setChecked(settings.getBoolean(PinActivity.VERIFY_PIN, false));
         ((Switch) findViewById(R.id.settings_alarm)).setChecked(settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false));
     }
 
@@ -663,7 +663,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 settings.setBoolean(SmsSenderService.SEND_MAP_LINK_MESSAGE, checked);
                 break;
             case R.id.settings_verify_pin:
-                settings.setBoolean("settings_verify_pin", checked);
+                settings.setBoolean(PinActivity.VERIFY_PIN, checked);
                 if (checked && StringUtils.isEmpty(telegramId) && StringUtils.isEmpty(email) && StringUtils.isNotEmpty(phoneNumber)) {
                     toaster.showActivityToast("Please remember your Security PIN and configure Notification settings in order to be able to recover forgotten Security PIN.");
                 } else if (checked) {
