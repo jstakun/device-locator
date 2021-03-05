@@ -23,7 +23,7 @@ public class RegisterDeviceDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setNegativeButton("Later", null);
+        //builder.setNegativeButton("Later", null);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 Intent intent = new Intent(getActivity(), MainActivity.class);
@@ -33,7 +33,7 @@ public class RegisterDeviceDialogFragment extends DialogFragment {
         });
         builder.setMessage(Html.fromHtml(getString(R.string.register_device)));
         builder.setTitle(Html.fromHtml(getString(R.string.app_name_html)));
-        builder.setIcon(R.drawable.ic_help_gray);
+        builder.setIcon(R.drawable.ic_warning_gray);//R.drawable.ic_help_gray);
         return builder.create();
     }
 }

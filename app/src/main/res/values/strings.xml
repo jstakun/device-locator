@@ -52,7 +52,7 @@
     <string name="email_registration_retry">&lt;font color="#808080">You have clicked wrong registration link. Please open NEWEST message from us! Click OK button to open your email inbox. If you have already confirmed your registration please click CANCEL button.&lt;/font></string>
     <string name="device_manager_first_time_use">&lt;font color="#808080">On this screen you can register this device and list other devices registered with the same login. You can click on any device on the list and send command to it.&lt;/font></string>
     <string name="device_tracker_first_time_use">&lt;font color="#808080">On this screen you can set who should get notified when commands are executed on this device and enable device tracker which will record this device location.&lt;/font></string>
-    <string name="register_device">&lt;font color="#808080">You have no registered devices. Do you want to register this device now?&lt;/font></string>
+    <string name="register_device">&lt;font color="#808080">This device is not registered. Please click OK to finish registration.&lt;/font></string>
     <string name="permissions_first_time_use">&lt;font color="#808080">On this screen you can grant permissions required to execute commands on this device.&lt;/font></string>
     <string name="commands_enabled_prompt">&lt;font color="#808080">You can now send SMS commands to this device. Please note or change pin on Security PIN card and click Permissions button to grant permissions required to execute commands."&lt;/font></string>
     <string name="telegram_init_prompt">&lt;font color="#808080">Telegram id you provided seems to be wrong. Please click <b>OK</b> to find your Telegram id.&lt;/font></string>
@@ -102,7 +102,7 @@
 
     <!-- Command Activity -->
     <string name="device_command_prompt">Select command</string>
-    <string name="devices_list_empty">No devices registered! Please make sure to set the same Login above and on all your other registered devices.</string>
+    <string name="devices_list_empty">This device is not registered! Please set your login above to finish device registration.</string>
     <string name="devices_list_loading">Synchronizing your devices…</string>
     <string name="devices_list_loading_failed">Device synchronization failed!</string>
     <string name="devices">My Devices</string>
