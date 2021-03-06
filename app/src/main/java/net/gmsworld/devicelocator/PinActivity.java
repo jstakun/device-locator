@@ -1,11 +1,13 @@
 package net.gmsworld.devicelocator;
 
-import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.text.Editable;
 import android.text.Html;
 import android.text.Layout;
@@ -13,10 +15,10 @@ import android.text.Spannable;
 import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.URLSpan;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -29,18 +31,33 @@ import net.gmsworld.devicelocator.services.CommandService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.Command;
-import net.gmsworld.devicelocator.utilities.FingerprintHelper;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import androidx.appcompat.app.AppCompatActivity;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.spec.ECGenParameterSpec;
+import java.util.UUID;
+import java.util.concurrent.Executor;
 
-public class PinActivity extends AppCompatActivity implements FingerprintHelper.AuthenticationCallback {
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+
+public class PinActivity extends AppCompatActivity {
 
     private static final String TAG = PinActivity.class.getSimpleName();
 
@@ -50,14 +67,16 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
     public static final String FAILED_COUNT = "pinFailedCount";
     public static final String VERIFY_PIN = "settings_verify_pin";
     private static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
+    private static final String KEY_NAME = UUID.randomUUID().toString();
+
+    private enum AuthType {Fingerprint, Pin};
 
     private Toaster toaster;
-
-    private FingerprintHelper fingerprintHelper;
     private PreferencesUtils settings;
     private String action;
     private Bundle extras;
     private int failedFingerprint = 0;
+    private String mToBeSignedMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,23 +91,6 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         settings = new PreferencesUtils(this);
 
         toaster = new Toaster(this);
-
-        //fingerprint authentication
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            KeyguardManager keyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-            FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
-            if (keyguardManager != null && fingerprintManager != null) {
-                fingerprintHelper = new FingerprintHelper(keyguardManager, fingerprintManager, this);
-                if (fingerprintHelper.init(this, settings)) {
-                    findViewById(R.id.deviceFingerprintCard).setVisibility(View.VISIBLE);
-                } else {
-                    fingerprintHelper = null;
-                }
-            }
-        }
-
-        //-----------------------------------------------------------------
 
         final String pin = settings.getEncryptedString(DEVICE_PIN);
 
@@ -109,7 +111,7 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
                 if (StringUtils.equals(input, pin)) {
                     onAuthenticated();
                 } else if (input.length() >= pin.length() && input.length() > lastLength) {
-                    onFailed(FingerprintHelper.AuthType.Pin);
+                    onFailed(AuthType.Pin);
                 }
                 lastLength = input.length();
             }
@@ -160,36 +162,54 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
             }
         });
 
+        //biometric authentication --------------------------------------
+
+        if (canAuthenticateWithStrongBiometrics()) {
+            // Generate keypair and init signature
+            Signature signature = null;
+            try {
+                KeyPair keyPair = generateKeyPair(KEY_NAME, true);
+                // Send public key part of key pair to the server, this public key will be used for authentication
+                mToBeSignedMessage = Base64.encodeToString(keyPair.getPublic().getEncoded(), Base64.URL_SAFE) +
+                        ":" + KEY_NAME + ":" +
+                        // Generated by the server to protect against replay attack
+                        RandomStringUtils.random(5);
+                signature = initSignature(KEY_NAME);
+            } catch (Exception e) {
+                //throw new RuntimeException(e);
+                Log.e(TAG, e.getMessage(), e);
+            }
+
+            // Create biometricPrompt
+            if (signature != null) {
+                showBiometricPrompt(signature);
+            }
+        }
+
+        //----------------------------------------------------------------
+
         FirebaseAnalytics.getInstance(this).logEvent("pin_activity", new Bundle());
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (fingerprintHelper != null) {
-            fingerprintHelper.startListening();
-        } else {
-            final EditText tokenInput = findViewById(R.id.verify_pin_edit);
-            tokenInput.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (imm != null) {
-                imm.showSoftInput(tokenInput, InputMethodManager.SHOW_IMPLICIT);
-            }
+        final EditText tokenInput = findViewById(R.id.verify_pin_edit);
+        tokenInput.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.showSoftInput(tokenInput, InputMethodManager.SHOW_IMPLICIT);
         }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (fingerprintHelper != null) {
-            fingerprintHelper.stopListening();
-        }
         final EditText tokenInput = findViewById(R.id.verify_pin_edit);
         tokenInput.setText("");
     }
 
-    @Override
-    public void onAuthenticated() {
+    private void onAuthenticated() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
@@ -213,19 +233,13 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         finish();
     }
 
-    @Override
-    public void onError(int errMsgId, CharSequence errString) {
-        Log.e(TAG, "Fingerprint authentication error occurred " + errMsgId + ": " + errString);
-    }
-
-    @Override
-    public void onFailed(FingerprintHelper.AuthType authType) {
+    private void onFailed(AuthType authType) {
         int pinFailedCount = settings.getInt(FAILED_COUNT);
         Log.d(TAG, "Invalid credentials type: " + authType.name());
-        if (authType == FingerprintHelper.AuthType.Fingerprint) {
+        if (authType == AuthType.Fingerprint) {
             failedFingerprint++;
             if (failedFingerprint == 3) {
-                findViewById(R.id.deviceFingerprintCard).setVisibility(View.GONE);
+                //TODO hide biometric
                 toaster.showActivityToast(R.string.pin_enter_valid);
             } else {
                 toaster.showActivityToast(R.string.fingerprint_invalid);
@@ -254,6 +268,138 @@ public class PinActivity extends AppCompatActivity implements FingerprintHelper.
         Log.d(TAG, pin + " " + pinVerificationMillis + " " + settingsVerifyPin);
         return (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS);
     }
+
+    //biometric authentication ----------------------------------------------------------
+
+    private void showBiometricPrompt(Signature signature) {
+        BiometricPrompt.AuthenticationCallback authenticationCallback = getAuthenticationCallback();
+        BiometricPrompt mBiometricPrompt = new BiometricPrompt(this, getMainThreadExecutor(), authenticationCallback);
+
+        // Set prompt info
+        BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setDescription("Please authenticate yourself using available method below or click Cancel and enter your Security PIN")
+                .setTitle(getString(R.string.app_name))
+                .setSubtitle("Authentication Required")
+                .setNegativeButtonText("Cancel")
+                .build();
+
+        // Show biometric prompt
+        if (signature != null) {
+            mBiometricPrompt.authenticate(promptInfo, new BiometricPrompt.CryptoObject(signature));
+        }
+    }
+
+    private BiometricPrompt.AuthenticationCallback getAuthenticationCallback() {
+        // Callback for biometric authentication result
+        return new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                Log.e(TAG, "Biometric authentication error " + errorCode + ": " + errString);
+                super.onAuthenticationError(errorCode, errString);
+            }
+
+            @Override
+            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                if (result.getCryptoObject() != null && result.getCryptoObject().getSignature() != null) {
+                    try {
+                        Signature signature = result.getCryptoObject().getSignature();
+                        signature.update(mToBeSignedMessage.getBytes());
+                        String signatureString = Base64.encodeToString(signature.sign(), Base64.URL_SAFE);
+                        Log.i(TAG, "Message: " + mToBeSignedMessage);
+                        Log.i(TAG, "Signature (Base64 Encoded): " + signatureString);
+                        onAuthenticated();
+                    } catch (SignatureException e) {
+                        Log.e(TAG, e.getMessage(), e);
+                        onFailed(AuthType.Fingerprint);
+                    }
+                } else {
+                    onFailed(AuthType.Fingerprint);
+                }
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                super.onAuthenticationFailed();
+                onFailed(AuthType.Fingerprint);
+            }
+        };
+    }
+
+    private KeyPair generateKeyPair(String keyName, boolean invalidatedByBiometricEnrollment) throws Exception {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, "AndroidKeyStore");
+
+        KeyGenParameterSpec.Builder builder = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            builder = new KeyGenParameterSpec.Builder(keyName,
+                    KeyProperties.PURPOSE_SIGN)
+                    .setAlgorithmParameterSpec(new ECGenParameterSpec("secp256r1"))
+                    .setDigests(KeyProperties.DIGEST_SHA256,
+                            KeyProperties.DIGEST_SHA384,
+                            KeyProperties.DIGEST_SHA512)
+                    // Require the user to authenticate with a biometric to authorize every use of the key
+                    .setUserAuthenticationRequired(true);
+
+
+            // Generated keys will be invalidated if the biometric templates are added more to user device
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                builder.setInvalidatedByBiometricEnrollment(invalidatedByBiometricEnrollment);
+            }
+
+            keyPairGenerator.initialize(builder.build());
+
+            return keyPairGenerator.generateKeyPair();
+        } else {
+            return null;
+        }
+    }
+
+    @Nullable
+    private KeyPair getKeyPair(String keyName) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+        keyStore.load(null);
+        if (keyStore.containsAlias(keyName)) {
+            // Get public key
+            PublicKey publicKey = keyStore.getCertificate(keyName).getPublicKey();
+            // Get private key
+            PrivateKey privateKey = (PrivateKey) keyStore.getKey(keyName, null);
+            // Return a key pair
+            return new KeyPair(publicKey, privateKey);
+        }
+        return null;
+    }
+
+    @Nullable
+    private Signature initSignature(String keyName) throws Exception {
+        KeyPair keyPair = getKeyPair(keyName);
+
+        if (keyPair != null) {
+            Signature signature = Signature.getInstance("SHA256withECDSA");
+            signature.initSign(keyPair.getPrivate());
+            return signature;
+        }
+        return null;
+    }
+
+    private Executor getMainThreadExecutor() {
+        return new MainThreadExecutor();
+    }
+
+    private boolean canAuthenticateWithStrongBiometrics() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && settings.getBoolean(Permissions.BIOMETRIC_AUTH, true) &&
+                BiometricManager.from(this).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS;
+    }
+
+    private static class MainThreadExecutor implements Executor {
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        @Override
+        public void execute(@NonNull Runnable r) {
+            handler.post(r);
+        }
+    }
+
+    //----------------------------------------------------------------------------
 
     private abstract static class TextViewLinkHandler extends LinkMovementMethod {
 

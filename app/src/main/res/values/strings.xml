@@ -98,7 +98,7 @@
     <string name="pin_recover_mail_title">Security PIN from device %1$s recovery</string>
     <string name="pin_recover_mail_body">Please send me back Security PIN from device %1$s.\nRequest id: %2$s</string>
     <string name="pin_invalid_entered">You\'ve entered 3 times invalid Security PIN!</string>
-    <string name="fingerprint_invalid">Unrecognized fingerprint!</string>
+    <string name="fingerprint_invalid">Failed authentication!</string>
 
     <!-- Command Activity -->
     <string name="device_command_prompt">Select command</string>

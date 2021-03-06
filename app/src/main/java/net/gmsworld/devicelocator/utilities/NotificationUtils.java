@@ -140,26 +140,25 @@ public class NotificationUtils {
             Log.e(TAG, e.getMessage(), e);
         }
 
-        if (deviceLocation != null) {
-            //message has location
-            if (imei != null && GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
-                Intent gmsIntent = new Intent(context, MapsActivity.class);
-                gmsIntent.putExtra("imei", imei);
-                //gmsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                mapIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            } else {
-                String device = "Your+Device";
-                if (StringUtils.isNotEmpty(deviceName)) {
-                    device = "Device+" + deviceName;
-                    title = deviceName.replace('-', ' ') + " Notification";
-                }
-                Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + deviceLocation.getLatitude() + "," + deviceLocation.getLongitude() + "(" + device + ")");
-                Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                gmsIntent.setPackage("com.google.android.apps.maps");
-                if (gmsIntent.resolveActivity(context.getPackageManager()) != null) {
-                    mapIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                }
+        if (imei != null) {
+            Intent gmsIntent = new Intent(context, MapsActivity.class);
+            gmsIntent.putExtra("imei", imei);
+            mapIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else if (deviceLocation != null) {
+            String device = "Your+Device";
+            if (StringUtils.isNotEmpty(deviceName)) {
+                device = "Device+" + deviceName;
+                title = deviceName.replace('-', ' ') + " Notification";
             }
+            Uri gmmIntentUri = Uri.parse("geo:0,0?q=" + deviceLocation.getLatitude() + "," + deviceLocation.getLongitude() + "(" + device + ")");
+            Intent gmsIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            gmsIntent.setPackage("com.google.android.apps.maps");
+            if (gmsIntent.resolveActivity(context.getPackageManager()) != null) {
+                mapIntent = PendingIntent.getActivity(context, notificationId, gmsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
+        }
+
+        if (deviceLocation != null && GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS) {
             Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
             if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) { //10 min
                 int distance = (int) deviceLocation.distanceTo(lastLocation); //in meters
@@ -303,9 +302,6 @@ public class NotificationUtils {
                 extras.putString("command", Command.UNMUTE_COMMAND);
             }
         }
-
-        //remove
-        //Log.d(TAG, " ---------------------- ----------------------- Extras: " +  extras);
 
         if (imei != null && extras.containsKey("command")) {
             final String commandName = extras.getString("command");

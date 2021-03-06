@@ -4,7 +4,6 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,7 +24,6 @@ import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.Files;
-import net.gmsworld.devicelocator.utilities.FingerprintHelper;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
@@ -36,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.biometric.BiometricManager;
 
 public class PermissionsActivity extends AppCompatActivity {
 
@@ -218,10 +217,9 @@ public class PermissionsActivity extends AppCompatActivity {
 
         Switch useFingerprintPermission = findViewById(R.id.use_fingerprint_permission);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
-            final boolean isHardwareDetected = fingerprintManager != null && fingerprintManager.isHardwareDetected();
+            final boolean isHardwareDetected = BiometricManager.from(this).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS;
             if (isHardwareDetected) {
-                useFingerprintPermission.setChecked(Permissions.haveFingerprintPermission(this) && settings.getBoolean(FingerprintHelper.BIOMETRIC_AUTH, true));
+                useFingerprintPermission.setChecked(settings.getBoolean(Permissions.BIOMETRIC_AUTH, true));
             } else {
                 useFingerprintPermission.setVisibility(View.GONE);
             }
@@ -359,12 +357,12 @@ public class PermissionsActivity extends AppCompatActivity {
                 break;
             case R.id.use_fingerprint_permission:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    settings.setBoolean(FingerprintHelper.BIOMETRIC_AUTH, checked);
-                    FingerprintManager fingerprintManager = (FingerprintManager) getSystemService(FINGERPRINT_SERVICE);
-                    final boolean isHardwareDetected = fingerprintManager != null && fingerprintManager.isHardwareDetected();
-                    if (isHardwareDetected && checked && !Permissions.haveFingerprintPermission(this)) {
-                        Permissions.requestCallPhonePermission(this, 0);
-                    } else if (!checked && isHardwareDetected && Permissions.haveFingerprintPermission(this)) {
+                    settings.setBoolean(Permissions.BIOMETRIC_AUTH, checked);
+                    final boolean isHardwareDetected = BiometricManager.from(this).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS;
+                    //if (isHardwareDetected && checked && !Permissions.haveFingerprintPermission(this)) {
+                    //    Permissions.requestCallPhonePermission(this, 0);
+                    //} else
+                    if (!checked && isHardwareDetected) {
                         //Permissions.startSettingsIntent(this, "Biometric");
                         settings.remove(PinActivity.VERIFICATION_TIMESTAMP);
                         settings.setBoolean(PinActivity.VERIFY_PIN, true);

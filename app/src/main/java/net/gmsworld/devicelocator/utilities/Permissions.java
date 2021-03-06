@@ -30,6 +30,8 @@ public class Permissions {
     public static final int PERMISSIONS_REQUEST_GET_EMAIL = 1008;
     public static final int PERMISSIONS_LOCATION = 1009;
 
+    public static final String BIOMETRIC_AUTH = "biometricAuth";
+
     private static final String TAG = Permissions.class.getSimpleName();
 
     public static void requestSendSMSAndLocationPermission(Activity activity, int requestCode) {
@@ -228,14 +230,6 @@ public class Permissions {
 
     public static boolean haveCallPhonePermission(Context context) {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    public static boolean haveFingerprintPermission(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return ContextCompat.checkSelfPermission(context, Manifest.permission.USE_FINGERPRINT) == PackageManager.PERMISSION_GRANTED;
-        } else {
-            return true;
-        }
     }
 
     public static boolean haveWriteStoragePermission(Context context) {
