@@ -157,11 +157,11 @@ public class PermissionsActivity extends AppCompatActivity {
         if (StringUtils.isNotEmpty(savedDeviceId) && !StringUtils.equals(deviceId, savedDeviceId)) {
             //device name has changed because READ_CONTACTS permission was revoked
             Log.d(TAG, "Device name has been changed!");
-            if (settings.contains(DevicesUtils.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
-                //READ_CONTACTS permission has been revoked: remove this device old data
-                settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
-                DevicesUtils.deleteDevice(this, settings, deviceId);
-            }
+            //if (settings.contains(DevicesUtils.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
+                //remove this device old data
+                //settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
+                //DevicesUtils.deleteDevice(this, settings, deviceId);
+            //}
             DevicesUtils.registerDevice(this, settings, toaster);
         }
 
