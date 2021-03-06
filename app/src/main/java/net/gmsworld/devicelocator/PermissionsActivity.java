@@ -31,6 +31,8 @@ import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -105,16 +107,27 @@ public class PermissionsActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d(TAG, "Request code: " + requestCode + " " + Arrays.toString(permissions) + ": " + Arrays.toString(grantResults));
         switch (requestCode) {
             case CAMERA_PERMISSION:
                  Log.d(TAG, "Camera permission callback");
-                 startCameraTest();
+                 if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    toaster.showActivityToast("Permission has been denied!");
+                 } else {
+                     startCameraTest();
+                 }
                  break;
             case CALL_PERMISSION:
                  Log.d(TAG, "Call permission callback");
+                 if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                    toaster.showActivityToast("Permission has been denied!");
+                 }
                  break;
             case CONTACTS_PERMISSION:
                  Log.d(TAG, "Contacts permission callback");
+                 if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                     toaster.showActivityToast("Permission has been denied!");
+                 }
                  break;
             case Permissions.PERMISSIONS_LOCATION:
                 if (Permissions.haveBackgroundLocationPermission(this)) {

@@ -1006,7 +1006,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         accountNames.add("");
 
         //add notification email to the list only if verified
-        String emailStatus = settings.getString(EMAIL_REGISTRATION_STATUS);
+        final String emailStatus = settings.getString(EMAIL_REGISTRATION_STATUS);
         if (!StringUtils.equalsIgnoreCase(emailStatus, "unverified") && StringUtils.isNotEmpty(email)) {
             accountNames.add(email);
         }
@@ -1036,14 +1036,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     onDeleteDevice(Messenger.getDeviceId(this, false), true);
                 }
             }
-        } else {
+        } else if (accountNames.size() == 1) {
             if (settings.contains(USER_LOGIN) && settings.contains(DevicesUtils.USER_DEVICES)) {
                 settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
                 onDeleteDevice(Messenger.getDeviceId(this, false), true);
             }
             if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && !silent) {
                 if (requestPermission) {
-                    toaster.showActivityToast("Please grant this permission to list accounts registered on this device");
+                    toaster.showActivityToast("Please grant Contacts access permission to list accounts registered on this device");
                     Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
                 } else {
                     LoginDialogFragment.newInstance().show(getFragmentManager(), LoginDialogFragment.TAG);
@@ -1673,7 +1673,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (Permissions.haveGetAccountsPermission(MainActivity.this)) {
                     initEmailListDialog();
                 } else {
-                    toaster.showActivityToast("Please grant this permission to list accounts registered on this device");
+                    toaster.showActivityToast("Please grant Contacts access permission to list accounts registered on this device");
                     Permissions.requestGetAccountsPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_GET_EMAIL);
                 }
             }
