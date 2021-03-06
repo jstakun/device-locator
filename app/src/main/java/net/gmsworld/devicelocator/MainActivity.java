@@ -1043,7 +1043,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
             if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && !silent) {
                 if (requestPermission) {
-                    toaster.showActivityToast("Please grant Contacts access permission to list accounts registered on this device");
+                    toaster.showActivityToast(R.string.contacts_policy_toast);
                     Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
                 } else {
                     LoginDialogFragment.newInstance().show(getFragmentManager(), LoginDialogFragment.TAG);
@@ -1673,7 +1673,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 if (Permissions.haveGetAccountsPermission(MainActivity.this)) {
                     initEmailListDialog();
                 } else {
-                    toaster.showActivityToast("Please grant Contacts access permission to list accounts registered on this device");
+                    toaster.showActivityToast(R.string.contacts_policy_toast);
                     Permissions.requestGetAccountsPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_GET_EMAIL);
                 }
             }

@@ -184,7 +184,7 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
                 if (Permissions.haveGetAccountsPermission(RegisterActivity.this)) {
                     initEmailListDialog();
                 } else {
-                    toaster.showActivityToast("Please grant this permission to list accounts registered on this device");
+                    toaster.showActivityToast(R.string.contacts_policy_toast);
                     Permissions.requestGetAccountsPermission(RegisterActivity.this, Permissions.PERMISSIONS_REQUEST_GET_EMAIL);
                 }
             }

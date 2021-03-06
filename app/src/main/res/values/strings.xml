@@ -153,6 +153,7 @@
     <string name="device_permissions">Device permissions</string>
     <string name="app_permissions">Application permissions</string>
     <string name="other_permissions">Other permissions</string>
+    <string name="permission_denied">This permission has been denied!</string>
     <string name="notifiers_missing">Please specify who should get notified in case of failed login</string>
     <string name="DevicePolicyManager_ACTION_ADD_DEVICE_ADMIN">Allow failed device login notification service and Lock screen command</string>
     <string name="Settings_ACTION_MANAGE_OVERLAY_PERMISSION">Allow taking front camera photo after failed device login and with Photo command</string>
@@ -162,7 +163,7 @@
     <string name="Manifest_permission_CAMERA">Allow taking front camera photo after failed device login and with Photo command</string>
     <string name="Manifest_permission_READ_CONTACTS">Only accept SMS commands sent from my contacts</string>
     <string name="Manifest_permission_CALL_PHONE">Allow to initiate phone call to Call command sender</string>
-    <string name="Manifest_permission_USE_FINGERPRINT">Allow application authentication with fingerprint</string>
+    <string name="Manifest_permission_USE_FINGERPRINT">Allow biometric application authentication</string>
     <string name="Manifest_permission_GET_ACCOUNTS">Allow to list accounts registered on the device</string>
     <string name="Manifest_permission_READ_PHONE_STATE">Allow to read device IMEI number for device identification</string>
     <string name="Manifest_permission_WRITE_EXTERNAL_STORAGE">Allow saving camera pictures in device photo gallery</string>
@@ -179,6 +180,7 @@
     <string name="privacy_policy_accept">I accept aforementioned Privacy Policy</string>
     <string name="location_policy_accept">Grant location in the background permission to let us locate your device only when you ask for it</string>
     <string name="location_policy_toast">Please grant device location access permission</string>
+    <string name="contacts_policy_toast">Please grant Contacts access permission to list accounts registered on this device</string>
     <string name="privacy_policy">Privacy Policy</string>
 
     <!-- -->

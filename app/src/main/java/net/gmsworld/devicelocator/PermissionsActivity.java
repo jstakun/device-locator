@@ -112,7 +112,7 @@ public class PermissionsActivity extends AppCompatActivity {
             case CAMERA_PERMISSION:
                  Log.d(TAG, "Camera permission callback");
                  if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                    toaster.showActivityToast("Permission has been denied!");
+                    toaster.showActivityToast(R.string.permission_denied);
                  } else {
                      startCameraTest();
                  }
@@ -120,13 +120,13 @@ public class PermissionsActivity extends AppCompatActivity {
             case CALL_PERMISSION:
                  Log.d(TAG, "Call permission callback");
                  if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                    toaster.showActivityToast("Permission has been denied!");
+                    toaster.showActivityToast(R.string.permission_denied);
                  }
                  break;
             case CONTACTS_PERMISSION:
                  Log.d(TAG, "Contacts permission callback");
                  if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                     toaster.showActivityToast("Permission has been denied!");
+                     toaster.showActivityToast(R.string.permission_denied);
                  }
                  break;
             case Permissions.PERMISSIONS_LOCATION:
@@ -155,7 +155,13 @@ public class PermissionsActivity extends AppCompatActivity {
         final String savedDeviceId = settings.getString(DevicesUtils.CURRENT_DEVICE_ID);
         final String deviceId = Messenger.getDeviceId(this, false);
         if (StringUtils.isNotEmpty(savedDeviceId) && !StringUtils.equals(deviceId, savedDeviceId)) {
-            //device name has changed because READ_PHONE_STATE permission was revoked
+            //device name has changed because READ_CONTACTS permission was revoked
+            Log.d(TAG, "Device name has been changed!");
+            if (settings.contains(DevicesUtils.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
+                //READ_CONTACTS permission has been revoked: remove this device old data
+                settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
+                DevicesUtils.deleteDevice(this, settings, deviceId);
+            }
             DevicesUtils.registerDevice(this, settings, toaster);
         }
 
@@ -207,13 +213,7 @@ public class PermissionsActivity extends AppCompatActivity {
 
         Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
         if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
-            boolean perm = Permissions.haveReadContactsPermission(this);
-            readContactsPermission.setChecked(perm);
-            if (!perm && settings.contains(DevicesUtils.USER_DEVICES) && settings.contains(MainActivity.USER_LOGIN)) {
-                //READ_CONTACTS permission has been revoked: remove this device old data
-                settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
-                DevicesUtils.deleteDevice(this, settings, deviceId);
-            }
+            readContactsPermission.setChecked(Permissions.haveReadContactsPermission(this));
         } else {
             readContactsPermission.setVisibility(View.GONE);
         }
@@ -402,7 +402,7 @@ public class PermissionsActivity extends AppCompatActivity {
                 break;
             case R.id.get_accounts_permission:
                 if (checked && !Permissions.haveGetAccountsPermission(this)) {
-                    Permissions.requestGetAccountsPermission(this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
+                    Permissions.requestGetAccountsPermission(this, CONTACTS_PERMISSION);
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this, "Contacts");
                 }
