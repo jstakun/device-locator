@@ -69,7 +69,7 @@ public class PinActivity extends AppCompatActivity {
     private static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
     private static final String KEY_NAME = UUID.randomUUID().toString();
 
-    private enum AuthType {Fingerprint, Pin};
+    private enum AuthType {Biometric, Pin};
 
     private Toaster toaster;
     private PreferencesUtils settings;
@@ -77,6 +77,7 @@ public class PinActivity extends AppCompatActivity {
     private Bundle extras;
     private int failedFingerprint = 0;
     private String mToBeSignedMessage;
+    private BiometricPrompt mBiometricPrompt = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -236,10 +237,12 @@ public class PinActivity extends AppCompatActivity {
     private void onFailed(AuthType authType) {
         int pinFailedCount = settings.getInt(FAILED_COUNT);
         Log.d(TAG, "Invalid credentials type: " + authType.name());
-        if (authType == AuthType.Fingerprint) {
+        if (authType == AuthType.Biometric) {
             failedFingerprint++;
             if (failedFingerprint == 3) {
-                //TODO hide biometric
+                if (mBiometricPrompt != null) {
+                    mBiometricPrompt.cancelAuthentication();
+                }
                 toaster.showActivityToast(R.string.pin_enter_valid);
             } else {
                 toaster.showActivityToast(R.string.fingerprint_invalid);
@@ -273,7 +276,7 @@ public class PinActivity extends AppCompatActivity {
 
     private void showBiometricPrompt(Signature signature) {
         BiometricPrompt.AuthenticationCallback authenticationCallback = getAuthenticationCallback();
-        BiometricPrompt mBiometricPrompt = new BiometricPrompt(this, getMainThreadExecutor(), authenticationCallback);
+        mBiometricPrompt = new BiometricPrompt(this, getMainThreadExecutor(), authenticationCallback);
 
         // Set prompt info
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
@@ -311,17 +314,17 @@ public class PinActivity extends AppCompatActivity {
                         onAuthenticated();
                     } catch (SignatureException e) {
                         Log.e(TAG, e.getMessage(), e);
-                        onFailed(AuthType.Fingerprint);
+                        onFailed(AuthType.Biometric);
                     }
                 } else {
-                    onFailed(AuthType.Fingerprint);
+                    onFailed(AuthType.Biometric);
                 }
             }
 
             @Override
             public void onAuthenticationFailed() {
                 super.onAuthenticationFailed();
-                onFailed(AuthType.Fingerprint);
+                onFailed(AuthType.Biometric);
             }
         };
     }
