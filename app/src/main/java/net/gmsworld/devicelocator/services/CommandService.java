@@ -92,8 +92,11 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
         toaster.showServiceToast(R.string.please_wait);
 
-        if (PinActivity.isAuthRequired(prefs)) {
-            Log.d(TAG, "User should authenticate again!");
+        final String thisDeviceId = Messenger.getDeviceId(this, false);
+        final String imei = extras.getString("imei");
+
+        if (!StringUtils.equals(imei, thisDeviceId) && PinActivity.isAuthRequired(prefs)) {
+            Log.d(TAG, "User should login again!");
             toaster.showServiceToast(R.string.please_auth);
             Intent authIntent = new Intent(this, PinActivity.class);
             authIntent.putExtras(extras);
@@ -107,7 +110,6 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             }
 
             final String command = cmd;
-            final String imei = extras.getString("imei");
             final String args = extras.getString("args");
             final String deviceName = extras.getString(MainActivity.DEVICE_NAME);
             final String cancelCommand = extras.getString("cancelCommand");
@@ -134,7 +136,6 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
             prefs.setEncryptedString(CommandActivity.PIN_PREFIX + imei, pin);
 
-            final String thisDeviceId = Messenger.getDeviceId(this, false);
             final String correlationId = thisDeviceId + Messenger.CID_SEPARATOR + prefs.getEncryptedString(PinActivity.DEVICE_PIN);
 
             String content = "imei=" + imei;

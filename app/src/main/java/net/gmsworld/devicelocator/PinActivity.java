@@ -280,9 +280,9 @@ public class PinActivity extends AppCompatActivity {
 
         // Set prompt info
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setDescription("Please authenticate yourself using available biometric method or click Cancel and enter your Security PIN")
+                .setDescription(getString(R.string.biometric_description))
                 .setTitle(getString(R.string.app_name))
-                .setSubtitle("Authentication Required")
+                .setSubtitle(getString(R.string.biometric_subtitle))
                 .setNegativeButtonText("Cancel")
                 .build();
 

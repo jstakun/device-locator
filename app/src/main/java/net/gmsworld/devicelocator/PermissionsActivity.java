@@ -1,8 +1,10 @@
 package net.gmsworld.devicelocator;
 
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import net.gmsworld.devicelocator.fragments.LocationPermissionDialogFragment;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.AppUtils;
+import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.Messenger;
@@ -53,6 +56,18 @@ public class PermissionsActivity extends AppCompatActivity {
     private Toaster toaster;
 
     private int locationPermissionRetryCount = 0;
+
+    private IntentFilter uiIntentFilter = new IntentFilter(Command.UPDATE_UI_ACTION);
+
+    private BroadcastReceiver uiReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
+                Log.d(TAG, "Received UI Update Broadcast");
+                refreshSwitches();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,8 +165,10 @@ public class PermissionsActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         Log.d(TAG, "onResume()");
+
+        registerReceiver(uiReceiver, uiIntentFilter);
+
         final String savedDeviceId = settings.getString(DevicesUtils.CURRENT_DEVICE_ID);
         final String deviceId = Messenger.getDeviceId(this, false);
         if (StringUtils.isNotEmpty(savedDeviceId) && !StringUtils.equals(deviceId, savedDeviceId)) {
@@ -165,90 +182,14 @@ public class PermissionsActivity extends AppCompatActivity {
             DevicesUtils.registerDevice(this, settings, toaster);
         }
 
-        // device permissions
+        refreshSwitches();
+    }
 
-        //device admin
-        Switch deviceAdminPermission = findViewById(R.id.device_admin_permission);
-        deviceAdminPermission.setChecked(settings.getBoolean(DeviceAdminEventReceiver.DEVICE_ADMIN_ENABLED, false));
-
-        //manage overlay
-        Switch manageOverlayPermission = findViewById(R.id.manage_overlay_permission);
-        manageOverlayPermission.setChecked(HiddenCameraUtils.canOverDrawOtherApps(this));
-
-        //do not disturb
-        Switch notificationPolicyAccessPermission = findViewById(R.id.notification_policy_access_permission);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
-            if (notificationManager != null) {
-                notificationPolicyAccessPermission.setChecked(notificationManager.isNotificationPolicyAccessGranted());
-            } else {
-                notificationPolicyAccessPermission.setVisibility(View.GONE);
-            }
-        } else {
-            notificationPolicyAccessPermission.setVisibility(View.GONE);
-        }
-
-        // application permissions
-
-        Switch accessFineLocationPermission = findViewById(R.id.access_fine_location_permission);
-        accessFineLocationPermission.setChecked(Permissions.haveLocationPermission(this));
-
-        Switch smsPermission = findViewById(R.id.sms_permission);
-        if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
-            smsPermission.setChecked(Permissions.haveSendSMSPermission(this));
-        } else {
-            smsPermission.setVisibility(View.GONE);
-        }
-
-        Switch cameraPermission = findViewById(R.id.camera_permission);
-        if (!Permissions.haveCameraPermission(this) || !HiddenCameraUtils.canOverDrawOtherApps(this) || !settings.getBoolean(HiddenCaptureImageService.STATUS, false)) {
-            cameraPermission.setChecked(false);
-            settings.setBoolean(HiddenCaptureImageService.STATUS, false);
-        } else {
-            cameraPermission.setChecked(true);
-        }
-
-        Switch writeStoragePermission = findViewById(R.id.write_storage_permission);
-        writeStoragePermission.setChecked(Permissions.haveWriteStoragePermission(this));
-
-        Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
-        if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
-            readContactsPermission.setChecked(Permissions.haveReadContactsPermission(this));
-        } else {
-            readContactsPermission.setVisibility(View.GONE);
-        }
-
-        Switch callPhonePermission = findViewById(R.id.call_phone_permission);
-        callPhonePermission.setChecked(Permissions.haveCallPhonePermission(this));
-
-        Switch resetPermission = findViewById(R.id.reset_permission);
-        resetPermission.setChecked(settings.getBoolean("allowReset", false));
-
-        ((Switch) findViewById(R.id.settings_sms_without_pin)).setChecked(settings.getBoolean("settings_sms_without_pin", true));
-
-        //other permissions
-
-        Switch useFingerprintPermission = findViewById(R.id.use_fingerprint_permission);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            final boolean isHardwareDetected = BiometricManager.from(this).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS;
-            if (isHardwareDetected) {
-                useFingerprintPermission.setChecked(settings.getBoolean(Permissions.BIOMETRIC_AUTH, true));
-            } else {
-                useFingerprintPermission.setVisibility(View.GONE);
-            }
-        } else {
-            useFingerprintPermission.setVisibility(View.GONE);
-        }
-
-        Switch readPhoneStatePermission = findViewById(R.id.read_phone_state_permission);
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            readPhoneStatePermission.setChecked(Permissions.haveReadPhoneStatePermission(this));
-        } else {
-            readPhoneStatePermission.setVisibility(View.GONE);
-        }
-
-        Switch getAccountsPermission = findViewById(R.id.get_accounts_permission);
-        getAccountsPermission.setChecked(Permissions.haveGetAccountsPermission(this));
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause()");
+        unregisterReceiver(uiReceiver);
     }
 
     @Override
@@ -429,6 +370,93 @@ public class PermissionsActivity extends AppCompatActivity {
             default:
                 break;
         }
+    }
+
+    private void refreshSwitches() {
+        // device permissions
+
+        //device admin
+        Switch deviceAdminPermission = findViewById(R.id.device_admin_permission);
+        deviceAdminPermission.setChecked(settings.getBoolean(DeviceAdminEventReceiver.DEVICE_ADMIN_ENABLED, false));
+
+        //manage overlay
+        Switch manageOverlayPermission = findViewById(R.id.manage_overlay_permission);
+        manageOverlayPermission.setChecked(HiddenCameraUtils.canOverDrawOtherApps(this));
+
+        //do not disturb
+        Switch notificationPolicyAccessPermission = findViewById(R.id.notification_policy_access_permission);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                notificationPolicyAccessPermission.setChecked(notificationManager.isNotificationPolicyAccessGranted());
+            } else {
+                notificationPolicyAccessPermission.setVisibility(View.GONE);
+            }
+        } else {
+            notificationPolicyAccessPermission.setVisibility(View.GONE);
+        }
+
+        // application permissions
+
+        Switch accessFineLocationPermission = findViewById(R.id.access_fine_location_permission);
+        accessFineLocationPermission.setChecked(Permissions.haveLocationPermission(this));
+
+        Switch smsPermission = findViewById(R.id.sms_permission);
+        if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
+            smsPermission.setChecked(Permissions.haveSendSMSPermission(this));
+        } else {
+            smsPermission.setVisibility(View.GONE);
+        }
+
+        Switch cameraPermission = findViewById(R.id.camera_permission);
+        if (!Permissions.haveCameraPermission(this) || !HiddenCameraUtils.canOverDrawOtherApps(this) || !settings.getBoolean(HiddenCaptureImageService.STATUS, false)) {
+            cameraPermission.setChecked(false);
+            settings.setBoolean(HiddenCaptureImageService.STATUS, false);
+        } else {
+            cameraPermission.setChecked(true);
+        }
+
+        Switch writeStoragePermission = findViewById(R.id.write_storage_permission);
+        writeStoragePermission.setChecked(Permissions.haveWriteStoragePermission(this));
+
+        Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
+        if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
+            readContactsPermission.setChecked(Permissions.haveReadContactsPermission(this));
+        } else {
+            readContactsPermission.setVisibility(View.GONE);
+        }
+
+        Switch callPhonePermission = findViewById(R.id.call_phone_permission);
+        callPhonePermission.setChecked(Permissions.haveCallPhonePermission(this));
+
+        Switch resetPermission = findViewById(R.id.reset_permission);
+        resetPermission.setChecked(settings.getBoolean("allowReset", false));
+
+        ((Switch) findViewById(R.id.settings_sms_without_pin)).setChecked(settings.getBoolean("settings_sms_without_pin", true));
+
+        //other permissions
+
+        Switch useFingerprintPermission = findViewById(R.id.use_fingerprint_permission);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            final boolean isHardwareDetected = BiometricManager.from(this).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS;
+            if (isHardwareDetected) {
+                useFingerprintPermission.setChecked(settings.getBoolean(Permissions.BIOMETRIC_AUTH, true));
+            } else {
+                useFingerprintPermission.setVisibility(View.GONE);
+            }
+        } else {
+            useFingerprintPermission.setVisibility(View.GONE);
+        }
+
+        Switch readPhoneStatePermission = findViewById(R.id.read_phone_state_permission);
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            readPhoneStatePermission.setChecked(Permissions.haveReadPhoneStatePermission(this));
+        } else {
+            readPhoneStatePermission.setVisibility(View.GONE);
+        }
+
+        Switch getAccountsPermission = findViewById(R.id.get_accounts_permission);
+        getAccountsPermission.setChecked(Permissions.haveGetAccountsPermission(this));
     }
 
     private void onCameraPermissionChecked(boolean checked) {

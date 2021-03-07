@@ -74,10 +74,12 @@ public class LauncherActivity extends Activity {
             Bundle extras = new Bundle();
             extras.putString("telegramId", getString(R.string.telegram_notification));
             SmsSenderService.initService(this, false, false, true, null, null, null, null, extras);
-        } else if (!Permissions.haveLocationPermission(this)) {
+        } else if (isEmailVerified && !Permissions.haveLocationPermission(this)) {
             NotificationUtils.showLocationPermissionNotification(this);
-        } else {
+        } else if (isEmailVerified) {
             Log.d(TAG, "Device location has been sent less than 1 hour ago");
+        } else {
+            Log.d(TAG, "Waiting for email registration");
         }
 
         //enable location sharing by default

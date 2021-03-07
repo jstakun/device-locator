@@ -160,9 +160,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private Toaster toaster;
 
-    private IntentFilter mIntentFilter;
+    private IntentFilter uiIntentFilter = new IntentFilter(Command.UPDATE_UI_ACTION);
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver uiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
@@ -187,9 +187,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         final Toolbar toolbar = findViewById(R.id.smsToolbar);
         setSupportActionBar(toolbar);
-
-        mIntentFilter = new IntentFilter();
-        mIntentFilter.addAction(Command.UPDATE_UI_ACTION);
 
         //show card: sms, tracker, devices
 
@@ -298,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         super.onResume();
         Log.d(TAG, "onResume()");
 
-        registerReceiver(mReceiver, mIntentFilter);
+        registerReceiver(uiReceiver, uiIntentFilter);
         initLocationSMSCheckbox();
         updateUI();
         initDeviceList();
@@ -364,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause()");
-        unregisterReceiver(mReceiver);
+        unregisterReceiver(uiReceiver);
     }
 
     @Override

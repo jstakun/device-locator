@@ -44,7 +44,7 @@
     <string name="device_tracker">Device Tracker</string>
     <string name="sms_control">Device Commands</string>
     <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
-    <string name="verify_security_pin">Authenticate me at application startup using Security PIN</string>
+    <string name="verify_security_pin">Login at application startup using Security PIN</string>
     <string name="sms_manager_first_time_use">&lt;font color="#808080">On this screen you can enable SMS commands, manage your Security PIN, and select Location messages sent in reply to Locate command.&lt;br/>Do you want to enable now SMS commands on your device?&lt;/font></string>
     <string name="sms_manager_first_time_use_gp">&lt;font color="#808080">On this screen you can enable SMS commands, manage your Security PIN, and select Location messages sent in reply to Locate command.&lt;/font></string>
     <string name="download_full_app">&lt;font color="#808080">Due to Google Play security policy SMS commands are disabled in this version.&lt;br/>Do you want to download Full version supporting SMS commands?&lt;/font></string>
@@ -98,7 +98,7 @@
     <string name="pin_recover_mail_title">Security PIN from device %1$s recovery</string>
     <string name="pin_recover_mail_body">Please send me back Security PIN from device %1$s.\nRequest id: %2$s</string>
     <string name="pin_invalid_entered">You\'ve entered 3 times invalid Security PIN!</string>
-    <string name="fingerprint_invalid">Failed authentication!</string>
+    <string name="fingerprint_invalid">Failed login!</string>
 
     <!-- Command Activity -->
     <string name="device_command_prompt">Select command</string>
@@ -125,7 +125,9 @@
     <string name="command_failed_to_device">Failed to send command %1$s to the device %2$s!</string>
     <string name="command_failed_device_gone">Failed to send command %1$s to the device %2$s! Is %3$s installed on this device?"</string>
     <string name="command_failed_device_offline">It seems device %1$s has been offline recently. Retry if no reply soon!</string>
-    <string name="please_auth">Please authenticate before sending command</string>
+    <string name="please_auth">Please login again before sending command!</string>
+    <string name="biometric_description">Please login using available biometric method or click Cancel and enter your Security PIN</string>
+    <string name="biometric_subtitle">Login Required</string>
 
     <!-- Login Activity -->
     <string name="error_invalid_email">Login is invalid</string>
@@ -162,10 +164,10 @@
     <string name="Manifest_permission_SEND_SMS">Allow receiving SMS commands and sending SMS notifications</string>
     <string name="Manifest_permission_CAMERA">Allow taking front camera photo after failed device login and with Photo command</string>
     <string name="Manifest_permission_READ_CONTACTS">Only accept SMS commands sent from my contacts</string>
-    <string name="Manifest_permission_CALL_PHONE">Allow to initiate phone call to Call command sender</string>
+    <string name="Manifest_permission_CALL_PHONE">Allow initiating phone call to Call command sender</string>
     <string name="Manifest_permission_USE_FINGERPRINT">Allow biometric application authentication</string>
-    <string name="Manifest_permission_GET_ACCOUNTS">Allow to list accounts registered on the device</string>
-    <string name="Manifest_permission_READ_PHONE_STATE">Allow to read device IMEI number for device identification</string>
+    <string name="Manifest_permission_GET_ACCOUNTS">Allow listing accounts registered on the device</string>
+    <string name="Manifest_permission_READ_PHONE_STATE">Allow reading device IMEI number for device identification</string>
     <string name="Manifest_permission_WRITE_EXTERNAL_STORAGE">Allow saving camera pictures in device photo gallery</string>
     <string name="reset_permission">Allow Reset device to factory defaults command</string>
     <string name="permission_settings">Please click on \"Permissions\" list item and next click on \"%1$s\" list item.</string>

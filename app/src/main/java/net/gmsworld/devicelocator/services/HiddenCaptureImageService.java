@@ -230,6 +230,10 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
             boolean deleted = imageFile.delete();
             Log.d(TAG, "Camera photo deleted: " + deleted);
             toaster.showServiceToast("Camera enabled!");
+            Intent broadcastIntent = new Intent();
+            Log.d(TAG, "Sending UI Update Broadcast");
+            broadcastIntent.setAction(Command.UPDATE_UI_ACTION);
+            sendBroadcast(broadcastIntent);
         }
 
         isRunning = false;
