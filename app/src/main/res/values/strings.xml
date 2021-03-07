@@ -86,6 +86,8 @@
     <string name="notifiers_error">No notifiers set. Notification can\'t be delivered!</string>
     <string name="single_device_text">In order to locate your other devices please install Device Locator on these devices and register them with the same login as above.</string>
     <string name="device_not_found">Device not found!</string>
+    <string name="donate_us">Donate Us</string>
+    <string name="share_this_device_location">Share this device location</string>
 
     <!-- Pin Activity -->
     <string name="pin_link">&lt;font color="#808080">If you forgot your Security PIN click &lt;a href="#">here&lt;/a>&lt;/font></string>
@@ -126,7 +128,7 @@
     <string name="command_failed_device_gone">Failed to send command %1$s to the device %2$s! Is %3$s installed on this device?"</string>
     <string name="command_failed_device_offline">It seems device %1$s has been offline recently. Retry if no reply soon!</string>
     <string name="please_auth">Please login again before sending command!</string>
-    <string name="biometric_description">Please login using available biometric method or click Cancel and enter your Security PIN</string>
+    <string name="biometric_description">Please login with biometrics or click Cancel and enter your Security PIN</string>
     <string name="biometric_subtitle">Login Required</string>
 
     <!-- Login Activity -->
@@ -140,7 +142,8 @@
     <string name="resetLink">&lt;a href="#">Reset password&lt;/a></string>
     <string name="unlock_with_fingerprint">Unlock with Fingerprint</string>
     <string name="route_button">Route view</string>
-    <string name="map_button">Map view</string>
+    <string name="map_button">See on Map</string>
+    <!--string name="map_button">Map view</string-->
     <string name="browser_button">Open in browser</string>
     <string name="resend_command">Send again</string>
     <string name="please_wait">Please wait…</string>
@@ -165,7 +168,7 @@
     <string name="Manifest_permission_CAMERA">Allow taking front camera photo after failed device login and with Photo command</string>
     <string name="Manifest_permission_READ_CONTACTS">Only accept SMS commands sent from my contacts</string>
     <string name="Manifest_permission_CALL_PHONE">Allow initiating phone call to Call command sender</string>
-    <string name="Manifest_permission_USE_FINGERPRINT">Allow biometric application authentication</string>
+    <string name="Manifest_permission_USE_FINGERPRINT">Allow biometrics application login</string>
     <string name="Manifest_permission_GET_ACCOUNTS">Allow listing accounts registered on the device</string>
     <string name="Manifest_permission_READ_PHONE_STATE">Allow reading device IMEI number for device identification</string>
     <string name="Manifest_permission_WRITE_EXTERNAL_STORAGE">Allow saving camera pictures in device photo gallery</string>
@@ -186,7 +189,6 @@
     <string name="privacy_policy">Privacy Policy</string>
 
     <!-- -->
-
     <string name="email_invalid_error">Please enter valid email address!</string>
     <string name="forget_me">Forget me</string>
     <string name="send_code_again">Send code again</string>
@@ -211,14 +213,4 @@
     <string name="alarm_settings_suffix">Next %1$s</string>
     <string name="device_tracker_radius_in_meters">Device tracker radius in meters</string>
     <string name="title_activity_web_view">Web Viewer</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
-
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-    <string name="donate_us">Donate Us</string>
-    <string name="share_this_device_location">Share this device location</string>
 </resources>
