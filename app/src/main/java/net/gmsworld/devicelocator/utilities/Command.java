@@ -1704,7 +1704,7 @@ public class Command {
                     device.creationDate = formatter.format(new Date());
                     device.geo = location.getLatitude() + " " + location.getLongitude() + " " + System.currentTimeMillis();
                     DevicesUtils.updateDevice(device, context);
-                    //send broadcast
+                    //send ui broadcast
                     Intent broadcastIntent = new Intent();
                     Log.d(TAG, "Sending UI Update Broadcast");
                     broadcastIntent.setAction(UPDATE_UI_ACTION);
