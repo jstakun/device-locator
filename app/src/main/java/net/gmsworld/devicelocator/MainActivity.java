@@ -520,7 +520,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS:
-                initUserLoginInput(false, true);
+                if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    initUserLoginInput(false, true);
+                }
                 break;
             case Permissions.PERMISSIONS_REQUEST_SMS_CONTROL:
                 if (Permissions.haveSendSMSPermission(this)) {
@@ -984,7 +986,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     //user login input setup -------------------------------------------------------------
 
     public void initUserLoginInput(boolean requestPermission, boolean silent) {
-        Log.d(TAG, "initUserLoginInput(" + requestPermission + ")");
+        Log.d(TAG, "initUserLoginInput(" + requestPermission + "," + silent + ")");
         final Spinner userAccounts = this.findViewById(R.id.userAccounts);
 
         userAccounts.setOnTouchListener(new View.OnTouchListener() {
@@ -992,8 +994,12 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 //Log.d(TAG, "setOnTouchListener");
                 view.performClick();
+                if (!Permissions.haveGetAccountsPermission(MainActivity.this)) {
+                    toaster.showActivityToast(R.string.contacts_policy_toast);
+                    Permissions.requestGetAccountsPermission(MainActivity.this, Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS);
+                }
                 if (motionEvent.getAction() == MotionEvent.ACTION_DOWN && (userAccounts.getAdapter() == null || userAccounts.getAdapter().getCount() == 1)) {
-                    initUserLoginInput(true, false);
+                    initUserLoginInput(false, false);
                 }
                 return false;
             }
