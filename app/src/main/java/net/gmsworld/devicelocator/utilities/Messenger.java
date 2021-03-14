@@ -36,6 +36,7 @@ import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.RegisterActivity;
 import net.gmsworld.devicelocator.fragments.NotificationActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.TelegramSetupDialogFragment;
+import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.DlFirebaseMessagingService;
 import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.RouteTrackingService;
@@ -833,23 +834,25 @@ public class Messenger {
                     command = Command.MUTE_COMMAND;
                     break;
                 case Command.INVALID_PIN:
-                    final String deviceName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), deviceId);
+                    final List<Device> devices = DevicesUtils.buildDeviceList(settings);
+                    final String deviceName = DevicesUtils.getDeviceName(devices, deviceId);
                     String sender = extras.getString("sender", "unknown");
                     if (StringUtils.contains(sender, "=")) {
                         sender = StringUtils.split(sender, "=")[0].trim();
                     }
-                    final String senderName = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), sender);
+                    final String senderName = DevicesUtils.getDeviceName(devices, sender);
                     final String source = extras.getString("source");
                     final String invalidCommand = extras.getString("invalidCommand");
                     text = "Command " + invalidCommand + " with invalid Security PIN has been sent to the device " + deviceName + " from " + source + " " + senderName + ".";
                     break;
                 case Command.INVALID_COMMAND:
-                    final String deviceNamee = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), deviceId);
+                    final List<Device> devicess = DevicesUtils.buildDeviceList(settings);
+                    final String deviceNamee = DevicesUtils.getDeviceName(devicess, deviceId);
                     String senderr = extras.getString("sender", "unknown");
                     if (senderr.contains("=")) {
                         senderr = senderr.split("=")[0].trim();
                     }
-                    final String senderNamee = DevicesUtils.getDeviceName(DevicesUtils.buildDeviceList(settings), senderr);
+                    final String senderNamee = DevicesUtils.getDeviceName(devicess, senderr);
                     final String sourcee = extras.getString("source");
                     final String invalidCommandd = extras.getString("invalidCommand");
                     text = "Invalid command " + invalidCommandd + " has been sent to the device " + deviceNamee + " from " + sourcee + " " + senderNamee + ".";

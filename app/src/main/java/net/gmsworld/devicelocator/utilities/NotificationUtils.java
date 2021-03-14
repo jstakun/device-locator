@@ -117,9 +117,18 @@ public class NotificationUtils {
     }
 
     public static void showLocationPermissionNotification(Context context) {
-        int notificationId = (int) System.currentTimeMillis();
-
+        final int notificationId = (int) System.currentTimeMillis();
         Notification notification = NotificationUtils.buildLocationPermissionNotification(context, notificationId);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            Log.d(TAG, "Creating notification " + notificationId);
+            notificationManager.notify(notificationId, notification);
+        }
+    }
+
+    public static void showSavedLocationNotification(Context context) {
+        final int notificationId = (int) System.currentTimeMillis();
+        Notification notification = NotificationUtils.buildSavedLocationNotification(context, notificationId);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
             Log.d(TAG, "Creating notification " + notificationId);
@@ -386,11 +395,30 @@ public class NotificationUtils {
     private static Notification buildLocationPermissionNotification(Context context, int notificationId) {
         initChannels(context, DEFAULT_CHANNEL_ID);
 
-        String text = context.getString(R.string.app_name) + " is unable to locate your device. Please click on the link below and grant Location permission.";
-        String title = context.getString(R.string.app_name) + " Notification";
+        final String text = context.getString(R.string.app_name) + " is unable to locate your device. Please click on the link below and grant Location permission.";
+        final String title = context.getString(R.string.app_name) + " Notification";
 
         Intent permissionIntent = new Intent(context, PermissionsActivity.class);
         permissionIntent.setAction("Location");
+        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, permissionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_devices_other_white)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setContentTitle(title)
+                .setContentText(text)
+                .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent);
+
+        return nb.build();
+    }
+
+    private static Notification buildSavedLocationNotification(Context context, int notificationId) {
+        initChannels(context, DEFAULT_CHANNEL_ID);
+
+        final String text = "Your saved device location is older than 1 day. Please open " + context.getString(R.string.app_name) + " to update your saved device location.";
+        final String title = context.getString(R.string.app_name) + " Notification";
+
+        Intent permissionIntent = new Intent(context, MapsActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, permissionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)

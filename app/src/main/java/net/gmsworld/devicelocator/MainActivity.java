@@ -686,17 +686,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
     }
 
-    private void setAlarmChecked(boolean checked) {
-        settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, checked);
-        settings.remove(LocationAlarmUtils.ALARM_SILENT);
-        if (checked) {
-            LocationAlarmUtils.initWhenDown(this, true);
-        } else {
-            LocationAlarmUtils.cancel(this);
-        }
-        updateAlarmText();
-    }
-
     private void clearFocus() {
         View current = getCurrentFocus();
         if (current != null) {
@@ -970,6 +959,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         if (settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)){
             LocationAlarmUtils.initWhenDown(this, false);
         }
+    }
+
+    private void setAlarmChecked(boolean checked) {
+        settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, checked);
+        settings.remove(LocationAlarmUtils.ALARM_SILENT);
+        if (checked) {
+            LocationAlarmUtils.initWhenDown(this, true);
+        } else {
+            LocationAlarmUtils.cancel(this);
+        }
+        updateAlarmText();
     }
 
     private void updateAlarmText() {

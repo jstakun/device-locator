@@ -187,7 +187,7 @@ public class DevicesUtils {
 
     public static void updateDevice(Device device, Context context) {
         PreferencesUtils settings = new PreferencesUtils(context);
-        ArrayList<Device> devices = buildDeviceList(settings);
+        List<Device> devices = buildDeviceList(settings);
         if (StringUtils.isEmpty(device.name)) {
             device.name = getDeviceName(devices, device.imei);
         }

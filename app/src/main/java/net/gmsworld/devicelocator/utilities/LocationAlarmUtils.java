@@ -22,48 +22,39 @@ public class LocationAlarmUtils {
 
     public static void initWhenDown(Context context, boolean forceReset) {
         PreferencesUtils settings = new PreferencesUtils(context);
+        long alarmInterval;
+
         if (settings.getBoolean(ALARM_SETTINGS, false)) {
-            final long alarmInterval = settings.getInt(ALARM_INTERVAL, ALARM_INTERVAL_VALUE) * AlarmManager.INTERVAL_HOUR;
-
-            AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);
-
-            if (alarmMgr != null && (forceReset || (PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null))) {
-                final long triggerAtMillis = System.currentTimeMillis() + alarmInterval;
-                Log.d(TAG, "Creating Location Alarm to be triggered at " + new Date(triggerAtMillis));
-                final PendingIntent operation = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
-                } else {
-                    alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, alarmInterval, operation);
-                }
-                settings.setLong(ALARM_KEY, triggerAtMillis);
-            } else {
-                Log.d(TAG, "Next location alarm will be triggered at " + new Date(settings.getLong(ALARM_KEY)));
-            }
-
-            /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                if (alarmMgr.getNextAlarmClock() != null) {
-                    long nextAlarm = alarmMgr.getNextAlarmClock().getTriggerTime();
-                    if (nextAlarm > 0) {
-                        Log.d(TAG, "Next alarm will be triggered at " + new Date(nextAlarm));
-                    }
-                }
-            }*/
-            //String nextAlarm = Settings.System.getString(context.getContentResolver(), Settings.System.NEXT_ALARM_FORMATTED);
-            //Log.d(TAG, "Next alarm will be triggered at " + nextAlarm);
+            alarmInterval = settings.getInt(ALARM_INTERVAL, ALARM_INTERVAL_VALUE) * AlarmManager.INTERVAL_HOUR;
         } else {
-            Log.d(TAG, "Location Alarm is disabled");
+            alarmInterval = ALARM_INTERVAL_VALUE * AlarmManager.INTERVAL_HOUR;
+        }
+
+        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);
+
+        if (alarmMgr != null && (forceReset || (PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null))) {
+           final long triggerAtMillis = System.currentTimeMillis() + alarmInterval;
+           Log.d(TAG, "Creating Location Alarm to be triggered at " + new Date(triggerAtMillis));
+           final PendingIntent operation = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+               alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
+           } else {
+               alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, alarmInterval, operation);
+           }
+           settings.setLong(ALARM_KEY, triggerAtMillis);
+        } else {
+            Log.d(TAG, "Next location alarm will be triggered at " + new Date(settings.getLong(ALARM_KEY)));
         }
     }
 
     public static void cancel(Context context) {
-        AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);
-        PendingIntent intent = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE);
-        if (intent != null && alarmMgr != null) {
-            alarmMgr.cancel(intent);
-        }
+        //AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        //Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);
+        //PendingIntent intent = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE);
+        //if (intent != null && alarmMgr != null) {
+        //    alarmMgr.cancel(intent);
+        //}
         PreferencesUtils settings = new PreferencesUtils(context);
         settings.setBoolean(ALARM_SETTINGS, false);
         settings.remove(ALARM_KEY, ALARM_INTERVAL, ALARM_SILENT);
