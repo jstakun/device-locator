@@ -20,7 +20,7 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "Received broadcast...");
+        Log.d(TAG, "Received Location Alarm broadcast...");
         PreferencesUtils settings = new PreferencesUtils(context);
         if (settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)) {
             //periodical location sharing is enabled
@@ -35,7 +35,7 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
                 Log.d(TAG, "Location permission is missing. No location update will be sent.");
                 NotificationUtils.showLocationPermissionNotification(context);
             }
-        } else if (System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60 * 24) ){
+        } else if (System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60 * 24) ) {
             //periodical location sharing is disabled
             if (Permissions.haveLocationPermission(context)) {
                 NotificationUtils.showSavedLocationNotification(context);

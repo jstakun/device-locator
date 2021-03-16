@@ -415,7 +415,7 @@ public class NotificationUtils {
     private static Notification buildSavedLocationNotification(Context context, int notificationId) {
         initChannels(context, DEFAULT_CHANNEL_ID);
 
-        final String text = "Your saved device location is older than 1 day. Please open " + context.getString(R.string.app_name) + " to update your saved device location.";
+        final String text = "Please open " + context.getString(R.string.app_name) + " to refresh your device location!";
         final String title = context.getString(R.string.app_name) + " Notification";
 
         Intent permissionIntent = new Intent(context, MapsActivity.class);
@@ -426,6 +426,7 @@ public class NotificationUtils {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentTitle(title)
                 .setContentText(text)
+                .setAutoCancel(true)
                 .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent);
 
         return nb.build();

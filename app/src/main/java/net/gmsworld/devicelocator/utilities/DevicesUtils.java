@@ -241,6 +241,7 @@ public class DevicesUtils {
                     @Override
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
+                            settings.setLong(Messenger.LOCATION_SENT_MILLIS, System.currentTimeMillis());
                             loadDeviceList(context, settings, null);
                         }
                     }
