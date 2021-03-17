@@ -28,6 +28,7 @@ import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.utilities.Toaster;
@@ -94,6 +95,8 @@ public class PermissionsActivity extends AppCompatActivity {
             FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.permissions_first_time_use, R.drawable.ic_settings_cell_gray);
             firstTimeUseDialogFragment.show(getFragmentManager(), "PermissionsFirstTimeUseDialog");
         }
+
+        NotificationUtils.cancel(this, NotificationUtils.LOCATION_PERMISSION_NOTIFICATION_ID);
 
         FirebaseAnalytics.getInstance(this).logEvent("permissions_activity", new Bundle());
     }

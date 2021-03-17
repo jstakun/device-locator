@@ -223,7 +223,7 @@ public class PinActivity extends AppCompatActivity {
             intent.putExtras(extras);
             startService(intent);
         } else if (StringUtils.equals(action, PermissionsActivity.LOCATION_ACTION)) {
-            Intent intent = new Intent(this, MainActivity.class);
+            Intent intent = new Intent(this, PermissionsActivity.class);
             intent.setAction(action);
             startActivity(intent);
         } else {
