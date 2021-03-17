@@ -951,7 +951,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
                 settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, progressChangedValue);
 
-                LocationAlarmUtils.initWhenDown(MainActivity.this, true);
+                if (settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)) {
+                    LocationAlarmUtils.initWhenDown(MainActivity.this, true);
+                } else {
+                    LocationAlarmUtils.initWhenDown(MainActivity.this, false);
+                }
                 updateAlarmText();
             }
         });

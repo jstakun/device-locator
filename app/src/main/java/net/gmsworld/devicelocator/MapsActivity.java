@@ -38,6 +38,7 @@ import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
 import net.gmsworld.devicelocator.utilities.Messenger;
+import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.utilities.Toaster;
@@ -136,6 +137,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             deviceImei = thisDeviceImei;
         }
+
+        NotificationUtils.cancel(this, NotificationUtils.SAVED_LOCATION_NOTIFICATION_ID);
 
         FirebaseAnalytics.getInstance(this).logEvent("maps_activity", new Bundle());
     }

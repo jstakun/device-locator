@@ -252,10 +252,12 @@
         </receiver>
         <receiver
             android:name=".broadcastreceivers.BootReceiver"
-            android:enabled="true">
+            android:enabled="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.ACTION_SHUTDOWN" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
         <receiver

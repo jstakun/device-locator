@@ -46,6 +46,9 @@ public class NotificationUtils {
     private static final String TAG = NotificationUtils.class.getSimpleName();
     private static final Map<String, Integer> notificationIds = new HashMap<>();
 
+    public static final int LOCATION_PERMISSION_NOTIFICATION_ID = 4444;
+    public static final int SAVED_LOCATION_NOTIFICATION_ID = 5555;
+
     public static Notification buildTrackerNotification(final Context context, final int notificationId, final String message) {
         Intent trackerIntent = new Intent(context, LauncherActivity.class);
         trackerIntent.setAction(MainActivity.ACTION_DEVICE_TRACKER);
@@ -117,22 +120,20 @@ public class NotificationUtils {
     }
 
     public static void showLocationPermissionNotification(Context context) {
-        final int notificationId = (int) System.currentTimeMillis();
-        Notification notification = NotificationUtils.buildLocationPermissionNotification(context, notificationId);
+        Notification notification = NotificationUtils.buildLocationPermissionNotification(context, LOCATION_PERMISSION_NOTIFICATION_ID);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
-            Log.d(TAG, "Creating notification " + notificationId);
-            notificationManager.notify(notificationId, notification);
+            Log.d(TAG, "Creating notification " + LOCATION_PERMISSION_NOTIFICATION_ID);
+            notificationManager.notify(LOCATION_PERMISSION_NOTIFICATION_ID, notification);
         }
     }
 
     public static void showSavedLocationNotification(Context context) {
-        final int notificationId = (int) System.currentTimeMillis();
-        Notification notification = NotificationUtils.buildSavedLocationNotification(context, notificationId);
+        Notification notification = NotificationUtils.buildSavedLocationNotification(context, SAVED_LOCATION_NOTIFICATION_ID);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
-            Log.d(TAG, "Creating notification " + notificationId);
-            notificationManager.notify(notificationId, notification);
+            Log.d(TAG, "Creating notification " + SAVED_LOCATION_NOTIFICATION_ID);
+            notificationManager.notify(SAVED_LOCATION_NOTIFICATION_ID, notification);
         }
     }
 
@@ -395,7 +396,7 @@ public class NotificationUtils {
     private static Notification buildLocationPermissionNotification(Context context, int notificationId) {
         initChannels(context, DEFAULT_CHANNEL_ID);
 
-        final String text = context.getString(R.string.app_name) + " is unable to locate your device. Please click on the link below and grant Location permission.";
+        final String text = "No permission to locate your device. Please click on the button below and grant Location permission.";
         final String title = context.getString(R.string.app_name) + " Notification";
 
         Intent permissionIntent = new Intent(context, PermissionsActivity.class);
@@ -415,7 +416,7 @@ public class NotificationUtils {
     private static Notification buildSavedLocationNotification(Context context, int notificationId) {
         initChannels(context, DEFAULT_CHANNEL_ID);
 
-        final String text = "Please open " + context.getString(R.string.app_name) + " to refresh your device location!";
+        final String text = "Refresh your device location!";
         final String title = context.getString(R.string.app_name) + " Notification";
 
         Intent permissionIntent = new Intent(context, MapsActivity.class);
@@ -437,6 +438,14 @@ public class NotificationUtils {
 
         if (notificationManager != null && notificationIds.containsKey(notificationId)) {
             notificationManager.cancel(notificationIds.remove(notificationId));
+        }
+    }
+
+    public static void cancel(Context context, int notificationId) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (notificationManager != null) {
+            notificationManager.cancel(notificationId);
         }
     }
 
