@@ -399,8 +399,8 @@ public class NotificationUtils {
         final String text = "No permission to locate your device. Please click on the button below and grant Location permission.";
         final String title = context.getString(R.string.app_name) + " Notification";
 
-        Intent permissionIntent = new Intent(context, PermissionsActivity.class);
-        permissionIntent.setAction("Location");
+        Intent permissionIntent = new Intent(context, LauncherActivity.class);
+        permissionIntent.setAction(PermissionsActivity.LOCATION_ACTION);
         PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, permissionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
@@ -419,8 +419,8 @@ public class NotificationUtils {
         final String text = "Refresh your device location!";
         final String title = context.getString(R.string.app_name) + " Notification";
 
-        Intent permissionIntent = new Intent(context, MapsActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, permissionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent mapsIntent = new Intent(context, MapsActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, mapsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_devices_other_white)

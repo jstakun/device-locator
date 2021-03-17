@@ -222,6 +222,10 @@ public class PinActivity extends AppCompatActivity {
             Intent intent = new Intent(this, CommandService.class);
             intent.putExtras(extras);
             startService(intent);
+        } else if (StringUtils.equals(action, PermissionsActivity.LOCATION_ACTION)) {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setAction(action);
+            startActivity(intent);
         } else {
             Intent intent = new Intent(this, MainActivity.class);
             if (action != null) {
@@ -308,9 +312,10 @@ public class PinActivity extends AppCompatActivity {
                     try {
                         Signature signature = result.getCryptoObject().getSignature();
                         signature.update(mToBeSignedMessage.getBytes());
-                        String signatureString = Base64.encodeToString(signature.sign(), Base64.URL_SAFE);
-                        Log.i(TAG, "Message: " + mToBeSignedMessage);
-                        Log.i(TAG, "Signature (Base64 Encoded): " + signatureString);
+                        //String signatureString = Base64.encodeToString(signature.sign(), Base64.URL_SAFE);
+                        //Log.i(TAG, "Message: " + mToBeSignedMessage);
+                        //Log.i(TAG, "Signature (Base64 Encoded): " + signatureString);
+                        Log.d(TAG, "Biometric authentication successful");
                         onAuthenticated();
                     } catch (SignatureException e) {
                         Log.e(TAG, e.getMessage(), e);

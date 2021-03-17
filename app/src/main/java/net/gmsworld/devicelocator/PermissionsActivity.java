@@ -43,6 +43,8 @@ import androidx.biometric.BiometricManager;
 
 public class PermissionsActivity extends AppCompatActivity {
 
+    public static final String LOCATION_ACTION = "net.gmsworld.devicelocator.LocationAction";
+
     private static final String TAG = PermissionsActivity.class.getSimpleName();
 
     private static final int CALL_PERMISSION = 1;
@@ -79,9 +81,11 @@ public class PermissionsActivity extends AppCompatActivity {
         final Toolbar toolbar = findViewById(R.id.smsToolbar);
         setSupportActionBar(toolbar);
 
-        if (getIntent() != null) {
-            if (StringUtils.equals(getIntent().getAction(), "Location")) {
-                toaster.showActivityToast("Please allow route tracking service and Location command");
+        Intent intent = getIntent();
+
+        if (intent != null) {
+            if (StringUtils.equals(intent.getAction(), LOCATION_ACTION)) {
+                toaster.showActivityToast(R.string.Manifest_permission_ACCESS_FINE_LOCATION_request);
             }
         }
 

@@ -127,7 +127,10 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         toaster = new Toaster(this);
 
         Intent intent = getIntent();
-        String action = intent.getAction();
+        String action = null;
+        if (intent != null) {
+            action = intent.getAction();
+        }
 
         thisDeviceImei = Messenger.getDeviceId(this, false);
 

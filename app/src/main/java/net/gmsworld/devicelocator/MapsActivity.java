@@ -184,13 +184,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //Log.d(TAG, "onCreateOptionsMenu()");
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
-        if (!AppUtils.getInstance().isFullVersion()) {
-            menu.findItem(R.id.donateUs).setVisible(false);
+        if (!PinActivity.isAuthRequired(settings)) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.main_menu, menu);
+            if (!AppUtils.getInstance().isFullVersion()) {
+                menu.findItem(R.id.donateUs).setVisible(false);
+            }
+            menu.findItem(R.id.map).setVisible(false);
         }
-        menu.findItem(R.id.map).setVisible(false);
         return true;
     }
 
@@ -269,7 +270,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
             devicesTimestamp = settings.getLong(DevicesUtils.USER_DEVICES_TIMESTAMP, -1L);
             int markerCount = 0;
-            if (devices.size() > 1) {
+            if (devices.size() > 1 && !PinActivity.isAuthRequired(settings)) {
                 initLocateButton();
             }
             for (int i =0;i<devices.size(); i++) {
@@ -353,10 +354,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Intent intent = new Intent(this, CommandActivity.class);
-        intent.putExtra("index", (int)marker.getTag());
-        intent.putParcelableArrayListExtra("devices", devices);
-        startActivity(intent);
+        if (!PinActivity.isAuthRequired(settings)) {
+            Intent intent = new Intent(this, CommandActivity.class);
+            intent.putExtra("index", (int) marker.getTag());
+            intent.putParcelableArrayListExtra("devices", devices);
+            startActivity(intent);
+        } else {
+            toaster.showActivityToast(R.string.please_auth);
+        }
     }
 
     @Override

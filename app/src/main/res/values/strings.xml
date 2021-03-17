@@ -44,7 +44,7 @@
     <string name="device_tracker">Device Tracker</string>
     <string name="sms_control">Device Commands</string>
     <string name="no_network_error">No network connection available! Please connect to networking service and retry.</string>
-    <string name="verify_security_pin">Login at application startup using Security PIN</string>
+    <string name="verify_security_pin">Login using Security PIN at application startup</string>
     <string name="sms_manager_first_time_use">&lt;font color="#808080">On this screen you can enable SMS commands, manage your Security PIN, and select Location messages sent in reply to Locate command.&lt;br/>Do you want to enable now SMS commands on your device?&lt;/font></string>
     <string name="sms_manager_first_time_use_gp">&lt;font color="#808080">On this screen you can enable SMS commands, manage your Security PIN, and select Location messages sent in reply to Locate command.&lt;/font></string>
     <string name="download_full_app">&lt;font color="#808080">Due to Google Play security policy SMS commands are disabled in this version.&lt;br/>Do you want to download Full version supporting SMS commands?&lt;/font></string>
@@ -127,7 +127,7 @@
     <string name="command_failed_to_device">Failed to send command %1$s to the device %2$s!</string>
     <string name="command_failed_device_gone">Failed to send command %1$s to the device %2$s! Is %3$s installed on this device?"</string>
     <string name="command_failed_device_offline">It seems device %1$s has been offline recently. Retry if no reply soon!</string>
-    <string name="please_auth">Please login again before sending command!</string>
+    <string name="please_auth">Please login again before sending command to this device!</string>
     <string name="biometric_description">Please login with biometrics or click Cancel and enter your Security PIN</string>
     <string name="biometric_subtitle">Login Required</string>
 
@@ -164,6 +164,7 @@
     <string name="Settings_ACTION_MANAGE_OVERLAY_PERMISSION">Allow taking front camera photo after failed device login and with Photo command</string>
     <string name="Settings_ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS">Allow Mute device audio command</string>
     <string name="Manifest_permission_ACCESS_FINE_LOCATION">Allow route tracking service and Location command</string>
+    <string name="Manifest_permission_ACCESS_FINE_LOCATION_request">Please allow route tracking service and Location command</string>
     <string name="Manifest_permission_SEND_SMS">Allow receiving SMS commands and sending SMS notifications</string>
     <string name="Manifest_permission_CAMERA">Allow taking front camera photo after failed device login and with Photo command</string>
     <string name="Manifest_permission_READ_CONTACTS">Only accept SMS commands sent from my contacts</string>

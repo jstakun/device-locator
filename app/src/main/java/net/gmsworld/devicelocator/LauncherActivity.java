@@ -57,6 +57,8 @@ public class LauncherActivity extends Activity {
                 showIntent = new Intent(this, RegisterActivity.class);
             } else if (PinActivity.isAuthRequired(settings)) {
                 showIntent = new Intent(this, PinActivity.class);
+            } else if (StringUtils.equals(action, PermissionsActivity.LOCATION_ACTION)) {
+                showIntent = new Intent(this, PermissionsActivity.class);
             } else {
                 showIntent = new Intent(this, MainActivity.class);
             }

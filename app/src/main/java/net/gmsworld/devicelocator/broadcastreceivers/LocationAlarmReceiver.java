@@ -25,6 +25,7 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
         if (settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)) {
             //periodical location sharing is enabled
             if (Permissions.haveLocationPermission(context)) {
+                Log.d(TAG, "Sending location update.");
                 Bundle extras = new Bundle();
                 extras.putString("adminTelegramId", context.getString(R.string.telegram_notification));
                 if (settings.getBoolean(LocationAlarmUtils.ALARM_SILENT, false)) {
@@ -32,17 +33,17 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
                 }
                 SmsSenderService.initService(context, true, true, true, null, null, null, null, extras);
             } else {
-                Log.d(TAG, "Location permission is missing. No location update will be sent.");
                 NotificationUtils.showLocationPermissionNotification(context);
             }
-        } else if (System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60 * 24) ) {
+        } else if (System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60 * 24)) {
             //periodical location sharing is disabled
             if (Permissions.haveLocationPermission(context)) {
                 NotificationUtils.showSavedLocationNotification(context);
             } else {
-                Log.d(TAG, "Location permission is missing. No location update will be sent.");
                 NotificationUtils.showLocationPermissionNotification(context);
             }
+        } else {
+            Log.d(TAG, "No need to send location update.");
         }
 
         LocationAlarmUtils.initWhenDown(context, true);
