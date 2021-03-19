@@ -381,8 +381,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
 
+        final boolean needUpdateLocation = System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60);
+
         if (bestLocation.getAccuracy() < AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
-            if (isAccBetter && (dist > 3f || accDiff > 2f)) {
+            if (isAccBetter && (needUpdateLocation || dist > 3f || accDiff > 2f)) {
                 Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + ", distance " + dist + " and accuracy difference " + accDiff);
                 DevicesUtils.sendGeo(this, settings, thisDeviceImei, bestLocation);
             }
