@@ -1,5 +1,6 @@
 package net.gmsworld.devicelocator.broadcastreceivers;
 
+import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +36,7 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
             } else {
                 NotificationUtils.showLocationPermissionNotification(context);
             }
-        } else if (System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60 * 24)) {
+        } else if (System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > AlarmManager.INTERVAL_DAY) {
             //periodical location sharing is disabled
             if (Permissions.haveLocationPermission(context)) {
                 NotificationUtils.showSavedLocationNotification(context);

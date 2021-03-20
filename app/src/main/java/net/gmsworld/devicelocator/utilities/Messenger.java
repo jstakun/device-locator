@@ -44,14 +44,12 @@ import net.gmsworld.devicelocator.services.ScreenStatusService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ocpsoft.prettytime.PrettyTime;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -491,7 +489,7 @@ public class Messenger {
             text += context.getString(R.string.speed) + " " + getSpeed(context, location.getSpeed()) + "\n";
         }
 
-        text += context.getString(R.string.last_seen) + " " + new PrettyTime().format(new Date(location.getTime()))
+        text += context.getString(R.string.last_seen) + " " + TimeFormatter.format(location.getTime())
                 + getBatteryLevel(context);
 
         if (StringUtils.isNotEmpty(phoneNumber)) {
@@ -518,7 +516,7 @@ public class Messenger {
     public static void sendGoogleMapsMessage(Context context, Location location, String phoneNumber, String telegramId, String email, String app) {
         final String deviceId = getDeviceId(context, true);
         String text = deviceId + " location" +
-                "\n" + context.getString(R.string.last_seen) + " " + new PrettyTime().format(new Date(location.getTime())) + getBatteryLevel(context) +
+                "\n" + context.getString(R.string.last_seen) + " " + TimeFormatter.format(location.getTime()) + getBatteryLevel(context) +
                 "\n" + MAPS_URL_PREFIX + latAndLongFormat.format(location.getLatitude()).replace(',', '.') + "," + latAndLongFormat.format(location.getLongitude()).replace(',', '.');
         if (StringUtils.isNotEmpty(phoneNumber)) {
             sendSMS(context, phoneNumber, text);
@@ -868,7 +866,7 @@ public class Messenger {
                     int interval = settings.getInt(LocationAlarmUtils.ALARM_INTERVAL, LocationAlarmUtils.ALARM_INTERVAL_VALUE);
                     text = context.getResources().getQuantityString(R.plurals.alarm_interval, interval, interval);
                     if (settings.getLong(LocationAlarmUtils.ALARM_KEY,0L) > 0) {
-                        text += "\n" + context.getString(R.string.alarm_settings_suffix, new PrettyTime().format(new Date(settings.getLong(LocationAlarmUtils.ALARM_KEY))));
+                        text += "\n" + context.getString(R.string.alarm_settings_suffix, TimeFormatter.format(settings.getLong(LocationAlarmUtils.ALARM_KEY)));
                         text += getBatteryLevel(context);
                     }
                     break;

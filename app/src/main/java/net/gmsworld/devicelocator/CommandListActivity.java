@@ -25,12 +25,11 @@ import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.Files;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.TimeFormatter;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ocpsoft.prettytime.PrettyTime;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -39,7 +38,6 @@ import androidx.appcompat.widget.Toolbar;
 
 public class CommandListActivity extends AppCompatActivity {
 
-    private final PrettyTime pt = new PrettyTime();
     private static ArrayList<Device> devices = null;
     private static final String TAG = CommandListActivity.class.getSimpleName();
 
@@ -95,7 +93,7 @@ public class CommandListActivity extends AppCompatActivity {
                         sender = sender.substring(Messenger.CID_SEPARATOR.length());
                     }
                     final String deviceName = DevicesUtils.getDeviceName(devices, sender);
-                    message = "Command " + StringUtils.capitalize(commandName) + "\nsent to " + deviceName + "\n" + pt.format(new Date(timestamp));
+                    message = "Command " + StringUtils.capitalize(commandName) + "\nsent to " + deviceName + "\n" + TimeFormatter.format(timestamp);
                     position = DevicesUtils.getDevicePosition(devices, sender);
                 } else {
                     if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR) && StringUtils.isNotEmpty(commandName)) {
@@ -119,10 +117,10 @@ public class CommandListActivity extends AppCompatActivity {
                                 message = "Command " + StringUtils.capitalize(commandName);
                             }
                         }
-                        message += "\nsent from " + deviceName + "\n" + pt.format(new Date(timestamp));
+                        message += "\nsent from " + deviceName + "\n" + TimeFormatter.format(timestamp);
                     } else {
                         //old format - leave it as it is
-                        message = "Command " + sender + "\nreceived from unknown device\n" + pt.format(new Date(timestamp));
+                        message = "Command " + sender + "\nreceived from unknown device\n" + TimeFormatter.format(timestamp);
                     }
                 }
                 values.add(message);

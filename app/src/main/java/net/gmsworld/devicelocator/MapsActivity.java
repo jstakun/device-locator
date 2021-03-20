@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -41,13 +42,12 @@ import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
+import net.gmsworld.devicelocator.utilities.TimeFormatter;
 import net.gmsworld.devicelocator.utilities.Toaster;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ocpsoft.prettytime.PrettyTime;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -69,7 +69,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String deviceImei = null, thisDeviceImei = null;
     private long devicesTimestamp = -1;
     private float currentZoom = -1f;
-    private final PrettyTime pt = new PrettyTime();
     private Location bestLocation;
     private Toaster toaster;
 
@@ -281,7 +280,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     devicesBounds.include(deviceMarker);
 
                     long timestamp = Long.valueOf(geo[geo.length - 1]);
-                    String snippet = getString(R.string.last_seen) + " " + pt.format(new Date(timestamp));
+                    String snippet = getString(R.string.last_seen) + " " + TimeFormatter.format(timestamp);
                     Location location = SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).getLastLocation();
                     if (location != null) {
                         Location deviceLocation = new Location("");
@@ -381,7 +380,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
 
-        final boolean needUpdateLocation = System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60);
+        final boolean needUpdateLocation = System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > AlarmManager.INTERVAL_HOUR;
 
         if (bestLocation.getAccuracy() < AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
             if (isAccBetter && (needUpdateLocation || dist > 3f || accDiff > 2f)) {

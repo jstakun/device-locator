@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -71,7 +72,7 @@ public class LauncherActivity extends Activity {
         startActivity(showIntent);
 
         //Sending device location after 1 hour of inactivity
-        if (Permissions.haveLocationPermission(this) && System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > (1000 * 60 * 60)) {
+        if (Permissions.haveLocationPermission(this) && System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > AlarmManager.INTERVAL_HOUR) {
             Log.d(TAG, "Sending device location after long time inactivity");
             Bundle extras = new Bundle();
             extras.putString("telegramId", getString(R.string.telegram_notification));

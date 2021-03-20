@@ -90,18 +90,17 @@ import net.gmsworld.devicelocator.utilities.Network;
 import net.gmsworld.devicelocator.utilities.Permissions;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.utilities.RouteTrackingServiceUtils;
+import net.gmsworld.devicelocator.utilities.TimeFormatter;
 import net.gmsworld.devicelocator.utilities.Toaster;
 import net.gmsworld.devicelocator.views.CommandArrayAdapter;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.ocpsoft.prettytime.PrettyTime;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -154,7 +153,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private final Handler loadingHandler = new UIHandler(this);
     private boolean isTrackingServiceBound = false;
     private FirebaseAnalytics firebaseAnalytics;
-    private final PrettyTime pt = new PrettyTime();
     private BroadcastReceiver onDownloadComplete = null;
     //private ReviewInfo reviewInfo;
 
@@ -981,7 +979,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         final long alarmMillis = settings.getLong(LocationAlarmUtils.ALARM_KEY,0L);
         String alarmText = getResources().getQuantityString(R.plurals.alarm_interval, interval, interval);
         if (alarmMillis > System.currentTimeMillis() && settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)) {
-            alarmText += " " + getString(R.string.alarm_settings_suffix, pt.format(new Date(alarmMillis)));
+            alarmText += " " + getString(R.string.alarm_settings_suffix, TimeFormatter.format(alarmMillis));
         }
         alarmInterval.setText(alarmText);
     }
@@ -2322,7 +2320,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 String[] tokens = StringUtils.split(device.geo, " ");
                 if (tokens.length >= 3) { //lat lng (acc) timestamp
                     long timestamp = Long.valueOf(tokens[tokens.length - 1]);
-                    message = getString(R.string.last_seen) + " " + pt.format(new Date(timestamp));
+                    message = getString(R.string.last_seen) + " " + TimeFormatter.format(timestamp);
                     if (location != null) {
                         Location deviceLocation = new Location("");
                         deviceLocation.setLatitude(Location.convert(tokens[0]));
@@ -2339,7 +2337,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             } else {
                 try {
-                    message = "Last edited " + pt.format(device.getDate());
+                    message = "Last edited " + TimeFormatter.format(device.getDate());
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                 }
