@@ -229,7 +229,7 @@ public class DevicesUtils {
         return -1;
     }
 
-    public static void sendGeo(final Activity context, final PreferencesUtils settings, final String thisDeviceImei, final Location location) {
+    public static void sendGeo(final Activity context, final PreferencesUtils settings, final String thisDeviceImei, final Location location, final boolean silent) {
         if (Network.isNetworkAvailable(context)) {
             final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             if (StringUtils.isNotEmpty(tokenStr)) {
@@ -243,6 +243,9 @@ public class DevicesUtils {
                         if (responseCode == 200) {
                             settings.setLong(Messenger.LOCATION_SENT_MILLIS, System.currentTimeMillis());
                             loadDeviceList(context, settings, null);
+                            if (!silent) {
+                                Toaster.showToast(context, "Location refreshed");
+                            }
                         }
                     }
                 });

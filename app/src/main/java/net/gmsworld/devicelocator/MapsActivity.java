@@ -385,7 +385,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (bestLocation.getAccuracy() < AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
             if (isAccBetter && (needUpdateLocation || dist > 3f || accDiff > 2f)) {
                 Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + ", distance " + dist + " and accuracy difference " + accDiff);
-                DevicesUtils.sendGeo(this, settings, thisDeviceImei, bestLocation);
+                DevicesUtils.sendGeo(this, settings, thisDeviceImei, bestLocation, false);
             }
         } else {
             Log.d(TAG, "Accuracy is " + bestLocation.getAccuracy() + " more than max " + AbstractLocationManager.MAX_REASONABLE_ACCURACY + ", will check again.");
