@@ -27,7 +27,7 @@ public class LocationAlarmUtils {
         if (settings.getBoolean(ALARM_SETTINGS, false)) {
             alarmInterval = settings.getInt(ALARM_INTERVAL, ALARM_INTERVAL_VALUE) * AlarmManager.INTERVAL_HOUR;
         } else {
-            alarmInterval = AlarmManager.INTERVAL_DAY;
+            alarmInterval = AlarmManager.INTERVAL_HALF_DAY;
         }
 
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
