@@ -21,7 +21,7 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "Received Location Alarm broadcast...");
+        Log.d(TAG, "Received Location Alarm intent ...");
         PreferencesUtils settings = new PreferencesUtils(context);
         if (settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)) {
             //periodical location sharing is enabled

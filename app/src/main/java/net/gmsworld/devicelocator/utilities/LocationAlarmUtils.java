@@ -27,7 +27,7 @@ public class LocationAlarmUtils {
         if (settings.getBoolean(ALARM_SETTINGS, false)) {
             alarmInterval = settings.getInt(ALARM_INTERVAL, ALARM_INTERVAL_VALUE) * AlarmManager.INTERVAL_HOUR;
         } else {
-            alarmInterval = ALARM_INTERVAL_VALUE * AlarmManager.INTERVAL_HOUR;
+            alarmInterval = AlarmManager.INTERVAL_DAY;
         }
 
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -35,7 +35,7 @@ public class LocationAlarmUtils {
 
         if (alarmMgr != null && (forceReset || (PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null))) {
            final long triggerAtMillis = System.currentTimeMillis() + alarmInterval;
-           Log.d(TAG, "Creating Location Alarm to be triggered at " + new Date(triggerAtMillis));
+           Log.d(TAG, "Next Location Alarm will be triggered at " + new Date(triggerAtMillis));
            final PendingIntent operation = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
