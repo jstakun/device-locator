@@ -5,8 +5,9 @@
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/836e04ca3de39eb9dd0565f74cf1e0ec/jetified-acra-http-5.7.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/919e4750fe87429253abd9e11abad1f3/jetified-acra-http-5.7.0/res" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/cc69658e1eee3fd5ffaef935e58a1a97/jetified-acra-http-5.7.0/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/cc69658e1eee3fd5ffaef935e58a1a97/jetified-acra-http-5.7.0/AndroidManifest.xml" />
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/cc69658e1eee3fd5ffaef935e58a1a97/jetified-acra-http-5.7.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2220ebb0874b75f4fd52f1fd78884d91/jetified-acra-http-5.7.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2220ebb0874b75f4fd52f1fd78884d91/jetified-acra-http-5.7.0/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/2220ebb0874b75f4fd52f1fd78884d91/jetified-acra-http-5.7.0/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/ch.acra/acra-http/5.7.0/5bee2c8fd8327b489702363ff8822407dbf22ef3/acra-http-5.7.0-javadoc.jar!/" />
