@@ -1703,7 +1703,7 @@ public class Command {
                     device.imei = extras.getString("imei");
                     device.creationDate = formatter.format(new Date());
                     device.geo = location.getLatitude() + " " + location.getLongitude() + " " + System.currentTimeMillis();
-                    DevicesUtils.updateDevice(device, context);
+                    DevicesUtils.updateDevice(null, device, context);
                     //send ui broadcast
                     Intent broadcastIntent = new Intent();
                     Log.d(TAG, "Sending UI Update Broadcast");

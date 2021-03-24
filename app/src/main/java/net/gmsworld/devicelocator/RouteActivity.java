@@ -1,6 +1,7 @@
 package net.gmsworld.devicelocator;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
@@ -374,7 +375,8 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         }
 
         if (bestLocation.getAccuracy() < AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
-            if (isAccBetter && (dist > 3f || accDiff > 2f)) {
+            final boolean needUpdateLocation = System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > AlarmManager.INTERVAL_HOUR;
+            if (isAccBetter && (needUpdateLocation || dist > 3f || accDiff > 2f)) {
                 Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + ", distance " + dist + " and accuracy difference " + accDiff);
                 DevicesUtils.sendGeo(this, settings, thisDeviceImei, bestLocation, true);
             }

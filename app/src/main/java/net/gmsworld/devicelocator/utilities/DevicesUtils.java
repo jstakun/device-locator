@@ -2,6 +2,7 @@ package net.gmsworld.devicelocator.utilities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.util.Log;
 
@@ -34,6 +35,7 @@ public class DevicesUtils {
 
     private static final String TAG = DevicesUtils.class.getSimpleName();
 
+    //TODO replace this interface with broadcast
     public interface DeviceLoadListener {
         void onDeviceListLoaded(ArrayList<Device> userDevices);
         void onDeviceLoadError(int messageId);
@@ -92,9 +94,14 @@ public class DevicesUtils {
                                         }
                                     }
                                     if (thisDeviceOnList) {
-                                        setUserDevices(settings, userDevices);
+                                        setUserDevices(settings, userDevices, context);
                                         if (deviceLoadListener != null) {
                                             deviceLoadListener.onDeviceListLoaded(userDevices);
+                                        } else {
+                                            Intent broadcastIntent = new Intent();
+                                            Log.d(TAG, "Sending UI Update Broadcast");
+                                            broadcastIntent.setAction(Command.UPDATE_UI_ACTION);
+                                            context.sendBroadcast(broadcastIntent);
                                         }
                                     } else if (deviceLoadListener != null) {
                                         deviceLoadListener.onDeviceLoadError(R.string.devices_list_empty);
@@ -185,9 +192,11 @@ public class DevicesUtils {
         return userDevices;
     }
 
-    public static void updateDevice(Device device, Context context) {
+    public static void updateDevice(List<Device> devices, Device device, Context context) {
         PreferencesUtils settings = new PreferencesUtils(context);
-        List<Device> devices = buildDeviceList(settings);
+        if (devices == null) {
+            devices = buildDeviceList(settings);
+        }
         if (StringUtils.isEmpty(device.name)) {
             device.name = getDeviceName(devices, device.imei);
         }
@@ -198,16 +207,20 @@ public class DevicesUtils {
             }
         }
         devices.add(device);
-        setUserDevices(settings, devices);
+        setUserDevices(settings, devices, context);
+        Intent broadcastIntent = new Intent();
+        Log.d(TAG, "Sending UI Update Broadcast");
+        broadcastIntent.setAction(Command.UPDATE_UI_ACTION);
+        context.sendBroadcast(broadcastIntent);
     }
 
-    private static void setUserDevices(PreferencesUtils settings, List<Device> userDevices) {
+    private static void setUserDevices(PreferencesUtils settings, List<Device> userDevices, Context context) {
         Set<String> deviceSet = new HashSet<>();
         for (Device device : userDevices) {
             deviceSet.add(device.toString());
         }
         settings.setStringSet(USER_DEVICES, deviceSet);
-        settings.setLong(USER_DEVICES_TIMESTAMP, System.currentTimeMillis());
+        //settings.setLong(USER_DEVICES_TIMESTAMP, System.currentTimeMillis());
     }
 
     public static String getDeviceName(List<Device> devices, String deviceId) {
@@ -242,7 +255,14 @@ public class DevicesUtils {
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             settings.setLong(Messenger.LOCATION_SENT_MILLIS, System.currentTimeMillis());
-                            loadDeviceList(context, settings, null);
+                            List<Device> devices = buildDeviceList(settings);
+                            int pos = getDevicePosition(devices, thisDeviceImei);
+                            if (pos >= 0 && pos < devices.size()) {
+                                Device d = devices.get(pos);
+                                d.geo = geo;
+                                updateDevice(devices, d, context);
+                            }
+                            //
                             if (!silent) {
                                 Toaster.showToast(context, "Location refreshed");
                             }

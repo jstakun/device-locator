@@ -60,15 +60,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final String TAG = MapsActivity.class.getSimpleName();
 
-    private static final long DEVICE_SEARCH_INTERVAL = 10000L; //10 sec
+    //private static final long DEVICE_SEARCH_INTERVAL = 10000L; //10 sec
 
     private GoogleMap mMap;
     private PreferencesUtils settings;
 
     private ArrayList<Device> devices;
     private String deviceImei = null, thisDeviceImei = null;
-    private long devicesTimestamp = -1;
     private float currentZoom = -1f;
+
     private Location bestLocation;
     private Toaster toaster;
 
@@ -76,7 +76,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private final Handler handler = new Handler();
 
-    private final Runnable findDevices = new Runnable() {
+    /*private final Runnable findDevices = new Runnable() {
         @Override
         public void run() {
             Log.d(TAG, "Checking for new devices list...");
@@ -88,7 +88,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 handler.postDelayed(findDevices, DEVICE_SEARCH_INTERVAL);
             }
         }
-    };
+    };*/
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -146,10 +146,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume()");
-        registerReceiver(mReceiver, mIntentFilter);
         if (mMap != null) {
             loadDeviceMarkers(true);
         }
+        registerReceiver(mReceiver, mIntentFilter);
         if (Permissions.haveLocationPermission(this)) {
             try {
                 if (SmartLocation.with(this).location().state().isAnyProviderAvailable()) {
@@ -168,7 +168,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onPause();
         Log.d(TAG, "onPause()");
         SmartLocation.with(this).location().stop();
-        handler.removeCallbacks(findDevices);
+        //handler.removeCallbacks(findDevices);
         unregisterReceiver(mReceiver);
     }
 
@@ -261,13 +261,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void loadDeviceMarkers(boolean centerToBounds) {
+        Log.d(TAG, "loadDeviceMarkers(" + centerToBounds + ")");
         mMap.clear();
         devices = DevicesUtils.buildDeviceList(settings);
         boolean foundDeviceImei = false;
         if (!devices.isEmpty()) {
             LatLng center = null;
             final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
-            devicesTimestamp = settings.getLong(DevicesUtils.USER_DEVICES_TIMESTAMP, -1L);
+            //devicesTimestamp = settings.getLong(DevicesUtils.USER_DEVICES_TIMESTAMP, -1L);
             int markerCount = 0;
             if (devices.size() > 1 && !PinActivity.isAuthRequired(settings)) {
                 initLocateButton();
@@ -312,11 +313,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.d(TAG, "Loaded " + markerCount + " device markers to the map");
 
             if (markerCount > 0) {
-                LatLngBounds bounds = devicesBounds.build();
-                final int width = getResources().getDisplayMetrics().widthPixels;
-                final int height = getResources().getDisplayMetrics().heightPixels;
-                final int padding = (int) (width * 0.2);
                 if (centerToBounds) {
+                    LatLngBounds bounds = devicesBounds.build();
+                    final int width = getResources().getDisplayMetrics().widthPixels;
+                    final int height = getResources().getDisplayMetrics().heightPixels;
+                    final int padding = (int) (width * 0.2);
                     try {
                         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
                     } catch (Exception e) {
@@ -345,7 +346,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 toaster.showActivityToast(R.string.device_not_found);
             }
 
-            handler.postDelayed(findDevices, DEVICE_SEARCH_INTERVAL);
+            //handler.postDelayed(findDevices, DEVICE_SEARCH_INTERVAL);
         } else {
             RegisterDeviceDialogFragment.newInstance().show(this.getFragmentManager(), RegisterDeviceDialogFragment.TAG);
         }
