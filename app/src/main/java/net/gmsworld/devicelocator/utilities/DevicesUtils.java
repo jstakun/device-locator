@@ -246,8 +246,8 @@ public class DevicesUtils {
         if (Network.isNetworkAvailable(context)) {
             final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             if (StringUtils.isNotEmpty(tokenStr)) {
-                final String geo = "geo:" + location.getLatitude() + " " + location.getLongitude() + " " + location.getAccuracy();
-                final String content = "imei=" + thisDeviceImei + "&flex=" + geo;
+                final String geo = location.getLatitude() + " " + location.getLongitude() + " " + location.getAccuracy();
+                final String content = "imei=" + thisDeviceImei + "&flex=" + "geo:" + geo;
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer " + tokenStr);
                 Network.post(context, context.getString(R.string.deviceManagerUrl), content, null, headers, new Network.OnGetFinishListener() {
@@ -259,7 +259,7 @@ public class DevicesUtils {
                             int pos = getDevicePosition(devices, thisDeviceImei);
                             if (pos >= 0 && pos < devices.size()) {
                                 Device d = devices.get(pos);
-                                d.geo = geo;
+                                d.geo = geo + " " + System.currentTimeMillis();
                                 updateDevice(devices, d, context);
                             }
                             //
