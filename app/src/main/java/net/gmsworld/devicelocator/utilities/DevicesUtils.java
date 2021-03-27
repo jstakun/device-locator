@@ -28,7 +28,6 @@ import java.util.Set;
 public class DevicesUtils {
 
     public static final String USER_DEVICES = "userDevices";
-    public static final String USER_DEVICES_TIMESTAMP = "userDevicesTimestamp";
     public static final String CURRENT_DEVICE_ID = "currentDeviceId";
 
     private static boolean isSyncingDevices = false;
@@ -111,7 +110,7 @@ public class DevicesUtils {
                                 }
                                 if (!thisDeviceOnList) {
                                     //this device has been removed from other device
-                                    settings.remove(MainActivity.USER_LOGIN, DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP);
+                                    settings.remove(MainActivity.USER_LOGIN, DevicesUtils.USER_DEVICES);
                                     if (deviceLoadListener != null) {
                                         deviceLoadListener.onDeviceRemoved();
                                     }
@@ -152,7 +151,7 @@ public class DevicesUtils {
             public void onGetFinish(String results, int responseCode, String url) {
                 if (responseCode == 200) {
                     Log.d(TAG, "Device " + deviceId + " has been removed!");
-                    settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, CURRENT_DEVICE_ID);
+                    settings.remove(DevicesUtils.USER_DEVICES, CURRENT_DEVICE_ID);
                 }
             }
         });

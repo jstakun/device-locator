@@ -76,20 +76,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private final Handler handler = new Handler();
 
-    /*private final Runnable findDevices = new Runnable() {
-        @Override
-        public void run() {
-            Log.d(TAG, "Checking for new devices list...");
-            if (devicesTimestamp < settings.getLong(DevicesUtils.USER_DEVICES_TIMESTAMP, -1L)) {
-                Log.d(TAG, "Found!");
-                loadDeviceMarkers(false);
-            } else {
-                Log.d(TAG, "Will check again in " + DEVICE_SEARCH_INTERVAL + " milliseconds...");
-                handler.postDelayed(findDevices, DEVICE_SEARCH_INTERVAL);
-            }
-        }
-    };*/
-
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -168,7 +154,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onPause();
         Log.d(TAG, "onPause()");
         SmartLocation.with(this).location().stop();
-        //handler.removeCallbacks(findDevices);
         unregisterReceiver(mReceiver);
     }
 
@@ -268,7 +253,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (!devices.isEmpty()) {
             LatLng center = null;
             final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
-            //devicesTimestamp = settings.getLong(DevicesUtils.USER_DEVICES_TIMESTAMP, -1L);
             int markerCount = 0;
             if (devices.size() > 1 && !PinActivity.isAuthRequired(settings)) {
                 initLocateButton();
@@ -323,6 +307,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     } catch (Exception e) {
                         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
                     }
+                    currentZoom = mMap.getCameraPosition().zoom;
                 }
                 if (center != null) {
                     if (currentZoom > 0) {

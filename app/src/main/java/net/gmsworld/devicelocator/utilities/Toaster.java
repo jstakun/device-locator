@@ -22,6 +22,7 @@ public class Toaster {
     private Service service;
     private Toast toast;
 
+    //TODO replace static methods with interface implemented in activity
     public static void showToast(final Context context, final int messageId, final Object... args) {
         Toaster toaster;
         if (context instanceof Service) {

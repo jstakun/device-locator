@@ -1036,13 +1036,13 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 //show dialog with info What to do if no accounts are registered on the device
                 LoginDialogFragment.newInstance().show(getFragmentManager(), LoginDialogFragment.TAG);
                 if (settings.contains(USER_LOGIN)) {
-                    settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
+                    settings.remove(DevicesUtils.USER_DEVICES, MainActivity.USER_LOGIN);
                     onDeleteDevice(Messenger.getDeviceId(this, false), true);
                 }
             }
         } else if (accountNames.size() == 1) {
             if (settings.contains(USER_LOGIN) && settings.contains(DevicesUtils.USER_DEVICES)) {
-                settings.remove(DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP, MainActivity.USER_LOGIN);
+                settings.remove(DevicesUtils.USER_DEVICES, MainActivity.USER_LOGIN);
                 onDeleteDevice(Messenger.getDeviceId(this, false), true);
             }
             if (findViewById(R.id.deviceSettings).getVisibility() == View.VISIBLE && !silent) {
@@ -1786,7 +1786,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         }
                         //current device has been removed
                         if (StringUtils.equals(Messenger.getDeviceId(MainActivity.this, false), imei)) {
-                            settings.remove(USER_LOGIN, DevicesUtils.USER_DEVICES, DevicesUtils.USER_DEVICES_TIMESTAMP);
+                            settings.remove(USER_LOGIN, DevicesUtils.USER_DEVICES);
                             if (!silent) {
                                 initUserLoginInput(true, false);
                             }

@@ -19,6 +19,7 @@ public class LocationAlarmUtils {
     public static final String ALARM_SETTINGS = "settings_alarm";
     public static final String ALARM_SILENT = "LocationAlarmUtilsSilent";
     public static final int ALARM_INTERVAL_VALUE = 1;
+    public static final long DEFAULT_ALARM_INTERVAL = AlarmManager.INTERVAL_HALF_DAY;
 
     public static void initWhenDown(Context context, boolean forceReset) {
         PreferencesUtils settings = new PreferencesUtils(context);
@@ -27,7 +28,7 @@ public class LocationAlarmUtils {
         if (settings.getBoolean(ALARM_SETTINGS, false)) {
             alarmInterval = settings.getInt(ALARM_INTERVAL, ALARM_INTERVAL_VALUE) * AlarmManager.INTERVAL_HOUR;
         } else {
-            alarmInterval = AlarmManager.INTERVAL_HALF_DAY;
+            alarmInterval = DEFAULT_ALARM_INTERVAL;
         }
 
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
