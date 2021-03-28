@@ -40,7 +40,7 @@ import static net.gmsworld.devicelocator.utilities.AbstractCommand.AUDIT_FILE;
 
 public class CommandService extends IntentService implements OnLocationUpdatedListener {
 
-    public static final String AUTH_NEEDED = "authNeeded";
+    public static final String AUTH_NEEDED = "CommandServiceAuthNeeded";
     public static final String LAST_COMMAND_SUFFIX = "_lastCommand";
 
     private final static String TAG = CommandService.class.getSimpleName();

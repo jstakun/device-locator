@@ -1,5 +1,6 @@
 package net.gmsworld.devicelocator;
 
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -66,7 +67,7 @@ public class PinActivity extends AppCompatActivity {
     public static final String VERIFICATION_TIMESTAMP = "pinVerificationMillis";
     public static final String FAILED_COUNT = "pinFailedCount";
     public static final String VERIFY_PIN = "settings_verify_pin";
-    private static final int PIN_VALIDATION_MILLIS = 30 * 60 * 1000; //30 mins
+    private static final long PIN_VALIDATION_MILLIS = AlarmManager.INTERVAL_HALF_HOUR;
     private static final String KEY_NAME = UUID.randomUUID().toString();
 
     private enum AuthType {Biometric, Pin};
@@ -277,7 +278,7 @@ public class PinActivity extends AppCompatActivity {
         final long pinVerificationMillis =  prefs.getLong(VERIFICATION_TIMESTAMP);
         final boolean settingsVerifyPin =  prefs.getBoolean(VERIFY_PIN, false);
         //Log.d(TAG, pin + " " + pinVerificationMillis + " " + settingsVerifyPin);
-        return (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > PinActivity.PIN_VALIDATION_MILLIS);
+        return (StringUtils.isNotEmpty(pin) && settingsVerifyPin && System.currentTimeMillis() - pinVerificationMillis > PIN_VALIDATION_MILLIS);
     }
 
     //biometric authentication ----------------------------------------------------------

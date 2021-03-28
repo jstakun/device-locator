@@ -46,7 +46,7 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
     private static final String TAG = CommandActivity.class.getSimpleName();
 
     public static final String PIN_PREFIX = "pin_";
-    public static final String AUTH_NEEDED = "authNeeded";
+    public static final String AUTH_NEEDED = "CommandActivityAuthNeeded";
 
     private FirebaseAnalytics firebaseAnalytics;
     private Device device;

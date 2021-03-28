@@ -127,13 +127,13 @@ public class Permissions {
         }
     }
 
-    public static void startSettingsIntent(Activity context, String permission) {
+    public static void startSettingsIntent(Activity activity, String permission) {
         try {
-            Toaster.showToast(context, context.getString(R.string.permission_settings, permission));
-            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + context.getPackageName()));
-            context.startActivity(intent);
+            Toaster.showToast(activity, activity.getString(R.string.permission_settings, permission));
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + activity.getPackageName()));
+            activity.startActivity(intent);
         } catch (Exception e) {
-            Toaster.showToast(context, "Unable to open Application Settings on your device!");
+            Toaster.showToast(activity, "Unable to open Application Settings on your device!");
             Log.e(TAG, e.getMessage(), e);
         }
     }
@@ -151,28 +151,28 @@ public class Permissions {
         context.startActivityForResult(intent, requestCode);
     }
 
-    public static void startNotificationPolicyAccessIntent(Activity context) {
+    public static void startNotificationPolicyAccessIntent(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Toaster.showToast(context, "Please grant \"Do Not Disturb\" access to " + context.getString(R.string.app_name));
+            Toaster.showToast(activity, "Please grant \"Do Not Disturb\" access to " + activity.getString(R.string.app_name));
             Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
             try {
-                context.startActivity(intent);
+                activity.startActivity(intent);
             } catch (Exception e){
-                Toaster.showToast(context, R.string.internal_error);
+                Toaster.showToast(activity, R.string.internal_error);
                 Log.e(TAG, e.getMessage(), e);
             }
         } else {
-            Toaster.showToast(context, "This permission is granted by default on your device!");
+            Toaster.showToast(activity, "This permission is granted by default on your device!");
         }
     }
 
-    public static void startDeviceAdminIntent(Activity context) {
+    public static void startDeviceAdminIntent(Activity activity) {
         try {
             Intent intent = new Intent();
             intent.setComponent(new ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings"));
-            context.startActivity(intent);
+            activity.startActivity(intent);
         } catch (Exception e) {
-            Toaster.showToast(context, R.string.internal_error);
+            Toaster.showToast(activity, R.string.internal_error);
             Log.e(TAG, e.getMessage(), e);
         }
     }
