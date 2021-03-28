@@ -127,7 +127,7 @@
     <string name="command_failed_to_device">Failed to send command %1$s to the device %2$s!</string>
     <string name="command_failed_device_gone">Failed to send command %1$s to the device %2$s! Is %3$s installed on this device?"</string>
     <string name="command_failed_device_offline">It seems device %1$s has been offline recently. Retry if no reply soon!</string>
-    <string name="please_auth">Please login again before sending command to this device!</string>
+    <string name="please_auth">Please login before sending command to this device!</string>
     <string name="biometric_description">Please login with biometrics or click Cancel and enter your Security PIN</string>
     <string name="biometric_subtitle">Login Required</string>
 

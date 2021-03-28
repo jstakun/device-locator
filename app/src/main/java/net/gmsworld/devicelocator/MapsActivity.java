@@ -60,8 +60,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final String TAG = MapsActivity.class.getSimpleName();
 
-    //private static final long DEVICE_SEARCH_INTERVAL = 10000L; //10 sec
-
     private GoogleMap mMap;
     private PreferencesUtils settings;
 
@@ -76,7 +74,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private final Handler handler = new Handler();
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
@@ -301,12 +299,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     LatLngBounds bounds = devicesBounds.build();
                     final int width = getResources().getDisplayMetrics().widthPixels;
                     final int height = getResources().getDisplayMetrics().heightPixels;
-                    final int padding = (int) (width * 0.2);
-                    try {
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
-                    } catch (Exception e) {
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
-                    }
+                    final int padding = (int) (width * 0.1);
+                    //try {
+                    //    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                    //} catch (Exception e) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                    //}
                     currentZoom = mMap.getCameraPosition().zoom;
                 }
                 if (center != null) {
@@ -330,8 +328,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (!foundDeviceImei && deviceImei != null) {
                 toaster.showActivityToast(R.string.device_not_found);
             }
-
-            //handler.postDelayed(findDevices, DEVICE_SEARCH_INTERVAL);
         } else {
             RegisterDeviceDialogFragment.newInstance().show(this.getFragmentManager(), RegisterDeviceDialogFragment.TAG);
         }
@@ -339,14 +335,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onInfoWindowClick(Marker marker) {
+        Intent intent = null;
         if (!PinActivity.isAuthRequired(settings)) {
-            Intent intent = new Intent(this, CommandActivity.class);
-            intent.putExtra("index", (int) marker.getTag());
-            intent.putParcelableArrayListExtra("devices", devices);
-            startActivity(intent);
+            intent = new Intent(this, CommandActivity.class);
         } else {
+            Log.d(TAG, "User should login again!");
             toaster.showActivityToast(R.string.please_auth);
+            intent = new Intent(this, PinActivity.class);
+            intent.setAction(CommandActivity.AUTH_NEEDED);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
+        intent.putExtra("index", (int) marker.getTag());
+        intent.putParcelableArrayListExtra("devices", devices);
+        startActivity(intent);
     }
 
     @Override
@@ -371,7 +372,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (bestLocation.getAccuracy() < AbstractLocationManager.MAX_REASONABLE_ACCURACY) {
             if (isAccBetter && (needUpdateLocation || dist > 3f || accDiff > 2f)) {
                 Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + ", distance " + dist + " and accuracy difference " + accDiff);
-                DevicesUtils.sendGeo(this, settings, thisDeviceImei, bestLocation, false);
+                DevicesUtils.sendGeo(this, settings, thisDeviceImei, bestLocation, toaster);
             }
         } else {
             Log.d(TAG, "Accuracy is " + bestLocation.getAccuracy() + " more than max " + AbstractLocationManager.MAX_REASONABLE_ACCURACY + ", will check again.");

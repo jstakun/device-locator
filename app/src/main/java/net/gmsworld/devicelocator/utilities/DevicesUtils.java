@@ -241,7 +241,7 @@ public class DevicesUtils {
         return -1;
     }
 
-    public static void sendGeo(final Activity context, final PreferencesUtils settings, final String thisDeviceImei, final Location location, final boolean silent) {
+    public static void sendGeo(final Activity context, final PreferencesUtils settings, final String thisDeviceImei, final Location location, final Toaster toaster) {
         if (Network.isNetworkAvailable(context)) {
             final String tokenStr = settings.getString(DeviceLocatorApp.GMS_TOKEN);
             if (StringUtils.isNotEmpty(tokenStr)) {
@@ -262,8 +262,8 @@ public class DevicesUtils {
                                 updateDevice(devices, d, context);
                             }
                             //
-                            if (!silent) {
-                                Toaster.showToast(context, "Location refreshed");
+                            if (toaster != null) {
+                                toaster.showActivityToast("Location refreshed");
                             }
                         }
                     }

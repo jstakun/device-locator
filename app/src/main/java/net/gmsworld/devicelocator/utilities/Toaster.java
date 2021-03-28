@@ -58,7 +58,11 @@ public class Toaster {
     }
 
     public void showActivityToast(int resId, final Object... args) {
-        showActivityToast(activity.getString(resId, args));
+        if (activity != null) {
+            showActivityToast(activity.getString(resId, args));
+        } else {
+            Log.e(TAG, "Unable to show Toast");
+        }
     }
 
     public void showActivityToast(String text) {
@@ -78,7 +82,11 @@ public class Toaster {
     }
 
     public void showServiceToast(final int messageId, final Object... args) {
-        showServiceToast(service.getString(messageId, args));
+        if (service != null) {
+            showServiceToast(service.getString(messageId, args));
+        } else {
+            Log.e(TAG, "Unable to show Toast");
+        }
     }
 
     public void showServiceToast(final String text) {

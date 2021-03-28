@@ -222,6 +222,10 @@ public class PinActivity extends AppCompatActivity {
             Intent intent = new Intent(this, CommandService.class);
             intent.putExtras(extras);
             startService(intent);
+        } else if (StringUtils.equals(action, CommandActivity.AUTH_NEEDED)) {
+            Intent intent = new Intent(this, CommandActivity.class);
+            intent.putExtras(extras);
+            startService(intent);
         } else if (StringUtils.equals(action, PermissionsActivity.LOCATION_ACTION)) {
             Intent intent = new Intent(this, PermissionsActivity.class);
             intent.setAction(action);

@@ -378,7 +378,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
             final boolean needUpdateLocation = System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > AlarmManager.INTERVAL_HOUR;
             if (isAccBetter && (needUpdateLocation || dist > 3f || accDiff > 2f)) {
                 Log.d(TAG, "Sending new location with accuracy " + bestLocation.getAccuracy() + ", distance " + dist + " and accuracy difference " + accDiff);
-                DevicesUtils.sendGeo(this, settings, thisDeviceImei, bestLocation, true);
+                DevicesUtils.sendGeo(this, settings, thisDeviceImei, bestLocation, toaster);
             }
         } else {
             Log.d(TAG, "Accuracy is " + bestLocation.getAccuracy() + " more than max " + AbstractLocationManager.MAX_REASONABLE_ACCURACY + ", will check again.");
