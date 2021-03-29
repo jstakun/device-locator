@@ -85,9 +85,10 @@ public class PinActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pin);
 
-        if (getIntent() != null) {
-            action = getIntent().getAction();
-            extras = getIntent().getExtras();
+        Intent intent = getIntent();
+        if (intent != null) {
+            action = intent.getAction();
+            extras = intent.getExtras();
         }
 
         settings = new PreferencesUtils(this);
@@ -226,7 +227,7 @@ public class PinActivity extends AppCompatActivity {
         } else if (StringUtils.equals(action, CommandActivity.AUTH_NEEDED)) {
             Intent intent = new Intent(this, CommandActivity.class);
             intent.putExtras(extras);
-            startService(intent);
+            startActivity(intent);
         } else if (StringUtils.equals(action, PermissionsActivity.LOCATION_ACTION)) {
             Intent intent = new Intent(this, PermissionsActivity.class);
             intent.setAction(action);

@@ -282,6 +282,7 @@ public class NotificationUtils {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setSound(notificationUri)
+                .setGroup("COMMAND_MESSAGES_" + (imei != null ? imei : ""))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE);
         //.setOngoing(false)
@@ -384,6 +385,7 @@ public class NotificationUtils {
                         .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                         .setContentTitle(title)
                         .setContentText(text)
+                        .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                         .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent);
 
         if (showProgress) {
@@ -408,6 +410,7 @@ public class NotificationUtils {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentTitle(title)
                 .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                 .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent);
 
         return nb.build();
@@ -427,7 +430,7 @@ public class NotificationUtils {
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
                 .setContentTitle(title)
                 .setContentText(text)
-                .setAutoCancel(true)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
                 .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent);
 
         return nb.build();
