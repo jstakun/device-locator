@@ -506,7 +506,7 @@ public class Messenger {
         if (StringUtils.isNotEmpty(app)) {
             if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                 //send message to local device
-                sendLocalMessage(context, app, text, Command.SHARE_COMMAND);
+                sendLocalMessage(context, app, text, Command.SHARE_COMMAND, location);
             } else {
                 sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
             }
@@ -532,7 +532,7 @@ public class Messenger {
         if (StringUtils.isNotEmpty(app)) {
             if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                 //send message to local device
-                sendLocalMessage(context, app, text, Command.SHARE_COMMAND);
+                sendLocalMessage(context, app, text, Command.SHARE_COMMAND, location);
             } else {
                 sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 5, 2000, new HashMap<String, String>());
             }
@@ -565,7 +565,7 @@ public class Messenger {
         if (StringUtils.isNotEmpty(app)) {
             if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                 //send message to local device
-                sendLocalMessage(context, app, text, Command.SHARE_COMMAND);
+                sendLocalMessage(context, app, text, Command.SHARE_COMMAND, null);
             } else {
                 sendCloudMessage(context, null, app, text, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
             }
@@ -930,7 +930,7 @@ public class Messenger {
                 Log.d(TAG, "Sending cloud message to device " + app);
                 if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                     //send message to local device
-                    sendLocalMessage(context, app, text, command);
+                    sendLocalMessage(context, app, text, command, null);
                 } else {
                     sendCloudMessage(context, null, app, text, command, 1, 2000, new HashMap<String, String>());
                 }
@@ -938,7 +938,7 @@ public class Messenger {
         }
     }
 
-    private static void sendLocalMessage(Context context, final String replyTo, final String message, final String replyToCommand) {
+    private static void sendLocalMessage(Context context, final String replyTo, final String message, final String replyToCommand, final Location location) {
         String[] replyToTokens = StringUtils.split(replyTo, CID_SEPARATOR);
         if (replyToTokens != null && replyToTokens.length >= 1) {
             Map<String, String> messageData = new HashMap<String, String>();
@@ -959,6 +959,9 @@ public class Messenger {
                 tokens.add("command:" + StringUtils.remove(replyToCommand, "dl"));
             }
             tokens.add("language:" + AppUtils.getInstance().getCurrentLocale(context).getLanguage());
+            if (location != null) {
+                tokens.add("geo:" + location.getLatitude() + " " + location.getLongitude() + " " + location.getAccuracy());
+            }
             messageData.put("flex", StringUtils.join(tokens, ","));
             final String foundCommand = DlFirebaseMessagingService.processMessage(context, messageData);
             if (StringUtils.isNotEmpty(foundCommand)) {
@@ -986,7 +989,7 @@ public class Messenger {
         if (StringUtils.isNotEmpty(app)) {
             if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                 //send message to local device
-                sendLocalMessage(context, app, message, Command.SHARE_COMMAND);
+                sendLocalMessage(context, app, message, Command.SHARE_COMMAND, null);
             } else {
                 sendCloudMessage(context, null, app, message, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
             }
@@ -1011,7 +1014,7 @@ public class Messenger {
         if (StringUtils.isNotEmpty(app)) {
             if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                 //send message to local device
-                sendLocalMessage(context, app, text, null);
+                sendLocalMessage(context, app, text, null, null);
             } else {
                 sendCloudMessage(context, null, app, text, null, 1, 2000, new HashMap<String, String>());
             }
