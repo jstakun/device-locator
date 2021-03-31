@@ -90,6 +90,12 @@ public class RegisterActivity extends AppCompatActivity implements NotificationA
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        toaster.cancel();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume()");

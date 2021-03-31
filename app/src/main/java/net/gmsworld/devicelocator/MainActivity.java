@@ -360,6 +360,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         super.onPause();
         Log.d(TAG, "onPause()");
         unregisterReceiver(uiReceiver);
+        toaster.cancel();
     }
 
     @Override

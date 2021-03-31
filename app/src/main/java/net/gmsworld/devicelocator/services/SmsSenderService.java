@@ -92,7 +92,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 String text;
                 if (StringUtils.isEmpty(command)) {
-                    text = "Sending device location in progress...";
+                    text = "Refreshing device location in progress...";
                 } else {
                     text = "Sending device command " + command + " in progress...";
                 }

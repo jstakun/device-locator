@@ -153,6 +153,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "onPause()");
         SmartLocation.with(this).location().stop();
         unregisterReceiver(mReceiver);
+        toaster.cancel();
     }
 
     @Override

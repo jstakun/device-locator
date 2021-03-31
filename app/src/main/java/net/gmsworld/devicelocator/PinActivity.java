@@ -210,6 +210,7 @@ public class PinActivity extends AppCompatActivity {
         super.onPause();
         final EditText tokenInput = findViewById(R.id.verify_pin_edit);
         tokenInput.setText("");
+        toaster.cancel();
     }
 
     private void onAuthenticated() {

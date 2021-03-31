@@ -221,6 +221,12 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        toaster.cancel();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         //reset pin verification time

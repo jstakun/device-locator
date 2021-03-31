@@ -168,6 +168,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         super.onPause();
         handler.removeCallbacks(r);
         SmartLocation.with(this).location().stop();
+        toaster.cancel();
     }
 
     @Override

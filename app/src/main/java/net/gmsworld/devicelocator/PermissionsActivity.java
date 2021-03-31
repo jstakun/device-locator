@@ -197,6 +197,7 @@ public class PermissionsActivity extends AppCompatActivity {
         super.onPause();
         Log.d(TAG, "onPause()");
         unregisterReceiver(uiReceiver);
+        toaster.cancel();
     }
 
     @Override
