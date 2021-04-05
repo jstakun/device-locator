@@ -2272,9 +2272,15 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         private void showDeviceLocation(Device device) {
             if (StringUtils.isNotEmpty(device.geo)) {
                 //send locate command to device
-                if (settings.contains(CommandActivity.PIN_PREFIX + device.imei) || StringUtils.equals(device.imei, Messenger.getDeviceId(MainActivity.this, false))) {
+                boolean isThisDevice = StringUtils.equals(device.imei, Messenger.getDeviceId(MainActivity.this, false));
+                if (settings.contains(CommandActivity.PIN_PREFIX + device.imei) || isThisDevice) {
                     //send locate command to deviceImei
-                    String devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + device.imei);
+                    String devicePin;
+                    if (isThisDevice) {
+                        devicePin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
+                    } else {
+                        devicePin = settings.getEncryptedString(CommandActivity.PIN_PREFIX + device.imei);
+                    }
                     Intent newIntent = new Intent(MainActivity.this, CommandService.class);
                     newIntent.putExtra("command", Command.SHARE_COMMAND);
                     newIntent.putExtra("imei", device.imei);

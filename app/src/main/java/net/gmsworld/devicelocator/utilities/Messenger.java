@@ -24,8 +24,8 @@ import android.view.inputmethod.InputMethodManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.installations.FirebaseInstallations;
+import com.google.firebase.installations.InstallationTokenResult;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -1298,29 +1298,27 @@ public class Messenger {
             }
 
             if (StringUtils.isEmpty(firebaseToken)) {
-                Task<InstanceIdResult> result = FirebaseInstanceId.getInstance().getInstanceId();
-
-                result.addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                        if (task.isSuccessful()) {
-                            // Task completed successfully
-                            InstanceIdResult result = task.getResult();
-                            if (result != null) {
-                                PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, result.getToken()).remove(DlFirebaseMessagingService.FIREBASE_TOKEN).apply();
-                                sendRegistrationToServer(context, result.getToken(), username, deviceName);
+                FirebaseInstallations.getInstance().getToken(true)
+                        .addOnCompleteListener(new OnCompleteListener<InstallationTokenResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<InstallationTokenResult> task) {
+                                if (task.isSuccessful() && task.getResult() != null) {
+                                    InstallationTokenResult result = task.getResult();
+                                    PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, result.getToken()).remove(DlFirebaseMessagingService.FIREBASE_TOKEN).apply();
+                                    sendRegistrationToServer(context, result.getToken(), username, deviceName);
+                                } else {
+                                    if (task != null) {
+                                        Exception exception = task.getException();
+                                        Log.e(TAG, "Failed to receive Firebase token!", exception);
+                                    } else {
+                                        Log.e(TAG, "Failed to receive Firebase token!");
+                                    }
+                                    if (!silent) {
+                                        Toaster.showToast(context, "Failed to synchronize device. Please restart " + context.getString(R.string.app_name) + " and try again!");
+                                    }
+                                }
                             }
-                        } else {
-                            // Task failed with an exception
-                            Exception exception = task.getException();
-                            Log.e(TAG, "Failed to receive Firebase token!", exception);
-                            if (!silent) {
-                                Toaster.showToast(context, "Failed to synchronize device. Please restart " + context.getString(R.string.app_name) + " and try again!");
-                            }
-                        }
-                    }
-                });
-
+                        });
                 return true;
             } else {
                 return sendRegistrationToServer(context, firebaseToken, username, deviceName);
@@ -1385,7 +1383,7 @@ public class Messenger {
                     }
                 });
             } else {
-                Log.e(TAG, "Invalid token: " + firebaseToken);
+                Log.e(TAG, "Invalid Firebase token: " + firebaseToken);
             }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage(), e);

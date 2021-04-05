@@ -41,7 +41,6 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d(TAG, "Received message from: " + remoteMessage.getFrom());
-        //Log.d(TAG, "Received message: " + remoteMessage.getData().toString());
 
         // Check if message contains a data payload.
         Map<String, String> messageData = remoteMessage.getData();
@@ -67,7 +66,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(String token) {
         // Get updated InstanceID token.
-        Log.d(TAG, "New Firebase token: " + token);
+        Log.d(TAG, "New Firebase token received" + StringUtils.abbreviate(token, 14));
         PreferencesUtils settings = new PreferencesUtils(this);
         settings.setString(NEW_FIREBASE_TOKEN, token);
         settings.remove(FIREBASE_TOKEN);

@@ -125,11 +125,11 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             prefs.setString(imei + LAST_COMMAND_SUFFIX, command);
 
             String pin = extras.getString("pin");
-            if (pin == null) {
+            if (StringUtils.isEmpty(pin)) {
                 pin = prefs.getEncryptedString(CommandActivity.PIN_PREFIX + imei);
             }
 
-            if (pin == null) {
+            if (StringUtils.isEmpty(pin)) {
                 Log.e(TAG, "Missing pin!");
                 return;
             }
@@ -149,6 +149,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                     Log.e(TAG, e.getMessage(), e);
                 }
             }
+            //Log.d(TAG, "Command content: " + content);
 
             if (!commandsInProgress.contains(imei + "_" + command)) {
                 if (StringUtils.isNotEmpty(cancelCommand)) {
