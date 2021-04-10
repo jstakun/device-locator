@@ -69,6 +69,8 @@ public class LauncherActivity extends Activity {
             showIntent.setAction(action);
         }
 
+        NotificationUtils.cancel(this, NotificationUtils.SAVED_LOCATION_NOTIFICATION_ID);
+
         startActivity(showIntent);
 
         //Sending device location after 1 hour of inactivity
