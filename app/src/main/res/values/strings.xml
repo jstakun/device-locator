@@ -71,6 +71,7 @@
     <string name="activation_email_desc">In order to activate email notifications please enter 4 digit activation code we\'ve sent to your email address:</string>
     <string name="activation_telegram_desc">In order to activate Telegram notifications please enter 4 digit activation code we\'ve sent to your Telegram chat or channel:</string>
     <string name="login_dialog_desc">&lt;font color="#808080">It seems you haven\'t any accounts registered on this device. Do you want to register Device Locator account now?&lt;/font></string>
+    <string name="review_dialog_desc">&lt;font color="#808080">You have been using Device Locator for quite some time. Would you like to review Device Locator now?&lt;/font></string>
     <string name="your_devices">Your devices</string>
     <string name="device_manager">Device manager</string>
     <string name="device_sms_error">Device Locator is unable to send SMS message due to device error!</string>

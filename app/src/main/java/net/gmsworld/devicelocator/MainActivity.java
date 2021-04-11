@@ -59,6 +59,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import net.gmsworld.devicelocator.broadcastreceivers.SmsReceiver;
+import net.gmsworld.devicelocator.fragments.AppReviewDialogFragment;
 import net.gmsworld.devicelocator.fragments.DownloadFullApplicationDialogFragment;
 import net.gmsworld.devicelocator.fragments.EmailActivationDialogFragment;
 import net.gmsworld.devicelocator.fragments.EmailNotificationDialogFragment;
@@ -112,12 +113,6 @@ import androidx.core.view.ViewCompat;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 
-//import com.google.android.play.core.review.ReviewInfo;
-//import com.google.android.play.core.review.ReviewManager;
-//import com.google.android.play.core.review.ReviewManagerFactory;
-//import com.google.android.play.core.review.testing.FakeReviewManager;
-//import com.google.android.play.core.tasks.Task;
-
 public class MainActivity extends AppCompatActivity implements RemoveDeviceDialogFragment.RemoveDeviceDialogListener, NewVersionDialogFragment.NewVersionDialogListener,
         SmsCommandsInitDialogFragment.SmsCommandsInitDialogListener, SmsNotificationWarningDialogFragment.SmsNotificationWarningDialogListener,
         DownloadFullApplicationDialogFragment.DownloadFullApplicationDialogListener, EmailNotificationDialogFragment.EmailNotificationDialogListener, DevicesUtils.DeviceLoadListener {
@@ -154,7 +149,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private boolean isTrackingServiceBound = false;
     private FirebaseAnalytics firebaseAnalytics;
     private BroadcastReceiver onDownloadComplete = null;
-    //private ReviewInfo reviewInfo;
 
     private Toaster toaster;
 
@@ -195,7 +189,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
 
         //
-        //initAppReview();
         initRunningButton();
         initShareRouteButton();
         initRadiusInput();
@@ -263,11 +256,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
         });
 
-        //
         if (settings.getBoolean(ScreenStatusService.RUNNING, false)) {
             ScreenStatusService.initService(this, false);
         }
-        //
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         firebaseAnalytics.logEvent("main_activity", new Bundle());
@@ -353,6 +344,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
             }
         }
+
+        //show app review
+        final int useCount = settings.getInt("useCount", 0);
+        final int appReview = settings.getInt("appReview", 0);
+        Log.d(TAG, "App use count: " + useCount + ", Next app review: " + appReview);
+        if (appReview > 0 && useCount - appReview >= 10) {
+            AppReviewDialogFragment.newInstance(settings, toaster, this).show(getFragmentManager(), AppReviewDialogFragment.TAG);
+        }
     }
 
     @Override
@@ -419,14 +418,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        //final int useCount = settings.getInt("useCount", 0);
-        //final int appReview = settings.getInt("appReview", 0);
-        //if (reviewInfo != null) {
-        //    showAppReview();
-        //    return true;
-        //} else {
-            switch (item.getItemId()) {
-                case R.id.sms:
+        switch (item.getItemId()) {
+            case R.id.sms:
                     Log.d(TAG, "Show sms settings");
                     settings.setBoolean("isTrackerShown", false);
                     settings.setBoolean("isDeviceManagerShown", false);
@@ -436,7 +429,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     supportInvalidateOptionsMenu();
                     showFirstTimeUsageDialog(false, false);
                     return true;
-                case R.id.tracker:
+            case R.id.tracker:
                     Log.d(TAG, "Show tracker settings");
                     settings.setBoolean("isTrackerShown", true);
                     settings.setBoolean("isDeviceManagerShown", false);
@@ -453,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         openNotificationActivationDialogFragment(NotificationActivationDialogFragment.Mode.Telegram);
                     }
                     return true;
-                case R.id.devices:
+            case R.id.devices:
                     Log.d(TAG, "Show Device Manager settings");
                     settings.setBoolean("isTrackerShown", false);
                     settings.setBoolean("isDeviceManagerShown", true);
@@ -465,28 +458,27 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     initUserLoginInput(true, false);
                     showFirstTimeUsageDialog(false, true);
                     return true;
-                case R.id.permissions:
+            case R.id.permissions:
                     startActivity(new Intent(this, PermissionsActivity.class));
                     return true;
-                case R.id.map:
+            case R.id.map:
                     startActivity(new Intent(this, MapsActivity.class));
                     return true;
-                case R.id.commandLog:
+            case R.id.commandLog:
                     startActivity(new Intent(this, CommandListActivity.class));
                     return true;
-                case R.id.privacyPolicy:
+            case R.id.privacyPolicy:
                     Intent gmsIntent = new Intent(this, WebViewActivity.class);
                     gmsIntent.putExtra("url", getString(R.string.privacyPolicyUrl));
                     gmsIntent.putExtra("title", getString(R.string.app_name) + " " + getString(R.string.privacy_policy));
                     startActivity(gmsIntent);
                     return true;
-                case R.id.donateUs:
+            case R.id.donateUs:
                     Messenger.viewDonateUrl(this);
                     return true;
-                default:
+            default:
                     return super.onOptionsItemSelected(item);
-            }
-        //}
+        }
     }
 
     @Override
@@ -778,7 +770,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
         } else {
             if (!this.motionDetectorRunning && !Permissions.haveLocationPermission(MainActivity.this)) {
-                //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL);
                 LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_REQUEST_TRACKER_CONTROL).show(getFragmentManager(), TAG);
                 return;
             }
@@ -2079,45 +2070,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     public void showEmailActivationDialogFragment(boolean retry) {
         EmailActivationDialogFragment.showEmailActivationDialogFragment(retry, this, toaster);
     }
-
-    //In App review ----
-
-    /*private void initAppReview() {
-        final int useCount = settings.getInt("useCount", 0);
-        final int appReview = settings.getInt("appReview", 0);
-        if (useCount - appReview >= 10) {
-            ReviewManager manager = ReviewManagerFactory.create(this);//new FakeReviewManager(this);//
-            Task<ReviewInfo> request = manager.requestReviewFlow();
-            request.addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    reviewInfo = task.getResult();
-                    Log.d(TAG, "Received app review info object");
-                } else {
-                    Log.e(TAG, "Failed to get app review info object");
-                }
-            });
-        } else {
-            Log.d(TAG, "Use count: " + useCount + " App review: " + appReview);
-        }
-    }
-
-    private void showAppReview() {
-        if (reviewInfo != null) {
-            final int useCount = settings.getInt("useCount", 0);
-            ReviewManager manager = ReviewManagerFactory.create(this);
-            Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
-            flow.addOnCompleteListener(flowTask -> {
-                settings.setInt("appReview", useCount);
-                reviewInfo  = null;
-            });
-            flow.addOnFailureListener(flowTask -> {
-                Log.e(TAG, flowTask.getMessage());
-                reviewInfo = null;
-            });
-        } else {
-            Log.d(TAG,"Review info object is null");
-        }
-    }*/
 
     // -----------------------------------------------------------------------------------
 
