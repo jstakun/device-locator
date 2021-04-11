@@ -95,4 +95,8 @@ public class AppReviewDialogFragment extends DialogFragment {
             Log.d(TAG,"Review info object is null");
         }
     }
+
+    public boolean isReviewInfoPresent() {
+        return reviewInfo != null;
+    }
 }

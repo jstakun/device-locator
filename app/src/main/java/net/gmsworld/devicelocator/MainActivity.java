@@ -350,7 +350,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         final int appReview = settings.getInt("appReview", 0);
         Log.d(TAG, "App use count: " + useCount + ", Next app review: " + appReview);
         if (appReview >= 0 && useCount - appReview >= 10) {
-            AppReviewDialogFragment.newInstance(settings, toaster, this).show(getFragmentManager(), AppReviewDialogFragment.TAG);
+            AppReviewDialogFragment  appReviewDialogFragment = AppReviewDialogFragment.newInstance(settings, toaster, this);
+            if (appReviewDialogFragment.isReviewInfoPresent()) {
+                appReviewDialogFragment.show(getFragmentManager(), AppReviewDialogFragment.TAG);
+            }
         }
     }
 
@@ -664,7 +667,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 break;
             case R.id.settings_alarm:
                 if (checked && !Permissions.haveLocationPermission(MainActivity.this)) {
-                    //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL);
                     ((Switch) view).setChecked(false);
                     LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_REQUEST_ALARM_CONTROL).show(getFragmentManager(), TAG);
                     return;
@@ -1526,8 +1528,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 }
             } else if (AppUtils.getInstance().hasTelephonyFeature(this)) {
                 //GP version with telephony
-                //DownloadFullApplicationDialogFragment downloadFullApplicationDialogFragment = DownloadFullApplicationDialogFragment.newInstance(this);
-                //downloadFullApplicationDialogFragment.show(getFragmentManager(), DownloadFullApplicationDialogFragment.TAG);
                 if (!settings.contains("SmsManagerFirstTimeUseDialog")) {
                     settings.setBoolean("SmsManagerFirstTimeUseDialog", true);
                     FirstTimeUseDialogFragment firstTimeUseDialogFragment = FirstTimeUseDialogFragment.newInstance(R.string.sms_manager_first_time_use_gp, R.drawable.ic_devices_other_gray);
