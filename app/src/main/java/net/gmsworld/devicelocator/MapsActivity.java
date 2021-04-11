@@ -60,15 +60,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final String TAG = MapsActivity.class.getSimpleName();
 
-    private GoogleMap mMap;
+    private GoogleMap mapMap;
+    private LatLng mapCenter = null;
+    private Location bestLocation;
+
     private PreferencesUtils settings;
+    private Toaster toaster;
 
     private ArrayList<Device> devices;
     private String deviceImei = null, thisDeviceImei = null;
     private float currentZoom = -1f;
-
-    private Location bestLocation;
-    private Toaster toaster;
 
     private IntentFilter mIntentFilter;
 
@@ -79,7 +80,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
                 Log.d(TAG, "Received UI Update Broadcast");
-                if (mMap != null) {
+                if (mapMap != null) {
+                    mapCenter = mapMap.getCameraPosition().target;
                     loadDeviceMarkers(false);
                 }
             }
@@ -130,7 +132,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume()");
-        if (mMap != null) {
+        if (mapMap != null) {
             loadDeviceMarkers(true);
         }
         registerReceiver(mReceiver, mIntentFilter);
@@ -223,15 +225,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         Log.d(TAG, "onMapReady()");
-        mMap = googleMap;
+        mapMap = googleMap;
 
         if (Permissions.haveLocationPermission(this)) {
-            mMap.setMyLocationEnabled(true);
+            mapMap.setMyLocationEnabled(true);
         }
 
-        mMap.setOnInfoWindowClickListener(this);
+        mapMap.setOnInfoWindowClickListener(this);
 
-        UiSettings mUiSettings = mMap.getUiSettings();
+        UiSettings mUiSettings = mapMap.getUiSettings();
         mUiSettings.setZoomControlsEnabled(true);
         mUiSettings.setCompassEnabled(true);
         mUiSettings.setMyLocationButtonEnabled(true);
@@ -246,17 +248,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void loadDeviceMarkers(boolean centerToBounds) {
         Log.d(TAG, "loadDeviceMarkers(" + centerToBounds + ")");
-        mMap.clear();
+        mapMap.clear();
         devices = DevicesUtils.buildDeviceList(settings);
         boolean foundDeviceImei = false;
         if (!devices.isEmpty()) {
-            LatLng center = null;
             final LatLngBounds.Builder devicesBounds = new LatLngBounds.Builder();
             int markerCount = 0;
             if (devices.size() > 1 && !PinActivity.isAuthRequired(settings)) {
                 initLocateButton();
             }
-            for (int i =0;i<devices.size(); i++) {
+            for (int i=0;i<devices.size(); i++) {
                 Device d = devices.get(i);
                 String[] geo = StringUtils.split(d.geo," ");
                 if (geo != null && geo.length > 1) {
@@ -280,7 +281,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     MarkerOptions mo;
                     if (d.imei.equals(deviceImei)) {
-                        center = deviceMarker;
+                        if (mapCenter == null) {
+                            mapCenter = deviceMarker;
+                        }
                         foundDeviceImei = true;
                         mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok)).anchor(0.5f, 0.5f);
                     } else if (d.imei.equals(thisDeviceImei)) {
@@ -288,7 +291,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     } else {
                         mo = new MarkerOptions().zIndex(0.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phone)).anchor(0.5f, 0.5f);
                     }
-                    Marker m = mMap.addMarker(mo);
+                    Marker m = mapMap.addMarker(mo);
                     m.setTag(i);
                     markerCount++;
                 }
@@ -296,33 +299,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.d(TAG, "Loaded " + markerCount + " device markers to the map");
 
             if (markerCount > 0) {
-                if (centerToBounds) {
+                if (centerToBounds && markerCount > 1) {
                     LatLngBounds bounds = devicesBounds.build();
                     final int width = getResources().getDisplayMetrics().widthPixels;
                     final int height = getResources().getDisplayMetrics().heightPixels;
-                    final int padding = (int) (width * 0.1);
+                    final int padding = (int) (width * 0.2);
                     //try {
                     //    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
                     //} catch (Exception e) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
+                    mapMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding));
                     //}
-                    currentZoom = mMap.getCameraPosition().zoom;
+                    currentZoom = mapMap.getCameraPosition().zoom - 1;
                 }
-                if (center != null) {
-                    if (currentZoom > 0) {
-                        try {
-                            mMap.animateCamera(CameraUpdateFactory.newLatLng(center));
-                        } catch (Exception e) {
-                            mMap.moveCamera(CameraUpdateFactory.newLatLng(center));
-                        }
-                    } else {
-                        try {
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(center, 14f));
-                        } catch (Exception e) {
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 14f));
-                        }
+                if (mapCenter != null) {
+                    if (currentZoom <= 0) {
+                        currentZoom = 14f;
                     }
-                    currentZoom = mMap.getCameraPosition().zoom;
+                    try {
+                        mapMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mapCenter, currentZoom));
+                    } catch (Exception e) {
+                        mapMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mapCenter, currentZoom));
+                    }
+                    //currentZoom = mapMap.getCameraPosition().zoom;
                 }
             }
 
