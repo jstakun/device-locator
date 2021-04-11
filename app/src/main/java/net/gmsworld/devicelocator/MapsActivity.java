@@ -320,7 +320,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     } catch (Exception e) {
                         mapMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mapCenter, currentZoom));
                     }
-                    //currentZoom = mapMap.getCameraPosition().zoom;
                 }
             }
 
