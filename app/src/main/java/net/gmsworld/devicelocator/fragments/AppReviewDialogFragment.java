@@ -66,12 +66,12 @@ public class AppReviewDialogFragment extends DialogFragment {
         ReviewManager manager = ReviewManagerFactory.create(activity); //ReviewManagerFactory.create(activity);//new FakeReviewManager(activity);//
         Task<ReviewInfo> request = manager.requestReviewFlow();
         request.addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    reviewInfo = task.getResult();
-                    Log.d(TAG, "Received app review info object");
-                } else {
-                    Log.e(TAG, "Failed to get app review info object");
-                }
+            if (task.isSuccessful()) {
+                reviewInfo = task.getResult();
+                Log.d(TAG, "Received app review info object");
+            } else {
+                Log.e(TAG, "Failed to get app review info object");
+            }
         });
     }
 
@@ -84,7 +84,6 @@ public class AppReviewDialogFragment extends DialogFragment {
                 settings.setInt("appReview", -1);
                 Log.d(TAG, "App review has been done");
                 reviewInfo  = null;
-
             });
             flow.addOnFailureListener(flowTask -> {
                 settings.setInt("appReview", useCount + 10);
