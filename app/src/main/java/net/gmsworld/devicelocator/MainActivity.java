@@ -349,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         final int useCount = settings.getInt("useCount", 0);
         final int appReview = settings.getInt("appReview", 0);
         Log.d(TAG, "App use count: " + useCount + ", Next app review: " + appReview);
-        if (appReview > 0 && useCount - appReview >= 10) {
+        if (appReview >= 0 && useCount - appReview >= 10) {
             AppReviewDialogFragment.newInstance(settings, toaster, this).show(getFragmentManager(), AppReviewDialogFragment.TAG);
         }
     }
