@@ -353,6 +353,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             AppReviewDialogFragment  appReviewDialogFragment = AppReviewDialogFragment.newInstance(settings, toaster, this);
             if (appReviewDialogFragment.isReviewInfoPresent()) {
                 appReviewDialogFragment.show(getFragmentManager(), AppReviewDialogFragment.TAG);
+            } else {
+                settings.setInt("appReview", useCount + 10);
             }
         }
     }
