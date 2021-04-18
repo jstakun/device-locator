@@ -82,7 +82,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.d(TAG, "Received UI Update Broadcast");
                 if (mapMap != null) {
                     mapCenter = mapMap.getCameraPosition().target;
-                    loadDeviceMarkers(false);
+                    LatLngBounds currentScreen = mapMap.getProjection().getVisibleRegion().latLngBounds;
+                    if (currentScreen.contains(new LatLng(bestLocation.getLatitude(), bestLocation.getLongitude()))) {
+                        loadDeviceMarkers(false);
+                    } else {
+                        loadDeviceMarkers(true);
+                    }
                 }
             }
         }
@@ -299,6 +304,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.d(TAG, "Loaded " + markerCount + " device markers to the map");
 
             if (markerCount > 0) {
+                toaster.showActivityToast(getResources().getQuantityString(R.plurals.loaded_devices, markerCount, markerCount));
                 if (centerToBounds && markerCount > 1) {
                     LatLngBounds bounds = devicesBounds.build();
                     final int width = getResources().getDisplayMetrics().widthPixels;

@@ -215,4 +215,9 @@
     <string name="alarm_settings_suffix">Next %1$s</string>
     <string name="device_tracker_radius_in_meters">Device tracker radius in meters</string>
     <string name="title_activity_web_view">Web Viewer</string>
+    <plurals name="loaded_devices">
+        <item quantity="one">Loaded %d device</item>
+        <item quantity="other">Loaded %d devices</item>
+    </plurals>
+
 </resources>
