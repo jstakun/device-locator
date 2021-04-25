@@ -91,6 +91,7 @@ public class LauncherActivity extends Activity {
         if (!settings.contains(LocationAlarmUtils.ALARM_SETTINGS)) {
             settings.setBoolean(LocationAlarmUtils.ALARM_SETTINGS, true);
             settings.setBoolean(LocationAlarmUtils.ALARM_SILENT, true);
+            LocationAlarmUtils.initWhenDown(this, false);
         }
 
         finish();

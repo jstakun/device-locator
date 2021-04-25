@@ -398,7 +398,7 @@ public class NotificationUtils {
     private static Notification buildLocationPermissionNotification(Context context, int notificationId) {
         initChannels(context, DEFAULT_CHANNEL_ID);
 
-        final String text = "Please click on the button below and grant Location permission to keep your device secure!";
+        final String text = "Please click the button below and grant Location permission to let us keep your device secure!";
         final String title = context.getString(R.string.app_name) + " Notification";
 
         Intent permissionIntent = new Intent(context, LauncherActivity.class);
