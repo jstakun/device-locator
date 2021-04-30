@@ -137,6 +137,15 @@ public class NotificationUtils {
         }
     }
 
+    public static void showRegistrationNotification(Context context) {
+        Notification notification = NotificationUtils.buildRegistrationNotification(context, SAVED_LOCATION_NOTIFICATION_ID);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager != null) {
+            Log.d(TAG, "Creating notification " + SAVED_LOCATION_NOTIFICATION_ID);
+            notificationManager.notify(SAVED_LOCATION_NOTIFICATION_ID, notification);
+        }
+    }
+
     private static Notification buildMessageNotification(Context context, int notificationId, String message, Location deviceLocation, Bundle extras) {
         PendingIntent mapIntent = null, routeIntent = null, webIntent = null;
         final String deviceName = extras.getString(MainActivity.DEVICE_NAME);
@@ -424,6 +433,26 @@ public class NotificationUtils {
 
         Intent mapsIntent = new Intent(context, MapsActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, mapsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_devices_other_white)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher))
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent);
+
+        return nb.build();
+    }
+
+    private static Notification buildRegistrationNotification(Context context, int notificationId) {
+        initChannels(context, DEFAULT_CHANNEL_ID);
+
+        final String text = "Complete your device registration to keep it secure!";
+        final String title = context.getString(R.string.app_name) + " Notification";
+
+        Intent permissionIntent = new Intent(context, LauncherActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, permissionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_devices_other_white)
