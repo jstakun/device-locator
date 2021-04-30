@@ -81,14 +81,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
                 Log.d(TAG, "Received UI Update Broadcast");
                 if (mapMap != null) {
-                    LatLngBounds currentScreen = mapMap.getProjection().getVisibleRegion().latLngBounds;
-                    LatLng newLoc = new LatLng(bestLocation.getLatitude(), bestLocation.getLongitude());
-                    if (currentScreen.contains(newLoc)) {
+                    if (bestLocation != null) {
+                        LatLng newLoc = new LatLng(bestLocation.getLatitude(), bestLocation.getLongitude());
+                        LatLngBounds currentScreen = mapMap.getProjection().getVisibleRegion().latLngBounds;
+                        if (currentScreen.contains(newLoc)) {
+                            mapCenter = mapMap.getCameraPosition().target;
+                            loadDeviceMarkers(false);
+                        } else {
+                            mapCenter = newLoc;
+                            loadDeviceMarkers(true);
+                        }
+                    } else {
                         mapCenter = mapMap.getCameraPosition().target;
                         loadDeviceMarkers(false);
-                    } else {
-                        mapCenter = newLoc;
-                        loadDeviceMarkers(true);
                     }
                 }
             }

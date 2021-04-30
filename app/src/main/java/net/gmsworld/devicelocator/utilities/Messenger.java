@@ -1574,6 +1574,7 @@ public class Messenger {
             return context.getPackageManager().getApplicationInfo(packageName, 0).enabled;
         }
         catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Package " + packageName + " not found");
             return false;
         }
     }
