@@ -81,7 +81,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
                 Log.d(TAG, "Received UI Update Broadcast");
                 if (mapMap != null) {
-                    if (bestLocation != null) {
+                    if (deviceImei != null && !StringUtils.equals(deviceImei, thisDeviceImei)) {
+                        loadDeviceMarkers(false);
+                    } else if (bestLocation != null) {
                         LatLng newLoc = new LatLng(bestLocation.getLatitude(), bestLocation.getLongitude());
                         LatLngBounds currentScreen = mapMap.getProjection().getVisibleRegion().latLngBounds;
                         if (currentScreen.contains(newLoc)) {
@@ -340,7 +342,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 toaster.showActivityToast(R.string.device_not_found);
             }
         } else {
-            RegisterDeviceDialogFragment.newInstance().show(this.getFragmentManager(), RegisterDeviceDialogFragment.TAG);
+            RegisterDeviceDialogFragment.showRegisterDeviceDialogFragment(this, toaster);
         }
     }
 
