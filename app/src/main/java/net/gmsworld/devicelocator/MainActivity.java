@@ -1163,6 +1163,10 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     private synchronized void registerDeviceName(TextView deviceNameInput, boolean silent) {
         final String newDeviceName = deviceNameInput.getText().toString();
         final String deviceName = settings.getString(DEVICE_NAME);
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), 0);
+        }
         if (StringUtils.isNotBlank(newDeviceName) && !StringUtils.equals(deviceName, newDeviceName)) {
             final String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-').replace(',', '-');
             if (Messenger.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName, false)) {
@@ -1183,6 +1187,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                     toaster.showActivityToast("Your device can't be registered at the moment!");
                 }
             }
+        } else {
+           ((TextView) findViewById(R.id.deviceName)).setText(deviceName);
         }
     }
 
