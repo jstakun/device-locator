@@ -269,13 +269,17 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
                 if (StringUtils.equals(now, "true")) {
                     routeUrl += "/now";
                 }
-                Intent sendIntent = new Intent();
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + deviceName + " location here: " + routeUrl);
-                sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Follow device <a href=\"" + getString(R.string.deviceUrl) + "/" + deviceImei + "\">" + deviceName + "</a> location <a href=\"" + routeUrl + "\">here</a>...");
-                sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.message, deviceName) + " - route map link");
-                sendIntent.setType("text/html");
-                startActivity(sendIntent);
+                try {
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + deviceName + " location here: " + routeUrl);
+                    sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Follow device <a href=\"" + getString(R.string.deviceUrl) + "/" + deviceImei + "\">" + deviceName + "</a> location <a href=\"" + routeUrl + "\">here</a>...");
+                    sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.message, deviceName) + " - route map link");
+                    sendIntent.setType("text/html");
+                    startActivity(sendIntent);
+                } catch (Exception e) {
+                    toaster.showActivityToast(R.string.internal_error);
+                }
             }
         });
     }

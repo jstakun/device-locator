@@ -1538,12 +1538,16 @@ public class Messenger {
     }
 
     public static void sendTelegramMessage(Context context, String message) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, message);
-        intent.setPackage(TELEGRAM_PACKAGE);
-        context.startActivity(intent);
-        Toaster.showToast(context, "Find Device Locator bot");
+        try {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, message);
+            intent.setPackage(TELEGRAM_PACKAGE);
+            context.startActivity(intent);
+            Toaster.showToast(context, "Find Device Locator bot");
+        } catch (Exception e) {
+            Toaster.showToast(context, R.string.internal_error);
+        }
     }
 
     /*public static void sendMessengerMessage(Context context, String message) {

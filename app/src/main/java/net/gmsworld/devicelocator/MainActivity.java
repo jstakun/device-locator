@@ -1161,9 +1161,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
     }
 
     private synchronized void registerDeviceName(TextView deviceNameInput, boolean silent) {
-        String newDeviceName = deviceNameInput.getText().toString();
-        String deviceName = settings.getString(DEVICE_NAME);
-        if (!StringUtils.equals(deviceName, newDeviceName)) {
+        final String newDeviceName = deviceNameInput.getText().toString();
+        final String deviceName = settings.getString(DEVICE_NAME);
+        if (StringUtils.isNotBlank(newDeviceName) && !StringUtils.equals(deviceName, newDeviceName)) {
             final String normalizedDeviceName = StringUtils.trimToEmpty(newDeviceName).replace(' ', '-').replace(',', '-');
             if (Messenger.sendRegistrationToServer(this, settings.getString(USER_LOGIN), normalizedDeviceName, false)) {
                 if (!StringUtils.equals(newDeviceName, normalizedDeviceName)) {
@@ -1716,15 +1716,19 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent sendIntent = new Intent();
-                final String deviceName = Messenger.getDeviceId(MainActivity.this, true);
-                final String imei = Messenger.getDeviceId(MainActivity.this, false);
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "Find device " + deviceName + " location here: " + getString(R.string.deviceUrl) + "/" + imei);
-                sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Find device " + deviceName + " location <a href=\"" + getString(R.string.deviceUrl) + "/" + imei + "\">here</a>");
-                sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.message, deviceName) + " - device location");
-                sendIntent.setType("text/html");
-                startActivity(sendIntent);
+                try {
+                    Intent sendIntent = new Intent();
+                    final String deviceName = Messenger.getDeviceId(MainActivity.this, true);
+                    final String imei = Messenger.getDeviceId(MainActivity.this, false);
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, "Find device " + deviceName + " location here: " + getString(R.string.deviceUrl) + "/" + imei);
+                    sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Find device " + deviceName + " location <a href=\"" + getString(R.string.deviceUrl) + "/" + imei + "\">here</a>");
+                    sendIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.message, deviceName) + " - device location");
+                    sendIntent.setType("text/html");
+                    startActivity(sendIntent);
+                } catch (Exception e) {
+                    toaster.showActivityToast(R.string.internal_error);
+                }
             }
         });
     }
@@ -2117,13 +2121,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         extras.putInt("size", 2); //we know only size > 1
                         SmsSenderService.initService(activity, true, true, true, null, Command.ROUTE_COMMAND, null, null, extras);
 
-                        Intent sendIntent = new Intent();
-                        sendIntent.setAction(Intent.ACTION_SEND);
-                        sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + deviceName + " location here: " + showRouteUrl);
-                        sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Follow device <a href=\"" + activity.getString(R.string.deviceUrl) + "/" + imei + "\">" + deviceName + "</a> location <a href=\"" + showRouteUrl + "\">here</a>...");
-                        sendIntent.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.message, deviceName) + " - route map link");
-                        sendIntent.setType("text/html");
-                        activity.startActivity(sendIntent);
+                        try {
+                            Intent sendIntent = new Intent();
+                            sendIntent.setAction(Intent.ACTION_SEND);
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, "Follow device " + deviceName + " location here: " + showRouteUrl);
+                            sendIntent.putExtra(Intent.EXTRA_HTML_TEXT, "Follow device <a href=\"" + activity.getString(R.string.deviceUrl) + "/" + imei + "\">" + deviceName + "</a> location <a href=\"" + showRouteUrl + "\">here</a>...");
+                            sendIntent.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.message, deviceName) + " - route map link");
+                            sendIntent.setType("text/html");
+                            activity.startActivity(sendIntent);
+                        } catch (Exception e) {
+                            activity.toaster.showActivityToast(R.string.internal_error);
+                        }
                     } else if (responseCode == 400) {
                         activity.toaster.showActivityToast("Route upload failed due to invalid route file!");
                     } else {
