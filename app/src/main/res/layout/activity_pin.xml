@@ -54,6 +54,32 @@
 
                 </net.gmsworld.devicelocator.views.LDCard>
 
+                <net.gmsworld.devicelocator.views.LDCard
+                    android:id="@+id/deviceFingerprintCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_margin="8dp"
+                    ldcard:title="@string/unlock_with_fingerprint"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_horizontal">
+
+                        <ImageButton
+                            android:id="@+id/deviceFingerprintButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_fingerprint"
+                            android:layout_marginTop="16dp"
+                            android:background="#00000000"
+                            android:contentDescription="Use figerprint" />
+
+                    </LinearLayout>
+                </net.gmsworld.devicelocator.views.LDCard>
+
             </LinearLayout>
 
         </ScrollView>

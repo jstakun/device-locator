@@ -20,6 +20,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -79,6 +80,8 @@ public class PinActivity extends AppCompatActivity {
     private int failedFingerprint = 0;
     private String mToBeSignedMessage;
     private BiometricPrompt mBiometricPrompt = null;
+    private Signature signature = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,7 +172,6 @@ public class PinActivity extends AppCompatActivity {
 
         if (canAuthenticateWithStrongBiometrics()) {
             // Generate keypair and init signature
-            Signature signature = null;
             try {
                 KeyPair keyPair = generateKeyPair(KEY_NAME, true);
                 // Send public key part of key pair to the server, this public key will be used for authentication
@@ -186,6 +188,17 @@ public class PinActivity extends AppCompatActivity {
             // Create biometricPrompt
             if (signature != null) {
                 showBiometricPrompt(signature);
+
+                findViewById(R.id.deviceFingerprintButton).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (signature != null) {
+                            showBiometricPrompt(signature);
+                        }
+                    }
+                });
+
+                findViewById(R.id.deviceFingerprintCard).setVisibility(View.VISIBLE);
             }
         }
 
