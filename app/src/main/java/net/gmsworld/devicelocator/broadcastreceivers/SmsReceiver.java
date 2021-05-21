@@ -42,9 +42,16 @@ public class SmsReceiver extends BroadcastReceiver {
                         } else {
                             sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
                         }
-                        if (contactExists(context, sms.getOriginatingAddress())) {
-                            proceed = true;
-                            break;
+                        if (sms != null) {
+                            final String originatingAddress = sms.getOriginatingAddress();
+                            if (StringUtils.isNotEmpty(originatingAddress) && contactExists(context, originatingAddress)) {
+                                proceed = true;
+                                break;
+                            } else {
+                                Log.d(TAG, "Originating address is empty or contact doesn't exists: " + originatingAddress);
+                            }
+                        } else {
+                            Log.d(TAG, "SMS object is null");
                         }
                     }
                 }
