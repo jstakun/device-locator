@@ -33,6 +33,8 @@ import net.gmsworld.devicelocator.utilities.RouteTrackingServiceUtils;
 
 import java.lang.ref.WeakReference;
 
+import androidx.annotation.NonNull;
+
 public class RouteTrackingService extends Service {
 
     public static final String COMMAND = "RouteTracingService.COMMAND";
@@ -266,7 +268,7 @@ public class RouteTrackingService extends Service {
         }
 
         @Override
-        public void handleMessage(Message msg) {
+        public void handleMessage(@NonNull Message msg) {
             RouteTrackingService service = routeTrackingService.get();
             if (service != null) {
                 switch (msg.what) {

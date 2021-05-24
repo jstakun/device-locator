@@ -164,7 +164,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                 if (StringUtils.equals(imei, thisDeviceId)) {
                     //if imei is this device send command locally
                     auditCommand(this, command, imei);
-                    Map<String, String> messageData = new HashMap<String, String>();
+                    Map<String, String> messageData = new HashMap<>();
                     messageData.put("pin", pin);
                     messageData.put("command", command + "dlapp");
                     if (StringUtils.isNotEmpty(args)) {

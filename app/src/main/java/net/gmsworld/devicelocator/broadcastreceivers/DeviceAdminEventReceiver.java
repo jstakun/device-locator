@@ -11,6 +11,7 @@ import net.gmsworld.devicelocator.services.HiddenCaptureImageService;
 import net.gmsworld.devicelocator.services.SmsSenderService;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 /**
@@ -26,21 +27,21 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
     public static final String DEVICE_ADMIN_ENABLED = "loginTracker";
 
     @Override
-    public void onEnabled(Context context, Intent intent) {
+    public void onEnabled(@NonNull Context context, @NonNull Intent intent) {
         super.onEnabled(context, intent);
         Log.d(TAG, "Device admin enabled");
         PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(DEVICE_ADMIN_ENABLED, true).putBoolean("allowReset", true).apply();
     }
 
     @Override
-    public void onDisabled(Context context, Intent intent) {
+    public void onDisabled(@NonNull Context context, @NonNull Intent intent) {
         super.onDisabled(context, intent);
         Log.d(TAG, "Device admin disabled");
         PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean(DEVICE_ADMIN_ENABLED, false).putBoolean("allowReset", false).apply();
     }
 
     @Override
-    public void onPasswordFailed(Context context, Intent intent) {
+    public void onPasswordFailed(@NonNull Context context, @NonNull Intent intent) {
         super.onPasswordFailed(context, intent);
         Log.d(TAG, "Wrong password has been entered to unlock this device. SENDING NOTIFICATION!");
         PreferencesUtils settings = new PreferencesUtils(context);
@@ -58,7 +59,7 @@ public class DeviceAdminEventReceiver extends DeviceAdminReceiver {
     }
 
     @Override
-    public void onPasswordSucceeded(Context context, Intent intent) {
+    public void onPasswordSucceeded(@NonNull Context context, @NonNull Intent intent) {
         super.onPasswordSucceeded(context, intent);
         Log.d(TAG, "Correct password has been entered to unlock this device.");
     }

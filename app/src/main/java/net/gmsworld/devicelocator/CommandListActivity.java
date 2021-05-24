@@ -98,7 +98,7 @@ public class CommandListActivity extends AppCompatActivity {
                 } else {
                     if (StringUtils.startsWith(sender, Messenger.CID_SEPARATOR) && StringUtils.isNotEmpty(commandName)) {
                         sender = sender.substring(Messenger.CID_SEPARATOR.length());
-                        String deviceName = null;
+                        String deviceName;
                         if (sender.equals("Telegram:" + getString(R.string.app_telegram))) {
                             deviceName = "Admin";
                             position = -1000;

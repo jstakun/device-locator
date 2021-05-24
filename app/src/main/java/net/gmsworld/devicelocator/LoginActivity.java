@@ -175,7 +175,7 @@ public class LoginActivity extends AppCompatActivity  {
                         @Override
                         public void onGetFinish(String results, int responseCode, String url) {
                             if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                                JsonElement reply = new JsonParser().parse(results);
+                                JsonElement reply = JsonParser.parseString(results);
                                 String status = null;
                                 if (reply != null) {
                                     JsonElement st = reply.getAsJsonObject().get("status");
@@ -280,7 +280,7 @@ public class LoginActivity extends AppCompatActivity  {
                         activity.showProgress(false);
                         activity.mAuthTask = null;
                         if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                            JsonElement reply = new JsonParser().parse(results);
+                            JsonElement reply = JsonParser.parseString(results);
                             String gmsToken = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN).getAsString();
                             if (StringUtils.isNotEmpty(gmsToken)) {
                                 try {

@@ -103,15 +103,18 @@ public class NotificationActivationDialogFragment extends DialogFragment {
                         try {
                             ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
                             if (clipboard != null && clipboard.hasPrimaryClip()) {
-                                int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
-                                for (int i = 0; i < clipboardItemCount; i++) {
-                                    ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
-                                    final String code = item.getText().toString();
-                                    if (code.length() == 4 && StringUtils.equals(code, activationCode)) {
-                                        activationCodeInput.setText(code);
-                                        toaster.showActivityToast("Code has been pasted from clipboard");
-                                        onEnteredActivationCode(getActivity(), settings, secret);
-                                        break;
+                                ClipData data = clipboard.getPrimaryClip();
+                                if (data != null) {
+                                    int clipboardItemCount = data.getItemCount();
+                                    for (int i = 0; i < clipboardItemCount; i++) {
+                                        ClipData.Item item = data.getItemAt(i);
+                                        final String code = item.getText().toString();
+                                        if (code.length() == 4 && StringUtils.equals(code, activationCode)) {
+                                            activationCodeInput.setText(code);
+                                            toaster.showActivityToast("Code has been pasted from clipboard");
+                                            onEnteredActivationCode(getActivity(), settings, secret);
+                                            break;
+                                        }
                                     }
                                 }
                             }

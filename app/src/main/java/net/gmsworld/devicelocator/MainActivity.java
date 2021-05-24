@@ -152,14 +152,16 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     private Toaster toaster;
 
-    private IntentFilter uiIntentFilter = new IntentFilter(Command.UPDATE_UI_ACTION);
+    private final IntentFilter uiIntentFilter = new IntentFilter(Command.UPDATE_UI_ACTION);
 
-    private BroadcastReceiver uiReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver uiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
-                Log.d(TAG, "Received UI Update Broadcast");
-                initDeviceList();
+            if (intent != null) {
+                if (StringUtils.equals(intent.getAction(), Command.UPDATE_UI_ACTION)) {
+                    Log.d(TAG, "Received UI Update Broadcast");
+                    initDeviceList();
+                }
             }
         }
     };
@@ -308,15 +310,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 try {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     if (clipboard != null && clipboard.hasPrimaryClip()) {
-                        int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
-                        for (int i = 0; i < clipboardItemCount; i++) {
-                            ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
-                            String pasteData = item.getText().toString();
-                            Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
-                            if (Messenger.isValidTelegramId(pasteData)) {
-                                telegramInput.setText(pasteData);
-                                registerTelegram(telegramInput);
-                                break;
+                        ClipData data = clipboard.getPrimaryClip();
+                        if (data != null) {
+                            int clipboardItemCount = data.getItemCount();
+                            for (int i = 0; i < clipboardItemCount; i++) {
+                                ClipData.Item item = data.getItemAt(i);
+                                String pasteData = item.getText().toString();
+                                Log.d(TAG, "Clipboard text at " + i + ": " + pasteData);
+                                if (Messenger.isValidTelegramId(pasteData)) {
+                                    telegramInput.setText(pasteData);
+                                    registerTelegram(telegramInput);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -945,11 +950,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
                 settings.setInt(LocationAlarmUtils.ALARM_INTERVAL, progressChangedValue);
 
-                if (settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false)) {
-                    LocationAlarmUtils.initWhenDown(MainActivity.this, true);
-                } else {
-                    LocationAlarmUtils.initWhenDown(MainActivity.this, false);
-                }
+                LocationAlarmUtils.initWhenDown(MainActivity.this, settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false));
                 updateAlarmText();
             }
         });
@@ -1208,14 +1209,17 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         try {
                             ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                             if (clipboard != null && clipboard.hasPrimaryClip()) {
-                                int clipboardItemCount = clipboard.getPrimaryClip().getItemCount();
-                                for (int i = 0; i < clipboardItemCount; i++) {
-                                    ClipData.Item item = clipboard.getPrimaryClip().getItemAt(i);
-                                    String pasteData = item.getText().toString();
-                                    if (!StringUtils.equals(pasteData, email) && Patterns.EMAIL_ADDRESS.matcher(pasteData).matches()) {
-                                        emailInput.setText(pasteData);
-                                        toaster.showActivityToast("Email address has been pasted from clipboard");
-                                        break;
+                                ClipData data = clipboard.getPrimaryClip();
+                                if (data != null) {
+                                    int clipboardItemCount = data.getItemCount();
+                                    for (int i = 0; i < clipboardItemCount; i++) {
+                                        ClipData.Item item = data.getItemAt(i);
+                                        String pasteData = item.getText().toString();
+                                        if (!StringUtils.equals(pasteData, email) && Patterns.EMAIL_ADDRESS.matcher(pasteData).matches()) {
+                                            emailInput.setText(pasteData);
+                                            toaster.showActivityToast("Email address has been pasted from clipboard");
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -1849,7 +1853,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                             settings.remove(NotificationActivationDialogFragment.TELEGRAM_SECRET);
                             if (responseCode == 200 && results.startsWith("{")) {
                                 String secret = null, status = null;
-                                JsonElement reply = new JsonParser().parse(results);
+                                JsonElement reply = JsonParser.parseString(results);
                                 if (reply != null) {
                                     JsonElement st = reply.getAsJsonObject().get("status");
                                     if (st != null) {
@@ -1969,7 +1973,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                 @Override
                 public void onGetFinish(String results, int responseCode, String url) {
                     if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                        JsonElement reply = new JsonParser().parse(results);
+                        JsonElement reply = JsonParser.parseString(results);
                         final int version = reply.getAsJsonObject().get("value").getAsInt();
                         final int versionCode = AppUtils.getInstance().getVersionCode(MainActivity.this);
                         if (version > versionCode) {
@@ -2094,7 +2098,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         }
 
         @Override
-        public void handleMessage(Message msg) {
+        public void handleMessage(@NonNull Message msg) {
             MainActivity activity = mainActivity.get();
             if (activity != null) {
                 if (msg.what == SHARE_ROUTE_MESSAGE) {
@@ -2294,14 +2298,14 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             if (StringUtils.isNotEmpty(device.geo)) {
                 String[] tokens = StringUtils.split(device.geo, " ");
                 if (tokens.length >= 3) { //lat lng (acc) timestamp
-                    long timestamp = Long.valueOf(tokens[tokens.length - 1]);
+                    long timestamp = Long.parseLong(tokens[tokens.length - 1]);
                     message = getString(R.string.last_seen) + " " + TimeFormatter.format(timestamp);
                     if (location != null) {
                         Location deviceLocation = new Location("");
                         deviceLocation.setLatitude(Location.convert(tokens[0]));
                         deviceLocation.setLongitude(Location.convert(tokens[1]));
                         if (tokens.length > 3) {
-                            deviceLocation.setAccuracy(Float.valueOf(tokens[2]));
+                            deviceLocation.setAccuracy(Float.parseFloat(tokens[2]));
                         }
                         int dist = (int) location.distanceTo(deviceLocation);
                         if (dist <= 0) {

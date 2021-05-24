@@ -13,6 +13,7 @@ import net.gmsworld.devicelocator.utilities.Toaster;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
@@ -40,7 +41,7 @@ public class QuotaLimitNotificationDialogFragment extends DialogFragment {
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
         alertDialogBuilder.setMessage("You have reached quota limit for sending commmand " + commandName +
                 " to the device " + deviceName + ". Do you want to increase your limit?");
@@ -66,7 +67,7 @@ public class QuotaLimitNotificationDialogFragment extends DialogFragment {
 
     private void sendCommand(final String queryString, final String commandName, final String tokenStr) {
         final Context context = getContext();
-        if (Network.isNetworkAvailable(context)) {
+        if (context != null && Network.isNetworkAvailable(context)) {
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bearer " + tokenStr);
             Network.post(context, getString(R.string.deviceManagerUrl), queryString, null, headers, new Network.OnGetFinishListener() {

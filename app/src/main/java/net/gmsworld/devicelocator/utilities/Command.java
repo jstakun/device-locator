@@ -114,13 +114,13 @@ public class Command {
             Object[] pdus = (Object[]) extras.get("pdus");
             if (pdus != null) {
                 Log.d(TAG, "Found " + pdus.length + " sms messages");
-                for (int i = 0; i < pdus.length; i++) {
+                for (Object o : pdus) {
                     SmsMessage sms;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         String format = extras.getString("format");
-                        sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);
+                        sms = SmsMessage.createFromPdu((byte[]) o, format);
                     } else {
-                        sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                        sms = SmsMessage.createFromPdu((byte[]) o);
                     }
                     if (sms != null) {
                         final String smsMessage = StringUtils.trim(sms.getMessageBody());
@@ -180,7 +180,7 @@ public class Command {
                 Log.e(TAG, "Invalid command " + commandName + " found in message!");
                 if (StringUtils.isNotEmpty(replyTo)) {
                     final String msg = "Invalid command " + commandName + " has been sent to the device " + Messenger.getDeviceId(context, true);
-                    Messenger.sendCloudMessage(context, null, replyTo, msg, commandName, 1, 2000, new HashMap<String, String>());
+                    Messenger.sendCloudMessage(context, null, replyTo, msg, commandName, 1, 2000, new HashMap<>());
                 }
                 AbstractCommand.sendSocialNotification(context, INVALID_COMMAND, replyTo, commandName);
             }
@@ -478,7 +478,7 @@ public class Command {
 
         @Override
         public boolean validateTokens() {
-            int interval = -1;
+            int interval;
             if (commandTokens != null && commandTokens.length > 1) {
                 final String intervalStr = commandTokens[commandTokens.length - 1];
                 if (StringUtils.endsWithIgnoreCase(intervalStr, "now")) {
@@ -1678,7 +1678,7 @@ public class Command {
                 if (StringUtils.containsIgnoreCase(message, "perimeter")) { //check if sender device is in perimeter
                     String[] tokens = StringUtils.split(message, "\n");
                     if (tokens.length > 1 && StringUtils.isNumeric(tokens[tokens.length - 1])) {
-                        int perimeter = Integer.valueOf(tokens[tokens.length - 1]);
+                        int perimeter = Integer.parseInt(tokens[tokens.length - 1]);
                         Location lastLocation = SmartLocation.with(context).location(new LocationGooglePlayServicesWithFallbackProvider(context)).getLastLocation();
                         if (lastLocation != null && (System.currentTimeMillis() - lastLocation.getTime() < 10 * 60 * 1000)) { //10 min
                             int distance = (int) location.distanceTo(lastLocation);

@@ -69,7 +69,10 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "onHandleIntent()");
 
-        Bundle extras = intent.getExtras();
+        Bundle extras = null;
+        if (intent != null) {
+           extras = intent.getExtras();
+        }
 
         settings = new PreferencesUtils(this);
 
@@ -212,7 +215,7 @@ public class SmsSenderService extends IntentService implements OnLocationUpdated
                 //send remote location message only for sms or local device
                 final String thisDeviceId = Messenger.getDeviceId(this, false);
                 if (telegramId == null && email == null && (app == null || StringUtils.startsWith(app, thisDeviceId))) {
-                    Messenger.sendCloudMessage(this, bestLocation, thisDeviceId, null, null, 2, 2000, new HashMap<String, String>());
+                    Messenger.sendCloudMessage(this, bestLocation, thisDeviceId, null, null, 2, 2000, new HashMap<>());
                 }
             }
             isRunning = false;

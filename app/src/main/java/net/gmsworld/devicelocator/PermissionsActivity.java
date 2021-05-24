@@ -60,14 +60,16 @@ public class PermissionsActivity extends AppCompatActivity {
 
     private int locationPermissionRetryCount = 0;
 
-    private IntentFilter uiIntentFilter = new IntentFilter(Command.UPDATE_UI_ACTION);
+    private final IntentFilter uiIntentFilter = new IntentFilter(Command.UPDATE_UI_ACTION);
 
-    private BroadcastReceiver uiReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver uiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
-                Log.d(TAG, "Received UI Update Broadcast");
-                refreshSwitches();
+            if (intent != null) {
+                if (StringUtils.equals(intent.getAction(), Command.UPDATE_UI_ACTION)) {
+                    Log.d(TAG, "Received UI Update Broadcast");
+                    refreshSwitches();
+                }
             }
         }
     };

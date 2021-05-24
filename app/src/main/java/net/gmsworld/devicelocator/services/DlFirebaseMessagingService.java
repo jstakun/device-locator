@@ -21,6 +21,8 @@ import org.apache.commons.lang3.StringUtils;
 import java.net.URLDecoder;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+
 import static net.gmsworld.devicelocator.utilities.Messenger.CID_SEPARATOR;
 
 public class DlFirebaseMessagingService extends FirebaseMessagingService {
@@ -64,7 +66,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     @Override
-    public void onNewToken(String token) {
+    public void onNewToken(@NonNull String token) {
         // Get updated InstanceID token.
         Log.d(TAG, "New Firebase token received" + StringUtils.abbreviate(token, 14));
         PreferencesUtils settings = new PreferencesUtils(this);
@@ -109,10 +111,10 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                                 location.setLatitude(Location.convert(coords[0]));
                                 location.setLongitude(Location.convert(coords[1]));
                                 if (coords.length >= 3) {
-                                    location.setAccuracy(Float.valueOf(coords[2]));
+                                    location.setAccuracy(Float.parseFloat(coords[2]));
                                 }
                                 if (coords.length >= 4) {
-                                    location.setSpeed(Float.valueOf(coords[3]));
+                                    location.setSpeed(Float.parseFloat(coords[3]));
                                 }
                                 DevicesUtils.loadDeviceList(context, new PreferencesUtils(context), null);
                             }

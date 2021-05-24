@@ -7,6 +7,8 @@ import android.util.Log;
 
 import net.gmsworld.devicelocator.utilities.Files;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.File;
 
 public class ScreenStatusBroadcastReceiver extends BroadcastReceiver {
@@ -17,16 +19,18 @@ public class ScreenStatusBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        persistScreenStatus(context, intent.getAction());
+        if (intent != null) {
+            persistScreenStatus(context, intent.getAction());
+        }
     }
 
     public static void persistScreenStatus(Context context, String action) {
         File screenFile = Files.getFilesDir(context, SCREEN_FILE, false);
         String line = "" + System.currentTimeMillis();
-        if (action.equals(Intent.ACTION_SCREEN_OFF)) {
+        if (StringUtils.equals(action, Intent.ACTION_SCREEN_OFF)) {
             line = "0," + line;
             Log.d(TAG, "Screen Off Broadcast Received");
-        } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
+        } else if (StringUtils.equals(action, Intent.ACTION_SCREEN_ON)) {
             line = "1," + line;
             Log.d(TAG, "Screen On Broadcast Received");
         }

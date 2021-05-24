@@ -56,7 +56,7 @@ public class DevicesUtils {
                         public void onGetFinish(String results, int responseCode, String url) {
                             isSyncingDevices = false;
                             if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                                JsonObject reply = new JsonParser().parse(results).getAsJsonObject();
+                                JsonObject reply = JsonParser.parseString(results).getAsJsonObject();
                                 JsonArray devices = null;
                                 if (reply.has("devices")) {
                                     devices = reply.get("devices").getAsJsonArray();
@@ -93,7 +93,7 @@ public class DevicesUtils {
                                         }
                                     }
                                     if (thisDeviceOnList) {
-                                        setUserDevices(settings, userDevices, context);
+                                        setUserDevices(settings, userDevices);
                                         if (deviceLoadListener != null) {
                                             deviceLoadListener.onDeviceListLoaded(userDevices);
                                         } else {
@@ -206,14 +206,14 @@ public class DevicesUtils {
             }
         }
         devices.add(device);
-        setUserDevices(settings, devices, context);
+        setUserDevices(settings, devices);
         Intent broadcastIntent = new Intent();
         Log.d(TAG, "Sending UI Update Broadcast");
         broadcastIntent.setAction(Command.UPDATE_UI_ACTION);
         context.sendBroadcast(broadcastIntent);
     }
 
-    private static void setUserDevices(PreferencesUtils settings, List<Device> userDevices, Context context) {
+    private static void setUserDevices(PreferencesUtils settings, List<Device> userDevices) {
         Set<String> deviceSet = new HashSet<>();
         for (Device device : userDevices) {
             deviceSet.add(device.toString());

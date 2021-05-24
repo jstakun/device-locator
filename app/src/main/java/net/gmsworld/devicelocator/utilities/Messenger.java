@@ -277,7 +277,7 @@ public class Messenger {
                     if (responseCode >= 500 && retryCount > 0) {
                         sendEmail(context, email, message, title, retryCount - 1, headers);
                     } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                        JsonElement reply = new JsonParser().parse(results);
+                        JsonElement reply = JsonParser.parseString(results);
                         String status = null;
                         if (reply != null) {
                             JsonElement st = reply.getAsJsonObject().get("status");
@@ -374,7 +374,7 @@ public class Messenger {
                     if (responseCode >= 500 && retryCount > 0) {
                         sendTelegram(context, telegramId, message, username, retryCount - 1, headers);
                     } else if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                        JsonElement reply = new JsonParser().parse(results);
+                        JsonElement reply = JsonParser.parseString(results);
                         String status = null;
                         if (reply != null) {
                             JsonElement st = reply.getAsJsonObject().get("status");
@@ -496,19 +496,19 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         }
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, telegramId, text, 1, new HashMap<String, String>(), location);
+            sendTelegram(context, telegramId, text, 1, new HashMap<>(), location);
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - current location";
             text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-            sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
+            sendEmail(context, location, email, text, title, 1, new HashMap<>());
         }
         if (StringUtils.isNotEmpty(app)) {
             if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                 //send message to local device
                 sendLocalMessage(context, app, text, Command.SHARE_COMMAND, location);
             } else {
-                sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
+                sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 1, 2000, new HashMap<>());
             }
         }
     }
@@ -522,19 +522,19 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         }
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, telegramId, text, 1, new HashMap<String, String>(), location);
+            sendTelegram(context, telegramId, text, 1, new HashMap<>(), location);
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - location map link";
             text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-            sendEmail(context, location, email, text, title, 1, new HashMap<String, String>());
+            sendEmail(context, location, email, text, title, 1, new HashMap<>());
         }
         if (StringUtils.isNotEmpty(app)) {
             if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                 //send message to local device
                 sendLocalMessage(context, app, text, Command.SHARE_COMMAND, location);
             } else {
-                sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 5, 2000, new HashMap<String, String>());
+                sendCloudMessage(context, location, app, text, Command.SHARE_COMMAND, 5, 2000, new HashMap<>());
             }
         }
     }
@@ -555,19 +555,19 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         }
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, telegramId, text, 1, new HashMap<String, String>(), null);
+            sendTelegram(context, telegramId, text, 1, new HashMap<>(), null);
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - location request";
             text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-            sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
+            sendEmail(context, null, email, text, title, 1, new HashMap<>());
         }
         if (StringUtils.isNotEmpty(app)) {
             if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                 //send message to local device
                 sendLocalMessage(context, app, text, Command.SHARE_COMMAND, null);
             } else {
-                sendCloudMessage(context, null, app, text, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
+                sendCloudMessage(context, null, app, text, Command.SHARE_COMMAND, 1, 2000, new HashMap<>());
             }
         }
     }
@@ -917,14 +917,14 @@ public class Messenger {
                 Log.e(TAG, e.getMessage(), e);
             }
             if (StringUtils.isNotEmpty(telegramId)) {
-                sendTelegram(context, telegramId, text, 1, new HashMap<String, String>(), null);
+                sendTelegram(context, telegramId, text, 1, new HashMap<>(), null);
             }
             if (StringUtils.isNotEmpty(email)) {
                 if (StringUtils.isEmpty(title)) {
                     title = context.getString(R.string.message, deviceId);
                 }
                 text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-                sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
+                sendEmail(context, null, email, text, title, 1, new HashMap<>());
             }
             if (StringUtils.isNotEmpty(app)) {
                 Log.d(TAG, "Sending cloud message to device " + app);
@@ -932,7 +932,7 @@ public class Messenger {
                     //send message to local device
                     sendLocalMessage(context, app, text, command, null);
                 } else {
-                    sendCloudMessage(context, null, app, text, command, 1, 2000, new HashMap<String, String>());
+                    sendCloudMessage(context, null, app, text, command, 1, 2000, new HashMap<>());
                 }
             }
         }
@@ -941,7 +941,7 @@ public class Messenger {
     private static void sendLocalMessage(Context context, final String replyTo, final String message, final String replyToCommand, final Location location) {
         String[] replyToTokens = StringUtils.split(replyTo, CID_SEPARATOR);
         if (replyToTokens != null && replyToTokens.length >= 1) {
-            Map<String, String> messageData = new HashMap<String, String>();
+            Map<String, String> messageData = new HashMap<>();
             messageData.put("imei", replyToTokens[0].trim());
             messageData.put("pin", replyToTokens[1].trim());
             messageData.put("command", Command.MESSAGE_COMMAND + "app");
@@ -979,19 +979,19 @@ public class Messenger {
             sendSMS(context, phoneNumber, message);
         }
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, telegramId, message, 1, new HashMap<String, String>(), null);
+            sendTelegram(context, telegramId, message, 1, new HashMap<>(), null);
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - current location";
             message += "\n" + "https://www.gms-world.net/showDevice/" + getDeviceId(context, false);
-            sendEmail(context, null, email, message, title, 1, new HashMap<String, String>());
+            sendEmail(context, null, email, message, title, 1, new HashMap<>());
         }
         if (StringUtils.isNotEmpty(app)) {
             if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                 //send message to local device
                 sendLocalMessage(context, app, message, Command.SHARE_COMMAND, null);
             } else {
-                sendCloudMessage(context, null, app, message, Command.SHARE_COMMAND, 1, 2000, new HashMap<String, String>());
+                sendCloudMessage(context, null, app, message, Command.SHARE_COMMAND, 1, 2000, new HashMap<>());
             }
         }
     }
@@ -1004,19 +1004,19 @@ public class Messenger {
             sendSMS(context, phoneNumber, text);
         }
         if (StringUtils.isNotEmpty(telegramId)) {
-            sendTelegram(context, telegramId, text, 1, new HashMap<String, String>(), null);
+            sendTelegram(context, telegramId, text, 1, new HashMap<>(), null);
         }
         if (StringUtils.isNotEmpty(email)) {
             String title = context.getString(R.string.message, deviceId) + " - failed login";
             text += "\n" + context.getString(R.string.deviceUrl) + "/" + getDeviceId(context, false);
-            sendEmail(context, null, email, text, title, 1, new HashMap<String, String>());
+            sendEmail(context, null, email, text, title, 1, new HashMap<>());
         }
         if (StringUtils.isNotEmpty(app)) {
             if (StringUtils.startsWith(app, getDeviceId(context, false))) {
                 //send message to local device
                 sendLocalMessage(context, app, text, null, null);
             } else {
-                sendCloudMessage(context, null, app, text, null, 1, 2000, new HashMap<String, String>());
+                sendCloudMessage(context, null, app, text, null, 1, 2000, new HashMap<>());
             }
         }
     }
@@ -1134,7 +1134,7 @@ public class Messenger {
                 public void onGetFinish(String results, int responseCode, String url) {
                     final PreferencesUtils settings = new PreferencesUtils(context);
                     if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                        JsonElement reply = new JsonParser().parse(results);
+                        JsonElement reply = JsonParser.parseString(results);
                         String status = null, secret = null;
                         if (reply != null) {
                             JsonElement st = reply.getAsJsonObject().get("status");
@@ -1205,7 +1205,7 @@ public class Messenger {
             public void onGetFinish(String results, int responseCode, String url) {
                 final PreferencesUtils settings = new PreferencesUtils(context);
                 if (responseCode == 200 && StringUtils.startsWith(results, "{")) {
-                    JsonElement reply = new JsonParser().parse(results);
+                    JsonElement reply = JsonParser.parseString(results);
                     String status = null, secret = null;
                     if (reply != null) {
                         JsonElement st = reply.getAsJsonObject().get("status");
@@ -1454,7 +1454,7 @@ public class Messenger {
         String tokenStr = null;
 
         try {
-            JsonElement reply = new JsonParser().parse(response);
+            JsonElement reply = JsonParser.parseString(response);
             if (reply != null) {
                 JsonElement t = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN);
                 if (t != null) {

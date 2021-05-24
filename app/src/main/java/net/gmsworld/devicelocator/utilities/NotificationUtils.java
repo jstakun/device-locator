@@ -109,13 +109,13 @@ public class NotificationUtils {
                     notificationIds.put(id, notificationId);
                 }
             }
-        }
 
-        Notification notification = NotificationUtils.buildMessageNotification(context, notificationId, message, location, extras);
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null) {
-            Log.d(TAG, "Creating notification " + id);
-            notificationManager.notify(notificationId, notification);
+            Notification notification = NotificationUtils.buildMessageNotification(context, notificationId, message, location, extras);
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                Log.d(TAG, "Creating notification " + id);
+                notificationManager.notify(notificationId, notification);
+            }
         }
     }
 
@@ -188,9 +188,9 @@ public class NotificationUtils {
                 }
             }
             if (imei != null) {
-                Float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(imei + "_previousLatitude", Float.NaN);
-                Float lng = PreferenceManager.getDefaultSharedPreferences(context).getFloat(imei + "_previousLongitude", Float.NaN);
-                if (!lat.isNaN() && !lng.isNaN()) {
+                float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(imei + "_previousLatitude", Float.NaN);
+                float lng = PreferenceManager.getDefaultSharedPreferences(context).getFloat(imei + "_previousLongitude", Float.NaN);
+                if (!Float.isNaN(lat) && !Float.isNaN(lng)) {
                     Location l = new Location("");
                     l.setLatitude((double) lat);
                     l.setLongitude((double) lng);

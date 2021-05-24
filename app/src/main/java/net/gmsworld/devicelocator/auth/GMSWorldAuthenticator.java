@@ -77,7 +77,7 @@ public class GMSWorldAuthenticator extends AbstractAccountAuthenticator {
                 final String encodedAuthorization = org.spongycastle.util.encoders.Base64.toBase64String(user_password.getBytes());
                 headers.put("Authorization", "Basic " + encodedAuthorization);
                 String jsonResponse = Network.get(context, context.getString(R.string.serverUrl) + "s/authenticate?scope=dl", headers);
-                JsonElement reply = new JsonParser().parse(jsonResponse);
+                JsonElement reply = JsonParser.parseString(jsonResponse);
                 authToken = reply.getAsJsonObject().get(DeviceLocatorApp.GMS_TOKEN).getAsString();
             } catch (Exception e) {
                 Log.e(TAG, e.getMessage(), e);

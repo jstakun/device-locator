@@ -78,24 +78,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Command.UPDATE_UI_ACTION)) {
-                Log.d(TAG, "Received UI Update Broadcast");
-                if (mapMap != null) {
-                    if (deviceImei != null && !StringUtils.equals(deviceImei, thisDeviceImei)) {
-                        loadDeviceMarkers(false);
-                    } else if (bestLocation != null) {
-                        LatLng newLoc = new LatLng(bestLocation.getLatitude(), bestLocation.getLongitude());
-                        LatLngBounds currentScreen = mapMap.getProjection().getVisibleRegion().latLngBounds;
-                        if (currentScreen.contains(newLoc)) {
+            if (intent != null) {
+                if (StringUtils.equals(intent.getAction(), Command.UPDATE_UI_ACTION)) {
+                    Log.d(TAG, "Received UI Update Broadcast");
+                    if (mapMap != null) {
+                        if (deviceImei != null && !StringUtils.equals(deviceImei, thisDeviceImei)) {
+                            loadDeviceMarkers(false);
+                        } else if (bestLocation != null) {
+                            LatLng newLoc = new LatLng(bestLocation.getLatitude(), bestLocation.getLongitude());
+                            LatLngBounds currentScreen = mapMap.getProjection().getVisibleRegion().latLngBounds;
+                            if (currentScreen.contains(newLoc)) {
+                                mapCenter = mapMap.getCameraPosition().target;
+                                loadDeviceMarkers(false);
+                            } else {
+                                mapCenter = newLoc;
+                                loadDeviceMarkers(true);
+                            }
+                        } else {
                             mapCenter = mapMap.getCameraPosition().target;
                             loadDeviceMarkers(false);
-                        } else {
-                            mapCenter = newLoc;
-                            loadDeviceMarkers(true);
                         }
-                    } else {
-                        mapCenter = mapMap.getCameraPosition().target;
-                        loadDeviceMarkers(false);
                     }
                 }
             }
@@ -127,9 +129,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (StringUtils.equals(action,Intent.ACTION_VIEW)) {
             Uri data = intent.getData();
-            String[] tokens = StringUtils.split(data.getPath(), "/");
-            if (tokens.length >= 2 && StringUtils.equals(tokens[0], "showDevice")) {
-                deviceImei = tokens[1];
+            if (data != null) {
+                String[] tokens = StringUtils.split(data.getPath(), "/");
+                if (tokens != null && tokens.length >= 2 && StringUtils.equals(tokens[0], "showDevice")) {
+                    deviceImei = tokens[1];
+                }
             }
         } else if (intent.hasExtra("imei")) {
             deviceImei = intent.getStringExtra("imei");
@@ -278,7 +282,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     LatLng deviceMarker = new LatLng(Double.parseDouble(geo[0]), Double.parseDouble(geo[1]));
                     devicesBounds.include(deviceMarker);
 
-                    long timestamp = Long.valueOf(geo[geo.length - 1]);
+                    long timestamp = Long.parseLong(geo[geo.length - 1]);
                     String snippet = getString(R.string.last_seen) + " " + TimeFormatter.format(timestamp);
                     Location location = SmartLocation.with(this).location(new LocationGooglePlayServicesWithFallbackProvider(this)).getLastLocation();
                     if (location != null) {
@@ -306,8 +310,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mo = new MarkerOptions().zIndex(0.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phone)).anchor(0.5f, 0.5f);
                     }
                     Marker m = mapMap.addMarker(mo);
-                    m.setTag(i);
-                    markerCount++;
+                    if (m != null) {
+                        m.setTag(i);
+                        markerCount++;
+                    }
                 }
             }
             Log.d(TAG, "Loaded " + markerCount + " device markers to the map");
@@ -348,7 +354,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        Intent intent = null;
+        Intent intent;
         if (!PinActivity.isAuthRequired(settings)) {
             intent = new Intent(this, CommandActivity.class);
         } else {
@@ -422,7 +428,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private class LocateCommandSender implements Runnable {
 
-        private Device device;
+        private final Device device;
 
         public LocateCommandSender(Device device) {
             this.device = device;

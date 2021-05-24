@@ -79,7 +79,7 @@ public class RouteActivity extends FragmentActivity implements OnMapReadyCallbac
         @Override
         public void onGetFinish(String results, int responseCode, String url) {
             if (responseCode == 200 && results.startsWith("{")) {
-                JsonElement reply = new JsonParser().parse(results);
+                JsonElement reply = JsonParser.parseString(results);
                 if (reply != null) {
                     try {
                         JsonArray features = reply.getAsJsonObject().getAsJsonArray("features");

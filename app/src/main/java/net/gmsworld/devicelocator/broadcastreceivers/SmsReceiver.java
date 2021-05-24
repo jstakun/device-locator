@@ -34,13 +34,13 @@ public class SmsReceiver extends BroadcastReceiver {
             if (bundle != null) {
                 Object[] pdus = (Object[]) bundle.get("pdus");
                 if (pdus != null) {
-                    for (int i = 0; i < pdus.length; i++) {
+                    for (Object o : pdus) {
                         SmsMessage sms;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             String format = bundle.getString("format");
-                            sms = SmsMessage.createFromPdu((byte[]) pdus[i], format);
+                            sms = SmsMessage.createFromPdu((byte[]) o, format);
                         } else {
-                            sms = SmsMessage.createFromPdu((byte[]) pdus[i]);
+                            sms = SmsMessage.createFromPdu((byte[]) o);
                         }
                         if (sms != null) {
                             final String originatingAddress = sms.getOriginatingAddress();
