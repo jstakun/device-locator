@@ -35,15 +35,18 @@ public class LocationAlarmUtils {
         Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);
 
         if (alarmMgr != null && (forceReset || (PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null))) {
-           final long triggerAtMillis = System.currentTimeMillis() + alarmInterval;
-           Log.d(TAG, "Next Location Alarm will be triggered at " + new Date(triggerAtMillis));
-           final PendingIntent operation = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-               alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
-           } else {
-               alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, alarmInterval, operation);
-           }
-           settings.setLong(ALARM_KEY, triggerAtMillis);
+            //if conditions are met show notification now
+            initNow(context, settings);
+            //init alarm
+            final long triggerAtMillis = System.currentTimeMillis() + alarmInterval;
+            Log.d(TAG, "Next Location Alarm will be triggered at " + new Date(triggerAtMillis));
+            final PendingIntent operation = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
+            } else {
+                alarmMgr.setInexactRepeating(AlarmManager.RTC_WAKEUP, triggerAtMillis, alarmInterval, operation);
+            }
+            settings.setLong(ALARM_KEY, triggerAtMillis);
         } else {
             Log.d(TAG, "Next location alarm will be triggered at " + new Date(settings.getLong(ALARM_KEY)));
         }
@@ -59,5 +62,23 @@ public class LocationAlarmUtils {
         PreferencesUtils settings = new PreferencesUtils(context);
         settings.setBoolean(ALARM_SETTINGS, false);
         settings.remove(ALARM_KEY, ALARM_INTERVAL, ALARM_SILENT);
+    }
+
+    public static boolean initNow(Context context, PreferencesUtils settings) {
+        if (System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS, System.currentTimeMillis()) > LocationAlarmUtils.DEFAULT_ALARM_INTERVAL) {
+            //periodical location sharing is disabled
+            if (Permissions.haveLocationPermission(context)) {
+                NotificationUtils.showSavedLocationNotification(context);
+            } else {
+                if (Messenger.isEmailVerified(settings)) {
+                    NotificationUtils.showLocationPermissionNotification(context);
+                } else {
+                    NotificationUtils.showRegistrationNotification(context);
+                }
+            }
+            return true;
+        } else {
+            return false;
+        }
     }
 }

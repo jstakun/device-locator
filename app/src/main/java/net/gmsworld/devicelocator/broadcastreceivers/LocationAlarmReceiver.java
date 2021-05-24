@@ -39,17 +39,8 @@ public class LocationAlarmReceiver extends BroadcastReceiver {
                     NotificationUtils.showRegistrationNotification(context);
                 }
             }
-        } else if (System.currentTimeMillis() - settings.getLong(Messenger.LOCATION_SENT_MILLIS) > LocationAlarmUtils.DEFAULT_ALARM_INTERVAL) {
-            //periodical location sharing is disabled
-            if (Permissions.haveLocationPermission(context)) {
-                NotificationUtils.showSavedLocationNotification(context);
-            } else {
-                if (Messenger.isEmailVerified(settings)) {
-                    NotificationUtils.showLocationPermissionNotification(context);
-                } else {
-                    NotificationUtils.showRegistrationNotification(context);
-                }
-            }
+        } else if (LocationAlarmUtils.initNow(context, settings)) {
+            Log.d(TAG, "Location update notification shown now.");
         } else {
             Log.d(TAG, "No need to send location update.");
         }
