@@ -295,10 +295,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
         //deviceId.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
-        if (AppUtils.getInstance().isFullVersion()) {
-            checkForNewVersion();
-        }
-
         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
             //check for active Telegram registration
             final String telegramSecret = settings.getString(NotificationActivationDialogFragment.TELEGRAM_SECRET);
@@ -353,13 +349,21 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         //show app review
         final int useCount = settings.getInt("useCount", 0);
         final int appReview = settings.getInt("appReview", 0);
+        boolean appReviewShown = false;
         Log.d(TAG, "App use count: " + useCount + ", Next app review: " + appReview);
         if (appReview >= 0 && useCount - appReview >= 10) {
             AppReviewDialogFragment  appReviewDialogFragment = AppReviewDialogFragment.newInstance(settings, toaster, this);
             if (appReviewDialogFragment.isReviewInfoPresent()) {
+                appReviewShown = true;
                 appReviewDialogFragment.show(getFragmentManager(), AppReviewDialogFragment.TAG);
             } else {
                 settings.setInt("appReview", useCount + 10);
+            }
+        } else if (AppUtils.getInstance().isFullVersion() && !appReviewShown) {
+            final int newVersionCheck = settings.getInt("newVersionCheck", 0);
+            if (newVersionCheck < useCount) {
+                settings.setInt("newVersionCheck", useCount);
+                checkForNewVersion();
             }
         }
     }
@@ -1985,7 +1989,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                                 Log.e(TAG, e.getMessage(), e);
                             }
                         } else {
-                            Log.d(TAG, "No new version is available");
+                            Log.d(TAG, "No new version is available: " + version);
                         }
                     }
                 }
