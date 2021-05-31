@@ -31,15 +31,18 @@ public class LocationAlarmUtils {
             alarmInterval = DEFAULT_ALARM_INTERVAL;
         }
 
+        //if conditions are met show notification now
+        if (initNow(context, settings)) {
+            Log.d(TAG, "Location update notification shown now.");
+        }
+
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent senderIntent = new Intent(context, LocationAlarmReceiver.class);
 
         if (alarmMgr != null && (forceReset || (PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_NO_CREATE) == null))) {
-            //if conditions are met show notification now
-            initNow(context, settings);
             //init alarm
             final long triggerAtMillis = System.currentTimeMillis() + alarmInterval;
-            Log.d(TAG, "Next Location Alarm will be triggered at " + new Date(triggerAtMillis));
+            Log.d(TAG, "Setting Next Location Alarm at " + new Date(triggerAtMillis));
             final PendingIntent operation = PendingIntent.getBroadcast(context, 0, senderIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmMgr.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAtMillis, operation);
