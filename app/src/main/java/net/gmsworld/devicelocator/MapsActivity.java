@@ -38,6 +38,7 @@ import net.gmsworld.devicelocator.utilities.AppUtils;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.DistanceFormatter;
+import net.gmsworld.devicelocator.utilities.LocationAlarmUtils;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.Permissions;
@@ -70,6 +71,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ArrayList<Device> devices;
     private String deviceImei = null, thisDeviceImei = null;
     private float currentZoom = -1f;
+    private boolean locateAllDevices = false;
 
     private IntentFilter mIntentFilter;
 
@@ -127,7 +129,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Intent intent = getIntent();
         String action = intent.getAction();
 
-        if (StringUtils.equals(action,Intent.ACTION_VIEW)) {
+        if (StringUtils.equals(action, Intent.ACTION_VIEW)) {
             Uri data = intent.getData();
             if (data != null) {
                 String[] tokens = StringUtils.split(data.getPath(), "/");
@@ -139,6 +141,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             deviceImei = intent.getStringExtra("imei");
         } else {
             deviceImei = thisDeviceImei;
+        }
+
+        if (intent.hasExtra("locateAllDevices")) {
+            locateAllDevices = true;
         }
 
         NotificationUtils.cancel(this, NotificationUtils.SAVED_LOCATION_NOTIFICATION_ID);
@@ -182,6 +188,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Log.d(TAG, "onNewIntent()");
         if (intent.hasExtra("imei")) {
             deviceImei = intent.getStringExtra("imei");
+        }
+        if (intent.hasExtra("locateAllDevices")) {
+            locateAllDevices = true;
         }
     }
 
@@ -262,6 +271,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mUiSettings.setMapToolbarEnabled(false);
 
         loadDeviceMarkers(true);
+
+        if (locateAllDevices) {
+            locateAllDevices(true, false);
+        }
     }
 
     private void loadDeviceMarkers(boolean centerToBounds) {
@@ -406,24 +419,40 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         locateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                locateAllDevices(false, true);
+            }
+        });
+    }
 
-                if (devices != null && devices.size() > 1) {
-                    toaster.showActivityToast(R.string.please_wait);
-                    long delay = 0L;
-                    for (Device device : devices) {
-                        if (!StringUtils.equals(device.imei, thisDeviceImei)) {
-                            if (settings.contains(CommandActivity.PIN_PREFIX + device.imei)) {
-                                //send locate command to device
-                                handler.postDelayed(new LocateCommandSender(device), delay);
-                                delay += 5000L;
-                            } else {
-                                toaster.showActivityToast(MapsActivity.this.getString(R.string.pin_not_saved, device.name));
+    private void locateAllDevices(boolean silent, boolean locateNow) {
+        locateAllDevices = false;
+        if (devices != null && devices.size() > 1) {
+            if (!silent) {
+                toaster.showActivityToast(R.string.please_wait);
+            }
+            long delay = 0L;
+            for (Device device : devices) {
+                if (!StringUtils.equals(device.imei, thisDeviceImei)) {
+                    long creationDate = 0L;
+                    if (!locateNow) {
+                        String[] tokens = StringUtils.split(device.geo, " ");
+                        if (tokens.length > 2) {
+                            try {
+                                creationDate = Long.valueOf(tokens[tokens.length - 1]);
+                            } catch (Exception e) {
                             }
                         }
                     }
+                    if (settings.contains(CommandActivity.PIN_PREFIX + device.imei) && (locateNow || (System.currentTimeMillis() - creationDate > LocationAlarmUtils.DEFAULT_ALARM_INTERVAL))) {
+                        //send locate command to device
+                        handler.postDelayed(new LocateCommandSender(device), delay);
+                        delay += 5000L;
+                    } else if (!silent) {
+                        toaster.showActivityToast(MapsActivity.this.getString(R.string.pin_not_saved, device.name));
+                    }
                 }
             }
-        });
+        }
     }
 
     private class LocateCommandSender implements Runnable {
@@ -443,7 +472,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             newIntent.putExtra("imei", device.imei);
             newIntent.putExtra(MainActivity.DEVICE_NAME, device.name);
             newIntent.putExtra("pin", devicePin);
-            newIntent.putExtra("args", "silent");
+            newIntent.putExtra("args", "now");
             startService(newIntent);
         }
     }
