@@ -434,7 +434,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             for (Device device : devices) {
                 if (!StringUtils.equals(device.imei, thisDeviceImei)) {
                     long creationDate = 0L;
-                    if (!locateNow) {
+                    if (!locateNow && StringUtils.isNotEmpty(device.geo)) {
                         String[] tokens = StringUtils.split(device.geo, " ");
                         if (tokens.length > 2) {
                             try {

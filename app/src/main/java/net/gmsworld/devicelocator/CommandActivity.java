@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.Html;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -147,6 +149,33 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
         } else {
             pinEdit.setText("");
         }
+
+        pinEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String input = charSequence.toString();
+                try {
+                    //pin is 4 to 8 digits string
+                    if (input.length() >= PinActivity.PIN_MIN_LENGTH) {
+                        if (!StringUtils.equals(savedPin, input) && StringUtils.isNumeric(input)) {
+                            settings.setEncryptedString(PIN_PREFIX + device.imei, input);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage(), e);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
 
         //devices list
 

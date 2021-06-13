@@ -839,7 +839,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String input = charSequence.toString();
                 try {
-                    //token is 4 to 8 digits string
+                    //pin is 4 to 8 digits string
                     if (input.length() >= PinActivity.PIN_MIN_LENGTH) {
                         if (!StringUtils.equals(pin, input) && StringUtils.isNumeric(input)) {
                             settings.setEncryptedString(PinActivity.DEVICE_PIN, input);
