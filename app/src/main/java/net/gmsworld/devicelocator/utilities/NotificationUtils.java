@@ -432,6 +432,7 @@ public class NotificationUtils {
         final String title = context.getString(R.string.app_name) + " Notification";
 
         Intent mapsIntent = new Intent(context, MapsActivity.class);
+        mapsIntent.putExtra("locateAllDevices", "1");
         PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, mapsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
