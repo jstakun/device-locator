@@ -120,7 +120,7 @@ public class NotificationUtils {
     }
 
     public static void showLocationPermissionNotification(Context context) {
-        Notification notification = NotificationUtils.buildLocationPermissionNotification(context, LOCATION_PERMISSION_NOTIFICATION_ID);
+        Notification notification = NotificationUtils.buildLocationPermissionNotification(context);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
             Log.d(TAG, "Creating notification " + LOCATION_PERMISSION_NOTIFICATION_ID);
@@ -129,7 +129,7 @@ public class NotificationUtils {
     }
 
     public static void showSavedLocationNotification(Context context) {
-        Notification notification = NotificationUtils.buildSavedLocationNotification(context, SAVED_LOCATION_NOTIFICATION_ID);
+        Notification notification = NotificationUtils.buildSavedLocationNotification(context);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
             Log.d(TAG, "Creating notification " + SAVED_LOCATION_NOTIFICATION_ID);
@@ -404,7 +404,7 @@ public class NotificationUtils {
         return nb.build();
     }
 
-    private static Notification buildLocationPermissionNotification(Context context, int notificationId) {
+    private static Notification buildLocationPermissionNotification(Context context) {
         initChannels(context, DEFAULT_CHANNEL_ID);
 
         final String text = "Please click the button below and grant Location permission to let us keep your device secure!";
@@ -412,7 +412,7 @@ public class NotificationUtils {
 
         Intent permissionIntent = new Intent(context, LauncherActivity.class);
         permissionIntent.setAction(PermissionsActivity.LOCATION_ACTION);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, permissionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, LOCATION_PERMISSION_NOTIFICATION_ID, permissionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_devices_other_white)
@@ -425,15 +425,15 @@ public class NotificationUtils {
         return nb.build();
     }
 
-    private static Notification buildSavedLocationNotification(Context context, int notificationId) {
+    private static Notification buildSavedLocationNotification(Context context) {
         initChannels(context, DEFAULT_CHANNEL_ID);
 
-        final String text = "Refresh your device location to keep it secure!";
+        final String text = "Refresh your devices location to keep them secure!";
         final String title = context.getString(R.string.app_name) + " Notification";
 
         Intent mapsIntent = new Intent(context, MapsActivity.class);
         mapsIntent.putExtra("locateAllDevices", "1");
-        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, mapsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, SAVED_LOCATION_NOTIFICATION_ID, mapsIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_devices_other_white)
