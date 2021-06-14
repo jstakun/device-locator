@@ -138,7 +138,7 @@ public class NotificationUtils {
     }
 
     public static void showRegistrationNotification(Context context) {
-        Notification notification = NotificationUtils.buildRegistrationNotification(context, SAVED_LOCATION_NOTIFICATION_ID);
+        Notification notification = NotificationUtils.buildRegistrationNotification(context);
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
             Log.d(TAG, "Creating notification " + SAVED_LOCATION_NOTIFICATION_ID);
@@ -446,14 +446,14 @@ public class NotificationUtils {
         return nb.build();
     }
 
-    private static Notification buildRegistrationNotification(Context context, int notificationId) {
+    private static Notification buildRegistrationNotification(Context context) {
         initChannels(context, DEFAULT_CHANNEL_ID);
 
         final String text = "Complete your device registration to keep it secure!";
         final String title = context.getString(R.string.app_name) + " Notification";
 
         Intent permissionIntent = new Intent(context, LauncherActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, notificationId, permissionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, SAVED_LOCATION_NOTIFICATION_ID, permissionIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(context, DEFAULT_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_devices_other_white)
