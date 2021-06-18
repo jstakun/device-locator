@@ -78,7 +78,7 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
 
         int index = getIntent().getIntExtra("index", 0);
 
-        if (index < 0 && index >= devices.size()) {
+        if (index < 0 || index >= devices.size()) {
             Log.d(TAG, "Invalid index " + index + " for devices " + devices.size());
             return;
         }
@@ -160,11 +160,14 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String input = charSequence.toString();
                 try {
-                    //pin is 4 to 8 digits string
                     if (input.length() >= PinActivity.PIN_MIN_LENGTH) {
+                        //pin is minimum 4 characters
                         if (!StringUtils.equals(savedPin, input) && StringUtils.isNumeric(input)) {
                             settings.setEncryptedString(PIN_PREFIX + device.imei, input);
                         }
+                    } else if (settings.contains(PIN_PREFIX + device.imei)) {
+                        //pins is less that 4 characters - if it is saved remove it
+                        settings.remove(PIN_PREFIX + device.imei);
                     }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
