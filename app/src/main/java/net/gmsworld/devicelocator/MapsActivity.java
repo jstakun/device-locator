@@ -317,6 +317,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                         foundDeviceImei = true;
                         mo = new MarkerOptions().zIndex(1.0f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneok)).anchor(0.5f, 0.5f);
+                        if (!centerToBounds && !mapMap.getProjection().getVisibleRegion().latLngBounds.contains(deviceMarker)) {
+                            //if selected device is not visible center to bounds
+                            centerToBounds = true;
+                        }
                     } else if (d.imei.equals(thisDeviceImei)) {
                         mo = new MarkerOptions().zIndex(0.5f).position(deviceMarker).title("Device " + d.name).snippet(snippet).icon(BitmapDescriptorFactory.fromResource(R.drawable.phoneidk)).anchor(0.5f, 0.5f);
                     } else {
@@ -438,8 +442,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         String[] tokens = StringUtils.split(device.geo, " ");
                         if (tokens.length > 2) {
                             try {
-                                creationDate = Long.valueOf(tokens[tokens.length - 1]);
-                            } catch (Exception e) {
+                                creationDate = Long.parseLong(tokens[tokens.length - 1]);
+                            } catch (Exception ignored) {
                             }
                         }
                     }
