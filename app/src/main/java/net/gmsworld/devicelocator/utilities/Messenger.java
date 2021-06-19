@@ -1084,7 +1084,7 @@ public class Messenger {
                             sendEmailRegistrationRequest(context, email, validate, retryCount - 1);
                         } else {
                             Log.d(TAG, "Failed to receive token: " + results);
-                            settings.edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, "unverified").commit();
+                            settings.edit().putString(MainActivity.EMAIL_REGISTRATION_STATUS, "unverified").apply();
                             Toaster.showToast(context, R.string.internal_error);
                         }
                     }
@@ -1109,7 +1109,7 @@ public class Messenger {
                         } else if (responseCode >= 500 && retryCount > 0) {
                             sendTelegramRegistrationRequest(context, telegramId, retryCount - 1);
                         } else {
-                            settings.edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "unverified").commit();
+                            settings.edit().putString(MainActivity.SOCIAL_REGISTRATION_STATUS, "unverified").apply();
                             Log.d(TAG, "Failed to receive token: " + results);
                         }
                     }
@@ -1307,12 +1307,8 @@ public class Messenger {
                                     PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, result.getToken()).remove(DlFirebaseMessagingService.FIREBASE_TOKEN).apply();
                                     sendRegistrationToServer(context, result.getToken(), username, deviceName);
                                 } else {
-                                    if (task != null) {
-                                        Exception exception = task.getException();
-                                        Log.e(TAG, "Failed to receive Firebase token!", exception);
-                                    } else {
-                                        Log.e(TAG, "Failed to receive Firebase token!");
-                                    }
+                                    Exception exception = task.getException();
+                                    Log.e(TAG, "Failed to receive Firebase token!", exception);
                                     if (!silent) {
                                         Toaster.showToast(context, "Failed to synchronize device. Please restart " + context.getString(R.string.app_name) + " and try again!");
                                     }
