@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
                         //Log.d(TAG, "UP...................");
                         DevicesUtils.loadDeviceList(MainActivity.this, settings, MainActivity.this);
                     } else {
-                        View view = (View) deviceSettings.getChildAt(deviceSettings.getChildCount() - 1);
+                        View view = deviceSettings.getChildAt(deviceSettings.getChildCount() - 1);
                         final int diff = (view.getBottom() - (deviceSettings.getHeight() + deviceSettings.getScrollY()));
                         if (diff == 0 && prev < deviceSettings.getScrollY()) {
                             //Log.d(TAG, "DOWN...................");
@@ -346,8 +346,8 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             }
         }
 
-        //show app review
         final int useCount = settings.getInt("useCount", 0);
+        //show app review
         final int appReview = settings.getInt("appReview", 0);
         boolean appReviewShown = false;
         Log.d(TAG, "App use count: " + useCount + ", Next app review: " + appReview);
@@ -359,7 +359,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             } else {
                 settings.setInt("appReview", useCount + 10);
             }
-        } else if (AppUtils.getInstance().isFullVersion() && !appReviewShown) {
+        }
+        //check for new version
+        if (!appReviewShown && AppUtils.getInstance().isFullVersion()) {
             final int newVersionCheck = settings.getInt("newVersionCheck", 0);
             if (newVersionCheck < useCount) {
                 settings.setInt("newVersionCheck", useCount);
@@ -383,11 +385,11 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
         RouteTrackingServiceUtils.unbindRouteTrackingService(this, null, isTrackingServiceBound);
 
-        registerEmail((TextView) findViewById(R.id.email), true, false);
-        registerTelegram((TextView) findViewById(R.id.telegramId));
-        registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
-        registerUserLogin((Spinner) findViewById(R.id.userAccounts), true);
-        registerDeviceName((TextView) findViewById(R.id.deviceName), true);
+        registerEmail(findViewById(R.id.email), true, false);
+        registerTelegram(findViewById(R.id.telegramId));
+        registerPhoneNumber(findViewById(R.id.phoneNumber));
+        registerUserLogin(findViewById(R.id.userAccounts), true);
+        registerDeviceName(findViewById(R.id.deviceName), true);
 
         //reset pin verification time
         if (settings.contains(PinActivity.VERIFICATION_TIMESTAMP)) {
@@ -1644,9 +1646,9 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             public void onClick(View view) {
                 if (StringUtils.isNotEmpty(phoneNumber) || StringUtils.isNotEmpty(email) || StringUtils.isNotEmpty(telegramId)) {
                     toaster.showActivityToast(R.string.please_wait);
-                    registerPhoneNumber((TextView) findViewById(R.id.phoneNumber));
-                    registerEmail((TextView) findViewById(R.id.email), true,false);
-                    registerTelegram((TextView) findViewById(R.id.telegramId));
+                    registerPhoneNumber(findViewById(R.id.phoneNumber));
+                    registerEmail(findViewById(R.id.email), true,false);
+                    registerTelegram(findViewById(R.id.telegramId));
 
                     if (!Messenger.isEmailVerified(settings)) {
                         toaster.showActivityToast("Your email address is still unverified! No email notifications will be sent...");
