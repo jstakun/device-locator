@@ -407,7 +407,7 @@ public class NotificationUtils {
     private static Notification buildLocationPermissionNotification(Context context) {
         initChannels(context, DEFAULT_CHANNEL_ID);
 
-        final String text = "Please click the button below and grant Location permission to let us keep your device secure!";
+        final String text = "Please click the button below and grant Location permission to keep your device secure!";
         final String title = context.getString(R.string.app_name) + " Notification";
 
         Intent permissionIntent = new Intent(context, LauncherActivity.class);
@@ -428,7 +428,7 @@ public class NotificationUtils {
     private static Notification buildSavedLocationNotification(Context context) {
         initChannels(context, DEFAULT_CHANNEL_ID);
 
-        final String text = "Refresh your devices location to keep them secure!";
+        final String text = "Refresh your devices location and keep them secure!";
         final String title = context.getString(R.string.app_name) + " Notification";
 
         Intent mapsIntent = new Intent(context, MapsActivity.class);
