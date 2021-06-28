@@ -1304,8 +1304,24 @@ public class Messenger {
                             public void onComplete(@NonNull Task<InstallationTokenResult> task) {
                                 if (task.isSuccessful() && task.getResult() != null) {
                                     InstallationTokenResult result = task.getResult();
-                                    PreferenceManager.getDefaultSharedPreferences(context).edit().putString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, result.getToken()).remove(DlFirebaseMessagingService.FIREBASE_TOKEN).apply();
+                                    Log.d(TAG,"Received Firebase token valid for " + result.getTokenExpirationTimestamp());
+                                    PreferenceManager.getDefaultSharedPreferences(context).edit()
+                                            .putString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, result.getToken())
+                                            .remove(DlFirebaseMessagingService.FIREBASE_TOKEN).apply();
                                     sendRegistrationToServer(context, result.getToken(), username, deviceName);
+                                    FirebaseInstallations.getInstance().getId()
+                                            .addOnCompleteListener(new OnCompleteListener<String>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<String> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Log.d("Installations", "Firebase Installation ID: " + task.getResult());
+                                                        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                                                                .putString(DlFirebaseMessagingService.FIREBASE_ID, task.getResult());
+                                                    } else {
+                                                        Log.e("Installations", "Unable to get Firebase Installation ID");
+                                                    }
+                                                }
+                                            });
                                 } else {
                                     Exception exception = task.getException();
                                     Log.e(TAG, "Failed to receive Firebase token!", exception);
@@ -1328,7 +1344,7 @@ public class Messenger {
         try {
             final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
             if (!StringUtils.equalsIgnoreCase(firebaseToken, "BLACKLISTED")) {
-                String imei = Messenger.getDeviceId(context, false);
+                String imei = getDeviceId(context, false);
                 String content = "imei=" + imei;
                 if (StringUtils.equalsIgnoreCase(imei, "unknown")) {
                     Log.e(TAG, "Invalid imei");
@@ -1400,6 +1416,8 @@ public class Messenger {
         }
 
         if (androidDeviceId == null && context != null) {
+            //TODO use Firebase ID PreferenceManager.getDefaultSharedPreferences(context).getString(DlFirebaseMessagingService.FIREBASE_ID, null)
+
             //get telephony imei Manifest.permission.READ_PHONE_STATE required
             if (Permissions.haveReadPhoneStatePermission(context) && Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                 try {

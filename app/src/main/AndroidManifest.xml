@@ -187,6 +187,7 @@
         <service
             android:name=".services.SmsSenderService"
             android:exported="false"
+            android:directBootAware="true"
             android:foregroundServiceType="location" />
         <service
             android:name=".services.CommandService"
@@ -202,7 +203,8 @@
         <service
             android:name=".services.DlFirebaseMessagingService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:directBootAware="true">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

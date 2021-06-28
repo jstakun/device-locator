@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             isTrackingServiceBound = false;
         }
 
-        //register firebase token if is not yet set or has changed and not send to server
+        //register firebase token if is not yet set or has been changed and not send to server
         final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
         final String newFirebaseToken = settings.getString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN);
         if (StringUtils.isEmpty(firebaseToken) || StringUtils.isNotEmpty(newFirebaseToken)) {
@@ -525,6 +525,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case Permissions.PERMISSIONS_REQUEST_GET_ACCOUNTS:
                 if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

@@ -10,7 +10,6 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import net.gmsworld.devicelocator.MainActivity;
-import net.gmsworld.devicelocator.PinActivity;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.DevicesUtils;
 import net.gmsworld.devicelocator.utilities.Messenger;
@@ -30,6 +29,7 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "DlFirebaseMsgService";
 
     public static final String FIREBASE_TOKEN = "firebaseToken";
+    public static final String FIREBASE_ID = "firebaseId";
     public static final String NEW_FIREBASE_TOKEN = "newFirebaseToken";
 
     private FirebaseAnalytics firebaseAnalytics;
@@ -68,14 +68,23 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String token) {
         // Get updated InstanceID token.
-        Log.d(TAG, "New Firebase token received" + StringUtils.abbreviate(token, 14));
+        Log.d(TAG, "New Firebase token received: " + StringUtils.abbreviate(token, 14));
         PreferencesUtils settings = new PreferencesUtils(this);
         settings.setString(NEW_FIREBASE_TOKEN, token);
         settings.remove(FIREBASE_TOKEN);
-        final String pin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
-        if (StringUtils.isNotEmpty(pin)) {
-            Messenger.sendRegistrationToServer(this, token, null, null);
-        }
+        Messenger.sendRegistrationToServer(this, token, null, null);
+    }
+
+    @Override
+    public void onMessageSent(String msgId) {
+        super.onMessageSent(msgId);
+        Log.d(TAG, "Firebase message " + msgId +" sent successfully");
+    }
+
+    @Override
+    public void onSendError(String msgId, Exception exception) {
+        super.onSendError(msgId, exception);
+        Log.e(TAG,"Failed to send Firebase message " + msgId, exception);
     }
 
     public static String processMessage(Context context, Map<String, String> message) {
