@@ -168,7 +168,7 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
                 try {
                     mCamera.setPreviewDisplay(mHolder);
                     mCamera.startPreview();
-                } catch (IOException e) {
+                } catch (IOException | RuntimeException e) {
                     e.printStackTrace();
                     mCameraCallbacks.onCameraError(CameraError.ERROR_CAMERA_OPEN_FAILED);
                 }
@@ -241,8 +241,11 @@ class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
                                     }
                                 });
                             }
-
-                            mCamera.startPreview();
+                            try {
+                                mCamera.startPreview();
+                            } catch (RuntimeException e) {
+                                e.printStackTrace();
+                            }
                             safeToTakePicture = true;
                         }
                     }).start();

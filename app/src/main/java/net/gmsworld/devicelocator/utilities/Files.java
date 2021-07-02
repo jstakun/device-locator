@@ -155,7 +155,7 @@ public class Files {
         if (Permissions.haveWriteStoragePermission(context)) {
             try {
                 final String path = StringUtils.remove(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath(), "Pictures") + context.getString(R.string.app_name);
-                Log.d(TAG, "Saving image to path: " + path);
+                Log.d(TAG, "Saving image to the path: " + path);
                 File storageDir = new File(path, imageFile.getName());
                 FileUtils.copyFile(imageFile, storageDir);
             } catch (Exception e) {

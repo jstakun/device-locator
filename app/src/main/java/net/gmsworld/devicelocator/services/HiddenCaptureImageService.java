@@ -124,18 +124,22 @@ public class HiddenCaptureImageService extends HiddenCameraService implements On
 
                     startCamera(cameraConfig);
 
-                    Log.d(TAG, "Picture will be taken in 1 second");
+                    if (isRunning) {
+                        Log.d(TAG, "Picture will be taken in 1 second");
 
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                takePicture();
-                            } catch (Throwable e) {
-                                Log.e(TAG, "Failed to take a picture!", e);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    takePicture();
+                                } catch (Throwable e) {
+                                    Log.e(TAG, "Failed to take a picture!", e);
+                                }
                             }
-                        }
-                    }, 1000);
+                        }, 1000);
+                    } else {
+                        Log.e(TAG, "Failed to start camera. No photo will be taken!");
+                    }
                 } catch (Throwable e) {
                     Log.e(TAG, e.getMessage(), e);
                     onCameraError(CameraError.ERROR_CAMERA_OPEN_FAILED);
