@@ -25,7 +25,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.installations.FirebaseInstallations;
-import com.google.firebase.installations.InstallationTokenResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -547,7 +547,7 @@ public class Messenger {
             text += context.getString(R.string.network) + " " + booleanToString(context, Network.isNetworkAvailable(context)) + "\n";
             text += context.getString(R.string.gps) + " " + locationToString(context);
         } else {
-            text = "Location service is disabled on device " + deviceId + "! Unable to send location. Please enable location service and send the command again.";
+            text = "Location service is disabled on the device " + deviceId + ". Unable to send location. Please enable location service and send command again!";
         }
         text += getBatteryLevel(context);
 
@@ -1298,7 +1298,40 @@ public class Messenger {
             }
 
             if (StringUtils.isEmpty(firebaseToken)) {
-                FirebaseInstallations.getInstance().getToken(true)
+                FirebaseMessaging.getInstance().getToken()
+                        .addOnCompleteListener(new OnCompleteListener<String>() {
+                            @Override
+                            public void onComplete(@NonNull Task<String> task) {
+                                if (task.isSuccessful() && task.getResult() != null) {
+                                    final String fcmtoken = task.getResult();
+                                    PreferenceManager.getDefaultSharedPreferences(context).edit()
+                                            .putString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, fcmtoken)
+                                            .remove(DlFirebaseMessagingService.FIREBASE_TOKEN).apply();
+                                    sendRegistrationToServer(context, fcmtoken, username, deviceName);
+                                    FirebaseInstallations.getInstance().getId()
+                                            .addOnCompleteListener(new OnCompleteListener<String>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<String> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Log.d("Installations", "Firebase Installation ID: " + task.getResult());
+                                                        PreferenceManager.getDefaultSharedPreferences(context).edit()
+                                                                .putString(DlFirebaseMessagingService.FIREBASE_ID, task.getResult());
+                                                    } else {
+                                                        Log.e("Installations", "Unable to get Firebase Installation ID");
+                                                    }
+                                                }
+                                            });
+                                } else {
+                                    Exception exception = task.getException();
+                                    Log.e(TAG, "Failed to receive Firebase token!", exception);
+                                    if (!silent) {
+                                        Toaster.showToast(context, "Failed to synchronize device. Please restart " + context.getString(R.string.app_name) + " and try again!");
+                                    }
+                                }
+
+                            }
+                        });
+                /*FirebaseInstallations.getInstance().getToken(true)
                         .addOnCompleteListener(new OnCompleteListener<InstallationTokenResult>() {
                             @Override
                             public void onComplete(@NonNull Task<InstallationTokenResult> task) {
@@ -1330,7 +1363,7 @@ public class Messenger {
                                     }
                                 }
                             }
-                        });
+                        });*/
                 return true;
             } else {
                 return sendRegistrationToServer(context, firebaseToken, username, deviceName);

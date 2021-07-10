@@ -224,18 +224,6 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
             isTrackingServiceBound = false;
         }
 
-        //register firebase token if is not yet set or has been changed and not send to server
-        final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
-        final String newFirebaseToken = settings.getString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN);
-        if (StringUtils.isEmpty(firebaseToken) || StringUtils.isNotEmpty(newFirebaseToken)) {
-            String deviceName = settings.getString(DEVICE_NAME);
-            if (StringUtils.isEmpty(deviceName)) {
-                deviceName = Messenger.getDefaultDeviceName();
-                settings.setString(DEVICE_NAME, deviceName);
-            }
-            Messenger.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
-        }
-
         ScrollView deviceSettings = findViewById(R.id.deviceSettings);
         deviceSettings.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
             int prev = 0;
@@ -295,6 +283,18 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
         deviceId.setText(Html.fromHtml(getString(R.string.deviceIdText, Messenger.getDeviceId(this, false))));
         //deviceId.setMovementMethod(LinkMovementMethodFixed.getInstance());
 
+        //register firebase token if is not yet set or has been changed and not send to server
+        final String firebaseToken = settings.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
+        final String newFirebaseToken = settings.getString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN);
+        if (StringUtils.isEmpty(firebaseToken) || StringUtils.isNotEmpty(newFirebaseToken)) {
+            String deviceName = settings.getString(DEVICE_NAME);
+            if (StringUtils.isEmpty(deviceName)) {
+                deviceName = Messenger.getDefaultDeviceName();
+                settings.setString(DEVICE_NAME, deviceName);
+            }
+            Messenger.sendRegistrationToServer(MainActivity.this, settings.getString(USER_LOGIN), deviceName, true);
+        }
+
         if (settings.contains(NotificationActivationDialogFragment.TELEGRAM_SECRET)) {
             //check for active Telegram registration
             final String telegramSecret = settings.getString(NotificationActivationDialogFragment.TELEGRAM_SECRET);
@@ -336,6 +336,7 @@ public class MainActivity extends AppCompatActivity implements RemoveDeviceDialo
 
             }
         }
+
         if (settings.getBoolean("isTrackerShown", false)) {
             //show email or telegram registration dialog if still unverified
             if (StringUtils.equalsIgnoreCase(settings.getString(EMAIL_REGISTRATION_STATUS), "unverified") && StringUtils.isNotEmpty(email)) {
