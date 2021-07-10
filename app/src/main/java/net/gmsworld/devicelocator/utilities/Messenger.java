@@ -1331,39 +1331,6 @@ public class Messenger {
 
                             }
                         });
-                /*FirebaseInstallations.getInstance().getToken(true)
-                        .addOnCompleteListener(new OnCompleteListener<InstallationTokenResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<InstallationTokenResult> task) {
-                                if (task.isSuccessful() && task.getResult() != null) {
-                                    InstallationTokenResult result = task.getResult();
-                                    Log.d(TAG,"Received Firebase token valid for " + result.getTokenExpirationTimestamp());
-                                    PreferenceManager.getDefaultSharedPreferences(context).edit()
-                                            .putString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN, result.getToken())
-                                            .remove(DlFirebaseMessagingService.FIREBASE_TOKEN).apply();
-                                    sendRegistrationToServer(context, result.getToken(), username, deviceName);
-                                    FirebaseInstallations.getInstance().getId()
-                                            .addOnCompleteListener(new OnCompleteListener<String>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<String> task) {
-                                                    if (task.isSuccessful()) {
-                                                        Log.d("Installations", "Firebase Installation ID: " + task.getResult());
-                                                        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                                                                .putString(DlFirebaseMessagingService.FIREBASE_ID, task.getResult());
-                                                    } else {
-                                                        Log.e("Installations", "Unable to get Firebase Installation ID");
-                                                    }
-                                                }
-                                            });
-                                } else {
-                                    Exception exception = task.getException();
-                                    Log.e(TAG, "Failed to receive Firebase token!", exception);
-                                    if (!silent) {
-                                        Toaster.showToast(context, "Failed to synchronize device. Please restart " + context.getString(R.string.app_name) + " and try again!");
-                                    }
-                                }
-                            }
-                        });*/
                 return true;
             } else {
                 return sendRegistrationToServer(context, firebaseToken, username, deviceName);
@@ -1449,8 +1416,6 @@ public class Messenger {
         }
 
         if (androidDeviceId == null && context != null) {
-            //TODO use Firebase ID PreferenceManager.getDefaultSharedPreferences(context).getString(DlFirebaseMessagingService.FIREBASE_ID, null)
-
             //get telephony imei Manifest.permission.READ_PHONE_STATE required
             if (Permissions.haveReadPhoneStatePermission(context) && Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                 try {
