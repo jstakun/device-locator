@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
+import net.gmsworld.devicelocator.fragments.PeriodicallyShareLocationDialog;
 import net.gmsworld.devicelocator.fragments.RegisterDeviceDialogFragment;
 import net.gmsworld.devicelocator.model.Device;
 import net.gmsworld.devicelocator.services.CommandService;
@@ -145,6 +146,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (intent.hasExtra("locateAllDevices")) {
             locateAllDevices = true;
+            //show dialog to enable automatic device location sharing with 1 hour interval
+            if (!settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false) && Permissions.haveLocationPermission(this)) {
+                PeriodicallyShareLocationDialog periodicallyShareLocationDialog = PeriodicallyShareLocationDialog.newInstance(settings);
+                periodicallyShareLocationDialog.show(getFragmentManager(), PeriodicallyShareLocationDialog.TAG);
+            }
         }
 
         NotificationUtils.cancel(this, NotificationUtils.SAVED_LOCATION_NOTIFICATION_ID);
@@ -191,6 +197,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         if (intent.hasExtra("locateAllDevices")) {
             locateAllDevices = true;
+            //show dialog to enable automatic device location sharing with 1 hour interval
+            if (!settings.getBoolean(LocationAlarmUtils.ALARM_SETTINGS, false) && Permissions.haveLocationPermission(this)) {
+                PeriodicallyShareLocationDialog periodicallyShareLocationDialog = PeriodicallyShareLocationDialog.newInstance(settings);
+                periodicallyShareLocationDialog.show(getFragmentManager(), PeriodicallyShareLocationDialog.TAG);
+            }
         }
     }
 

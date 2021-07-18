@@ -197,6 +197,7 @@
     <string name="activation_code">Activation code</string>
     <string name="sms_notification_warning">&lt;font color="#808080">SMS notifications will be sent from this device. This could generate additional costs! Is this OK for you?&lt;/font></string>
     <string name="remove_device_message">&lt;font color="#808080">Remove device %1$s from the list?&lt;/font></string>
+    <string name="periodically_share_location">&lt;font color="#808080">Do you want to save this device location automatically every 1 hour?&lt;/font></string>
     <string name="telegram_hint">\@telegram_id or number id</string>
     <string name="email_notification_message">&lt;font color="#808080">Do you want to receive notifications to %1$s?&lt;/font></string>
 

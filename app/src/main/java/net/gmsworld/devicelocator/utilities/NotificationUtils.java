@@ -49,6 +49,8 @@ public class NotificationUtils {
     public static final int LOCATION_PERMISSION_NOTIFICATION_ID = 4444;
     public static final int SAVED_LOCATION_NOTIFICATION_ID = 5555;
 
+    public static final String SHOW_NOTIFICATION = "ShowNotification";
+
     public static Notification buildTrackerNotification(final Context context, final int notificationId, final String message) {
         Intent trackerIntent = new Intent(context, LauncherActivity.class);
         trackerIntent.setAction(MainActivity.ACTION_DEVICE_TRACKER);
@@ -92,57 +94,65 @@ public class NotificationUtils {
     }
 
     static void showMessageNotification(Context context, String message, Location location, Bundle extras) {
-        int notificationId = (int) System.currentTimeMillis();
-        String id = null;
+        if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SHOW_NOTIFICATION, true)) {
+            int notificationId = (int) System.currentTimeMillis();
+            String id = null;
 
-        if (extras != null) {
-            if (extras.containsKey("routeId")) {
-                id = extras.getString("routeId");
-            } else if (extras.containsKey("imei") && extras.containsKey("command")) {
-                id = extras.getString("imei") + "_" + extras.getString("command");
-            }
-            if (id != null) {
-                if (notificationIds.containsKey(id)) {
-                    notificationId = notificationIds.get(id);
-                } else {
-                    notificationId = notificationIds.size();
-                    notificationIds.put(id, notificationId);
+            if (extras != null) {
+                if (extras.containsKey("routeId")) {
+                    id = extras.getString("routeId");
+                } else if (extras.containsKey("imei") && extras.containsKey("command")) {
+                    id = extras.getString("imei") + "_" + extras.getString("command");
                 }
-            }
+                if (id != null) {
+                    if (notificationIds.containsKey(id)) {
+                        notificationId = notificationIds.get(id);
+                    } else {
+                        notificationId = notificationIds.size();
+                        notificationIds.put(id, notificationId);
+                    }
+                }
 
-            Notification notification = NotificationUtils.buildMessageNotification(context, notificationId, message, location, extras);
-            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (notificationManager != null) {
-                Log.d(TAG, "Creating notification " + id);
-                notificationManager.notify(notificationId, notification);
+                Notification notification = NotificationUtils.buildMessageNotification(context, notificationId, message, location, extras);
+                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                if (notificationManager != null) {
+                    Log.d(TAG, "Creating notification " + id);
+                    notificationManager.notify(notificationId, notification);
+                }
             }
         }
     }
 
     public static void showLocationPermissionNotification(Context context) {
-        Notification notification = NotificationUtils.buildLocationPermissionNotification(context);
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null) {
-            Log.d(TAG, "Creating notification " + LOCATION_PERMISSION_NOTIFICATION_ID);
-            notificationManager.notify(LOCATION_PERMISSION_NOTIFICATION_ID, notification);
+        if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SHOW_NOTIFICATION, true)) {
+            Notification notification = NotificationUtils.buildLocationPermissionNotification(context);
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                Log.d(TAG, "Creating notification " + LOCATION_PERMISSION_NOTIFICATION_ID);
+                notificationManager.notify(LOCATION_PERMISSION_NOTIFICATION_ID, notification);
+            }
         }
     }
 
     public static void showSavedLocationNotification(Context context) {
-        Notification notification = NotificationUtils.buildSavedLocationNotification(context);
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null) {
-            Log.d(TAG, "Creating notification " + SAVED_LOCATION_NOTIFICATION_ID);
-            notificationManager.notify(SAVED_LOCATION_NOTIFICATION_ID, notification);
+        if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SHOW_NOTIFICATION, true)) {
+            Notification notification = NotificationUtils.buildSavedLocationNotification(context);
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                Log.d(TAG, "Creating notification " + SAVED_LOCATION_NOTIFICATION_ID);
+                notificationManager.notify(SAVED_LOCATION_NOTIFICATION_ID, notification);
+            }
         }
     }
 
     public static void showRegistrationNotification(Context context) {
-        Notification notification = NotificationUtils.buildRegistrationNotification(context);
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (notificationManager != null) {
-            Log.d(TAG, "Creating notification " + SAVED_LOCATION_NOTIFICATION_ID);
-            notificationManager.notify(SAVED_LOCATION_NOTIFICATION_ID, notification);
+        if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SHOW_NOTIFICATION, true)) {
+            Notification notification = NotificationUtils.buildRegistrationNotification(context);
+            NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                Log.d(TAG, "Creating notification " + SAVED_LOCATION_NOTIFICATION_ID);
+                notificationManager.notify(SAVED_LOCATION_NOTIFICATION_ID, notification);
+            }
         }
     }
 

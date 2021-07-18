@@ -44,7 +44,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     public static final String LAST_COMMAND_SUFFIX = "_lastCommand";
 
     private final static String TAG = CommandService.class.getSimpleName();
-    private static final List<String> commandsInProgress = new ArrayList<>();
+    private static final List<String> commandSendingInProgress = new ArrayList<>();
 
     private final Toaster toaster;
 
@@ -151,7 +151,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             }
             //Log.d(TAG, "Command content: " + content);
 
-            if (!commandsInProgress.contains(imei + "_" + command)) {
+            if (!commandSendingInProgress.contains(imei + "_" + command)) {
                 if (StringUtils.isNotEmpty(cancelCommand)) {
                     String notificationId = imei + "_" + cancelCommand;
                     Log.d(TAG, "Cancelling command " + cancelCommand);
@@ -187,6 +187,12 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         firebaseAnalytics.logEvent("cloud_command_received_" + foundCommand.toLowerCase(), new Bundle());
                     }
                 } else {
+                    //register firebase token if is not yet set or has been changed and not send to server
+                    final String firebaseToken = prefs.getString(DlFirebaseMessagingService.FIREBASE_TOKEN);
+                    final String newFirebaseToken = prefs.getString(DlFirebaseMessagingService.NEW_FIREBASE_TOKEN);
+                    if (StringUtils.isEmpty(firebaseToken) || StringUtils.isNotEmpty(newFirebaseToken)) {
+                        Messenger.sendRegistrationToServer(this, prefs.getString(MainActivity.USER_LOGIN), deviceName, true);
+                    }
                     //else send command to remote device
                     sendCommand(content, command, imei, deviceName, prefs, thisDeviceId);
                 }
@@ -198,7 +204,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     private void sendCommand(final String queryString, final String command, final String imei, final String name, final PreferencesUtils settings, final String deviceId) {
         if (Network.isNetworkAvailable(this)) {
-            commandsInProgress.add(imei + "_" + command);
+            commandSendingInProgress.add(imei + "_" + command);
             final String deviceName = (StringUtils.isNotEmpty(name) ? name : imei);
             auditCommand(this, command, imei);
             Log.d(TAG, "Sending command " + command + " to " + imei);
@@ -211,10 +217,11 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             toaster.showServiceToast(R.string.command_sent_to_device, StringUtils.capitalize(command), deviceName);
+                            //TODO start timer which will be stopped after 5 mins or when command reply is received
                         } else if (responseCode == 404) {
                             toaster.showServiceToast(R.string.command_failed_device_gone, StringUtils.capitalize(command), deviceName, CommandService.this.getString(R.string.app_name));
                         } else if (responseCode == 410) {
-                            toaster.showServiceToast(R.string.command_failed_device_offline,deviceName);
+                            toaster.showServiceToast(R.string.command_failed_device_offline, deviceName);
                         } else if (responseCode == 403 && StringUtils.startsWith(results, "{")) {
                             //show dialog with action=reset_quota appended to queryString
                             Intent newIntent = new Intent(CommandService.this, QuotaResetDialogActivity.class);
@@ -227,7 +234,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                         } else {
                             toaster.showServiceToast(R.string.command_failed_to_device, StringUtils.capitalize(command), deviceName);
                         }
-                        commandsInProgress.remove(imei + "_" + command);
+                        commandSendingInProgress.remove(imei + "_" + command);
                     }
                 });
             } else {
@@ -239,14 +246,16 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                             Messenger.getToken(CommandService.this, results);
                             sendCommand(queryString, command, imei, name, settings, deviceId);
                         } else {
+                            toaster.showServiceToast(R.string.command_failed_to_device, StringUtils.capitalize(command), deviceName);
                             Log.d(TAG, "Failed to receive token: " + results);
+                            commandSendingInProgress.remove(imei + "_" + command);
                         }
-                        commandsInProgress.remove(imei + "_" + command);
                     }
                 });
             }
         } else {
             toaster.showServiceToast(R.string.no_network_error);
+            commandSendingInProgress.remove(imei + "_" + command);
         }
     }
 
