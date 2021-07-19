@@ -13,7 +13,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Switch;
 
 import com.androidhiddencamera.HiddenCameraUtils;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -39,6 +38,7 @@ import java.util.Arrays;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.biometric.BiometricManager;
 
@@ -131,6 +131,7 @@ public class PermissionsActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         Log.d(TAG, "Request code: " + requestCode + " " + Arrays.toString(permissions) + ": " + Arrays.toString(grantResults));
         switch (requestCode) {
             case CAMERA_PERMISSION:
@@ -269,7 +270,7 @@ public class PermissionsActivity extends AppCompatActivity {
     }
 
     public void onPermissionSwitchSelected(View view) {
-        boolean checked = ((Switch) view).isChecked();
+        boolean checked = ((SwitchCompat) view).isChecked();
 
         switch (view.getId()) {
             case R.id.device_admin_permission:
@@ -296,7 +297,7 @@ public class PermissionsActivity extends AppCompatActivity {
             case R.id.access_fine_location_permission:
                 if (checked && !Permissions.haveLocationPermission(this)) {
                     //Permissions.requestLocationPermission(this, Permissions.PERMISSIONS_LOCATION);
-                    ((Switch) view).setChecked(false);
+                    ((SwitchCompat) view).setChecked(false);
                     LocationPermissionDialogFragment.newInstance(Permissions.PERMISSIONS_LOCATION).show(getFragmentManager(), TAG);
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this , "Location");
@@ -377,6 +378,9 @@ public class PermissionsActivity extends AppCompatActivity {
                 } else if (!checked) {
                     Permissions.startSettingsIntent(this, "Storage");
                 }
+            case R.id.show_notifications_permission:
+                settings.setBoolean(NotificationUtils.SHOW_NOTIFICATION, checked);
+                break;
             default:
                 break;
         }
@@ -386,15 +390,15 @@ public class PermissionsActivity extends AppCompatActivity {
         // device permissions
 
         //device admin
-        Switch deviceAdminPermission = findViewById(R.id.device_admin_permission);
+        SwitchCompat deviceAdminPermission = findViewById(R.id.device_admin_permission);
         deviceAdminPermission.setChecked(settings.getBoolean(DeviceAdminEventReceiver.DEVICE_ADMIN_ENABLED, false));
 
         //manage overlay
-        Switch manageOverlayPermission = findViewById(R.id.manage_overlay_permission);
+        SwitchCompat manageOverlayPermission = findViewById(R.id.manage_overlay_permission);
         manageOverlayPermission.setChecked(HiddenCameraUtils.canOverDrawOtherApps(this));
 
         //do not disturb
-        Switch notificationPolicyAccessPermission = findViewById(R.id.notification_policy_access_permission);
+        SwitchCompat notificationPolicyAccessPermission = findViewById(R.id.notification_policy_access_permission);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
             if (notificationManager != null) {
@@ -408,17 +412,17 @@ public class PermissionsActivity extends AppCompatActivity {
 
         // application permissions
 
-        Switch accessFineLocationPermission = findViewById(R.id.access_fine_location_permission);
+        SwitchCompat accessFineLocationPermission = findViewById(R.id.access_fine_location_permission);
         accessFineLocationPermission.setChecked(Permissions.haveLocationPermission(this));
 
-        Switch smsPermission = findViewById(R.id.sms_permission);
+        SwitchCompat smsPermission = findViewById(R.id.sms_permission);
         if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
             smsPermission.setChecked(Permissions.haveSendSMSPermission(this));
         } else {
             smsPermission.setVisibility(View.GONE);
         }
 
-        Switch cameraPermission = findViewById(R.id.camera_permission);
+        SwitchCompat cameraPermission = findViewById(R.id.camera_permission);
         if (!Permissions.haveCameraPermission(this) || !HiddenCameraUtils.canOverDrawOtherApps(this) || !settings.getBoolean(HiddenCaptureImageService.STATUS, false)) {
             cameraPermission.setChecked(false);
             settings.setBoolean(HiddenCaptureImageService.STATUS, false);
@@ -426,27 +430,27 @@ public class PermissionsActivity extends AppCompatActivity {
             cameraPermission.setChecked(true);
         }
 
-        Switch writeStoragePermission = findViewById(R.id.write_storage_permission);
+        SwitchCompat writeStoragePermission = findViewById(R.id.write_storage_permission);
         writeStoragePermission.setChecked(Permissions.haveWriteStoragePermission(this));
 
-        Switch readContactsPermission = findViewById(R.id.read_contacts_permission);
+        SwitchCompat readContactsPermission = findViewById(R.id.read_contacts_permission);
         if (AppUtils.getInstance().isFullVersion() && AppUtils.getInstance().hasTelephonyFeature(this)) {
             readContactsPermission.setChecked(Permissions.haveReadContactsPermission(this));
         } else {
             readContactsPermission.setVisibility(View.GONE);
         }
 
-        Switch callPhonePermission = findViewById(R.id.call_phone_permission);
+        SwitchCompat callPhonePermission = findViewById(R.id.call_phone_permission);
         callPhonePermission.setChecked(Permissions.haveCallPhonePermission(this));
 
-        Switch resetPermission = findViewById(R.id.reset_permission);
+        SwitchCompat resetPermission = findViewById(R.id.reset_permission);
         resetPermission.setChecked(settings.getBoolean("allowReset", false));
 
-        ((Switch) findViewById(R.id.settings_sms_without_pin)).setChecked(settings.getBoolean("settings_sms_without_pin", true));
+        ((SwitchCompat) findViewById(R.id.settings_sms_without_pin)).setChecked(settings.getBoolean("settings_sms_without_pin", true));
 
         //other permissions
 
-        Switch useFingerprintPermission = findViewById(R.id.use_fingerprint_permission);
+        SwitchCompat useFingerprintPermission = findViewById(R.id.use_fingerprint_permission);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             final boolean isHardwareDetected = BiometricManager.from(this).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS;
             if (isHardwareDetected) {
@@ -458,15 +462,16 @@ public class PermissionsActivity extends AppCompatActivity {
             useFingerprintPermission.setVisibility(View.GONE);
         }
 
-        Switch readPhoneStatePermission = findViewById(R.id.read_phone_state_permission);
+        SwitchCompat readPhoneStatePermission = findViewById(R.id.read_phone_state_permission);
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
             readPhoneStatePermission.setChecked(Permissions.haveReadPhoneStatePermission(this));
         } else {
             readPhoneStatePermission.setVisibility(View.GONE);
         }
 
-        Switch getAccountsPermission = findViewById(R.id.get_accounts_permission);
-        getAccountsPermission.setChecked(Permissions.haveGetAccountsPermission(this));
+        ((SwitchCompat) findViewById(R.id.get_accounts_permission)).setChecked(Permissions.haveGetAccountsPermission(this));
+
+        ((SwitchCompat) findViewById(R.id.show_notifications_permission)).setChecked(settings.getBoolean(NotificationUtils.SHOW_NOTIFICATION, true));
     }
 
     private void onCameraPermissionChecked(boolean checked) {

@@ -36,7 +36,7 @@
             android:layout_margin="8dp"
             ldcard:title="@string/device_permissions">
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/device_admin_permission"
                 android:text="@string/DevicePolicyManager_ACTION_ADD_DEVICE_ADMIN"
                 android:textColor="@color/gray"
@@ -47,7 +47,7 @@
                 android:checked="false"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/manage_overlay_permission"
                 android:text="@string/Settings_ACTION_MANAGE_OVERLAY_PERMISSION"
                 android:textColor="@color/gray"
@@ -58,7 +58,7 @@
                 android:checked="false"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/notification_policy_access_permission"
                 android:text="@string/Settings_ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS"
                 android:textColor="@color/gray"
@@ -78,7 +78,7 @@
             android:layout_margin="8dp"
             ldcard:title="@string/app_permissions">
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/access_fine_location_permission"
                 android:text="@string/Manifest_permission_ACCESS_FINE_LOCATION"
                 android:textColor="@color/gray"
@@ -89,7 +89,7 @@
                 android:checked="false"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/sms_permission"
                 android:text="@string/Manifest_permission_SEND_SMS"
                 android:textColor="@color/gray"
@@ -100,7 +100,7 @@
                 android:checked="false"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/camera_permission"
                 android:text="@string/Manifest_permission_CAMERA"
                 android:textColor="@color/gray"
@@ -111,7 +111,7 @@
                 android:checked="false"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/write_storage_permission"
                 android:text="@string/Manifest_permission_WRITE_EXTERNAL_STORAGE"
                 android:textColor="@color/gray"
@@ -122,7 +122,7 @@
                 android:checked="false"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/settings_sms_without_pin"
                 android:text="@string/accept_sms_without_pin"
                 android:textColor="@color/gray"
@@ -133,7 +133,7 @@
                 android:paddingBottom="8dp"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/read_contacts_permission"
                 android:text="@string/Manifest_permission_READ_CONTACTS"
                 android:textColor="@color/gray"
@@ -144,7 +144,7 @@
                 android:checked="false"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/call_phone_permission"
                 android:text="@string/Manifest_permission_CALL_PHONE"
                 android:textColor="@color/gray"
@@ -155,7 +155,7 @@
                 android:checked="false"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/reset_permission"
                 android:text="@string/reset_permission"
                 android:textColor="@color/gray"
@@ -175,7 +175,7 @@
             android:layout_margin="8dp"
             ldcard:title="@string/other_permissions">
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/use_fingerprint_permission"
                 android:text="@string/Manifest_permission_USE_FINGERPRINT"
                 android:textColor="@color/gray"
@@ -186,7 +186,7 @@
                 android:checked="false"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/get_accounts_permission"
                 android:text="@string/Manifest_permission_GET_ACCOUNTS"
                 android:textColor="@color/gray"
@@ -197,7 +197,7 @@
                 android:checked="false"
                 android:onClick="onPermissionSwitchSelected"/>
 
-            <Switch
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/read_phone_state_permission"
                 android:text="@string/Manifest_permission_READ_PHONE_STATE"
                 android:textColor="@color/gray"
@@ -206,6 +206,17 @@
                 android:paddingTop="15dp"
                 android:paddingBottom="8dp"
                 android:checked="false"
+                android:onClick="onPermissionSwitchSelected"/>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/show_notifications_permission"
+                android:text="@string/show_notifications_permission"
+                android:textColor="@color/gray"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:paddingBottom="8dp"
+                android:checked="true"
                 android:onClick="onPermissionSwitchSelected"/>
 
         </net.gmsworld.devicelocator.views.LDCard>

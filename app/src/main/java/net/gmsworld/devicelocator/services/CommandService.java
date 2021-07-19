@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -45,6 +46,9 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
 
     private final static String TAG = CommandService.class.getSimpleName();
     private static final List<String> commandSendingInProgress = new ArrayList<>();
+    private static final List<String> commandsSent = new ArrayList<>();
+
+    private final Handler commandHandler = new Handler();
 
     private final Toaster toaster;
 
@@ -77,7 +81,10 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
     @Override
     protected void onHandleIntent(Intent intent) {
         Log.d(TAG, "onHandleIntent()");
-        Bundle extras = intent.getExtras();
+        Bundle extras = null;
+        if (intent != null) {
+            extras = intent.getExtras();
+        }
 
         //hide notification dialogs
         sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
@@ -217,7 +224,20 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                     public void onGetFinish(String results, int responseCode, String url) {
                         if (responseCode == 200) {
                             toaster.showServiceToast(R.string.command_sent_to_device, StringUtils.capitalize(command), deviceName);
-                            //TODO start timer which will be stopped after 5 mins or when command reply is received
+                            commandsSent.add(imei + "_" + command);
+                            commandHandler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.d(TAG, "Checking if reply to command " + command + " received from the device " + imei);
+                                    if (commandsSent.contains(imei + "_" + command)) {
+                                        Bundle extras = new Bundle();
+                                        extras.putString(MainActivity.DEVICE_NAME, deviceName);
+                                        extras.putString("imei", imei);
+                                        extras.putString("command", command);
+                                        NotificationUtils.showMessageNotification(CommandService.this, "No reply to command " + StringUtils.capitalize(command) + " received from device " + deviceName + ". Please send this command again.", null ,extras);
+                                    }
+                                }
+                            }, 180000); //3 mins
                         } else if (responseCode == 404) {
                             toaster.showServiceToast(R.string.command_failed_device_gone, StringUtils.capitalize(command), deviceName, CommandService.this.getString(R.string.app_name));
                         } else if (responseCode == 410) {
@@ -267,5 +287,10 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
         auditLog += command + " 1";
         File auditFile = Files.getFilesDir(context, AUDIT_FILE, false);
         Files.appendLineToFileFromContextDir(auditFile, auditLog, 100, 10);
+    }
+
+    public static void receivedReplyToCommand(String imei, String command) {
+        Log.d(TAG, "Received reply to command " + command + " from device " + imei);
+        commandsSent.remove(imei + " " + command);
     }
 }

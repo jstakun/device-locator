@@ -177,6 +177,7 @@
     <string name="reset_permission">Allow Reset device to factory defaults command</string>
     <string name="permission_settings">Please click on \"Permissions\" list item and next click on \"%1$s\" list item.</string>
     <string name="location_service_permission">&lt;font color="#808080">To let Device Locator locate your Device at any time please grant us permission to access your Device location in the background.&lt;br/>&lt;br/>Device Locator will use location in the background only to let you quickly locate your Device.&lt;br/>&lt;br/>Please click TURN ON button to proceed.&lt;/font></string>
+    <string name="show_notifications_permission">Show notifications is device status bar</string>
 
     <!-- Register Activity -->
     <string name="privacy_policy_text">Read our &lt;a href="https://www.gms-world.net/privacy.jsp">Privacy Policy&lt;/a></string>
@@ -197,7 +198,7 @@
     <string name="activation_code">Activation code</string>
     <string name="sms_notification_warning">&lt;font color="#808080">SMS notifications will be sent from this device. This could generate additional costs! Is this OK for you?&lt;/font></string>
     <string name="remove_device_message">&lt;font color="#808080">Remove device %1$s from the list?&lt;/font></string>
-    <string name="periodically_share_location">&lt;font color="#808080">Do you want to save this device location automatically every 1 hour?&lt;/font></string>
+    <string name="periodically_share_location">&lt;font color="#808080">Do you want to secure this device and save its location automatically every hour?&lt;/font></string>
     <string name="telegram_hint">\@telegram_id or number id</string>
     <string name="email_notification_message">&lt;font color="#808080">Do you want to receive notifications to %1$s?&lt;/font></string>
 

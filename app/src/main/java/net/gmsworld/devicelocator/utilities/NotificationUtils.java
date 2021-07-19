@@ -93,7 +93,7 @@ public class NotificationUtils {
                 .build();
     }
 
-    static void showMessageNotification(Context context, String message, Location location, Bundle extras) {
+    public static void showMessageNotification(Context context, String message, Location location, Bundle extras) {
         if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean(SHOW_NOTIFICATION, true)) {
             int notificationId = (int) System.currentTimeMillis();
             String id = null;

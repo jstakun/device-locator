@@ -142,6 +142,9 @@ public class DlFirebaseMessagingService extends FirebaseMessagingService {
                         } else if (token.startsWith("language:")) {
                             extras.putString("language", token.split(":")[1]);
                         }
+                        if (extras.containsKey("command") && extras.containsKey("imei")) {
+                            CommandService.receivedReplyToCommand(extras.getString("imei"), extras.getString("command"));
+                        }
                     }
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage(), e);
