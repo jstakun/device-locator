@@ -119,8 +119,6 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             final String command = cmd;
             final String args = extras.getString("args");
             final String deviceName = extras.getString(MainActivity.DEVICE_NAME);
-            final String cancelCommand = extras.getString("cancelCommand");
-            final String routeId = extras.getString("routeId");
 
             if (command == null || imei == null) {
                 Log.e(TAG, "Missing command or imei!");
@@ -159,14 +157,6 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
             //Log.d(TAG, "Command content: " + content);
 
             if (!commandSendingInProgress.contains(imei + "_" + command)) {
-                if (StringUtils.isNotEmpty(cancelCommand)) {
-                    String notificationId = imei + "_" + cancelCommand;
-                    Log.d(TAG, "Cancelling command " + cancelCommand);
-                    NotificationUtils.cancel(this, notificationId);
-                    NotificationUtils.cancel(this, notificationId.substring(0, notificationId.length() - 2));
-                } else if (StringUtils.isNotEmpty("routeId")) {
-                    NotificationUtils.cancel(this, routeId);
-                }
                 //Log.d(TAG, "Comparing " + imei + " with " + thisDeviceId);
                 if (StringUtils.equals(imei, thisDeviceId)) {
                     //if imei is this device send command locally
@@ -236,6 +226,7 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                                         extras.putString(MainActivity.DEVICE_NAME, deviceName);
                                         extras.putString("imei", imei);
                                         extras.putString("command", command);
+                                        extras.putBoolean("showResend", true);
                                         NotificationUtils.showMessageNotification(CommandService.this, "No reply to command " + StringUtils.capitalize(command) + " received from device " + deviceName + ".\nPlease send this command again.", null ,extras);
                                     }
                                 }

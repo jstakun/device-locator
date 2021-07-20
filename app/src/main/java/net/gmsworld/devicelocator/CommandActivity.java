@@ -30,6 +30,7 @@ import net.gmsworld.devicelocator.utilities.AbstractCommand;
 import net.gmsworld.devicelocator.utilities.Command;
 import net.gmsworld.devicelocator.utilities.Messenger;
 import net.gmsworld.devicelocator.utilities.Network;
+import net.gmsworld.devicelocator.utilities.NotificationUtils;
 import net.gmsworld.devicelocator.utilities.PreferencesUtils;
 import net.gmsworld.devicelocator.utilities.Toaster;
 import net.gmsworld.devicelocator.views.CommandArrayAdapter;
@@ -54,6 +55,7 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
     private Device device;
     private PreferencesUtils settings;
     private Toaster toaster;
+    private Intent callerIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,15 +71,92 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
 
         toaster = new Toaster(this);
 
-        final List<Device> devices = getIntent().getParcelableArrayListExtra("devices");
+        callerIntent = getIntent();
+
+        //docs link
+
+        TextView commandLink = findViewById(R.id.docs_link);
+        commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
+        //commandLink.setMovementMethod(LinkMovementMethodFixed.getInstance());
+
+        findViewById(R.id.commandView).requestFocus();
+
+        //firebase event
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        firebaseAnalytics.logEvent("command_activity", new Bundle());
+
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d(TAG, "onNewIntent()");
+        if (intent != null) {
+            callerIntent = intent;
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume()");
+        initUi();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        toaster.cancel();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //reset pin verification time
+        settings.setLong(PinActivity.VERIFICATION_TIMESTAMP, System.currentTimeMillis());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == android.R.id.home) {
+            setResult(RESULT_CANCELED);
+            finish();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void initUi() {
+        final Spinner commandSpinner = findViewById(R.id.deviceCommand);
+        final EditText args = findViewById(R.id.deviceCommandArgs);
+        final EditText pinEdit = findViewById(R.id.devicePin);
+        final CheckBox socialSend = findViewById(R.id.social_send);
+
+        if (callerIntent == null) {
+            toaster.showActivityToast(R.string.crash_error);
+            return;
+        }
+
+        if (callerIntent.hasExtra("notificationId")) {
+            NotificationUtils.cancel(this, callerIntent.getIntExtra("notificationId", -1));
+        }
+
+        //devices list
+
+        final List<Device> devices = callerIntent.getParcelableArrayListExtra("devices");
 
         if (devices == null || devices.isEmpty()) {
             toaster.showActivityToast(R.string.crash_error);
             return;
         }
 
-        int index = getIntent().getIntExtra("index", 0);
-
+        int index = -1;
+        if (callerIntent != null) {
+            index = callerIntent.getIntExtra("index", 0);
+        }
         if (index < 0 || index >= devices.size()) {
             Log.d(TAG, "Invalid index " + index + " for devices " + devices.size());
             return;
@@ -85,20 +164,43 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
 
         device = devices.get(index);
 
-        final Spinner commandSpinner = findViewById(R.id.deviceCommand);
-        final EditText args = findViewById(R.id.deviceCommandArgs);
-        final EditText pinEdit = findViewById(R.id.devicePin);
-        final CheckBox socialSend = findViewById(R.id.social_send);
+        List<String> deviceNames = new ArrayList<>();
+        for (int i = 0; i < devices.size(); i++) {
+            deviceNames.add(StringUtils.isNotEmpty(devices.get(i).name) ? devices.get(i).name : devices.get(i).imei);
+        }
 
-        //command args
+        final Spinner deviceSpinner = findViewById(R.id.deviceList);
+        final CommandArrayAdapter devicesAdapter = new CommandArrayAdapter(this, R.layout.command_row,  deviceNames);
+        deviceSpinner.setAdapter(devicesAdapter);
 
-        args.setOnEditorActionListener(new EditText.OnEditorActionListener() {
+        for (int i = 0; i < devices.size(); i++) {
+            if (StringUtils.equalsIgnoreCase(device.name, devices.get(i).name) || StringUtils.equalsIgnoreCase(device.imei, devices.get(i).imei)) {
+                deviceSpinner.setSelection(i);
+                break;
+            }
+        }
+
+        deviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
-                    sendCommand(pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString(), socialSend.isChecked());
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                device = devices.get(position);
+                String savedPin;
+                if (StringUtils.equals(device.imei, Messenger.getDeviceId(CommandActivity.this, false))) {
+                    savedPin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
+                } else {
+                    savedPin = settings.getEncryptedString(PIN_PREFIX + device.imei);
                 }
-                return false;
+                if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
+                    pinEdit.setText(savedPin);
+                } else {
+                    pinEdit.setText("");
+                }
+                setSelectedCommand(commandSpinner, callerIntent.getStringExtra("command"));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
             }
         });
 
@@ -107,7 +209,7 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
         final CommandArrayAdapter commands = new CommandArrayAdapter(this, R.layout.command_row,  getResources().getStringArray(R.array.device_commands));
         commandSpinner.setAdapter(commands);
 
-        setSelectedCommand(commandSpinner);
+        setSelectedCommand(commandSpinner, callerIntent.getStringExtra("command"));
 
         commandSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -180,45 +282,15 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
             }
         });
 
-        //devices list
+        //command args
 
-        List<String> deviceNames = new ArrayList<>();
-        for (int i = 0; i < devices.size(); i++) {
-            deviceNames.add(StringUtils.isNotEmpty(devices.get(i).name) ? devices.get(i).name : devices.get(i).imei);
-        }
-
-        final Spinner deviceSpinner = findViewById(R.id.deviceList);
-        final CommandArrayAdapter devicesAdapter = new CommandArrayAdapter(this, R.layout.command_row,  deviceNames);
-        deviceSpinner.setAdapter(devicesAdapter);
-
-        for (int i = 0; i < devices.size(); i++) {
-            if (StringUtils.equalsIgnoreCase(device.name, devices.get(i).name) || StringUtils.equalsIgnoreCase(device.imei, devices.get(i).imei)) {
-                deviceSpinner.setSelection(i);
-                break;
-            }
-        }
-
-        deviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        args.setOnEditorActionListener(new EditText.OnEditorActionListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                device = devices.get(position);
-                String savedPin;
-                if (StringUtils.equals(device.imei, Messenger.getDeviceId(CommandActivity.this, false))) {
-                    savedPin = settings.getEncryptedString(PinActivity.DEVICE_PIN);
-                } else {
-                    savedPin = settings.getEncryptedString(PIN_PREFIX + device.imei);
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_PREVIOUS) {
+                    sendCommand(pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString(), socialSend.isChecked());
                 }
-                if (savedPin.length() >= PinActivity.PIN_MIN_LENGTH && StringUtils.isNumeric(savedPin)) {
-                    pinEdit.setText(savedPin);
-                } else {
-                    pinEdit.setText("");
-                }
-                setSelectedCommand(commandSpinner);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
+                return false;
             }
         });
 
@@ -240,41 +312,12 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
             }
         });
 
-        //docs link
+        //auto send
 
-        TextView commandLink = findViewById(R.id.docs_link);
-        commandLink.setText(Html.fromHtml(getString(R.string.docsLink)));
-        //commandLink.setMovementMethod(LinkMovementMethodFixed.getInstance());
-
-        findViewById(R.id.commandView).requestFocus();
-
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        firebaseAnalytics.logEvent("command_activity", new Bundle());
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        toaster.cancel();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        //reset pin verification time
-        settings.setLong(PinActivity.VERIFICATION_TIMESTAMP, System.currentTimeMillis());
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == android.R.id.home) {
-            setResult(RESULT_CANCELED);
-            finish();
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
+        if (callerIntent.getBooleanExtra("autosend", false)) {
+            sendCommand(pinEdit.getText().toString(), commandSpinner.getSelectedItem().toString(), args.getText().toString(), false);
         }
+
     }
 
     private boolean isValidCommand(String pin, String command, String commandArgs) {
@@ -348,19 +391,26 @@ public class CommandActivity extends AppCompatActivity implements SendCommandDia
         startService(intent);
     }
 
-    private void setSelectedCommand(Spinner commandSpinner) {
-        String lastCommand = settings.getString(device.imei + CommandService.LAST_COMMAND_SUFFIX);
-        Log.d(TAG, "Found last command " + lastCommand);
-        if (StringUtils.isNotEmpty(lastCommand)) {
-            AbstractCommand c = Command.getCommandByName(lastCommand);
-            if (c != null && c.hasOppositeCommand()) {
-                lastCommand = c.getOppositeCommand().substring(0, c.getOppositeCommand().length()-2);
+    private void setSelectedCommand(Spinner commandSpinner, String commandToSelect) {
+        String lastCommand = null;
+        if (StringUtils.isNotEmpty(commandToSelect)) {
+            lastCommand = commandToSelect.substring(0, commandToSelect.length() - 2);
+        } else {
+            lastCommand = settings.getString(device.imei + CommandService.LAST_COMMAND_SUFFIX);
+            Log.d(TAG, "Found last command " + lastCommand);
+            if (StringUtils.isNotEmpty(lastCommand)) {
+                AbstractCommand c = Command.getCommandByName(lastCommand);
+                if (c != null && c.hasOppositeCommand()) {
+                    lastCommand = c.getOppositeCommand().substring(0, c.getOppositeCommand().length() - 2);
+                }
             }
-            for (int i = 0;i < commandSpinner.getAdapter().getCount();i++) {
-                final String item = (String)commandSpinner.getItemAtPosition(i);
+        }
+        if (StringUtils.isNotEmpty(lastCommand)) {
+            for (int i = 0; i < commandSpinner.getAdapter().getCount(); i++) {
+                final String item = (String) commandSpinner.getItemAtPosition(i);
                 if (StringUtils.equalsIgnoreCase(StringUtils.deleteWhitespace(item), lastCommand)) {
-                   commandSpinner.setSelection(i);
-                   break;
+                    commandSpinner.setSelection(i);
+                    break;
                 }
             }
         }

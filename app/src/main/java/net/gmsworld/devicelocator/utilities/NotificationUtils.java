@@ -18,17 +18,19 @@ import android.util.Log;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
+import net.gmsworld.devicelocator.CommandActivity;
 import net.gmsworld.devicelocator.LauncherActivity;
 import net.gmsworld.devicelocator.MainActivity;
 import net.gmsworld.devicelocator.MapsActivity;
 import net.gmsworld.devicelocator.PermissionsActivity;
 import net.gmsworld.devicelocator.R;
 import net.gmsworld.devicelocator.RouteActivity;
-import net.gmsworld.devicelocator.services.CommandService;
+import net.gmsworld.devicelocator.model.Device;
 
 import org.apache.commons.lang3.StringUtils;
 
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -162,6 +164,7 @@ public class NotificationUtils {
         final String routeId = extras.getString("routeId");
         final String imei = extras.getString("imei", null);
         String title = context.getString(R.string.app_name) + " Notification";
+        PreferencesUtils settings = new PreferencesUtils(context);
 
         try {
             message = URLDecoder.decode(message, "UTF-8");
@@ -198,8 +201,8 @@ public class NotificationUtils {
                 }
             }
             if (imei != null) {
-                float lat = PreferenceManager.getDefaultSharedPreferences(context).getFloat(imei + "_previousLatitude", Float.NaN);
-                float lng = PreferenceManager.getDefaultSharedPreferences(context).getFloat(imei + "_previousLongitude", Float.NaN);
+                float lat = settings.getFloat(imei + "_previousLatitude", Float.NaN);
+                float lng = settings.getFloat(imei + "_previousLongitude", Float.NaN);
                 if (!Float.isNaN(lat) && !Float.isNaN(lng)) {
                     Location l = new Location("");
                     l.setLatitude((double) lat);
@@ -211,9 +214,8 @@ public class NotificationUtils {
                         message += "\n" + DistanceFormatter.format(distance) + " away from previous location";
                     }
                 }
-                PreferenceManager.getDefaultSharedPreferences(context).edit().
-                        putFloat(imei + "_previousLatitude", (float)deviceLocation.getLatitude()).
-                        putFloat(imei + "_previousLongitude", (float)deviceLocation.getLongitude()).apply();
+                settings.setFloat(imei + "_previousLatitude", (float)deviceLocation.getLatitude());
+                settings.setFloat(imei + "_previousLongitude", (float)deviceLocation.getLongitude());
             }
             if (deviceLocation.hasSpeed() && deviceLocation.getSpeed() > 10f) {
                 message += "\n" + "Speed: " + Messenger.getSpeed(context, deviceLocation.getSpeed());
@@ -336,46 +338,29 @@ public class NotificationUtils {
         if (imei != null && extras.containsKey("command")) {
             final String commandName = extras.getString("command");
             AbstractCommand command = Command.getCommandByName(commandName);
-            if (command != null && command.canResend()) {
-                //TODO replace CommandService with CommandActivity
-                Intent resendIntent = new Intent(context, CommandService.class);
-                final String args = command.getDefaultArgs();
-                if (StringUtils.isNotEmpty(args)) {
-                    resendIntent.putExtra("args", args);
-                }
+            if (command != null && (command.canResend() || extras.getBoolean("showResend", false))) {
+                Intent resendIntent = new Intent(context, CommandActivity.class);
+                ArrayList<Device> devices = DevicesUtils.buildDeviceList(settings);
+                resendIntent.putExtra("devices", devices);
+                resendIntent.putExtra("index", DevicesUtils.getDevicePosition(devices, imei));
+                resendIntent.putExtra("notificationId", notificationId);
+                resendIntent.putExtra("autosend", true);
                 resendIntent.putExtra("command", commandName);
-                resendIntent.putExtra("imei", imei);
-                if (extras.containsKey("pin")) {
-                    resendIntent.putExtra("pin", extras.getString("pin"));
-                }
-                if (extras.containsKey(MainActivity.DEVICE_NAME)) {
-                    resendIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
-                }
-                PendingIntent resendPendingIntent = PendingIntent.getService(context, notificationId, resendIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                PendingIntent resendPendingIntent = PendingIntent.getActivity(context, notificationId, resendIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 nb.addAction(R.drawable.ic_open_in_browser, context.getString(R.string.resend_command), resendPendingIntent);
             } else if (command != null && command.hasOppositeCommand()) {
                 AbstractCommand c = Command.getCommandByName(command.getOppositeCommand());
                 if (c != null) {
-                    //TODO replace CommandService with CommandActivity
-                    Intent oppositeIntent = new Intent(context, CommandService.class);
+                    Intent oppositeIntent = new Intent(context, CommandActivity.class);
+                    ArrayList<Device> devices = DevicesUtils.buildDeviceList(settings);
+                    oppositeIntent.putExtra("devices", devices);
+                    oppositeIntent.putExtra("index", DevicesUtils.getDevicePosition(devices, imei));
+                    oppositeIntent.putExtra("notificationId", notificationId);
+                    oppositeIntent.putExtra("autosend", true);
                     oppositeIntent.putExtra("command", c.getSmsCommand());
-                    final String args = c.getDefaultArgs();
-                    if (StringUtils.isNotEmpty(args)) {
-                        oppositeIntent.putExtra("args", args);
-                    }
-                    if (StringUtils.isNotEmpty(routeId)) {
-                        oppositeIntent.putExtra("routeId", routeId);
-                    } else {
-                        oppositeIntent.putExtra("cancelCommand", StringUtils.isNotEmpty(cancelCommand) ? cancelCommand : commandName);
-                    }
-                    oppositeIntent.putExtra("imei", imei);
-                    if (extras.containsKey("pin")) {
-                        oppositeIntent.putExtra("pin", extras.getString("pin"));
-                    }
-                    if (extras.containsKey(MainActivity.DEVICE_NAME)) {
-                        oppositeIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
-                    }
-                    PendingIntent oppositePendingIntent = PendingIntent.getService(context, notificationId, oppositeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    PendingIntent oppositePendingIntent = PendingIntent.getActivity(context, notificationId, oppositeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                     nb.addAction(R.drawable.ic_open_in_browser, c.getLabel(), oppositePendingIntent);
                 }
             } else if (command == null) {
@@ -476,14 +461,6 @@ public class NotificationUtils {
                 .addAction(R.drawable.ic_open_in_browser, "Open " + context.getString(R.string.app_name), contentIntent);
 
         return nb.build();
-    }
-
-    public static void cancel(Context context, String notificationId) {
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        if (notificationManager != null && notificationIds.containsKey(notificationId)) {
-            notificationManager.cancel(notificationIds.remove(notificationId));
-        }
     }
 
     public static void cancel(Context context, int notificationId) {

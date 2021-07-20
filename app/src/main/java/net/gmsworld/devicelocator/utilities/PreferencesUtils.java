@@ -78,6 +78,14 @@ public class PreferencesUtils {
         }
     }
 
+    public void setFloat(String key, Float value) {
+        if (value != null) {
+            sharedPreferences.edit().putFloat(key, value).apply();
+        } else {
+            sharedPreferences.edit().remove(key).apply();
+        }
+    }
+
     public void setBoolean(String key, Boolean value) {
         if (value != null) {
             sharedPreferences.edit().putBoolean(key, value).apply();
@@ -104,6 +112,10 @@ public class PreferencesUtils {
 
     public Integer getInt(String key, Integer defaultValue) {
         return sharedPreferences.getInt(key, defaultValue);
+    }
+
+    public Float getFloat(String key, Float defaultValue) {
+        return sharedPreferences.getFloat(key, defaultValue);
     }
 
     public Boolean getBoolean(String key, Boolean defaultValue) {
