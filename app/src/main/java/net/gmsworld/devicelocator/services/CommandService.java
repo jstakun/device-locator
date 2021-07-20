@@ -231,12 +231,12 @@ public class CommandService extends IntentService implements OnLocationUpdatedLi
                                 public void run() {
                                     Log.d(TAG, "Checking if reply to command " + command + " received from the device " + imei);
                                     if (commandsSent.contains(commandSent)) {
+                                        commandsSent.remove(commandSent);
                                         Bundle extras = new Bundle();
                                         extras.putString(MainActivity.DEVICE_NAME, deviceName);
                                         extras.putString("imei", imei);
                                         extras.putString("command", command);
                                         NotificationUtils.showMessageNotification(CommandService.this, "No reply to command " + StringUtils.capitalize(command) + " received from device " + deviceName + ".\nPlease send this command again.", null ,extras);
-                                        commandsSent.remove(commandSent);
                                     }
                                 }
                             }, 180000); //3 mins

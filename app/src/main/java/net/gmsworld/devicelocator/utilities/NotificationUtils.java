@@ -337,44 +337,46 @@ public class NotificationUtils {
             final String commandName = extras.getString("command");
             AbstractCommand command = Command.getCommandByName(commandName);
             if (command != null && command.canResend()) {
-                Intent newIntent = new Intent(context, CommandService.class);
+                //TODO replace CommandService with CommandActivity
+                Intent resendIntent = new Intent(context, CommandService.class);
                 final String args = command.getDefaultArgs();
                 if (StringUtils.isNotEmpty(args)) {
-                    newIntent.putExtra("args", args);
+                    resendIntent.putExtra("args", args);
                 }
-                newIntent.putExtra("command", commandName);
-                newIntent.putExtra("imei", imei);
+                resendIntent.putExtra("command", commandName);
+                resendIntent.putExtra("imei", imei);
                 if (extras.containsKey("pin")) {
-                    newIntent.putExtra("pin", extras.getString("pin"));
+                    resendIntent.putExtra("pin", extras.getString("pin"));
                 }
                 if (extras.containsKey(MainActivity.DEVICE_NAME)) {
-                    newIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
+                    resendIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
                 }
-                PendingIntent retryIntent = PendingIntent.getService(context, notificationId, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                nb.addAction(R.drawable.ic_open_in_browser, context.getString(R.string.resend_command), retryIntent);
+                PendingIntent resendPendingIntent = PendingIntent.getService(context, notificationId, resendIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                nb.addAction(R.drawable.ic_open_in_browser, context.getString(R.string.resend_command), resendPendingIntent);
             } else if (command != null && command.hasOppositeCommand()) {
                 AbstractCommand c = Command.getCommandByName(command.getOppositeCommand());
                 if (c != null) {
-                    Intent newIntent = new Intent(context, CommandService.class);
-                    newIntent.putExtra("command", c.getSmsCommand());
+                    //TODO replace CommandService with CommandActivity
+                    Intent oppositeIntent = new Intent(context, CommandService.class);
+                    oppositeIntent.putExtra("command", c.getSmsCommand());
                     final String args = c.getDefaultArgs();
                     if (StringUtils.isNotEmpty(args)) {
-                        newIntent.putExtra("args", args);
+                        oppositeIntent.putExtra("args", args);
                     }
                     if (StringUtils.isNotEmpty(routeId)) {
-                        newIntent.putExtra("routeId", routeId);
+                        oppositeIntent.putExtra("routeId", routeId);
                     } else {
-                        newIntent.putExtra("cancelCommand", StringUtils.isNotEmpty(cancelCommand) ? cancelCommand : commandName);
+                        oppositeIntent.putExtra("cancelCommand", StringUtils.isNotEmpty(cancelCommand) ? cancelCommand : commandName);
                     }
-                    newIntent.putExtra("imei", imei);
+                    oppositeIntent.putExtra("imei", imei);
                     if (extras.containsKey("pin")) {
-                        newIntent.putExtra("pin", extras.getString("pin"));
+                        oppositeIntent.putExtra("pin", extras.getString("pin"));
                     }
                     if (extras.containsKey(MainActivity.DEVICE_NAME)) {
-                        newIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
+                        oppositeIntent.putExtra(MainActivity.DEVICE_NAME, extras.getString(MainActivity.DEVICE_NAME));
                     }
-                    PendingIntent oppositeIntent = PendingIntent.getService(context, notificationId, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    nb.addAction(R.drawable.ic_open_in_browser, c.getLabel(), oppositeIntent);
+                    PendingIntent oppositePendingIntent = PendingIntent.getService(context, notificationId, oppositeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    nb.addAction(R.drawable.ic_open_in_browser, c.getLabel(), oppositePendingIntent);
                 }
             } else if (command == null) {
                 Log.d(TAG, "Command " + commandName + " not found!");

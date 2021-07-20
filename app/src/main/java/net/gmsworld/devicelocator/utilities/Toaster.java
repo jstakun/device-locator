@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +19,6 @@ public class Toaster {
     private static final String TAG = Toaster.class.getName();
 
     private Activity activity;
-    private Handler toastHandler;
     private Service service;
     private Toast toast;
 
@@ -90,10 +90,8 @@ public class Toaster {
     }
 
     public void showServiceToast(final String text) {
-        if (toastHandler == null && service != null) {
-            toastHandler = new Handler(service.getMainLooper());
-        }
-        if (toastHandler != null) {
+        if (service != null) {
+            Handler toastHandler = new Handler(Looper.getMainLooper());
             toastHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -113,7 +111,7 @@ public class Toaster {
                 }
             });
         } else {
-            Log.e(TAG, "Unable to show Toast: " + text);
+            Log.e(TAG, "Unable to show Toast");
         }
     }
 
